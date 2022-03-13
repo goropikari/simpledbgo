@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/goropikari/simpledb_go/bytes"
+	"github.com/goropikari/simpledb_go/core"
 )
 
 // InvalidOffsetError is error type that indicates you specify invalid offset.
@@ -98,6 +99,45 @@ func (page *Page) SetUInt32(offset int64, x uint32) error {
 	return nil
 }
 
+// GetBytes returns bytes from page.
+func (page *Page) GetBytes(offset int64) ([]byte, error) {
+	if page == nil {
+		return nil, core.NilReceiverError
+	}
+
+	if _, err := page.bb.Seek(offset, io.SeekStart); err != nil {
+		return nil, err
+	}
+
+	length, err := page.GetUInt32(offset)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := make([]byte, length)
+	_, err = page.bb.Read(buf)
+	if err == io.EOF {
+		return buf, err
+	} else if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
+}
+
+// SetBytes writes bytes to page.
+func (page *Page) SetBytes(offset int64, p []byte) error {
+	if err := page.SetUInt32(offset, uint32(len(p))); err != nil {
+		return err
+	}
+
+	if _, err := page.bb.Write(p); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // GetString returns string from buffer.
 func (page *Page) GetString(offset int64) (string, error) {
 	if page == nil {
@@ -139,15 +179,13 @@ func (page *Page) SetString(offset int64, s string) error {
 	return nil
 }
 
-func (page *Page) maxLength(strlen int) int {
-	return strlen + Int32Length
-}
-
 // Contents returns ByteBuffer.
-func (page *Page) Contents() bytes.ByteBuffer {
-	page.bb.Seek(0, io.SeekStart)
+func (page *Page) Contents() (bytes.ByteBuffer, error) {
+	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
+		return nil, err
+	}
 
-	return page.bb
+	return page.bb, nil
 }
 
 // Write writes bytes to page.
@@ -155,7 +193,7 @@ func (page *Page) Write(p []byte) (int, error) {
 	return page.bb.Write(p)
 }
 
-// GetBytes returns page buffer.
-func (page *Page) GetBytes() []byte {
+// GetFullBytes returns page buffer.
+func (page *Page) GetFullBytes() []byte {
 	return page.bb.GetBytes()
 }
