@@ -85,7 +85,9 @@ func (fileMgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 		return err
 	}
 
-	f.Seek(int64(fileMgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart)
+	if _, err = f.Seek(int64(fileMgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+		return err
+	}
 
 	if _, err = io.CopyN(page, f, int64(fileMgr.config.blockSize)); err != nil {
 		return err
@@ -108,9 +110,11 @@ func (fileMgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 		return err
 	}
 
-	f.Seek(int64(fileMgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart)
+	if _, err = f.Seek(int64(fileMgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+		return err
+	}
 
-	if _, err := f.Write(page.GetBytes()); err != nil {
+	if _, err := f.Write(page.GetFullBytes()); err != nil {
 		return err
 	}
 
@@ -181,6 +185,7 @@ func (fileMgr *Manager) openFile(filename core.FileName) (f *os.File, err error)
 	return f, nil
 }
 
+// CloseFile closes a file.
 func (fileMgr *Manager) CloseFile(filename core.FileName) error {
 	if fileMgr == nil {
 		return core.NilReceiverError
@@ -188,7 +193,9 @@ func (fileMgr *Manager) CloseFile(filename core.FileName) error {
 
 	if f, ok := fileMgr.openFiles[filename]; ok {
 		delete(fileMgr.openFiles, filename)
-		f.Close()
+		if err := f.Close(); err != nil {
+			return err
+		}
 		return nil
 	}
 

@@ -21,8 +21,10 @@ func TestManager(t *testing.T) {
 	dir, _ := os.MkdirTemp(".", "manager-")
 	f, _ := os.CreateTemp(dir, "")
 	filename := core.FileName(filepath.Base(f.Name()))
-	f.Close()
-	os.MkdirAll(dir, os.ModePerm)
+	err := f.Close()
+	require.NoError(t, err)
+	err = os.MkdirAll(dir, os.ModePerm)
+	require.NoError(t, err)
 	defer os.RemoveAll(dir)
 
 	config, err := file.NewManagerConfig(dir, directio.BlockSize, true)
@@ -58,7 +60,8 @@ func TestManager(t *testing.T) {
 	require.NoError(t, err)
 	page := file.NewPage(bb)
 	block := file.NewBlock(filename, 0)
-	fileMgr.CopyPageToBlock(page, block)
+	err = fileMgr.CopyPageToBlock(page, block)
+	require.NoError(t, err)
 
 	buf, _ = directio.AlignedBlock(directio.BlockSize)
 	copy(buf, []byte(strings.Repeat("B", directio.BlockSize)))
@@ -66,8 +69,10 @@ func TestManager(t *testing.T) {
 	require.NoError(t, err)
 	page = file.NewPage(bb)
 	block = file.NewBlock(filename, 1)
-	fileMgr.CopyPageToBlock(page, block)
-	fileMgr.CloseFile(filename)
+	err = fileMgr.CopyPageToBlock(page, block)
+	require.NoError(t, err)
+	err = fileMgr.CloseFile(filename)
+	require.NoError(t, err)
 
 	content, _ := ioutil.ReadFile(testFilePath)
 	require.Equal(t, string(content), strings.Repeat("A", directio.BlockSize)+strings.Repeat("B", directio.BlockSize))
@@ -80,7 +85,7 @@ func TestManager(t *testing.T) {
 	block = file.NewBlock(filename, 0)
 	err = fileMgr.CopyBlockToPage(block, page)
 	require.NoError(t, err)
-	require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetBytes()))
+	require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetFullBytes()))
 
 	buf, _ = directio.AlignedBlock(directio.BlockSize)
 	bb, err = bytes.NewDirectBufferBytes(buf)
@@ -89,5 +94,5 @@ func TestManager(t *testing.T) {
 	block = file.NewBlock(filename, 1)
 	err = fileMgr.CopyBlockToPage(block, page)
 	require.NoError(t, err)
-	require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetBytes()))
+	require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetFullBytes()))
 }
