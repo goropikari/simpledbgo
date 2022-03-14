@@ -12,25 +12,25 @@ import (
 	"github.com/goropikari/simpledb_go/directio"
 )
 
-// ManagerConfig is configuration of Manager.
-type ManagerConfig struct {
+// Config is configuration of Manager.
+type Config struct {
 	dbDir      string
 	blockSize  int // for direct io, blockSize must be multiple of 4096
 	isDirectIO bool
 }
 
-// NewManagerConfig is constructor of ManagerConfig
-func NewManagerConfig(dbDir string, blockSize int, isDirectIO bool) (ManagerConfig, error) {
+// NewConfig is constructor of Config
+func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 	if isDirectIO && blockSize%directio.BlockSize != 0 {
-		return ManagerConfig{}, directio.InvalidBlockSize
+		return Config{}, directio.InvalidBlockSize
 	}
 
 	abspath, err := filepath.Abs(dbDir)
 	if err != nil {
-		return ManagerConfig{}, err
+		return Config{}, err
 	}
 
-	return ManagerConfig{
+	return Config{
 		dbDir:      abspath,
 		blockSize:  blockSize,
 		isDirectIO: isDirectIO,
@@ -41,12 +41,12 @@ func NewManagerConfig(dbDir string, blockSize int, isDirectIO bool) (ManagerConf
 // Manager manages files.
 type Manager struct {
 	mu        sync.Mutex
-	config    ManagerConfig
+	config    Config
 	openFiles map[core.FileName]*os.File
 }
 
 // NewManager is constructor of Manager.
-func NewManager(config ManagerConfig) (*Manager, error) {
+func NewManager(config Config) (*Manager, error) {
 	if err := os.MkdirAll(config.dbDir, os.ModePerm); err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (fileMgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 
 	blockNum := core.BlockNumber(stat.Size() / int64(fileMgr.config.blockSize))
 	block := NewBlock(filename, blockNum)
-	blk, err := directio.AlignedBlock(int(fileMgr.config.blockSize))
+	blk, err := fileMgr.prepareBytes()
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +183,19 @@ func (fileMgr *Manager) openFile(filename core.FileName) (f *os.File, err error)
 	fileMgr.openFiles[filename] = f
 
 	return f, nil
+}
+
+func (fileMgr *Manager) prepareBytes() (blk []byte, err error) {
+	if fileMgr.config.isDirectIO {
+		blk, err = directio.AlignedBlock(int(fileMgr.config.blockSize))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		blk = make([]byte, fileMgr.config.blockSize)
+	}
+
+	return
 }
 
 // CloseFile closes a file.
