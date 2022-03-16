@@ -74,3 +74,16 @@ Go で同じようなことをしようと思ったら、struct に mutex をも
 複数ユーザーが使う DBMS ならば同時に複数のファイルを disk から読み込みたいとか普通にありそうだけれども。
 DBMS が管理している page cache は一つだから同時に読み書きすると page cache の
 奪い合いが起こるとかそんなところだろうか？
+
+
+# Chapter 4: Memory Management
+4.3.1 p.84 には最初の `printLogRecords` で20行だけ表示されると書いてあるが、
+iterator を呼ばれた段階で `flush` を最初にやっているので実際は page に書かれた 21 ~ 35 の
+record も表示される。
+
+```java
+public Iterator<byte[]> iterator() {
+  flush();
+  return new LogIterator(fm, currentblk);
+}
+```

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goropikari/simpledb_go/bytes"
 	"github.com/goropikari/simpledb_go/core"
 	"github.com/goropikari/simpledb_go/directio"
 )
@@ -22,7 +23,7 @@ type Config struct {
 // NewConfig is constructor of Config
 func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 	if isDirectIO && blockSize%directio.BlockSize != 0 {
-		return Config{}, directio.InvalidBlockSize
+		return Config{}, directio.InvalidBlockSizeError
 	}
 
 	abspath, err := filepath.Abs(dbDir)
@@ -47,6 +48,10 @@ type Manager struct {
 
 // NewManager is constructor of Manager.
 func NewManager(config Config) (*Manager, error) {
+	if err := validateConfig(config); err != nil {
+		return nil, err
+	}
+
 	if err := os.MkdirAll(config.dbDir, os.ModePerm); err != nil {
 		return nil, err
 	}
@@ -71,25 +76,57 @@ func NewManager(config Config) (*Manager, error) {
 	}, nil
 }
 
-// CopyBlockToPage copies block to page.
-func (fileMgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
-	if fileMgr == nil {
-		return core.NilReceiverError
+func validateConfig(config Config) error {
+	if config.dbDir == "" {
+		return errors.New("database directory must be specified")
+	}
+	if config.blockSize <= 0 {
+		return errors.New("block size must be positive")
 	}
 
-	fileMgr.mu.Lock()
-	defer fileMgr.mu.Unlock()
+	return nil
+}
 
-	f, err := fileMgr.openFile(block.GetFileName())
+// GetBlockSize returns block size.
+func (mgr *Manager) GetBlockSize() (int, error) {
+	if mgr == nil {
+		return 0, core.NilReceiverError
+	}
+
+	return mgr.config.blockSize, nil
+}
+
+// CopyBlockToPage copies block to page.
+func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
+	if mgr == nil {
+		return core.NilReceiverError
+	}
+	if block == nil {
+		return errors.New("block must not be nil")
+	}
+	if page == nil {
+		return errors.New("page must not be nil")
+	}
+
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
+
+	f, err := mgr.openFile(block.GetFileName())
 	if err != nil {
 		return err
 	}
 
-	if _, err = f.Seek(int64(fileMgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+	if _, err = f.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
 		return err
 	}
 
-	if _, err = io.CopyN(page, f, int64(fileMgr.config.blockSize)); err != nil {
+	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
+		return err
+	}
+	if _, err = io.CopyN(page, f, int64(mgr.config.blockSize)); err != nil && err != io.EOF {
+		return err
+	}
+	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
 		return err
 	}
 
@@ -97,24 +134,33 @@ func (fileMgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 }
 
 // CopyPageToBlock copies page to block.
-func (fileMgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
-	if fileMgr == nil {
+func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
+	if mgr == nil {
 		return core.NilReceiverError
 	}
+	if block == nil {
+		return errors.New("block must not be nil")
+	}
+	if page == nil {
+		return errors.New("page must not be nil")
+	}
 
-	fileMgr.mu.Lock()
-	defer fileMgr.mu.Unlock()
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
 
-	f, err := fileMgr.openFile(block.GetFileName())
+	f, err := mgr.openFile(block.GetFileName())
 	if err != nil {
 		return err
 	}
 
-	if _, err = f.Seek(int64(fileMgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+	if _, err = f.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
 		return err
 	}
 
 	if _, err := f.Write(page.GetFullBytes()); err != nil {
+		return err
+	}
+	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
 		return err
 	}
 
@@ -122,95 +168,157 @@ func (fileMgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 }
 
 // AppendBlock appends block to given filename.
-func (fileMgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
-	if fileMgr == nil {
+func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
+	if mgr == nil {
 		return nil, core.NilReceiverError
 	}
 
-	fileMgr.mu.Lock()
-	defer fileMgr.mu.Unlock()
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
 
-	f, err := fileMgr.openFile(filename)
+	f, err := mgr.openFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	stat, err := f.Stat()
+	blockNum, err := mgr.lastBlockNumber(f)
 	if err != nil {
 		return nil, err
 	}
-	if _, err = f.Seek(stat.Size(), io.SeekStart); err != nil {
-		return nil, err
-	}
-
-	blockNum := core.BlockNumber(stat.Size() / int64(fileMgr.config.blockSize))
 	block := NewBlock(filename, blockNum)
-	blk, err := fileMgr.prepareBytes()
+
+	buf, err := mgr.prepareBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err = f.Write(blk); err != nil {
+	// extend file size
+	if _, err = f.Write(buf); err != nil {
 		return nil, err
 	}
 
 	return block, nil
 }
 
-func (fileMgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
-	if fileMgr == nil {
+// LastBlock returns last block of given file.
+func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
+	if mgr == nil {
 		return nil, core.NilReceiverError
 	}
 
-	if v, ok := fileMgr.openFiles[filename]; ok {
+	f, err := mgr.openFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	lastBlockNum, err := mgr.lastBlockNumber(f)
+	if err != nil {
+		return nil, err
+	}
+
+	block := NewBlock(filename, lastBlockNum)
+
+	return block, nil
+}
+
+// lastBlockNumber returns last block number of given file.
+func (mgr *Manager) lastBlockNumber(f *os.File) (core.BlockNumber, error) {
+	stat, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	if _, err = f.Seek(stat.Size(), io.SeekStart); err != nil {
+		return 0, err
+	}
+
+	blockNum := core.BlockNumber(stat.Size() / int64(mgr.config.blockSize))
+
+	return blockNum, nil
+}
+
+// openFile opens file as given filename.
+// If there is no such file, create new file.
+func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
+	if mgr == nil {
+		return nil, core.NilReceiverError
+	}
+
+	if v, ok := mgr.openFiles[filename]; ok {
 		return v, nil
 	}
 
 	// open file. If there is no such file, create new file.
-	path := filepath.Join(string(fileMgr.config.dbDir), string(filename))
-	if fileMgr.config.isDirectIO {
-		f, err = directio.OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	path := filepath.Join(string(mgr.config.dbDir), string(filename))
+	flag := os.O_RDWR | os.O_CREATE
+	if mgr.config.isDirectIO {
+		f, err = directio.OpenFile(path, flag, os.ModePerm)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		f, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
+		f, err = os.OpenFile(path, flag, os.ModePerm)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	fileMgr.openFiles[filename] = f
+	mgr.openFiles[filename] = f
 
 	return f, nil
 }
 
-func (fileMgr *Manager) prepareBytes() (blk []byte, err error) {
-	if fileMgr.config.isDirectIO {
-		blk, err = directio.AlignedBlock(int(fileMgr.config.blockSize))
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		blk = make([]byte, fileMgr.config.blockSize)
-	}
-
-	return
-}
-
 // CloseFile closes a file.
-func (fileMgr *Manager) CloseFile(filename core.FileName) error {
-	if fileMgr == nil {
+func (mgr *Manager) CloseFile(filename core.FileName) error {
+	if mgr == nil {
 		return core.NilReceiverError
 	}
 
-	if f, ok := fileMgr.openFiles[filename]; ok {
-		delete(fileMgr.openFiles, filename)
+	if f, ok := mgr.openFiles[filename]; ok {
+		delete(mgr.openFiles, filename)
 		if err := f.Close(); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	return errors.New("no such file")
+	return errors.New("there is no such file")
+}
+
+// prepareBytes prepares byte slice.
+func (mgr *Manager) prepareBytes() (buf []byte, err error) {
+	if mgr.config.isDirectIO {
+		buf, err = directio.AlignedBlock(int(mgr.config.blockSize))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		buf = make([]byte, mgr.config.blockSize)
+	}
+
+	return
+}
+
+// PreparePage prepares a page.
+// If file manager's config specifies direct IO support, this returns page
+// satisfying direct IO constraints.
+func (mgr *Manager) PreparePage() (*Page, error) {
+	if mgr == nil {
+		return nil, core.NilReceiverError
+	}
+
+	if mgr.config.isDirectIO {
+		bb, err := bytes.NewDirectBuffer(mgr.config.blockSize)
+		if err != nil {
+			return nil, err
+		}
+
+		return NewPage(bb), nil
+	}
+
+	bb, err := bytes.NewBuffer(mgr.config.blockSize)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewPage(bb), nil
 }

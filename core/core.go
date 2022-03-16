@@ -1,6 +1,9 @@
 package core
 
-import "errors"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 var (
 	// InvalidFileNameFormatError is an error that means file name is invalid format.
@@ -12,6 +15,11 @@ var (
 	// NilReceiverError is an error that means receiver is nil.
 	NilReceiverError = errors.New("receiver is nil")
 )
+
+// UInt32Length is byte length of int32
+var UInt32Length = 4
+
+var Endianness = binary.BigEndian
 
 // FileName is a type for filename.
 type FileName string

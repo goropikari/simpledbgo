@@ -1,0 +1,4 @@
+run:
+  skip-files:
+    - log/iterator.go
+    - log/iterator_test.go

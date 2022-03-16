@@ -2,7 +2,6 @@ package file_test
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,83 +15,89 @@ import (
 )
 
 func TestManager(t *testing.T) {
-	// Since tmpfs doesn't support O_DIRECT, dummy data is created at current directory
-	// https://github.com/ncw/directio/issues/9
-	dir, _ := os.MkdirTemp(".", "manager-")
-	f, _ := os.CreateTemp(dir, "")
-	filename := core.FileName(filepath.Base(f.Name()))
-	err := f.Close()
-	require.NoError(t, err)
-	err = os.MkdirAll(dir, os.ModePerm)
-	require.NoError(t, err)
-	defer os.RemoveAll(dir)
+	t.Run("test manager", func(t *testing.T) {
+		// Since tmpfs doesn't support O_DIRECT, dummy data is created at current directory
+		// https://github.com/ncw/directio/issues/9
+		dir, _ := os.MkdirTemp(".", "manager-")
+		f, _ := os.CreateTemp(dir, "")
+		filename, err := core.NewFileName(filepath.Base(f.Name()))
+		require.NoError(t, err)
+		err = f.Close()
+		require.NoError(t, err)
+		err = os.MkdirAll(dir, os.ModePerm)
+		require.NoError(t, err)
+		defer os.RemoveAll(dir)
 
-	config, err := file.NewConfig(dir, directio.BlockSize, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fileMgr, err := file.NewManager(config)
-	if err != nil {
-		log.Fatal(err)
-	}
+		config, err := file.NewConfig(dir, directio.BlockSize, true)
+		require.NoError(t, err)
+		fileMgr, err := file.NewManager(config)
+		require.NoError(t, err)
 
-	testFilePath := filepath.Join(dir, string(filename))
+		testFilePath := filepath.Join(dir, string(filename))
 
-	// create new file
-	if _, err := fileMgr.AppendBlock(filename); err != nil {
-		log.Fatal(err)
-	}
-	f, _ = os.OpenFile(testFilePath, os.O_RDONLY, os.ModePerm)
-	info, _ := f.Stat()
-	require.Equal(t, info.Size(), int64(directio.BlockSize))
+		// create new file
+		_, err = fileMgr.AppendBlock(filename)
+		require.NoError(t, err)
 
-	// append block
-	if _, err := fileMgr.AppendBlock(filename); err != nil {
-		log.Fatal(err)
-	}
-	info, _ = f.Stat()
-	require.Equal(t, info.Size(), int64(directio.BlockSize*2))
+		f, err = os.OpenFile(testFilePath, os.O_RDONLY, os.ModePerm)
+		require.NoError(t, err)
+		info, err := f.Stat()
+		require.NoError(t, err)
 
-	// write page to block
-	buf, _ := directio.AlignedBlock(directio.BlockSize)
-	copy(buf, []byte(strings.Repeat("A", directio.BlockSize)))
-	bb, err := bytes.NewDirectBufferBytes(buf)
-	require.NoError(t, err)
-	page := file.NewPage(bb)
-	block := file.NewBlock(filename, 0)
-	err = fileMgr.CopyPageToBlock(page, block)
-	require.NoError(t, err)
+		require.Equal(t, info.Size(), int64(directio.BlockSize))
 
-	buf, _ = directio.AlignedBlock(directio.BlockSize)
-	copy(buf, []byte(strings.Repeat("B", directio.BlockSize)))
-	bb, err = bytes.NewDirectBufferBytes(buf)
-	require.NoError(t, err)
-	page = file.NewPage(bb)
-	block = file.NewBlock(filename, 1)
-	err = fileMgr.CopyPageToBlock(page, block)
-	require.NoError(t, err)
-	err = fileMgr.CloseFile(filename)
-	require.NoError(t, err)
+		// append block
+		_, err = fileMgr.AppendBlock(filename)
+		require.NoError(t, err)
+		info, err = f.Stat()
+		require.NoError(t, err)
+		require.Equal(t, info.Size(), int64(directio.BlockSize*2))
 
-	content, _ := ioutil.ReadFile(testFilePath)
-	require.Equal(t, string(content), strings.Repeat("A", directio.BlockSize)+strings.Repeat("B", directio.BlockSize))
+		// write page to block
+		buf, err := directio.AlignedBlock(directio.BlockSize)
+		require.NoError(t, err)
+		copy(buf, []byte(strings.Repeat("A", directio.BlockSize)))
+		bb, err := bytes.NewDirectBufferBytes(buf)
+		require.NoError(t, err)
+		page := file.NewPage(bb)
+		block := file.NewBlock(filename, 0)
+		err = fileMgr.CopyPageToBlock(page, block)
+		require.NoError(t, err)
 
-	// write block to page
-	buf, _ = directio.AlignedBlock(directio.BlockSize)
-	bb, err = bytes.NewDirectBufferBytes(buf)
-	require.NoError(t, err)
-	page = file.NewPage(bb)
-	block = file.NewBlock(filename, 0)
-	err = fileMgr.CopyBlockToPage(block, page)
-	require.NoError(t, err)
-	require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetFullBytes()))
+		buf, err = directio.AlignedBlock(directio.BlockSize)
+		require.NoError(t, err)
+		copy(buf, []byte(strings.Repeat("B", directio.BlockSize)))
+		bb, err = bytes.NewDirectBufferBytes(buf)
+		require.NoError(t, err)
+		page = file.NewPage(bb)
+		block = file.NewBlock(filename, 1)
+		err = fileMgr.CopyPageToBlock(page, block)
+		require.NoError(t, err)
+		err = fileMgr.CloseFile(filename)
+		require.NoError(t, err)
 
-	buf, _ = directio.AlignedBlock(directio.BlockSize)
-	bb, err = bytes.NewDirectBufferBytes(buf)
-	require.NoError(t, err)
-	page = file.NewPage(bb)
-	block = file.NewBlock(filename, 1)
-	err = fileMgr.CopyBlockToPage(block, page)
-	require.NoError(t, err)
-	require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetFullBytes()))
+		content, err := ioutil.ReadFile(testFilePath)
+		require.NoError(t, err)
+		require.Equal(t, string(content), strings.Repeat("A", directio.BlockSize)+strings.Repeat("B", directio.BlockSize))
+
+		// write block to page
+		buf, _ = directio.AlignedBlock(directio.BlockSize)
+		bb, err = bytes.NewDirectBufferBytes(buf)
+		require.NoError(t, err)
+		page = file.NewPage(bb)
+		block = file.NewBlock(filename, 0)
+		err = fileMgr.CopyBlockToPage(block, page)
+		require.NoError(t, err)
+		require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetFullBytes()))
+
+		buf, err = directio.AlignedBlock(directio.BlockSize)
+		require.NoError(t, err)
+		bb, err = bytes.NewDirectBufferBytes(buf)
+		require.NoError(t, err)
+		page = file.NewPage(bb)
+		block = file.NewBlock(filename, 1)
+		err = fileMgr.CopyBlockToPage(block, page)
+		require.NoError(t, err)
+		require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetFullBytes()))
+	})
 }

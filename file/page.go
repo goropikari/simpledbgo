@@ -3,6 +3,7 @@ package file
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/goropikari/simpledb_go/bytes"
@@ -11,11 +12,6 @@ import (
 
 // InvalidOffsetError is error type that indicates you specify invalid offset.
 var InvalidOffsetError = errors.New("you may be specify invalid offset")
-
-// Int32Length is byte length of int32
-var Int32Length = 4
-
-var order = binary.BigEndian
 
 // Page is a model of a page.
 type Page struct {
@@ -40,7 +36,10 @@ func (page *Page) GetInt32(offset int64) (int32, error) {
 	}
 
 	var ret int32
-	if err := binary.Read(page.bb, order, &ret); err != nil {
+	if err := binary.Read(page.bb, core.Endianness, &ret); err != nil {
+		if err == io.EOF {
+			return ret, err
+		}
 		return 0, err
 	}
 
@@ -48,6 +47,9 @@ func (page *Page) GetInt32(offset int64) (int32, error) {
 }
 
 // SetInt32 returns int32 from buffer.
+// --------------------
+// |  int32 (4 bytes) |
+// --------------------
 func (page *Page) SetInt32(offset int64, x int32) error {
 	if page == nil {
 		return nil
@@ -57,7 +59,7 @@ func (page *Page) SetInt32(offset int64, x int32) error {
 		return err
 	}
 
-	if err := binary.Write(page.bb, order, x); err != nil {
+	if err := binary.Write(page.bb, core.Endianness, x); err != nil {
 		return err
 	}
 
@@ -75,7 +77,7 @@ func (page *Page) GetUInt32(offset int64) (uint32, error) {
 	}
 
 	var ret uint32
-	if err := binary.Read(page.bb, order, &ret); err != nil {
+	if err := binary.Read(page.bb, core.Endianness, &ret); err != nil {
 		return 0, err
 	}
 
@@ -83,6 +85,9 @@ func (page *Page) GetUInt32(offset int64) (uint32, error) {
 }
 
 // SetUInt32 returns uint32 from buffer.
+// --------------------
+// | uint32 (4 bytes) |
+// --------------------
 func (page *Page) SetUInt32(offset int64, x uint32) error {
 	if page == nil {
 		return nil
@@ -92,7 +97,7 @@ func (page *Page) SetUInt32(offset int64, x uint32) error {
 		return err
 	}
 
-	if err := binary.Write(page.bb, order, x); err != nil {
+	if err := binary.Write(page.bb, core.Endianness, x); err != nil {
 		return err
 	}
 
@@ -111,7 +116,7 @@ func (page *Page) GetBytes(offset int64) ([]byte, error) {
 
 	length, err := page.GetUInt32(offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get bytes: %w", err)
 	}
 
 	buf := make([]byte, length)
@@ -126,9 +131,15 @@ func (page *Page) GetBytes(offset int64) ([]byte, error) {
 }
 
 // SetBytes writes bytes to page.
+// ---------------------------------------
+// | bytes length (uint32) | body (bytes)|
+// ---------------------------------------
 func (page *Page) SetBytes(offset int64, p []byte) error {
+	if page == nil {
+		return core.NilReceiverError
+	}
 	if err := page.SetUInt32(offset, uint32(len(p))); err != nil {
-		return err
+		return fmt.Errorf("failed to set bytes: %w", err)
 	}
 
 	if _, err := page.bb.Write(p); err != nil {
@@ -145,7 +156,7 @@ func (page *Page) GetString(offset int64) (string, error) {
 	}
 
 	if _, err := page.bb.Seek(offset, io.SeekStart); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get string: %w", err)
 	}
 
 	length, err := page.GetUInt32(offset)
@@ -154,38 +165,34 @@ func (page *Page) GetString(offset int64) (string, error) {
 	}
 
 	b := make([]byte, length)
-	if n, err := page.bb.Read(b); err != nil {
+	n, err := page.bb.Read(b)
+	if err != nil && err == io.EOF {
 		return "", err
-	} else if uint32(n) != length {
+	}
+	if uint32(n) != length {
 		return "", InvalidOffsetError
 	}
 
-	return string(b), nil
+	return string(b), err
 }
 
 // SetString returns string from buffer.
+// ----------------------------------------
+// | string length (uint32)| body (string)|
+// ----------------------------------------
 func (page *Page) SetString(offset int64, s string) error {
 	if _, err := page.bb.Seek(offset, io.SeekStart); err != nil {
 		return err
 	}
 
 	if err := page.SetUInt32(offset, uint32(len(s))); err != nil {
-		return err
+		return fmt.Errorf("failed to set string: %w", err)
 	}
-	if _, err := page.bb.Write([]byte(s)); err != nil && err != io.EOF {
+	if _, err := page.bb.Write([]byte(s)); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// Contents returns ByteBuffer.
-func (page *Page) Contents() (bytes.ByteBuffer, error) {
-	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
-		return nil, err
-	}
-
-	return page.bb, nil
 }
 
 // Write writes bytes to page.
