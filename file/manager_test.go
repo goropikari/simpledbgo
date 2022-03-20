@@ -15,7 +15,7 @@ import (
 )
 
 func TestManager(t *testing.T) {
-	t.Run("test manager", func(t *testing.T) {
+	t.Run("test file manager", func(t *testing.T) {
 		// Since tmpfs doesn't support O_DIRECT, dummy data is created at current directory
 		// https://github.com/ncw/directio/issues/9
 		dir, _ := os.MkdirTemp(".", "manager-")

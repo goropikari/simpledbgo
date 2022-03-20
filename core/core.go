@@ -3,6 +3,9 @@ package core
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+	"math/rand"
+	"os"
 )
 
 var (
@@ -10,7 +13,7 @@ var (
 	InvalidFileNameFormatError = errors.New("invalid filename format")
 
 	// NonPositiveBlockNumberError is an error that means BlockNumber is non positive.
-	NonPositiveBlockNumberError = errors.New("block number must be positive")
+	NonNegativeBlockNumberError = errors.New("block number must be non negative")
 
 	// NilReceiverError is an error that means receiver is nil.
 	NilReceiverError = errors.New("receiver is nil")
@@ -19,6 +22,7 @@ var (
 // UInt32Length is byte length of int32
 var UInt32Length = 4
 
+// Endianness is endianness of this system.
 var Endianness = binary.BigEndian
 
 // FileName is a type for filename.
@@ -38,8 +42,8 @@ type BlockNumber int
 
 // NewBlockNumber is a constructor of BlockNumber.
 func NewBlockNumber(bn int) (BlockNumber, error) {
-	if bn <= 0 {
-		return 0, NonPositiveBlockNumberError
+	if bn < 0 {
+		return 0, NonNegativeBlockNumberError
 	}
 
 	return BlockNumber(bn), nil
@@ -59,4 +63,17 @@ func HashCode(s string) int {
 	}
 
 	return result
+}
+
+func RandomString() string {
+	return fmt.Sprintf("%v", rand.Uint32())
+}
+
+func FileSize(f *os.File) (int64, error) {
+	info, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+
+	return info.Size(), nil
 }

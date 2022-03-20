@@ -4,11 +4,13 @@ export PATH := $(ROOT_DIR)/bin:$(PATH)
 MOCK_FILE := $(shell find -name "*.go" | xargs grep mockgen | cut -d: -f1)
 
 tools:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.44.2
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.45.0
 
+.PHONY: test
 test:
 	go test ./...
 
+.PHONY: lint
 lint:
 	./bin/golangci-lint run ./...
 

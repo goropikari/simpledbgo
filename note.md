@@ -87,3 +87,12 @@ public Iterator<byte[]> iterator() {
   return new LogIterator(fm, currentblk);
 }
 ```
+
+
+synchronized の中で wait を呼ぶと、スレッドそのオブジェクトの lock を開放する。そのため、他のスレッドが他の synchronized method を使うことができるようになる。
+
+https://www.techscore.com/tech/Java/JavaSE/Thread/5-2/
+
+Go で Java の wait, notify, notifyAll と同じことをしようとしたら、sync.Cond.Wait, Signal, Broadcast を使うのが良さそう。
+ただ、Java と違って timeout がない。timeout がないせいで運の悪い goroutine がいつまでも残りそうな気がするが一旦無視する。
+

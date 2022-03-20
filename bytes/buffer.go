@@ -19,6 +19,7 @@ var (
 type ByteBuffer interface {
 	io.ReadWriteSeeker
 	GetBytes() []byte
+	Reset()
 }
 
 // Buffer is a buffer.
@@ -97,4 +98,12 @@ func (bb *Buffer) Seek(offset int64, whence int) (int64, error) {
 // GetBytes returns buffer.
 func (bb *Buffer) GetBytes() []byte {
 	return bb.buf
+}
+
+// Reset resets buffer.
+func (bb *Buffer) Reset() {
+	bb.off = 0
+	for i := 0; i < bb.capacity; i++ {
+		bb.buf[i] = 0
+	}
 }

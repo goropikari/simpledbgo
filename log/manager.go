@@ -90,8 +90,8 @@ func (mgr *Manager) flush() error {
 	return nil
 }
 
-// flushByLSN flushes given LSN block.
-func (mgr *Manager) flushByLSN(lsn int) error {
+// FlushByLSN flushes given LSN block.
+func (mgr *Manager) FlushByLSN(lsn int) error {
 	if lsn >= mgr.lastSavedLSN {
 		return mgr.flush()
 	}

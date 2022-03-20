@@ -26,6 +26,10 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 		return Config{}, directio.InvalidBlockSizeError
 	}
 
+	if blockSize <= 0 {
+		return Config{}, errors.New("block size must be positive")
+	}
+
 	abspath, err := filepath.Abs(dbDir)
 	if err != nil {
 		return Config{}, err
@@ -116,16 +120,23 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 		return err
 	}
 
-	if _, err = f.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
-		return err
-	}
-
 	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
 		return err
 	}
+
+	// seek でファイルサイズ以上の位置が指定されていた場合、io.CopyN しても 1 byte も読み込まれず
+	// page に変化がない.
+	// 実際は 0 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
+	page.Reset()
+	seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
+	if _, err = f.Seek(seekPos, io.SeekStart); err != nil {
+		return err
+	}
+
 	if _, err = io.CopyN(page, f, int64(mgr.config.blockSize)); err != nil && err != io.EOF {
 		return err
 	}
+
 	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
 		return err
 	}
@@ -181,11 +192,15 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 		return nil, err
 	}
 
-	blockNum, err := mgr.lastBlockNumber(f)
+	numBlock, err := mgr.numBlock(f)
 	if err != nil {
 		return nil, err
 	}
-	block := NewBlock(filename, blockNum)
+	appendBlockNum, err := core.NewBlockNumber(numBlock)
+	if err != nil {
+		return nil, err
+	}
+	block := NewBlock(filename, appendBlockNum)
 
 	buf, err := mgr.prepareBytes()
 	if err != nil {
@@ -193,11 +208,23 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	}
 
 	// extend file size
+	if _, err := f.Seek(int64(numBlock*mgr.config.blockSize), io.SeekStart); err != nil {
+		return nil, err
+	}
 	if _, err = f.Write(buf); err != nil {
 		return nil, err
 	}
 
 	return block, nil
+}
+
+func (mgr *Manager) numBlock(file *os.File) (int, error) {
+	fileSize, err := core.FileSize(file)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(fileSize) / mgr.config.blockSize, nil
 }
 
 // LastBlock returns last block of given file.
@@ -223,15 +250,18 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
 
 // lastBlockNumber returns last block number of given file.
 func (mgr *Manager) lastBlockNumber(f *os.File) (core.BlockNumber, error) {
-	stat, err := f.Stat()
+	fileSize, err := core.FileSize(f)
 	if err != nil {
 		return 0, err
 	}
-	if _, err = f.Seek(stat.Size(), io.SeekStart); err != nil {
-		return 0, err
+	if fileSize == 0 {
+		return core.NewBlockNumber(0)
 	}
 
-	blockNum := core.BlockNumber(stat.Size() / int64(mgr.config.blockSize))
+	blockNum, err := core.NewBlockNumber(int(fileSize/int64(mgr.config.blockSize)) - 1)
+	if err != nil {
+		return 0, err
+	}
 
 	return blockNum, nil
 }

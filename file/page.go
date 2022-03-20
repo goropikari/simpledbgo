@@ -204,3 +204,7 @@ func (page *Page) Write(p []byte) (int, error) {
 func (page *Page) GetFullBytes() []byte {
 	return page.bb.GetBytes()
 }
+
+func (page *Page) Reset() {
+	page.bb.Reset()
+}
