@@ -14,13 +14,10 @@ var (
 
 	// NonPositiveBlockNumberError is an error that means BlockNumber is non positive.
 	NonNegativeBlockNumberError = errors.New("block number must be non negative")
-
-	// NilReceiverError is an error that means receiver is nil.
-	NilReceiverError = errors.New("receiver is nil")
 )
 
-// UInt32Length is byte length of int32
-var UInt32Length = 4
+// Uint32Length is byte length of int32
+var Uint32Length = 4
 
 // Endianness is endianness of this system.
 var Endianness = binary.BigEndian

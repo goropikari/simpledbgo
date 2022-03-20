@@ -3,7 +3,6 @@ package buffer
 import (
 	"errors"
 
-	"github.com/goropikari/simpledb_go/core"
 	"github.com/goropikari/simpledb_go/file"
 	"github.com/goropikari/simpledb_go/log"
 )
@@ -50,23 +49,21 @@ func (buf *buffer) getBlock() *file.Block {
 	return buf.block
 }
 
-func (buf *buffer) setModified(txnum, lsn int) error {
+func (buf *buffer) setModified(txnum, lsn int) {
 	if buf == nil {
-		return core.NilReceiverError
+		return
 	}
 
 	buf.txnum = txnum
 	if lsn >= 0 {
 		buf.lsn = lsn
 	}
-
-	return nil
 }
 
 func (buf *buffer) isPinned() bool {
-	// if buf == nil {
-	// 	return false, core.NilReceiverError
-	// }
+	if buf == nil {
+		return false
+	}
 
 	return buf.pins > 0
 }
@@ -81,7 +78,7 @@ func (buf *buffer) isPinned() bool {
 
 func (buf *buffer) assignToBlock(block *file.Block) error {
 	if buf == nil {
-		return core.NilReceiverError
+		return nil
 	}
 
 	if err := buf.flush(); err != nil {
@@ -100,7 +97,7 @@ func (buf *buffer) assignToBlock(block *file.Block) error {
 
 func (buf *buffer) flush() error {
 	if buf == nil {
-		return core.NilReceiverError
+		return nil
 	}
 
 	if buf.txnum >= 0 {

@@ -38,22 +38,22 @@ func TestPage_SetGetInt32(t *testing.T) {
 	})
 }
 
-func TestPage_SetGetUInt32(t *testing.T) {
-	t.Run("test SetGetUInt32", func(t *testing.T) {
+func TestPage_SetGetUint32(t *testing.T) {
+	t.Run("test SetGetUint32", func(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
 		page := file.NewPage(bb)
 
 		x1 := rand.Uint32()
-		err = page.SetUInt32(0, x1)
+		err = page.SetUint32(0, x1)
 		require.NoError(t, err)
 		x2 := rand.Uint32()
-		err = page.SetUInt32(4, x2)
+		err = page.SetUint32(4, x2)
 		require.NoError(t, err)
-		y1, err := page.GetUInt32(0)
+		y1, err := page.GetUint32(0)
 		require.NoError(t, err)
-		y2, err := page.GetUInt32(4)
+		y2, err := page.GetUint32(4)
 		require.NoError(t, err)
 		require.Equal(t, x1, y1)
 		require.Equal(t, x2, y2)
@@ -61,7 +61,7 @@ func TestPage_SetGetUInt32(t *testing.T) {
 }
 
 func TestPage_SetGetBytes(t *testing.T) {
-	t.Run("test SetGetUInt32", func(t *testing.T) {
+	t.Run("test SetGetUint32", func(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestPage_SetGetBytes(t *testing.T) {
 }
 
 func TestPage_SetGetString(t *testing.T) {
-	t.Run("test SetGetUInt32", func(t *testing.T) {
+	t.Run("test SetGetUint32", func(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)

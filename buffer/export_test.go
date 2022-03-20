@@ -12,8 +12,8 @@ func (buf *buffer) GetPage() *file.Page {
 	return buf.page
 }
 
-func (buf *buffer) SetModified(txnum, lsn int) error {
-	return buf.setModified(txnum, lsn)
+func (buf *buffer) SetModified(txnum, lsn int) {
+	buf.setModified(txnum, lsn)
 }
 func (mgr *Manager) Pin(block *file.Block) (*buffer, error) {
 	return mgr.pin(block)

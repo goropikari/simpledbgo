@@ -66,8 +66,8 @@ func (page *Page) SetInt32(offset int64, x int32) error {
 	return nil
 }
 
-// GetUInt32 returns uint32 from buffer.
-func (page *Page) GetUInt32(offset int64) (uint32, error) {
+// GetUint32 returns uint32 from buffer.
+func (page *Page) GetUint32(offset int64) (uint32, error) {
 	if page == nil {
 		return 0, nil
 	}
@@ -84,11 +84,11 @@ func (page *Page) GetUInt32(offset int64) (uint32, error) {
 	return ret, nil
 }
 
-// SetUInt32 returns uint32 from buffer.
+// SetUint32 returns uint32 from buffer.
 // --------------------
 // | uint32 (4 bytes) |
 // --------------------
-func (page *Page) SetUInt32(offset int64, x uint32) error {
+func (page *Page) SetUint32(offset int64, x uint32) error {
 	if page == nil {
 		return nil
 	}
@@ -107,14 +107,14 @@ func (page *Page) SetUInt32(offset int64, x uint32) error {
 // GetBytes returns bytes from page.
 func (page *Page) GetBytes(offset int64) ([]byte, error) {
 	if page == nil {
-		return nil, core.NilReceiverError
+		return nil, nil
 	}
 
 	if _, err := page.bb.Seek(offset, io.SeekStart); err != nil {
 		return nil, err
 	}
 
-	length, err := page.GetUInt32(offset)
+	length, err := page.GetUint32(offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get bytes: %w", err)
 	}
@@ -136,9 +136,9 @@ func (page *Page) GetBytes(offset int64) ([]byte, error) {
 // ---------------------------------------
 func (page *Page) SetBytes(offset int64, p []byte) error {
 	if page == nil {
-		return core.NilReceiverError
+		return nil
 	}
-	if err := page.SetUInt32(offset, uint32(len(p))); err != nil {
+	if err := page.SetUint32(offset, uint32(len(p))); err != nil {
 		return fmt.Errorf("failed to set bytes: %w", err)
 	}
 
@@ -159,7 +159,7 @@ func (page *Page) GetString(offset int64) (string, error) {
 		return "", fmt.Errorf("failed to get string: %w", err)
 	}
 
-	length, err := page.GetUInt32(offset)
+	length, err := page.GetUint32(offset)
 	if err != nil {
 		return "", err
 	}
@@ -185,7 +185,7 @@ func (page *Page) SetString(offset int64, s string) error {
 		return err
 	}
 
-	if err := page.SetUInt32(offset, uint32(len(s))); err != nil {
+	if err := page.SetUint32(offset, uint32(len(s))); err != nil {
 		return fmt.Errorf("failed to set string: %w", err)
 	}
 	if _, err := page.bb.Write([]byte(s)); err != nil {

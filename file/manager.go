@@ -92,19 +92,16 @@ func validateConfig(config Config) error {
 }
 
 // GetBlockSize returns block size.
-func (mgr *Manager) GetBlockSize() (int, error) {
+func (mgr *Manager) GetBlockSize() int {
 	if mgr == nil {
-		return 0, core.NilReceiverError
+		return 0
 	}
 
-	return mgr.config.blockSize, nil
+	return mgr.config.blockSize
 }
 
 // CopyBlockToPage copies block to page.
 func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
-	if mgr == nil {
-		return core.NilReceiverError
-	}
 	if block == nil {
 		return errors.New("block must not be nil")
 	}
@@ -126,7 +123,7 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 
 	// seek でファイルサイズ以上の位置が指定されていた場合、io.CopyN しても 1 byte も読み込まれず
 	// page に変化がない.
-	// 実際は 0 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
+	// 実際は x00 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
 	page.Reset()
 	seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
 	if _, err = f.Seek(seekPos, io.SeekStart); err != nil {
@@ -146,9 +143,6 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 
 // CopyPageToBlock copies page to block.
 func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
-	if mgr == nil {
-		return core.NilReceiverError
-	}
 	if block == nil {
 		return errors.New("block must not be nil")
 	}
@@ -181,7 +175,7 @@ func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 // AppendBlock appends block to given filename.
 func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	if mgr == nil {
-		return nil, core.NilReceiverError
+		return nil, nil
 	}
 
 	mgr.mu.Lock()
@@ -218,6 +212,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	return block, nil
 }
 
+// numBlock returns the number of blocks of given file.
 func (mgr *Manager) numBlock(file *os.File) (int, error) {
 	fileSize, err := core.FileSize(file)
 	if err != nil {
@@ -230,7 +225,7 @@ func (mgr *Manager) numBlock(file *os.File) (int, error) {
 // LastBlock returns last block of given file.
 func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
 	if mgr == nil {
-		return nil, core.NilReceiverError
+		return nil, nil
 	}
 
 	f, err := mgr.openFile(filename)
@@ -249,8 +244,8 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
 }
 
 // lastBlockNumber returns last block number of given file.
-func (mgr *Manager) lastBlockNumber(f *os.File) (core.BlockNumber, error) {
-	fileSize, err := core.FileSize(f)
+func (mgr *Manager) lastBlockNumber(file *os.File) (core.BlockNumber, error) {
+	fileSize, err := core.FileSize(file)
 	if err != nil {
 		return 0, err
 	}
@@ -270,7 +265,7 @@ func (mgr *Manager) lastBlockNumber(f *os.File) (core.BlockNumber, error) {
 // If there is no such file, create new file.
 func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
 	if mgr == nil {
-		return nil, core.NilReceiverError
+		return nil, nil
 	}
 
 	if v, ok := mgr.openFiles[filename]; ok {
@@ -300,7 +295,7 @@ func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
 // CloseFile closes a file.
 func (mgr *Manager) CloseFile(filename core.FileName) error {
 	if mgr == nil {
-		return core.NilReceiverError
+		return nil
 	}
 
 	if f, ok := mgr.openFiles[filename]; ok {
@@ -311,7 +306,7 @@ func (mgr *Manager) CloseFile(filename core.FileName) error {
 		return nil
 	}
 
-	return errors.New("there is no such file")
+	return errors.New("no such file")
 }
 
 // prepareBytes prepares byte slice.
@@ -333,7 +328,7 @@ func (mgr *Manager) prepareBytes() (buf []byte, err error) {
 // satisfying direct IO constraints.
 func (mgr *Manager) PreparePage() (*Page, error) {
 	if mgr == nil {
-		return nil, core.NilReceiverError
+		return nil, nil
 	}
 
 	if mgr.config.isDirectIO {

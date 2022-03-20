@@ -54,7 +54,7 @@ func iteratorRecords(logMgr *log.Manager) []string {
 		bb := bytes.NewBufferBytes(v)
 		page := file.NewPage(bb)
 		s, _ := page.GetString(0)
-		x, _ := page.GetUInt32(int64(len(s) + 4))
+		x, _ := page.GetUint32(int64(len(s) + 4))
 		// fmt.Println(s, x)
 		strs = append(strs, fmt.Sprintf("%v %v", s, x))
 	}
@@ -70,10 +70,10 @@ func createRecord(logMgr *log.Manager, start, end int) {
 }
 
 func createLogRecord(s string, n uint32) []byte {
-	bb, _ := bytes.NewBuffer(len(s) + core.UInt32Length*2)
+	bb, _ := bytes.NewBuffer(len(s) + core.Uint32Length*2)
 	page := file.NewPage(bb)
 	page.SetString(0, s)
-	page.SetUInt32(int64(len(s)+core.UInt32Length), n)
+	page.SetUint32(int64(len(s)+core.Uint32Length), n)
 
 	return page.GetFullBytes()
 }

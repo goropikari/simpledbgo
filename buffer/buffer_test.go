@@ -42,7 +42,7 @@ func TestBuffer(t *testing.T) {
 		require.NoError(t, err)
 		err = p.SetInt32(80, n+1)
 		require.NoError(t, err)
-		err = buf1.SetModified(1, 0)
+		buf1.SetModified(1, 0)
 		require.NoError(t, err)
 		err = bm.Unpin(buf1)
 		require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestBuffer(t *testing.T) {
 		// This modification won't get written to disk.
 		err = p1.SetInt32(80, 9999)
 		require.NoError(t, err)
-		err = buf1.SetModified(1, 0)
+		buf1.SetModified(1, 0)
 		require.NoError(t, err)
 	})
 }
