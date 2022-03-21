@@ -9,22 +9,34 @@ import (
 	"github.com/goropikari/simpledb_go/log"
 )
 
-// goroutine の数を制御
-// timeout を設定する
+const maxTimeoutSecond = 10
 
+var (
+	// ErrFailedPin is an error type that means failed to pin block.
+	ErrFailedPin = errors.New("failed to pin block")
+
+	// ErrTimeout is an error type that means timeout exceeded.
+	ErrTimeoutExceeded = errors.New("timeout exceeded")
+)
+
+// Manager is model of buffer manager.
 type Manager struct {
 	cond               *sync.Cond
 	bufferPool         []*buffer
 	numAvailableBuffer int
-	maxTimeMilliSec    time.Duration
+	timeout            time.Duration
 }
 
+// NewManager is a constructor of Manager.
 func NewManager(fileMgr *file.Manager, logMgr *log.Manager, numBuffer int) (*Manager, error) {
 	if fileMgr == nil {
 		return nil, errors.New("fileMgr must not be nil")
 	}
 	if logMgr == nil {
 		return nil, errors.New("logMgr must not be nil")
+	}
+	if numBuffer <= 0 {
+		return nil, errors.New("numBuffer must be positive")
 	}
 
 	bufferPool := make([]*buffer, 0, numBuffer)
@@ -36,22 +48,18 @@ func NewManager(fileMgr *file.Manager, logMgr *log.Manager, numBuffer int) (*Man
 		bufferPool = append(bufferPool, buf)
 	}
 
-	var mu sync.Mutex
-	cond := sync.NewCond(&mu)
+	cond := sync.NewCond(&sync.Mutex{})
 
 	return &Manager{
 		cond:               cond,
 		bufferPool:         bufferPool,
 		numAvailableBuffer: numBuffer,
-		maxTimeMilliSec:    time.Second * 10, // 10 seconds
+		timeout:            time.Second * maxTimeoutSecond,
 	}, nil
 }
 
+// available returns the number of unpinned buffer.
 func (mgr *Manager) available() int {
-	// if mgr == nil {
-	// 	return 0, core.NilReceiverError
-	// }
-
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
@@ -77,18 +85,14 @@ func (mgr *Manager) available() int {
 // 	return nil
 // }
 
+// unpin unpins the buffer.
 func (mgr *Manager) unpin(buf *buffer) error {
-	// if mgr == nil {
-	// 	return core.NilReceiverError
-	// }
-
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
 	buf.unpin()
 
-	pinned := buf.isPinned()
-	if !pinned {
+	if pinned := buf.isPinned(); !pinned {
 		mgr.numAvailableBuffer++
 		mgr.cond.Broadcast()
 	}
@@ -96,43 +100,37 @@ func (mgr *Manager) unpin(buf *buffer) error {
 	return nil
 }
 
+// pin pins the block and return pinned buffer.
 func (mgr *Manager) pin(block *file.Block) (*buffer, error) {
-	// if mgr == nil {
-	// 	return nil, core.NilReceiverError
-	// }
-
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
 	startTime := time.Now()
-	buf, err := mgr.tryToPin(block)
-	if err != nil {
+	buf, err := mgr.tryToPin(block, chooseUnpinnedBuffer)
+	if err != nil && !errors.Is(err, ErrFailedPin) {
 		return nil, err
 	}
 	for buf == nil && mgr.waitingTooLong(startTime) {
 		mgr.cond.Wait()
-		buf, err = mgr.tryToPin(block)
-		if err != nil {
+		buf, err = mgr.tryToPin(block, chooseUnpinnedBuffer)
+		if err != nil && !errors.Is(err, ErrFailedPin) {
 			return nil, err
 		}
 	}
 	if buf == nil {
-		return nil, errors.New("timeout")
+		return nil, ErrTimeoutExceeded
 	}
 
 	return buf, nil
 }
 
-func (mgr *Manager) tryToPin(block *file.Block) (*buffer, error) {
-	// if mgr == nil {
-	// 	return nil, core.NilReceiverError
-	// }
-
+// tryToPin tries to pin the block to a buffer.
+func (mgr *Manager) tryToPin(block *file.Block, chooseUnpinnedBuffer func([]*buffer) *buffer) (*buffer, error) {
 	buf := mgr.findExistingBuffer(block)
 	if buf == nil {
-		buf = mgr.chooseUnpinnedBuffer()
+		buf = chooseUnpinnedBuffer(mgr.bufferPool)
 		if buf == nil {
-			return nil, nil
+			return nil, ErrFailedPin
 		}
 		if err := buf.assignToBlock(block); err != nil {
 			return nil, err
@@ -146,6 +144,8 @@ func (mgr *Manager) tryToPin(block *file.Block) (*buffer, error) {
 	return buf, nil
 }
 
+// findExistingBuffer returns the buffer whose block is same as given block.
+// If there is no such buffer, returns nil.
 func (mgr *Manager) findExistingBuffer(block *file.Block) *buffer {
 	for _, buf := range mgr.bufferPool {
 		other := buf.getBlock()
@@ -157,8 +157,9 @@ func (mgr *Manager) findExistingBuffer(block *file.Block) *buffer {
 	return nil
 }
 
-func (mgr *Manager) chooseUnpinnedBuffer() *buffer {
-	for _, buf := range mgr.bufferPool {
+// chooseUnpinnedBuffer chooses unpinned buffer.
+func chooseUnpinnedBuffer(bufferPool []*buffer) *buffer {
+	for _, buf := range bufferPool {
 		if !buf.isPinned() {
 			return buf
 		}
@@ -167,6 +168,7 @@ func (mgr *Manager) chooseUnpinnedBuffer() *buffer {
 	return nil
 }
 
+// waitingTooLong checks whether if wait time is too long or not.
 func (mgr *Manager) waitingTooLong(start time.Time) bool {
-	return time.Since(start) > mgr.maxTimeMilliSec
+	return time.Since(start) > mgr.timeout
 }

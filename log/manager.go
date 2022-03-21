@@ -2,6 +2,7 @@ package log
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 
@@ -40,32 +41,30 @@ func NewManager(fileMgr *file.Manager, config Config) (*Manager, error) {
 
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	lastBlock, err := fileMgr.LastBlock(config.logfile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	if err := fileMgr.CopyBlockToPage(lastBlock, page); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	boundary, err := page.GetUint32(0)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	if boundary == 0 {
 		blockSize := fileMgr.GetBlockSize()
-		if err != nil {
-			return nil, err
-		}
 		if err = page.SetUint32(0, uint32(blockSize)); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w", err)
 		}
 	}
 
 	return &Manager{
+		mu:           sync.Mutex{},
 		fileMgr:      fileMgr,
 		currentBlock: lastBlock,
 		page:         page,
@@ -77,12 +76,8 @@ func NewManager(fileMgr *file.Manager, config Config) (*Manager, error) {
 
 // flush flushes page into current block.
 func (mgr *Manager) flush() error {
-	if mgr == nil {
-		return nil
-	}
-
 	if err := mgr.fileMgr.CopyPageToBlock(mgr.page, mgr.currentBlock); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	mgr.lastSavedLSN = mgr.latestLSN
@@ -101,16 +96,12 @@ func (mgr *Manager) FlushByLSN(lsn int) error {
 
 // AppendRecord appends record into the log page.
 func (mgr *Manager) AppendRecord(record []byte) error {
-	if mgr == nil {
-		return nil
-	}
-
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
 	boundary, err := mgr.page.GetUint32(0)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 	recordLength := len(record)
 	bytesNeeded := recordLength + core.Uint32Length
@@ -122,17 +113,17 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 		}
 		boundary, err = mgr.page.GetUint32(0)
 		if err != nil {
-			return err
+			return fmt.Errorf("%w", err)
 		}
 	}
 	recordPosition := int(boundary) - bytesNeeded
 
-	if err := mgr.page.SetBytes(int64(recordPosition), record); err != nil && err != io.EOF {
-		return err
+	if err := mgr.page.SetBytes(int64(recordPosition), record); err != nil && !errors.Is(err, io.EOF) {
+		return fmt.Errorf("%w", err)
 	}
 
 	if err := mgr.page.SetUint32(0, uint32(recordPosition)); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 	mgr.latestLSN++
 
@@ -141,10 +132,6 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 
 // Iterator returns iterator.
 func (mgr *Manager) Iterator() (<-chan []byte, error) {
-	if mgr == nil {
-		return nil, nil
-	}
-
 	it, err := iterator(mgr.fileMgr, mgr.currentBlock)
 	if err != nil {
 		return nil, err
@@ -156,10 +143,6 @@ func (mgr *Manager) Iterator() (<-chan []byte, error) {
 // appendNewLogBlock appends new block to log file.
 // This initializes page and append new block to log file.
 func (mgr *Manager) appendNewLogBlock() error {
-	if mgr == nil {
-		return nil
-	}
-
 	// flush page into current block
 	if err := mgr.flush(); err != nil {
 		return err
@@ -168,18 +151,18 @@ func (mgr *Manager) appendNewLogBlock() error {
 	// initialize page for log
 	blockSize := mgr.fileMgr.GetBlockSize()
 	if err := mgr.page.SetUint32(0, uint32(blockSize)); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	// extend new block
 	block, err := mgr.fileMgr.AppendBlock(mgr.config.logfile)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 	mgr.currentBlock = block
 
-	if err := mgr.fileMgr.CopyPageToBlock(mgr.page, block); err != nil && err != io.EOF {
-		return err
+	if err := mgr.fileMgr.CopyPageToBlock(mgr.page, block); err != nil && !errors.Is(err, io.EOF) {
+		return fmt.Errorf("%w", err)
 	}
 
 	return nil

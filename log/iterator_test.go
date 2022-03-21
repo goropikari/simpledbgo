@@ -3,7 +3,6 @@ package log_test
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/goropikari/simpledb_go/bytes"
@@ -37,12 +36,13 @@ func TestLogIterator(t *testing.T) {
 		expected = expectedRecords(1, 58)
 		require.Equal(t, expected, actual)
 
-		logMgr.FlushByLSN(65)
+		err = logMgr.FlushByLSN(65)
+		require.NoError(t, err)
 		actual = iteratorRecords(logMgr)
 		expected = expectedRecords(1, 70)
 		require.Equal(t, expected, actual)
 
-		err = os.RemoveAll(filepath.Join(".", dir, filename))
+		err = os.RemoveAll(dir)
 		require.NoError(t, err)
 	})
 }
@@ -55,7 +55,6 @@ func iteratorRecords(logMgr *log.Manager) []string {
 		page := file.NewPage(bb)
 		s, _ := page.GetString(0)
 		x, _ := page.GetUint32(int64(len(s) + 4))
-		// fmt.Println(s, x)
 		strs = append(strs, fmt.Sprintf("%v %v", s, x))
 	}
 
@@ -70,7 +69,8 @@ func createRecord(logMgr *log.Manager, start, end int) {
 }
 
 func createLogRecord(s string, n uint32) []byte {
-	bb, _ := bytes.NewBuffer(len(s) + core.Uint32Length*2)
+	bufferSize, _ := core.NewBlockSize(len(s) + core.Uint32Length*2)
+	bb, _ := bytes.NewBuffer(bufferSize)
 	page := file.NewPage(bb)
 	page.SetString(0, s)
 	page.SetUint32(int64(len(s)+core.Uint32Length), n)

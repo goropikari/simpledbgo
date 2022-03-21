@@ -3,16 +3,18 @@ package bytes
 import (
 	"errors"
 	"io"
+
+	"github.com/goropikari/simpledb_go/core"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/tests/mock/mock_${GOFILE} -package=mock
 
 var (
-	// OutOfRangeError is an error type that refer out of range.
-	OutOfRangeError = errors.New("reference out of range of buffer")
+	// ErrOutOfRange is an error type that refer out of range.
+	ErrOutOfRange = errors.New("reference out of range of buffer")
 
-	// UnsupportedWhenceError is an error type that given whence is unsupported.
-	UnsupportedWhenceError = errors.New("unsupported whence")
+	// ErrUnsupportedWhence is an error type that given whence is unsupported.
+	ErrUnsupportedWhence = errors.New("unsupported whence")
 )
 
 // ByteBuffer is an interface that implement io.ReadWriteSeeker.
@@ -30,8 +32,8 @@ type Buffer struct {
 }
 
 // NewBuffer is a constructor of Buffer.
-func NewBuffer(n int) (*Buffer, error) {
-	return NewBufferBytes(make([]byte, n)), nil
+func NewBuffer(n core.BlockSize) (*Buffer, error) {
+	return NewBufferBytes(make([]byte, int(n))), nil
 }
 
 // NewBufferBytes is a constructor of Buffer by byte slice.
@@ -44,15 +46,15 @@ func NewBufferBytes(buf []byte) *Buffer {
 }
 
 // Read reads bytes from Reader.
-func (bb *Buffer) Read(p []byte) (n int, err error) {
-	if bb.off < 0 || bb.off >= int64(bb.capacity) {
+func (buf *Buffer) Read(p []byte) (n int, err error) {
+	if buf.off < 0 || buf.off >= int64(buf.capacity) {
 		return 0, io.EOF
 	}
 
-	cnt := copy(p, bb.buf[bb.off:])
+	cnt := copy(p, buf.buf[buf.off:])
 
-	bb.off += int64(cnt)
-	if int(bb.off) == bb.capacity {
+	buf.off += int64(cnt)
+	if int(buf.off) == buf.capacity {
 		return cnt, io.EOF
 	}
 
@@ -60,15 +62,15 @@ func (bb *Buffer) Read(p []byte) (n int, err error) {
 }
 
 // Write writes given bytes to writer.
-func (bb *Buffer) Write(p []byte) (n int, err error) {
-	if bb.off < 0 || bb.off >= int64(bb.capacity) {
+func (buf *Buffer) Write(p []byte) (n int, err error) {
+	if buf.off < 0 || buf.off >= int64(buf.capacity) {
 		return 0, io.EOF
 	}
 
-	cnt := copy(bb.buf[bb.off:], p)
+	cnt := copy(buf.buf[buf.off:], p)
 
-	bb.off += int64(cnt)
-	if bb.off == int64(bb.capacity) {
+	buf.off += int64(cnt)
+	if buf.off == int64(buf.capacity) {
 		return cnt, io.EOF
 	}
 
@@ -76,7 +78,7 @@ func (bb *Buffer) Write(p []byte) (n int, err error) {
 }
 
 // Seek seeks position.
-func (bb *Buffer) Seek(offset int64, whence int) (int64, error) {
+func (buf *Buffer) Seek(offset int64, whence int) (int64, error) {
 	off := int64(0)
 
 	switch whence {
@@ -85,25 +87,25 @@ func (bb *Buffer) Seek(offset int64, whence int) (int64, error) {
 	case io.SeekCurrent:
 		off += offset
 	default:
-		return 0, UnsupportedWhenceError
+		return 0, ErrUnsupportedWhence
 	}
-	if off < 0 || off > int64(bb.capacity) {
-		return 0, OutOfRangeError
+	if off < 0 || off > int64(buf.capacity) {
+		return 0, ErrOutOfRange
 	}
-	bb.off = off
+	buf.off = off
 
 	return off, nil
 }
 
 // GetBytes returns buffer.
-func (bb *Buffer) GetBytes() []byte {
-	return bb.buf
+func (buf *Buffer) GetBytes() []byte {
+	return buf.buf
 }
 
 // Reset resets buffer.
-func (bb *Buffer) Reset() {
-	bb.off = 0
-	for i := 0; i < bb.capacity; i++ {
-		bb.buf[i] = 0
+func (buf *Buffer) Reset() {
+	buf.off = 0
+	for i := 0; i < buf.capacity; i++ {
+		buf.buf[i] = 0
 	}
 }

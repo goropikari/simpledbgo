@@ -2,6 +2,7 @@ package log
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/goropikari/simpledb_go/core"
@@ -46,16 +47,16 @@ func newIterator(fileMgr *file.Manager, block *file.Block) (*Iterator, error) {
 
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	if err := fileMgr.CopyBlockToPage(block, page); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	boundary, err := page.GetUint32(0)
-	if err != nil && err != io.EOF {
-		return nil, err
+	if err != nil && !errors.Is(err, io.EOF) {
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return &Iterator{
@@ -70,7 +71,7 @@ func newIterator(fileMgr *file.Manager, block *file.Block) (*Iterator, error) {
 func (logIt *Iterator) hasNext() bool {
 	blockSize := logIt.fileMgr.GetBlockSize()
 
-	return int(logIt.currentRecordPosition) < blockSize || logIt.block.GetBlockNumber() > 0
+	return int(logIt.currentRecordPosition) < int(blockSize) || logIt.block.GetBlockNumber() > 0
 }
 
 func (logIt *Iterator) next() []byte {
@@ -88,7 +89,10 @@ func (logIt *Iterator) next() []byte {
 }
 
 func (logIt *Iterator) moveToBlock(block *file.Block) {
-	logIt.fileMgr.CopyBlockToPage(block, logIt.page)
+	err := logIt.fileMgr.CopyBlockToPage(block, logIt.page)
+	if err != nil {
+		panic(err)
+	}
 	boundary, _ := logIt.page.GetUint32(0)
 	logIt.currentRecordPosition = boundary
 	logIt.block = block

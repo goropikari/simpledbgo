@@ -2,6 +2,7 @@ package file
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,23 +17,24 @@ import (
 // Config is configuration of Manager.
 type Config struct {
 	dbDir      string
-	blockSize  int // for direct io, blockSize must be multiple of 4096
+	blockSize  core.BlockSize // for direct io, blockSize must be multiple of 4096
 	isDirectIO bool
 }
 
-// NewConfig is constructor of Config
-func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
-	if isDirectIO && blockSize%directio.BlockSize != 0 {
-		return Config{}, directio.InvalidBlockSizeError
+// NewConfig is constructor of Config.
+func NewConfig(dbDir string, blkSize int, isDirectIO bool) (Config, error) {
+	if isDirectIO && blkSize%directio.BlockSize != 0 {
+		return Config{}, directio.ErrInvalidBlockSize
 	}
 
-	if blockSize <= 0 {
-		return Config{}, errors.New("block size must be positive")
+	blockSize, err := core.NewBlockSize(blkSize)
+	if err != nil {
+		return Config{}, fmt.Errorf("%w", err)
 	}
 
 	abspath, err := filepath.Abs(dbDir)
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("%w", err)
 	}
 
 	return Config{
@@ -40,7 +42,6 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 		blockSize:  blockSize,
 		isDirectIO: isDirectIO,
 	}, nil
-
 }
 
 // Manager manages files.
@@ -57,24 +58,25 @@ func NewManager(config Config) (*Manager, error) {
 	}
 
 	if err := os.MkdirAll(config.dbDir, os.ModePerm); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	files, err := os.ReadDir(config.dbDir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	// remove temporary files.
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), "temp") {
 			if err := os.Remove(filepath.Join(config.dbDir, file.Name())); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("%w", err)
 			}
 		}
 	}
 
 	return &Manager{
+		mu:        sync.Mutex{},
 		config:    config,
 		openFiles: make(map[core.FileName]*os.File, 0),
 	}, nil
@@ -92,11 +94,7 @@ func validateConfig(config Config) error {
 }
 
 // GetBlockSize returns block size.
-func (mgr *Manager) GetBlockSize() int {
-	if mgr == nil {
-		return 0
-	}
-
+func (mgr *Manager) GetBlockSize() core.BlockSize {
 	return mgr.config.blockSize
 }
 
@@ -118,24 +116,24 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 	}
 
 	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	// seek でファイルサイズ以上の位置が指定されていた場合、io.CopyN しても 1 byte も読み込まれず
 	// page に変化がない.
 	// 実際は x00 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
 	page.Reset()
-	seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
+	seekPos := int64(int(mgr.config.blockSize) * int(block.GetBlockNumber()))
 	if _, err = f.Seek(seekPos, io.SeekStart); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
-	if _, err = io.CopyN(page, f, int64(mgr.config.blockSize)); err != nil && err != io.EOF {
-		return err
+	if _, err = io.CopyN(page, f, int64(mgr.config.blockSize)); err != nil && !errors.Is(err, io.EOF) {
+		return fmt.Errorf("%w", err)
 	}
 
 	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	return nil
@@ -158,15 +156,15 @@ func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 		return err
 	}
 
-	if _, err = f.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
-		return err
+	if _, err = f.Seek(int64(int(mgr.config.blockSize)*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+		return fmt.Errorf("%w", err)
 	}
 
 	if _, err := f.Write(page.GetFullBytes()); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	return nil
@@ -174,10 +172,6 @@ func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 
 // AppendBlock appends block to given filename.
 func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
-	if mgr == nil {
-		return nil, nil
-	}
-
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -192,7 +186,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	}
 	appendBlockNum, err := core.NewBlockNumber(numBlock)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	block := NewBlock(filename, appendBlockNum)
 
@@ -202,11 +196,11 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	}
 
 	// extend file size
-	if _, err := f.Seek(int64(numBlock*mgr.config.blockSize), io.SeekStart); err != nil {
-		return nil, err
+	if _, err := f.Seek(int64(numBlock*int(mgr.config.blockSize)), io.SeekStart); err != nil {
+		return nil, fmt.Errorf("%w", err)
 	}
 	if _, err = f.Write(buf); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return block, nil
@@ -216,18 +210,14 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 func (mgr *Manager) numBlock(file *os.File) (int, error) {
 	fileSize, err := core.FileSize(file)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w", err)
 	}
 
-	return int(fileSize) / mgr.config.blockSize, nil
+	return int(fileSize) / int(mgr.config.blockSize), nil
 }
 
 // LastBlock returns last block of given file.
 func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
-	if mgr == nil {
-		return nil, nil
-	}
-
 	f, err := mgr.openFile(filename)
 	if err != nil {
 		return nil, err
@@ -247,15 +237,20 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
 func (mgr *Manager) lastBlockNumber(file *os.File) (core.BlockNumber, error) {
 	fileSize, err := core.FileSize(file)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w", err)
 	}
 	if fileSize == 0 {
-		return core.NewBlockNumber(0)
+		blkNum, err := core.NewBlockNumber(0)
+		if err != nil {
+			return 0, fmt.Errorf("%w", err)
+		}
+
+		return blkNum, nil
 	}
 
 	blockNum, err := core.NewBlockNumber(int(fileSize/int64(mgr.config.blockSize)) - 1)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w", err)
 	}
 
 	return blockNum, nil
@@ -264,26 +259,22 @@ func (mgr *Manager) lastBlockNumber(file *os.File) (core.BlockNumber, error) {
 // openFile opens file as given filename.
 // If there is no such file, create new file.
 func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
-	if mgr == nil {
-		return nil, nil
-	}
-
 	if v, ok := mgr.openFiles[filename]; ok {
 		return v, nil
 	}
 
 	// open file. If there is no such file, create new file.
-	path := filepath.Join(string(mgr.config.dbDir), string(filename))
+	path := filepath.Join(mgr.config.dbDir, string(filename))
 	flag := os.O_RDWR | os.O_CREATE
 	if mgr.config.isDirectIO {
 		f, err = directio.OpenFile(path, flag, os.ModePerm)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w", err)
 		}
 	} else {
 		f, err = os.OpenFile(path, flag, os.ModePerm)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w", err)
 		}
 	}
 
@@ -294,15 +285,12 @@ func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
 
 // CloseFile closes a file.
 func (mgr *Manager) CloseFile(filename core.FileName) error {
-	if mgr == nil {
-		return nil
-	}
-
 	if f, ok := mgr.openFiles[filename]; ok {
 		delete(mgr.openFiles, filename)
 		if err := f.Close(); err != nil {
-			return err
+			return fmt.Errorf("%w", err)
 		}
+
 		return nil
 	}
 
@@ -314,7 +302,7 @@ func (mgr *Manager) prepareBytes() (buf []byte, err error) {
 	if mgr.config.isDirectIO {
 		buf, err = directio.AlignedBlock(int(mgr.config.blockSize))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w", err)
 		}
 	} else {
 		buf = make([]byte, mgr.config.blockSize)
@@ -327,14 +315,10 @@ func (mgr *Manager) prepareBytes() (buf []byte, err error) {
 // If file manager's config specifies direct IO support, this returns page
 // satisfying direct IO constraints.
 func (mgr *Manager) PreparePage() (*Page, error) {
-	if mgr == nil {
-		return nil, nil
-	}
-
 	if mgr.config.isDirectIO {
 		bb, err := bytes.NewDirectBuffer(mgr.config.blockSize)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w", err)
 		}
 
 		return NewPage(bb), nil
@@ -342,7 +326,7 @@ func (mgr *Manager) PreparePage() (*Page, error) {
 
 	bb, err := bytes.NewBuffer(mgr.config.blockSize)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return NewPage(bb), nil

@@ -1,7 +1,6 @@
 package core
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -9,18 +8,18 @@ import (
 )
 
 var (
-	// InvalidFileNameFormatError is an error that means file name is invalid format.
-	InvalidFileNameFormatError = errors.New("invalid filename format")
+	// ErrInvalidFileNameFormat is an error that means file name is invalid format.
+	ErrInvalidFileNameFormat = errors.New("invalid filename format")
 
 	// NonPositiveBlockNumberError is an error that means BlockNumber is non positive.
-	NonNegativeBlockNumberError = errors.New("block number must be non negative")
+	ErrNonNegativeBlockNumber = errors.New("block number must be non negative")
+
+	// ErrBlockSize is an error that means BlockSize in non positive.
+	ErrBlockSize = errors.New("block size must be positive")
 )
 
-// Uint32Length is byte length of int32
-var Uint32Length = 4
-
-// Endianness is endianness of this system.
-var Endianness = binary.BigEndian
+// Uint32Length is byte length of int32.
+const Uint32Length = 4
 
 // FileName is a type for filename.
 type FileName string
@@ -28,7 +27,7 @@ type FileName string
 // NewFileName is a constructor of FileName.
 func NewFileName(name string) (FileName, error) {
 	if name == "" {
-		return "", InvalidFileNameFormatError
+		return "", ErrInvalidFileNameFormat
 	}
 
 	return FileName(name), nil
@@ -40,20 +39,32 @@ type BlockNumber int
 // NewBlockNumber is a constructor of BlockNumber.
 func NewBlockNumber(bn int) (BlockNumber, error) {
 	if bn < 0 {
-		return 0, NonNegativeBlockNumberError
+		return 0, ErrNonNegativeBlockNumber
 	}
 
 	return BlockNumber(bn), nil
 }
 
+// BlockSize is a type for block size.
+type BlockSize int
+
+// NewBlockSize is a constructor of BlockSize.
+func NewBlockSize(x int) (BlockSize, error) {
+	if x <= 0 {
+		return 0, ErrBlockSize
+	}
+
+	return BlockSize(x), nil
+}
+
 // HashCode calculates given string hash value.
-func HashCode(s string) int {
+func HashCode(str string) int {
 	result := 1
 	base := 139
 	mod := 1000000009
 	b := 1
 
-	for c := range []byte(s) {
+	for c := range []byte(str) {
 		result *= c * b
 		b = (b * base) % mod
 		result %= mod
@@ -62,14 +73,16 @@ func HashCode(s string) int {
 	return result
 }
 
+// RandomString returns random string.
 func RandomString() string {
 	return fmt.Sprintf("%v", rand.Uint32())
 }
 
+// FileSize returns file size.
 func FileSize(f *os.File) (int64, error) {
 	info, err := f.Stat()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w", err)
 	}
 
 	return info.Size(), nil

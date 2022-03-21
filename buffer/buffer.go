@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/goropikari/simpledb_go/file"
 	"github.com/goropikari/simpledb_go/log"
@@ -27,7 +28,7 @@ func newBuffer(fileMgr *file.Manager, logMgr *log.Manager) (*buffer, error) {
 
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return &buffer{
@@ -68,12 +69,12 @@ func (buf *buffer) isPinned() bool {
 	return buf.pins > 0
 }
 
-// func (buf *buffer) modifyingTx() (int, error) {
+// func (buf *buffer) modifyingTx() int {
 // 	if buf == nil {
-// 		return -1, core.NilReceiverError
+// 		return -1
 // 	}
-//
-// 	return buf.txnum, nil
+
+// 	return buf.txnum
 // }
 
 func (buf *buffer) assignToBlock(block *file.Block) error {
@@ -87,7 +88,7 @@ func (buf *buffer) assignToBlock(block *file.Block) error {
 
 	buf.block = block
 	if err := buf.fileMgr.CopyBlockToPage(block, buf.page); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	buf.pins = 0
@@ -102,12 +103,12 @@ func (buf *buffer) flush() error {
 
 	if buf.txnum >= 0 {
 		if err := buf.logMgr.FlushByLSN(buf.txnum); err != nil {
-			return err
+			return fmt.Errorf("%w", err)
 		}
-
 		if err := buf.fileMgr.CopyPageToBlock(buf.page, buf.block); err != nil {
-			return err
+			return fmt.Errorf("%w", err)
 		}
+		buf.txnum = -1
 	}
 
 	return nil

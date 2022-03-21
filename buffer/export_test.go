@@ -15,6 +15,7 @@ func (buf *buffer) GetPage() *file.Page {
 func (buf *buffer) SetModified(txnum, lsn int) {
 	buf.setModified(txnum, lsn)
 }
+
 func (mgr *Manager) Pin(block *file.Block) (*buffer, error) {
 	return mgr.pin(block)
 }

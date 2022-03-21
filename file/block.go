@@ -29,7 +29,7 @@ func (b *Block) GetFileName() core.FileName {
 	return b.fileName
 }
 
-// GetBlockNumber is a getter of blockNumber
+// GetBlockNumber is a getter of blockNumber.
 func (b *Block) GetBlockNumber() core.BlockNumber {
 	if b == nil {
 		return 0

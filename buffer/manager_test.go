@@ -51,7 +51,7 @@ func TestBufferManager(t *testing.T) {
 		require.Equal(t, 0, bm.Available())
 
 		bufs[5], err = bm.Pin(file.NewBlock(fileName, 3))
-		require.EqualError(t, err, "timeout")
+		require.EqualError(t, err, "timeout exceeded")
 
 		err = bm.Unpin(bufs[2])
 		require.NoError(t, err)

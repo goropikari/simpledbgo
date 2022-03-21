@@ -1,4 +1,18 @@
+linters:
+  disable:
+    - funlen
+    - gochecknoglobals
+    - goerr113
+    - golint
+    - gosec
+    - interfacer
+    - maligned
+    - paralleltest
+    - scopelint
+    - varnamelen
+    # - wrapcheck
+    - wsl
+  enable-all: true
 run:
   skip-files:
-    - log/iterator.go
-    - log/iterator_test.go
+    - _test.go
