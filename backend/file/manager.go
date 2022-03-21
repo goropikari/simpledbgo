@@ -32,11 +32,24 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 		return Config{}, fmt.Errorf("%w", err)
 	}
 
-	return Config{
+	config := Config{
 		dbDir:      abspath,
 		blockSize:  blockSize,
 		isDirectIO: isDirectIO,
-	}, nil
+	}
+	config.SetDefaults()
+
+	return config, nil
+}
+
+// SetDefaults sets defalut value of config.
+func (config *Config) SetDefaults() {
+	if config.dbDir == "" {
+		config.dbDir = "simpledb"
+	}
+	if config.blockSize == 0 {
+		config.blockSize = directio.BlockSize
+	}
 }
 
 // Manager manages files.

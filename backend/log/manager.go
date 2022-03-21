@@ -17,9 +17,17 @@ type Config struct {
 
 // NewConfig is constructor of Config.
 func NewConfig(logfile core.FileName) Config {
-	return Config{
+	config := Config{
 		logfile: logfile,
 	}
+	config.SetDefaults()
+
+	return config
+}
+
+// SetDefaults sets default value of config.
+func (config *Config) SetDefaults() {
+	config.logfile = "logfile"
 }
 
 // Manager is a log manager of database.
