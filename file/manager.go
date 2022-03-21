@@ -284,7 +284,7 @@ func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
 }
 
 // CloseFile closes a file.
-func (mgr *Manager) CloseFile(filename core.FileName) error {
+func (mgr *Manager) closeFile(filename core.FileName) error {
 	if f, ok := mgr.openFiles[filename]; ok {
 		delete(mgr.openFiles, filename)
 		if err := f.Close(); err != nil {
