@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/bytes"
 	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/directio"
 	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/stretchr/testify/require"
 )
 

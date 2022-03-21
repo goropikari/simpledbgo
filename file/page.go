@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goropikari/simpledb_go/bytes"
+	"github.com/goropikari/simpledb_go/lib/bytes"
 )
 
 // ErrInvalidOffset is error type that indicates you specify invalid offset.

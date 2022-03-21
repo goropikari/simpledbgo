@@ -4,7 +4,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/bytes"
+	"github.com/goropikari/simpledb_go/lib/bytes"
 
 	"github.com/stretchr/testify/require"
 )

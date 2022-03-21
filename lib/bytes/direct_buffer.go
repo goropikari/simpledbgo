@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/directio"
+	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
 // NewDirectBuffer is a constructor of DirectBuffer.

@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/bytes"
 	"github.com/goropikari/simpledb_go/core"
 	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/log"
 	"github.com/stretchr/testify/require"
 )

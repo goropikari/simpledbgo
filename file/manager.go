@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goropikari/simpledb_go/bytes"
 	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/directio"
+	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
 // Config is configuration of Manager.
