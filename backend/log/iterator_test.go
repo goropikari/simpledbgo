@@ -5,10 +5,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/file"
+	"github.com/goropikari/simpledb_go/backend/log"
+	"github.com/goropikari/simpledb_go/backend/service"
 	"github.com/goropikari/simpledb_go/lib/bytes"
-	"github.com/goropikari/simpledb_go/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,12 +48,12 @@ func TestLogIterator(t *testing.T) {
 	})
 }
 
-func iteratorRecords(logMgr *log.Manager) []string {
+func iteratorRecords(logMgr service.LogManager) []string {
 	strs := make([]string, 0, 400)
 	ch, _ := logMgr.Iterator()
 	for v := range ch {
 		bb := bytes.NewBufferBytes(v)
-		page := file.NewPage(bb)
+		page := core.NewPage(bb)
 		s, _ := page.GetString(0)
 		x, _ := page.GetUint32(int64(len(s) + 4))
 		strs = append(strs, fmt.Sprintf("%v %v", s, x))
@@ -61,7 +62,7 @@ func iteratorRecords(logMgr *log.Manager) []string {
 	return strs
 }
 
-func createRecord(logMgr *log.Manager, start, end int) {
+func createRecord(logMgr service.LogManager, start, end int) {
 	for i := start; i <= end; i++ {
 		record := createLogRecord(fmt.Sprintf("record%d", i), uint32(i+100))
 		logMgr.AppendRecord(record)
@@ -69,9 +70,9 @@ func createRecord(logMgr *log.Manager, start, end int) {
 }
 
 func createLogRecord(s string, n uint32) []byte {
-	bufferSize, _ := core.NewBlockSize(len(s) + core.Uint32Length*2)
+	bufferSize := len(s) + core.Uint32Length*2
 	bb, _ := bytes.NewBuffer(bufferSize)
-	page := file.NewPage(bb)
+	page := core.NewPage(bb)
 	page.SetString(0, s)
 	page.SetUint32(int64(len(s)+core.Uint32Length), n)
 

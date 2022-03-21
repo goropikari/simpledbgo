@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/file"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/stretchr/testify/require"
@@ -59,8 +59,8 @@ func TestManager(t *testing.T) {
 		copy(buf, []byte(strings.Repeat("A", directio.BlockSize)))
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page := file.NewPage(bb)
-		block := file.NewBlock(filename, 0)
+		page := core.NewPage(bb)
+		block := core.NewBlock(filename, 0)
 		err = fileMgr.CopyPageToBlock(page, block)
 		require.NoError(t, err)
 
@@ -69,8 +69,8 @@ func TestManager(t *testing.T) {
 		copy(buf, []byte(strings.Repeat("B", directio.BlockSize)))
 		bb, err = bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page = file.NewPage(bb)
-		block = file.NewBlock(filename, 1)
+		page = core.NewPage(bb)
+		block = core.NewBlock(filename, 1)
 		err = fileMgr.CopyPageToBlock(page, block)
 		require.NoError(t, err)
 		err = fileMgr.CloseFile(filename)
@@ -84,8 +84,8 @@ func TestManager(t *testing.T) {
 		buf, _ = directio.AlignedBlock(directio.BlockSize)
 		bb, err = bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page = file.NewPage(bb)
-		block = file.NewBlock(filename, 0)
+		page = core.NewPage(bb)
+		block = core.NewBlock(filename, 0)
 		err = fileMgr.CopyBlockToPage(block, page)
 		require.NoError(t, err)
 		require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetFullBytes()))
@@ -94,8 +94,8 @@ func TestManager(t *testing.T) {
 		require.NoError(t, err)
 		bb, err = bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page = file.NewPage(bb)
-		block = file.NewBlock(filename, 1)
+		page = core.NewPage(bb)
+		block = core.NewBlock(filename, 1)
 		err = fileMgr.CopyBlockToPage(block, page)
 		require.NoError(t, err)
 		require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetFullBytes()))

@@ -1,10 +1,10 @@
-package file_test
+package core_test
 
 import (
 	"math/rand"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/stretchr/testify/require"
@@ -15,7 +15,7 @@ func TestPage_SetGetInt32(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page := file.NewPage(bb)
+		page := core.NewPage(bb)
 
 		n := int32(10000)
 		x1 := rand.Int31n(n)
@@ -43,7 +43,7 @@ func TestPage_SetGetUint32(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page := file.NewPage(bb)
+		page := core.NewPage(bb)
 
 		x1 := rand.Uint32()
 		err = page.SetUint32(0, x1)
@@ -65,7 +65,7 @@ func TestPage_SetGetBytes(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page := file.NewPage(bb)
+		page := core.NewPage(bb)
 
 		x1 := []byte("hello")
 		err = page.SetBytes(0, x1)
@@ -87,7 +87,7 @@ func TestPage_SetGetString(t *testing.T) {
 		buf, _ := directio.AlignedBlock(directio.BlockSize)
 		bb, err := bytes.NewDirectBufferBytes(buf)
 		require.NoError(t, err)
-		page := file.NewPage(bb)
+		page := core.NewPage(bb)
 
 		x1 := "foo"
 		x2 := "bar"

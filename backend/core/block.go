@@ -1,19 +1,17 @@
-package file
+package core
 
 import (
 	"fmt"
-
-	"github.com/goropikari/simpledb_go/core"
 )
 
 // Block is a model representing `filename`'s  `blockNumber` th block.
 type Block struct {
-	fileName    core.FileName
-	blockNumber core.BlockNumber
+	fileName    FileName
+	blockNumber BlockNumber
 }
 
 // NewBlock is a constructor of Block.
-func NewBlock(fileName core.FileName, blockNumber core.BlockNumber) *Block {
+func NewBlock(fileName FileName, blockNumber BlockNumber) *Block {
 	return &Block{
 		fileName:    fileName,
 		blockNumber: blockNumber,
@@ -21,7 +19,7 @@ func NewBlock(fileName core.FileName, blockNumber core.BlockNumber) *Block {
 }
 
 // GetFileName is a getter of fileName.
-func (b *Block) GetFileName() core.FileName {
+func (b *Block) GetFileName() FileName {
 	if b == nil {
 		return ""
 	}
@@ -30,7 +28,7 @@ func (b *Block) GetFileName() core.FileName {
 }
 
 // GetBlockNumber is a getter of blockNumber.
-func (b *Block) GetBlockNumber() core.BlockNumber {
+func (b *Block) GetBlockNumber() BlockNumber {
 	if b == nil {
 		return 0
 	}
@@ -62,5 +60,5 @@ func (b *Block) HashCode() int {
 		return 0
 	}
 
-	return core.HashCode(b.String())
+	return HashCode(b.String())
 }

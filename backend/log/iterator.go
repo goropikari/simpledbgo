@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/service"
 )
 
 // Iterator is iterator of log manager.
 type Iterator struct {
-	fileMgr               *file.Manager
-	block                 *file.Block
-	page                  *file.Page
+	fileMgr               service.FileManager
+	block                 *core.Block
+	page                  *core.Page
 	currentRecordPosition uint32
 	boundary              uint32
 }
 
-func iterator(fileMgr *file.Manager, block *file.Block) (<-chan []byte, error) {
+func iterator(fileMgr service.FileManager, block *core.Block) (<-chan []byte, error) {
 	if err := validateArgs(fileMgr, block); err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func iterator(fileMgr *file.Manager, block *file.Block) (<-chan []byte, error) {
 	return ch, nil
 }
 
-func newIterator(fileMgr *file.Manager, block *file.Block) (*Iterator, error) {
+func newIterator(fileMgr service.FileManager, block *core.Block) (*Iterator, error) {
 	if err := validateArgs(fileMgr, block); err != nil {
 		return nil, err
 	}
@@ -71,14 +71,14 @@ func newIterator(fileMgr *file.Manager, block *file.Block) (*Iterator, error) {
 func (logIt *Iterator) hasNext() bool {
 	blockSize := logIt.fileMgr.GetBlockSize()
 
-	return int(logIt.currentRecordPosition) < int(blockSize) || logIt.block.GetBlockNumber() > 0
+	return int(logIt.currentRecordPosition) < blockSize || logIt.block.GetBlockNumber() > 0
 }
 
 func (logIt *Iterator) next() []byte {
 	blockSize := logIt.fileMgr.GetBlockSize()
 
 	if logIt.currentRecordPosition == uint32(blockSize) {
-		block := file.NewBlock(logIt.block.GetFileName(), logIt.block.GetBlockNumber()-1)
+		block := core.NewBlock(logIt.block.GetFileName(), logIt.block.GetBlockNumber()-1)
 		logIt.moveToBlock(block)
 	}
 
@@ -88,7 +88,7 @@ func (logIt *Iterator) next() []byte {
 	return record
 }
 
-func (logIt *Iterator) moveToBlock(block *file.Block) {
+func (logIt *Iterator) moveToBlock(block *core.Block) {
 	err := logIt.fileMgr.CopyBlockToPage(block, logIt.page)
 	if err != nil {
 		panic(err)
@@ -98,8 +98,8 @@ func (logIt *Iterator) moveToBlock(block *file.Block) {
 	logIt.block = block
 }
 
-func validateArgs(fileMgr *file.Manager, block *file.Block) error {
-	if fileMgr == nil {
+func validateArgs(fileMgr service.FileManager, block *core.Block) error {
+	if fileMgr.IsZero() {
 		return errors.New("fileMgr must not be nil")
 	}
 	if block == nil {

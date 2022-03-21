@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goropikari/simpledb_go/core"
+	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
@@ -17,19 +17,14 @@ import (
 // Config is configuration of Manager.
 type Config struct {
 	dbDir      string
-	blockSize  core.BlockSize // for direct io, blockSize must be multiple of 4096
+	blockSize  int // for direct io, blockSize must be multiple of 4096
 	isDirectIO bool
 }
 
 // NewConfig is constructor of Config.
-func NewConfig(dbDir string, blkSize int, isDirectIO bool) (Config, error) {
-	if isDirectIO && blkSize%directio.BlockSize != 0 {
+func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
+	if isDirectIO && blockSize%directio.BlockSize != 0 {
 		return Config{}, directio.ErrInvalidBlockSize
-	}
-
-	blockSize, err := core.NewBlockSize(blkSize)
-	if err != nil {
-		return Config{}, fmt.Errorf("%w", err)
 	}
 
 	abspath, err := filepath.Abs(dbDir)
@@ -93,13 +88,17 @@ func validateConfig(config Config) error {
 	return nil
 }
 
+func (mgr *Manager) IsZero() bool {
+	return mgr == nil
+}
+
 // GetBlockSize returns block size.
-func (mgr *Manager) GetBlockSize() core.BlockSize {
+func (mgr *Manager) GetBlockSize() int {
 	return mgr.config.blockSize
 }
 
 // CopyBlockToPage copies block to page.
-func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
+func (mgr *Manager) CopyBlockToPage(block *core.Block, page *core.Page) error {
 	if block == nil {
 		return errors.New("block must not be nil")
 	}
@@ -115,7 +114,7 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 		return err
 	}
 
-	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
+	if _, err := page.Seek(0, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -123,7 +122,7 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 	// page に変化がない.
 	// 実際は x00 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
 	page.Reset()
-	seekPos := int64(int(mgr.config.blockSize) * int(block.GetBlockNumber()))
+	seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
 	if _, err = f.Seek(seekPos, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -132,7 +131,7 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 		return fmt.Errorf("%w", err)
 	}
 
-	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
+	if _, err := page.Seek(0, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -140,7 +139,7 @@ func (mgr *Manager) CopyBlockToPage(block *Block, page *Page) error {
 }
 
 // CopyPageToBlock copies page to block.
-func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
+func (mgr *Manager) CopyPageToBlock(page *core.Page, block *core.Block) error {
 	if block == nil {
 		return errors.New("block must not be nil")
 	}
@@ -156,14 +155,14 @@ func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 		return err
 	}
 
-	if _, err = f.Seek(int64(int(mgr.config.blockSize)*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+	if _, err = f.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	if _, err := f.Write(page.GetFullBytes()); err != nil {
 		return fmt.Errorf("%w", err)
 	}
-	if _, err := page.bb.Seek(0, io.SeekStart); err != nil {
+	if _, err := page.Seek(0, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -171,7 +170,7 @@ func (mgr *Manager) CopyPageToBlock(page *Page, block *Block) error {
 }
 
 // AppendBlock appends block to given filename.
-func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
+func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -188,7 +187,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
-	block := NewBlock(filename, appendBlockNum)
+	block := core.NewBlock(filename, appendBlockNum)
 
 	buf, err := mgr.prepareBytes()
 	if err != nil {
@@ -196,7 +195,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*Block, error) {
 	}
 
 	// extend file size
-	if _, err := f.Seek(int64(numBlock*int(mgr.config.blockSize)), io.SeekStart); err != nil {
+	if _, err := f.Seek(int64(numBlock*mgr.config.blockSize), io.SeekStart); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 	if _, err = f.Write(buf); err != nil {
@@ -213,11 +212,11 @@ func (mgr *Manager) numBlock(file *os.File) (int, error) {
 		return 0, fmt.Errorf("%w", err)
 	}
 
-	return int(fileSize) / int(mgr.config.blockSize), nil
+	return int(fileSize) / mgr.config.blockSize, nil
 }
 
 // LastBlock returns last block of given file.
-func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
+func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) {
 	f, err := mgr.openFile(filename)
 	if err != nil {
 		return nil, err
@@ -228,7 +227,7 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*Block, error) {
 		return nil, err
 	}
 
-	block := NewBlock(filename, lastBlockNum)
+	block := core.NewBlock(filename, lastBlockNum)
 
 	return block, nil
 }
@@ -300,7 +299,7 @@ func (mgr *Manager) closeFile(filename core.FileName) error {
 // prepareBytes prepares byte slice.
 func (mgr *Manager) prepareBytes() (buf []byte, err error) {
 	if mgr.config.isDirectIO {
-		buf, err = directio.AlignedBlock(int(mgr.config.blockSize))
+		buf, err = directio.AlignedBlock(mgr.config.blockSize)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
@@ -314,14 +313,14 @@ func (mgr *Manager) prepareBytes() (buf []byte, err error) {
 // PreparePage prepares a page.
 // If file manager's config specifies direct IO support, this returns page
 // satisfying direct IO constraints.
-func (mgr *Manager) PreparePage() (*Page, error) {
+func (mgr *Manager) PreparePage() (*core.Page, error) {
 	if mgr.config.isDirectIO {
 		bb, err := bytes.NewDirectBuffer(mgr.config.blockSize)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		return NewPage(bb), nil
+		return core.NewPage(bb), nil
 	}
 
 	bb, err := bytes.NewBuffer(mgr.config.blockSize)
@@ -329,5 +328,5 @@ func (mgr *Manager) PreparePage() (*Page, error) {
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	return NewPage(bb), nil
+	return core.NewPage(bb), nil
 }

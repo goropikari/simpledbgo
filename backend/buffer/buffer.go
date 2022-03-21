@@ -4,25 +4,25 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/goropikari/simpledb_go/file"
-	"github.com/goropikari/simpledb_go/log"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/service"
 )
 
 type buffer struct {
-	fileMgr *file.Manager
-	logMgr  *log.Manager
-	page    *file.Page
-	block   *file.Block
+	fileMgr service.FileManager
+	logMgr  service.LogManager
+	page    *core.Page
+	block   *core.Block
 	pins    int
 	txnum   int
 	lsn     int
 }
 
-func newBuffer(fileMgr *file.Manager, logMgr *log.Manager) (*buffer, error) {
-	if fileMgr == nil {
+func newBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*buffer, error) {
+	if fileMgr.IsZero() {
 		return nil, errors.New("fileMgr must not be nil")
 	}
-	if logMgr == nil {
+	if logMgr.IsZero() {
 		return nil, errors.New("fileMgr must not be nil")
 	}
 
@@ -42,7 +42,7 @@ func newBuffer(fileMgr *file.Manager, logMgr *log.Manager) (*buffer, error) {
 	}, nil
 }
 
-func (buf *buffer) getBlock() *file.Block {
+func (buf *buffer) getBlock() *core.Block {
 	if buf == nil {
 		return nil
 	}
@@ -77,7 +77,7 @@ func (buf *buffer) isPinned() bool {
 // 	return buf.txnum
 // }
 
-func (buf *buffer) assignToBlock(block *file.Block) error {
+func (buf *buffer) assignToBlock(block *core.Block) error {
 	if buf == nil {
 		return nil
 	}

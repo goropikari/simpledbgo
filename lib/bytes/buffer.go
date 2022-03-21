@@ -3,11 +3,16 @@ package bytes
 import (
 	"errors"
 	"io"
-
-	"github.com/goropikari/simpledb_go/core"
 )
 
-//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/tests/mock/mock_${GOFILE} -package=mock
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/tests/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
+// ByteBuffer is an interface that implement io.ReadWriteSeeker.
+type ByteBuffer interface {
+	io.ReadWriteSeeker
+	GetBytes() []byte
+	Reset()
+}
 
 var (
 	// ErrOutOfRange is an error type that refer out of range.
@@ -17,13 +22,6 @@ var (
 	ErrUnsupportedWhence = errors.New("unsupported whence")
 )
 
-// ByteBuffer is an interface that implement io.ReadWriteSeeker.
-type ByteBuffer interface {
-	io.ReadWriteSeeker
-	GetBytes() []byte
-	Reset()
-}
-
 // Buffer is a buffer.
 type Buffer struct {
 	capacity int
@@ -32,8 +30,8 @@ type Buffer struct {
 }
 
 // NewBuffer is a constructor of Buffer.
-func NewBuffer(n core.BlockSize) (*Buffer, error) {
-	return NewBufferBytes(make([]byte, int(n))), nil
+func NewBuffer(n int) (*Buffer, error) {
+	return NewBufferBytes(make([]byte, n)), nil
 }
 
 // NewBufferBytes is a constructor of Buffer by byte slice.

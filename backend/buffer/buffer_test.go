@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/buffer"
-	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/file"
-	"github.com/goropikari/simpledb_go/log"
+	"github.com/goropikari/simpledb_go/backend/buffer"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/file"
+	"github.com/goropikari/simpledb_go/backend/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,7 +33,7 @@ func TestBuffer(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("test buffer", func(t *testing.T) {
-		block := file.NewBlock(fileName, 1)
+		block := core.NewBlock(fileName, 1)
 		buf1, err := bm.Pin(block)
 		require.NoError(t, err)
 
@@ -48,17 +48,17 @@ func TestBuffer(t *testing.T) {
 		require.NoError(t, err)
 
 		// One of these pins will flush buff1 to disk:
-		buf2, err := bm.Pin(file.NewBlock(fileName, 2))
+		buf2, err := bm.Pin(core.NewBlock(fileName, 2))
 		require.NoError(t, err)
-		_, err = bm.Pin(file.NewBlock(fileName, 3))
+		_, err = bm.Pin(core.NewBlock(fileName, 3))
 		require.NoError(t, err)
-		_, err = bm.Pin(file.NewBlock(fileName, 4))
+		_, err = bm.Pin(core.NewBlock(fileName, 4))
 		require.NoError(t, err)
 
 		err = bm.Unpin(buf2)
 		require.NoError(t, err)
 
-		buf1, err = bm.Pin(file.NewBlock(fileName, 1))
+		buf1, err = bm.Pin(core.NewBlock(fileName, 1))
 		require.NoError(t, err)
 		p1 := buf1.GetPage()
 		// This modification won't get written to disk.

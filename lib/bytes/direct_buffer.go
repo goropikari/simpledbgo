@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/goropikari/simpledb_go/core"
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
 // NewDirectBuffer is a constructor of DirectBuffer.
-func NewDirectBuffer(n core.BlockSize) (*Buffer, error) {
-	buf, err := directio.AlignedBlock(int(n))
+func NewDirectBuffer(n int) (*Buffer, error) {
+	buf, err := directio.AlignedBlock(n)
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}

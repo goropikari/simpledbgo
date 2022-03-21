@@ -1,10 +1,10 @@
 package buffer
 
-import "github.com/goropikari/simpledb_go/file"
+import "github.com/goropikari/simpledb_go/backend/core"
 
 type Buffer = buffer
 
-func (buf *buffer) GetPage() *file.Page {
+func (buf *buffer) GetPage() *core.Page {
 	if buf == nil {
 		return nil
 	}
@@ -16,7 +16,7 @@ func (buf *buffer) SetModified(txnum, lsn int) {
 	buf.setModified(txnum, lsn)
 }
 
-func (mgr *Manager) Pin(block *file.Block) (*buffer, error) {
+func (mgr *Manager) Pin(block *core.Block) (*buffer, error) {
 	return mgr.pin(block)
 }
 

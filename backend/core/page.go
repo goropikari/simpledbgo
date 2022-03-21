@@ -1,4 +1,4 @@
-package file
+package core
 
 import (
 	"encoding/binary"
@@ -214,4 +214,13 @@ func (page *Page) GetFullBytes() []byte {
 
 func (page *Page) Reset() {
 	page.bb.Reset()
+}
+
+func (page *Page) Seek(offset int64, whence int) (int64, error) {
+	offset, err := page.bb.Seek(offset, whence)
+	if err != nil {
+		return 0, fmt.Errorf("%w", err)
+	}
+
+	return offset, nil
 }

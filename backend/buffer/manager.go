@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goropikari/simpledb_go/file"
-	"github.com/goropikari/simpledb_go/log"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/service"
 )
 
 const maxTimeoutSecond = 10
@@ -28,11 +28,11 @@ type Manager struct {
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(fileMgr *file.Manager, logMgr *log.Manager, numBuffer int) (*Manager, error) {
-	if fileMgr == nil {
+func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) (*Manager, error) {
+	if fileMgr.IsZero() {
 		return nil, errors.New("fileMgr must not be nil")
 	}
-	if logMgr == nil {
+	if logMgr.IsZero() {
 		return nil, errors.New("logMgr must not be nil")
 	}
 	if numBuffer <= 0 {
@@ -101,7 +101,7 @@ func (mgr *Manager) unpin(buf *buffer) error {
 }
 
 // pin pins the block and return pinned buffer.
-func (mgr *Manager) pin(block *file.Block) (*buffer, error) {
+func (mgr *Manager) pin(block *core.Block) (*buffer, error) {
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
@@ -125,7 +125,7 @@ func (mgr *Manager) pin(block *file.Block) (*buffer, error) {
 }
 
 // tryToPin tries to pin the block to a buffer.
-func (mgr *Manager) tryToPin(block *file.Block, chooseUnpinnedBuffer func([]*buffer) *buffer) (*buffer, error) {
+func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*buffer) *buffer) (*buffer, error) {
 	buf := mgr.findExistingBuffer(block)
 	if buf == nil {
 		buf = chooseUnpinnedBuffer(mgr.bufferPool)
@@ -146,7 +146,7 @@ func (mgr *Manager) tryToPin(block *file.Block, chooseUnpinnedBuffer func([]*buf
 
 // findExistingBuffer returns the buffer whose block is same as given block.
 // If there is no such buffer, returns nil.
-func (mgr *Manager) findExistingBuffer(block *file.Block) *buffer {
+func (mgr *Manager) findExistingBuffer(block *core.Block) *buffer {
 	for _, buf := range mgr.bufferPool {
 		other := buf.getBlock()
 		if other != nil && other.Equal(block) {

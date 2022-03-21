@@ -6,8 +6,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/goropikari/simpledb_go/core"
-	"github.com/goropikari/simpledb_go/file"
+	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/backend/service"
 )
 
 // Config is configuration of log manager.
@@ -25,17 +25,17 @@ func NewConfig(logfile core.FileName) Config {
 // Manager is a log manager of database.
 type Manager struct {
 	mu           sync.Mutex
-	fileMgr      *file.Manager
-	currentBlock *file.Block
-	page         *file.Page
+	fileMgr      service.FileManager
+	currentBlock *core.Block
+	page         *core.Page
 	latestLSN    int // reset when server restart
 	lastSavedLSN int
 	config       Config
 }
 
 // NewManager is constructor of Manager.
-func NewManager(fileMgr *file.Manager, config Config) (*Manager, error) {
-	if fileMgr == nil {
+func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
+	if fileMgr.IsZero() {
 		return nil, errors.New("fileMgr must not be nil")
 	}
 
@@ -72,6 +72,10 @@ func NewManager(fileMgr *file.Manager, config Config) (*Manager, error) {
 		lastSavedLSN: 0,
 		config:       config,
 	}, nil
+}
+
+func (mgr *Manager) IsZero() bool {
+	return mgr == nil
 }
 
 // flush flushes page into current block.
