@@ -1,18 +1,16 @@
 linters:
   disable:
-    - funlen
-    - gochecknoglobals
-    - goerr113
     - golint
-    - gosec
     - interfacer
     - maligned
-    - paralleltest
     - scopelint
     - varnamelen
-    # - wrapcheck
-    - wsl
   enable-all: true
+issues:
+  exclude:
+    - "endianness"
+    - "G404:"
+
 run:
   skip-files:
     - _test.go

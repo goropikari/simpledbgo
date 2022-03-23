@@ -11,7 +11,7 @@ import (
 var ErrInvalidBlockSize = fmt.Errorf("block size must be multiple of %d", BlockSize)
 
 // BlockSize is block size for direct IO.
-var BlockSize = directio.BlockSize
+const BlockSize = directio.BlockSize
 
 // AlignedBlock returns byte slice satisfying direct IO.
 func AlignedBlock(n int) ([]byte, error) {

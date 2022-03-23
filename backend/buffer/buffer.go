@@ -1,7 +1,6 @@
 package buffer
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/goropikari/simpledb_go/backend/core"
@@ -20,10 +19,11 @@ type buffer struct {
 
 func newBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*buffer, error) {
 	if fileMgr.IsZero() {
-		return nil, errors.New("fileMgr must not be nil")
+		return nil, ErrInvalidArgs
 	}
+
 	if logMgr.IsZero() {
-		return nil, errors.New("fileMgr must not be nil")
+		return nil, ErrInvalidArgs
 	}
 
 	page, err := fileMgr.PreparePage()
@@ -105,9 +105,11 @@ func (buf *buffer) flush() error {
 		if err := buf.logMgr.FlushByLSN(buf.txnum); err != nil {
 			return fmt.Errorf("%w", err)
 		}
+
 		if err := buf.fileMgr.CopyPageToBlock(buf.page, buf.block); err != nil {
 			return fmt.Errorf("%w", err)
 		}
+
 		buf.txnum = -1
 	}
 

@@ -11,7 +11,7 @@ var (
 	// ErrInvalidFileNameFormat is an error that means file name is invalid format.
 	ErrInvalidFileNameFormat = errors.New("invalid filename format")
 
-	// NonPositiveBlockNumberError is an error that means BlockNumber is non positive.
+	// ErrNonNegativeBlockNumber is an error that means BlockNumber is non positive.
 	ErrNonNegativeBlockNumber = errors.New("block number must be non negative")
 
 	// ErrBlockSize is an error that means BlockSize in non positive.
