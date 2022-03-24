@@ -53,12 +53,3 @@ func (b *Block) String() string {
 
 	return fmt.Sprintf("[file %v, block %v]", b.fileName, b.blockNumber)
 }
-
-// HashCode returns receiver's hash value.
-func (b *Block) HashCode() int {
-	if b == nil {
-		return 0
-	}
-
-	return HashCode(b.String())
-}
