@@ -10,7 +10,6 @@ issues:
   exclude:
     - "endianness"
     - "G404:"
-
 run:
   skip-files:
     - _test.go

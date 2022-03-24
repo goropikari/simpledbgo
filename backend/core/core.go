@@ -21,6 +21,9 @@ var (
 const (
 	// Uint32Length is byte length of uint32.
 	Uint32Length = 4
+
+	// Int32Length is byte length of int32.
+	Int32Length = 4
 )
 
 // FileName is a type for filename.
@@ -72,4 +75,12 @@ func FileSize(f *os.File) (int64, error) {
 	}
 
 	return info.Size(), nil
+}
+
+func StringLength(s string) int {
+	return len(s) + Uint32Length
+}
+
+func BytesLength(p []byte) int {
+	return len(p) + Uint32Length
 }

@@ -2,25 +2,19 @@ package buffer
 
 import "github.com/goropikari/simpledb_go/backend/core"
 
-type Buffer = buffer
-
-func (buf *buffer) GetPage() *core.Page {
-	if buf == nil {
-		return nil
-	}
-
+func (buf *Buffer) GetPage() *core.Page {
 	return buf.page
 }
 
-func (buf *buffer) SetModified(txnum, lsn int) {
+func (buf *Buffer) SetModified(txnum, lsn int) {
 	buf.setModified(txnum, lsn)
 }
 
-func (mgr *Manager) Pin(block *core.Block) (*buffer, error) {
+func (mgr *Manager) Pin(block *core.Block) (*Buffer, error) {
 	return mgr.pin(block)
 }
 
-func (mgr *Manager) Unpin(buf *buffer) error {
+func (mgr *Manager) Unpin(buf *Buffer) error {
 	return mgr.unpin(buf)
 }
 

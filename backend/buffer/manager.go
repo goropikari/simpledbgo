@@ -25,7 +25,7 @@ var (
 // Manager is model of buffer manager.
 type Manager struct {
 	cond               *sync.Cond
-	bufferPool         []*buffer
+	bufferPool         []*Buffer
 	numAvailableBuffer int
 	timeout            time.Duration
 }
@@ -44,10 +44,10 @@ func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffe
 		return nil, ErrInvalidArgs
 	}
 
-	bufferPool := make([]*buffer, 0, numBuffer)
+	bufferPool := make([]*Buffer, 0, numBuffer)
 
 	for i := 0; i < numBuffer; i++ {
-		buf, err := newBuffer(fileMgr, logMgr)
+		buf, err := NewBuffer(fileMgr, logMgr)
 		if err != nil {
 			return nil, err
 		}
@@ -73,27 +73,25 @@ func (mgr *Manager) available() int {
 	return mgr.numAvailableBuffer
 }
 
-// func (mgr *Manager) flushAll(txnum int) error {
-// 	mgr.cond.L.Lock()
-// 	defer mgr.cond.L.Unlock()
-//
-// 	for _, buf := range mgr.bufferPool {
-// 		n, err := buf.modifyingTx()
-// 		if err != nil {
-// 			return err
-// 		}
-// 		if n == txnum {
-// 			if err := buf.flush(); err != nil {
-// 				return err
-// 			}
-// 		}
-// 	}
-//
-// 	return nil
-// }
+// FlushAll flushes all record about given txnum.
+func (mgr *Manager) FlushAll(txnum int) error {
+	mgr.cond.L.Lock()
+	defer mgr.cond.L.Unlock()
+
+	for _, buf := range mgr.bufferPool {
+		n := buf.modifyingTx()
+		if n == txnum {
+			if err := buf.flush(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
 
 // unpin unpins the buffer.
-func (mgr *Manager) unpin(buf *buffer) error {
+func (mgr *Manager) unpin(buf *Buffer) error {
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
@@ -108,7 +106,7 @@ func (mgr *Manager) unpin(buf *buffer) error {
 }
 
 // pin pins the block and return pinned buffer.
-func (mgr *Manager) pin(block *core.Block) (*buffer, error) {
+func (mgr *Manager) pin(block *core.Block) (*Buffer, error) {
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
@@ -136,7 +134,7 @@ func (mgr *Manager) pin(block *core.Block) (*buffer, error) {
 }
 
 // tryToPin tries to pin the block to a buffer.
-func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*buffer) *buffer) (*buffer, error) {
+func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*Buffer) *Buffer) (*Buffer, error) {
 	buf := mgr.findExistingBuffer(block)
 	if buf == nil {
 		buf = chooseUnpinnedBuffer(mgr.bufferPool)
@@ -160,9 +158,9 @@ func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*buf
 
 // findExistingBuffer returns the buffer whose block is same as given block.
 // If there is no such buffer, returns nil.
-func (mgr *Manager) findExistingBuffer(block *core.Block) *buffer {
+func (mgr *Manager) findExistingBuffer(block *core.Block) *Buffer {
 	for _, buf := range mgr.bufferPool {
-		other := buf.getBlock()
+		other := buf.GetBlock()
 		if other != nil && other.Equal(block) {
 			return buf
 		}
@@ -172,7 +170,7 @@ func (mgr *Manager) findExistingBuffer(block *core.Block) *buffer {
 }
 
 // chooseUnpinnedBuffer chooses unpinned buffer.
-func chooseUnpinnedBuffer(bufferPool []*buffer) *buffer {
+func chooseUnpinnedBuffer(bufferPool []*Buffer) *Buffer {
 	for _, buf := range bufferPool {
 		if !buf.isPinned() {
 			return buf

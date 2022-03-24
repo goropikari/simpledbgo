@@ -7,7 +7,7 @@ import (
 	"github.com/goropikari/simpledb_go/backend/service"
 )
 
-type buffer struct {
+type Buffer struct {
 	fileMgr service.FileManager
 	logMgr  service.LogManager
 	page    *core.Page
@@ -17,7 +17,7 @@ type buffer struct {
 	lsn     int
 }
 
-func newBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*buffer, error) {
+func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*Buffer, error) {
 	if fileMgr.IsZero() {
 		return nil, ErrInvalidArgs
 	}
@@ -31,7 +31,7 @@ func newBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*buffer,
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	return &buffer{
+	return &Buffer{
 		fileMgr: fileMgr,
 		logMgr:  logMgr,
 		page:    page,
@@ -42,46 +42,45 @@ func newBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*buffer,
 	}, nil
 }
 
-func (buf *buffer) getBlock() *core.Block {
-	if buf == nil {
-		return nil
-	}
-
+func (buf *Buffer) GetBlock() *core.Block {
 	return buf.block
 }
 
-func (buf *buffer) setModified(txnum, lsn int) {
-	if buf == nil {
-		return
+func (buf *Buffer) GetInt32(offset int64) (int32, error) {
+	n, err := buf.page.GetInt32(offset)
+	if err != nil {
+		return 0, fmt.Errorf("%w", err)
 	}
 
+	return n, nil
+}
+
+func (buf *Buffer) setModified(txnum, lsn int) {
 	buf.txnum = txnum
 	if lsn >= 0 {
 		buf.lsn = lsn
 	}
 }
 
-func (buf *buffer) isPinned() bool {
-	if buf == nil {
-		return false
+// GetString returns string from page.
+func (buf *Buffer) GetString(offset int64) (string, error) {
+	s, err := buf.page.GetString(offset)
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
 	}
 
+	return s, nil
+}
+
+func (buf *Buffer) isPinned() bool {
 	return buf.pins > 0
 }
 
-// func (buf *buffer) modifyingTx() int {
-// 	if buf == nil {
-// 		return -1
-// 	}
+func (buf *Buffer) modifyingTx() int {
+	return buf.txnum
+}
 
-// 	return buf.txnum
-// }
-
-func (buf *buffer) assignToBlock(block *core.Block) error {
-	if buf == nil {
-		return nil
-	}
-
+func (buf *Buffer) assignToBlock(block *core.Block) error {
 	if err := buf.flush(); err != nil {
 		return err
 	}
@@ -96,11 +95,7 @@ func (buf *buffer) assignToBlock(block *core.Block) error {
 	return nil
 }
 
-func (buf *buffer) flush() error {
-	if buf == nil {
-		return nil
-	}
-
+func (buf *Buffer) flush() error {
 	if buf.txnum >= 0 {
 		if err := buf.logMgr.FlushByLSN(buf.txnum); err != nil {
 			return fmt.Errorf("%w", err)
@@ -116,10 +111,10 @@ func (buf *buffer) flush() error {
 	return nil
 }
 
-func (buf *buffer) pin() {
+func (buf *Buffer) pin() {
 	buf.pins++
 }
 
-func (buf *buffer) unpin() {
+func (buf *Buffer) unpin() {
 	buf.pins--
 }

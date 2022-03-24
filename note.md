@@ -96,3 +96,105 @@ https://www.techscore.com/tech/Java/JavaSE/Thread/5-2/
 Go で Java の wait, notify, notifyAll と同じことをしようとしたら、sync.Cond.Wait, Signal, Broadcast を使うのが良さそう。
 ただ、Java と違って timeout がない。timeout がないせいで運の悪い goroutine がいつまでも残りそうな気がするが一旦無視する。
 
+
+# Chapter 5: Transaction Management
+
+元の Java の実装だと RecoveryMgr class が Transaction class に依存し、また逆に
+Transaction class が RecoveryMgr class に依存しているのがなんだか気持ち悪い.
+
+```java
+public class Transaction {
+    private static int nextTxNum = 0;
+    private static final int END_OF_FILE = -1;
+    private RecoveryMgr    recoveryMgr;
+    private ConcurrencyMgr concurMgr;
+    private BufferMgr bm;
+    private FileMgr fm;
+    private int txnum;
+    private BufferList mybuffers;
+
+    public void rollback() {
+        recoveryMgr.rollback();
+        System.out.println("transaction " + txnum + " rolled back");
+        concurMgr.release();
+        mybuffers.unpinAll();
+    }
+    ...
+}
+
+
+public class RecoveryMgr {
+    private LogMgr lm;
+    private BufferMgr bm;
+    private Transaction tx;
+    private int txnum;
+
+    private void doRollback() {
+        Iterator<byte[]> iter = lm.iterator();
+        while (iter.hasNext()) {
+            byte[] bytes = iter.next();
+            LogRecord rec = LogRecord.createLogRecord(bytes);
+            if (rec.txNumber() == txnum) {
+                if (rec.op() == START)
+                    return;
+                rec.undo(tx);
+            }
+        }
+    }
+    ...
+}
+```
+
+下のように visitor pattern を使うといくぶんか違和感はなくなった気がする。
+
+```go
+package recovery
+
+struct Manager {
+    logMgr log.Manager
+    bufMgr buffer.Manager
+    txnum  int
+}
+
+func (mgr *Manager) commit(tx TransactionVisitor) {
+    mgr.doRollback(tx)
+}
+
+func (mgr *Manager) doRollback(tx TransactionVisitor) {
+    for _, bytes := range mgr.logMgr.Iterator() {
+        rec := factory(rec) // rec is LogRecord
+        ...
+            rec.undoAccept(tx)
+    }
+}
+
+type LogRecord interface {
+    undoAccept(TransactionVisitor)
+}
+
+type TransactionVisitor interface {
+    VisitSetIntRecord(SetIntRecord)
+    VisitSetStringRecord(SetStringRecord)
+    VisitStartRecord(StartRecord)
+    VisitRollbackRecord(RollbackRecord)
+}
+
+type SetIntRecord struct {}
+
+func (rec *SetIntRecord) undoAccept(tx TransactionVisitor) {
+    tx.visitSetIntRecord(rec)
+}
+...
+```
+
+```go
+package transaction
+
+type Transaction struct {}
+
+func (tx *Transaction) VisitSetIntRecord(rec recovery.SetIntRecord) {
+    tx.pin(rec.block)
+    tx.setInt(rec.block, rec.offset, rec.val, false)
+    tx.unpin(rec.block)
+}
+```

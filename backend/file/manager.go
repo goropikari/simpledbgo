@@ -48,7 +48,6 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 		blockSize:  blockSize,
 		isDirectIO: isDirectIO,
 	}
-	config.SetDefaults()
 
 	return config, nil
 }
@@ -73,9 +72,7 @@ type Manager struct {
 
 // NewManager is constructor of Manager.
 func NewManager(config Config) (*Manager, error) {
-	if err := validateConfig(config); err != nil {
-		return nil, err
-	}
+	config.SetDefaults()
 
 	if err := os.MkdirAll(config.dbDir, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("%w", err)
@@ -100,18 +97,6 @@ func NewManager(config Config) (*Manager, error) {
 		config:    config,
 		openFiles: make(map[core.FileName]*os.File, 0),
 	}, nil
-}
-
-func validateConfig(config Config) error {
-	if config.dbDir == "" {
-		return ErrInvalidConfig
-	}
-
-	if config.blockSize <= 0 {
-		return ErrInvalidConfig
-	}
-
-	return nil
 }
 
 func (mgr *Manager) IsZero() bool {
