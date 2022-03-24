@@ -14,6 +14,17 @@ import (
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
+var (
+	// ErrNoSuchFile is an error that means specified file does not exist.
+	ErrNoSuchFile = errors.New("no such file")
+
+	// ErrArgsInvalid is an error that means given args is invalid.
+	ErrInvalidArgs = errors.New("arguments is invalid")
+
+	// ErrInvalidConfig is an error that means given config is invalid.
+	ErrInvalidConfig = errors.New("config is invalid")
+)
+
 // Config is configuration of Manager.
 type Config struct {
 	dbDir      string
@@ -47,6 +58,7 @@ func (config *Config) SetDefaults() {
 	if config.dbDir == "" {
 		config.dbDir = "simpledb"
 	}
+
 	if config.blockSize == 0 {
 		config.blockSize = directio.BlockSize
 	}
@@ -92,10 +104,11 @@ func NewManager(config Config) (*Manager, error) {
 
 func validateConfig(config Config) error {
 	if config.dbDir == "" {
-		return errors.New("database directory must be specified")
+		return ErrInvalidConfig
 	}
+
 	if config.blockSize <= 0 {
-		return errors.New("block size must be positive")
+		return ErrInvalidConfig
 	}
 
 	return nil
@@ -113,16 +126,17 @@ func (mgr *Manager) GetBlockSize() int {
 // CopyBlockToPage copies block to page.
 func (mgr *Manager) CopyBlockToPage(block *core.Block, page *core.Page) error {
 	if block == nil {
-		return errors.New("block must not be nil")
+		return ErrInvalidArgs
 	}
+
 	if page == nil {
-		return errors.New("page must not be nil")
+		return ErrInvalidArgs
 	}
 
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
-	f, err := mgr.openFile(block.GetFileName())
+	file, err := mgr.openFile(block.GetFileName())
 	if err != nil {
 		return err
 	}
@@ -135,12 +149,14 @@ func (mgr *Manager) CopyBlockToPage(block *core.Block, page *core.Page) error {
 	// page に変化がない.
 	// 実際は x00 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
 	page.Reset()
+
 	seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
-	if _, err = f.Seek(seekPos, io.SeekStart); err != nil {
+
+	if _, err = file.Seek(seekPos, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	if _, err = io.CopyN(page, f, int64(mgr.config.blockSize)); err != nil && !errors.Is(err, io.EOF) {
+	if _, err = io.CopyN(page, file, int64(mgr.config.blockSize)); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -154,27 +170,29 @@ func (mgr *Manager) CopyBlockToPage(block *core.Block, page *core.Page) error {
 // CopyPageToBlock copies page to block.
 func (mgr *Manager) CopyPageToBlock(page *core.Page, block *core.Block) error {
 	if block == nil {
-		return errors.New("block must not be nil")
+		return ErrInvalidArgs
 	}
+
 	if page == nil {
-		return errors.New("page must not be nil")
+		return ErrInvalidArgs
 	}
 
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
-	f, err := mgr.openFile(block.GetFileName())
+	file, err := mgr.openFile(block.GetFileName())
 	if err != nil {
 		return err
 	}
 
-	if _, err = f.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+	if _, err = file.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	if _, err := f.Write(page.GetFullBytes()); err != nil {
+	if _, err := file.Write(page.GetFullBytes()); err != nil {
 		return fmt.Errorf("%w", err)
 	}
+
 	if _, err := page.Seek(0, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -187,19 +205,21 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
-	f, err := mgr.openFile(filename)
+	file, err := mgr.openFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	numBlock, err := mgr.numBlock(f)
+	numBlock, err := mgr.numBlock(file)
 	if err != nil {
 		return nil, err
 	}
+
 	appendBlockNum, err := core.NewBlockNumber(numBlock)
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
+
 	block := core.NewBlock(filename, appendBlockNum)
 
 	buf, err := mgr.prepareBytes()
@@ -208,10 +228,11 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 	}
 
 	// extend file size
-	if _, err := f.Seek(int64(numBlock*mgr.config.blockSize), io.SeekStart); err != nil {
+	if _, err := file.Seek(int64(numBlock*mgr.config.blockSize), io.SeekStart); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
-	if _, err = f.Write(buf); err != nil {
+
+	if _, err = file.Write(buf); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 
@@ -251,6 +272,7 @@ func (mgr *Manager) lastBlockNumber(file *os.File) (core.BlockNumber, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%w", err)
 	}
+
 	if fileSize == 0 {
 		blkNum, err := core.NewBlockNumber(0)
 		if err != nil {
@@ -278,6 +300,7 @@ func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
 	// open file. If there is no such file, create new file.
 	path := filepath.Join(mgr.config.dbDir, string(filename))
 	flag := os.O_RDWR | os.O_CREATE
+
 	if mgr.config.isDirectIO {
 		f, err = directio.OpenFile(path, flag, os.ModePerm)
 		if err != nil {
@@ -299,6 +322,7 @@ func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
 func (mgr *Manager) closeFile(filename core.FileName) error {
 	if f, ok := mgr.openFiles[filename]; ok {
 		delete(mgr.openFiles, filename)
+
 		if err := f.Close(); err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -306,7 +330,7 @@ func (mgr *Manager) closeFile(filename core.FileName) error {
 		return nil
 	}
 
-	return errors.New("no such file")
+	return ErrNoSuchFile
 }
 
 // prepareBytes prepares byte slice.

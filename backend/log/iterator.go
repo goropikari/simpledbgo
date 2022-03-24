@@ -25,14 +25,14 @@ func iterator(fileMgr service.FileManager, block *core.Block) (<-chan []byte, er
 
 	ch := make(chan []byte)
 
-	it, err := newIterator(fileMgr, block)
+	iter, err := newIterator(fileMgr, block)
 	if err != nil {
 		return nil, err
 	}
 
 	go func() {
-		for it.hasNext() {
-			ch <- it.next()
+		for iter.hasNext() {
+			ch <- iter.next()
 		}
 		close(ch)
 	}()
@@ -93,17 +93,21 @@ func (logIt *Iterator) moveToBlock(block *core.Block) {
 	if err != nil {
 		panic(err)
 	}
+
 	boundary, _ := logIt.page.GetUint32(0)
+
 	logIt.currentRecordPosition = boundary
+
 	logIt.block = block
 }
 
 func validateArgs(fileMgr service.FileManager, block *core.Block) error {
 	if fileMgr.IsZero() {
-		return errors.New("fileMgr must not be nil")
+		return ErrInvalidArgs
 	}
+
 	if block == nil {
-		return errors.New("block must not be nil")
+		return ErrInvalidArgs
 	}
 
 	return nil

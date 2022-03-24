@@ -10,6 +10,9 @@ import (
 	"github.com/goropikari/simpledb_go/backend/service"
 )
 
+// ErrInvalidArgs is an error that means given args is invalid.
+var ErrInvalidArgs = errors.New("arguments is invalid")
+
 // Config is configuration of log manager.
 type Config struct {
 	logfile core.FileName
@@ -44,13 +47,14 @@ type Manager struct {
 // NewManager is constructor of Manager.
 func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 	if fileMgr.IsZero() {
-		return nil, errors.New("fileMgr must not be nil")
+		return nil, ErrInvalidArgs
 	}
 
 	page, err := fileMgr.PreparePage()
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
+
 	lastBlock, err := fileMgr.LastBlock(config.logfile)
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
@@ -64,6 +68,7 @@ func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
+
 	if boundary == 0 {
 		blockSize := fileMgr.GetBlockSize()
 		if err = page.SetUint32(0, uint32(blockSize)); err != nil {
@@ -82,6 +87,7 @@ func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 	}, nil
 }
 
+// IsZero checks whether manager is zero value or not.
 func (mgr *Manager) IsZero() bool {
 	return mgr == nil
 }
@@ -115,19 +121,23 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
+
 	recordLength := len(record)
 	bytesNeeded := recordLength + core.Uint32Length
 
 	if int(boundary)-bytesNeeded < core.Uint32Length {
 		mgr.flush()
+
 		if err := mgr.appendNewLogBlock(); err != nil {
 			return err
 		}
+
 		boundary, err = mgr.page.GetUint32(0)
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
+
 	recordPosition := int(boundary) - bytesNeeded
 
 	if err := mgr.page.SetBytes(int64(recordPosition), record); err != nil && !errors.Is(err, io.EOF) {
@@ -161,7 +171,10 @@ func (mgr *Manager) appendNewLogBlock() error {
 	}
 
 	// initialize page for log
+	// Reset はなくても動くけどログファイルを見るときに見やすいので Reset しておく
+	mgr.page.Reset()
 	blockSize := mgr.fileMgr.GetBlockSize()
+
 	if err := mgr.page.SetUint32(0, uint32(blockSize)); err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -171,6 +184,7 @@ func (mgr *Manager) appendNewLogBlock() error {
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
+
 	mgr.currentBlock = block
 
 	if err := mgr.fileMgr.CopyPageToBlock(mgr.page, block); err != nil && !errors.Is(err, io.EOF) {

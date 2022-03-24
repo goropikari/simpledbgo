@@ -11,15 +11,17 @@ var (
 	// ErrInvalidFileNameFormat is an error that means file name is invalid format.
 	ErrInvalidFileNameFormat = errors.New("invalid filename format")
 
-	// NonPositiveBlockNumberError is an error that means BlockNumber is non positive.
+	// ErrNonNegativeBlockNumber is an error that means BlockNumber is non positive.
 	ErrNonNegativeBlockNumber = errors.New("block number must be non negative")
 
 	// ErrBlockSize is an error that means BlockSize in non positive.
 	ErrBlockSize = errors.New("block size must be positive")
 )
 
-// Uint32Length is byte length of int32.
-const Uint32Length = 4
+const (
+	// Uint32Length is byte length of uint32.
+	Uint32Length = 4
+)
 
 // FileName is a type for filename.
 type FileName string
@@ -34,7 +36,7 @@ func NewFileName(name string) (FileName, error) {
 }
 
 // BlockNumber is a type for block number.
-type BlockNumber int
+type BlockNumber uint32
 
 // NewBlockNumber is a constructor of BlockNumber.
 func NewBlockNumber(bn int) (BlockNumber, error) {
@@ -46,7 +48,7 @@ func NewBlockNumber(bn int) (BlockNumber, error) {
 }
 
 // BlockSize is a type for block size.
-type BlockSize int
+type BlockSize uint32
 
 // NewBlockSize is a constructor of BlockSize.
 func NewBlockSize(x int) (BlockSize, error) {
@@ -55,22 +57,6 @@ func NewBlockSize(x int) (BlockSize, error) {
 	}
 
 	return BlockSize(x), nil
-}
-
-// HashCode calculates given string hash value.
-func HashCode(str string) int {
-	result := 1
-	base := 139
-	mod := 1000000009
-	b := 1
-
-	for c := range []byte(str) {
-		result *= c * b
-		b = (b * base) % mod
-		result %= mod
-	}
-
-	return result
 }
 
 // RandomString returns random string.

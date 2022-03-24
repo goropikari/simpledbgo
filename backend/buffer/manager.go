@@ -17,6 +17,9 @@ var (
 
 	// ErrTimeout is an error type that means timeout exceeded.
 	ErrTimeoutExceeded = errors.New("timeout exceeded")
+
+	// ErrArgsInvalid is an error that means given args is invalid.
+	ErrInvalidArgs = errors.New("arguments is invalid")
 )
 
 // Manager is model of buffer manager.
@@ -30,21 +33,25 @@ type Manager struct {
 // NewManager is a constructor of Manager.
 func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) (*Manager, error) {
 	if fileMgr.IsZero() {
-		return nil, errors.New("fileMgr must not be nil")
+		return nil, ErrInvalidArgs
 	}
+
 	if logMgr.IsZero() {
-		return nil, errors.New("logMgr must not be nil")
+		return nil, ErrInvalidArgs
 	}
+
 	if numBuffer <= 0 {
-		return nil, errors.New("numBuffer must be positive")
+		return nil, ErrInvalidArgs
 	}
 
 	bufferPool := make([]*buffer, 0, numBuffer)
+
 	for i := 0; i < numBuffer; i++ {
 		buf, err := newBuffer(fileMgr, logMgr)
 		if err != nil {
 			return nil, err
 		}
+
 		bufferPool = append(bufferPool, buf)
 	}
 
@@ -106,17 +113,21 @@ func (mgr *Manager) pin(block *core.Block) (*buffer, error) {
 	defer mgr.cond.L.Unlock()
 
 	startTime := time.Now()
+
 	buf, err := mgr.tryToPin(block, chooseUnpinnedBuffer)
 	if err != nil && !errors.Is(err, ErrFailedPin) {
 		return nil, err
 	}
+
 	for buf == nil && mgr.waitingTooLong(startTime) {
 		mgr.cond.Wait()
 		buf, err = mgr.tryToPin(block, chooseUnpinnedBuffer)
+
 		if err != nil && !errors.Is(err, ErrFailedPin) {
 			return nil, err
 		}
 	}
+
 	if buf == nil {
 		return nil, ErrTimeoutExceeded
 	}
@@ -132,13 +143,16 @@ func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*buf
 		if buf == nil {
 			return nil, ErrFailedPin
 		}
+
 		if err := buf.assignToBlock(block); err != nil {
 			return nil, err
 		}
 	}
+
 	if !buf.isPinned() {
 		mgr.numAvailableBuffer--
 	}
+
 	buf.pin()
 
 	return buf, nil
