@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/service"
@@ -74,7 +75,11 @@ func (logIt *Iterator) next() []byte {
 		logIt.moveToBlock(block)
 	}
 
-	record, _ := logIt.page.GetBytes(int64(logIt.currentRecordPosition))
+	record, err := logIt.page.GetBytes(int64(logIt.currentRecordPosition))
+	if err != nil && !errors.Is(err, io.EOF) {
+		log.Fatal(err)
+	}
+
 	logIt.currentRecordPosition += uint32(core.Uint32Length + len(record))
 
 	return record
@@ -86,7 +91,10 @@ func (logIt *Iterator) moveToBlock(block *core.Block) {
 		panic(err)
 	}
 
-	boundary, _ := logIt.page.GetUint32(0)
+	boundary, err := logIt.page.GetUint32(0)
+	if err != nil && !errors.Is(err, io.EOF) {
+		log.Fatal(err)
+	}
 
 	logIt.currentRecordPosition = boundary
 
