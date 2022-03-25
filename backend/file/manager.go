@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
+	goos "os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -12,13 +12,20 @@ import (
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
+	"github.com/goropikari/simpledb_go/lib/os"
 )
+
+type Filer interface {
+	io.ReadWriteSeeker
+	Close() error
+	Size() (int64, error)
+}
 
 var (
 	// ErrNoSuchFile is an error that means specified file does not exist.
 	ErrNoSuchFile = errors.New("no such file")
 
-	// ErrArgsInvalid is an error that means given args is invalid.
+	// ErrInvalidArgs is an error that means given args is invalid.
 	ErrInvalidArgs = errors.New("arguments is invalid")
 
 	// ErrInvalidConfig is an error that means given config is invalid.
@@ -67,18 +74,18 @@ func (config *Config) SetDefaults() {
 type Manager struct {
 	mu        sync.Mutex
 	config    Config
-	openFiles map[core.FileName]*os.File
+	openFiles map[core.FileName]Filer
 }
 
 // NewManager is constructor of Manager.
 func NewManager(config Config) (*Manager, error) {
 	config.SetDefaults()
 
-	if err := os.MkdirAll(config.dbDir, os.ModePerm); err != nil {
+	if err := goos.MkdirAll(config.dbDir, goos.ModePerm); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	files, err := os.ReadDir(config.dbDir)
+	files, err := goos.ReadDir(config.dbDir)
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
@@ -86,7 +93,7 @@ func NewManager(config Config) (*Manager, error) {
 	// remove temporary files.
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), "temp") {
-			if err := os.Remove(filepath.Join(config.dbDir, file.Name())); err != nil {
+			if err := goos.Remove(filepath.Join(config.dbDir, file.Name())); err != nil {
 				return nil, fmt.Errorf("%w", err)
 			}
 		}
@@ -95,7 +102,7 @@ func NewManager(config Config) (*Manager, error) {
 	return &Manager{
 		mu:        sync.Mutex{},
 		config:    config,
-		openFiles: make(map[core.FileName]*os.File, 0),
+		openFiles: make(map[core.FileName]Filer, 0),
 	}, nil
 }
 
@@ -225,8 +232,8 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 }
 
 // numBlock returns the number of blocks of given file.
-func (mgr *Manager) numBlock(file *os.File) (int, error) {
-	fileSize, err := core.FileSize(file)
+func (mgr *Manager) numBlock(file Filer) (int, error) {
+	fileSize, err := file.Size()
 	if err != nil {
 		return 0, fmt.Errorf("%w", err)
 	}
@@ -252,8 +259,8 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) {
 }
 
 // lastBlockNumber returns last block number of given file.
-func (mgr *Manager) lastBlockNumber(file *os.File) (core.BlockNumber, error) {
-	fileSize, err := core.FileSize(file)
+func (mgr *Manager) lastBlockNumber(file Filer) (core.BlockNumber, error) {
+	fileSize, err := file.Size()
 	if err != nil {
 		return 0, fmt.Errorf("%w", err)
 	}
@@ -277,25 +284,17 @@ func (mgr *Manager) lastBlockNumber(file *os.File) (core.BlockNumber, error) {
 
 // openFile opens file as given filename.
 // If there is no such file, create new file.
-func (mgr *Manager) openFile(filename core.FileName) (f *os.File, err error) {
+func (mgr *Manager) openFile(filename core.FileName) (Filer, error) {
 	if v, ok := mgr.openFiles[filename]; ok {
 		return v, nil
 	}
 
-	// open file. If there is no such file, create new file.
 	path := filepath.Join(mgr.config.dbDir, string(filename))
-	flag := os.O_RDWR | os.O_CREATE
 
-	if mgr.config.isDirectIO {
-		f, err = directio.OpenFile(path, flag, os.ModePerm)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-	} else {
-		f, err = os.OpenFile(path, flag, os.ModePerm)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
+	// open file. If there is no such file, create new file.
+	f, err := os.OpenFile(path, mgr.config.isDirectIO)
+	if err != nil {
+		return nil, err
 	}
 
 	mgr.openFiles[filename] = f

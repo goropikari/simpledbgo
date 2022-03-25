@@ -2,9 +2,12 @@ linters:
   disable:
     - golint
     - interfacer
+    - ireturn
     - maligned
     - scopelint
     - varnamelen
+    - wrapcheck
+    - wsl
   enable-all: true
 issues:
   exclude:

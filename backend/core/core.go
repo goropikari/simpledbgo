@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"os"
 )
 
 var (
@@ -67,20 +66,12 @@ func RandomString() string {
 	return fmt.Sprintf("%v", rand.Uint32())
 }
 
-// FileSize returns file size.
-func FileSize(f *os.File) (int64, error) {
-	info, err := f.Stat()
-	if err != nil {
-		return 0, fmt.Errorf("%w", err)
-	}
-
-	return info.Size(), nil
-}
-
+// StringLength returns needed byte length of string.
 func StringLength(s string) int {
 	return len(s) + Uint32Length
 }
 
+// BytesLength returns needed byte length of byte slice.
 func BytesLength(p []byte) int {
 	return len(p) + Uint32Length
 }
