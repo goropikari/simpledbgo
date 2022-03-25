@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/core"
@@ -46,13 +47,22 @@ type Manager struct {
 
 // NewManager is constructor of Manager.
 func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
-	if fileMgr.IsZero() {
-		return nil, ErrInvalidArgs
-	}
-
 	page, err := fileMgr.PreparePage()
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
+	}
+
+	n, err := fileMgr.FileSize(config.logfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// logfile のサイズが 0 だったら block size 分ファイルを作る
+	if n == 0 {
+		_, _, err := appendNewLogBlock(fileMgr, config.logfile)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	lastBlock, err := fileMgr.LastBlock(config.logfile)
@@ -85,11 +95,6 @@ func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 		lastSavedLSN: 0,
 		config:       config,
 	}, nil
-}
-
-// IsZero checks whether manager is zero value or not.
-func (mgr *Manager) IsZero() bool {
-	return mgr == nil
 }
 
 // flush flushes page into current block.
@@ -125,12 +130,19 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 	recordLength := len(record)
 	bytesNeeded := recordLength + core.Uint32Length
 
+	// There is no enough space. Append new block to logfile.
 	if int(boundary)-bytesNeeded < core.Uint32Length {
-		mgr.flush()
-
-		if err := mgr.appendNewLogBlock(); err != nil {
+		if err := mgr.flush(); err != nil {
 			return err
 		}
+
+		page, block, err := appendNewLogBlock(mgr.fileMgr, mgr.config.logfile)
+		if err != nil {
+			return err
+		}
+
+		mgr.page = page
+		mgr.currentBlock = block
 
 		boundary, err = mgr.page.GetUint32(0)
 		if err != nil {
@@ -163,33 +175,27 @@ func (mgr *Manager) Iterator() (<-chan []byte, error) {
 }
 
 // appendNewLogBlock appends new block to log file.
-// This initializes page and append new block to log file.
-func (mgr *Manager) appendNewLogBlock() error {
-	// flush page into current block
-	if err := mgr.flush(); err != nil {
-		return err
+func appendNewLogBlock(fileMgr service.FileManager, filename core.FileName) (*core.Page, *core.Block, error) {
+	page, err := fileMgr.PreparePage()
+	if err != nil {
+		return nil, nil, err
 	}
 
-	// initialize page for log
-	// Reset はなくても動くけどログファイルを見るときに見やすいので Reset しておく
-	mgr.page.Reset()
-	blockSize := mgr.fileMgr.GetBlockSize()
+	blockSize := fileMgr.GetBlockSize()
 
-	if err := mgr.page.SetUint32(0, uint32(blockSize)); err != nil {
-		return fmt.Errorf("%w", err)
+	if err := page.SetUint32(0, uint32(blockSize)); err != nil {
+		return nil, nil, err
 	}
 
 	// extend new block
-	block, err := mgr.fileMgr.AppendBlock(mgr.config.logfile)
+	block, err := fileMgr.AppendBlock(filename)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return nil, nil, err
 	}
 
-	mgr.currentBlock = block
-
-	if err := mgr.fileMgr.CopyPageToBlock(mgr.page, block); err != nil && !errors.Is(err, io.EOF) {
-		return fmt.Errorf("%w", err)
+	if err := fileMgr.CopyPageToBlock(page, block); err != nil && !errors.Is(err, io.EOF) {
+		return nil, nil, err
 	}
 
-	return nil
+	return page, block, nil
 }

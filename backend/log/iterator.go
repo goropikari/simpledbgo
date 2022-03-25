@@ -19,10 +19,6 @@ type Iterator struct {
 }
 
 func iterator(fileMgr service.FileManager, block *core.Block) (<-chan []byte, error) {
-	if err := validateArgs(fileMgr, block); err != nil {
-		return nil, err
-	}
-
 	ch := make(chan []byte)
 
 	iter, err := newIterator(fileMgr, block)
@@ -41,10 +37,6 @@ func iterator(fileMgr service.FileManager, block *core.Block) (<-chan []byte, er
 }
 
 func newIterator(fileMgr service.FileManager, block *core.Block) (*Iterator, error) {
-	if err := validateArgs(fileMgr, block); err != nil {
-		return nil, err
-	}
-
 	page, err := fileMgr.PreparePage()
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
@@ -99,16 +91,4 @@ func (logIt *Iterator) moveToBlock(block *core.Block) {
 	logIt.currentRecordPosition = boundary
 
 	logIt.block = block
-}
-
-func validateArgs(fileMgr service.FileManager, block *core.Block) error {
-	if fileMgr.IsZero() {
-		return ErrInvalidArgs
-	}
-
-	if block == nil {
-		return ErrInvalidArgs
-	}
-
-	return nil
 }

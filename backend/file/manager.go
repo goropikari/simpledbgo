@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	goos "os"
 	"path/filepath"
 	"strings"
@@ -85,18 +86,8 @@ func NewManager(config Config) (*Manager, error) {
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	files, err := goos.ReadDir(config.dbDir)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-
-	// remove temporary files.
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), "temp") {
-			if err := goos.Remove(filepath.Join(config.dbDir, file.Name())); err != nil {
-				return nil, fmt.Errorf("%w", err)
-			}
-		}
+	if err := deleteTempFiles(config.dbDir); err != nil {
+		return nil, err
 	}
 
 	return &Manager{
@@ -106,8 +97,22 @@ func NewManager(config Config) (*Manager, error) {
 	}, nil
 }
 
-func (mgr *Manager) IsZero() bool {
-	return mgr == nil
+func deleteTempFiles(dbPath string) error {
+	files, err := goos.ReadDir(dbPath)
+	if err != nil {
+		return err
+	}
+
+	// remove temporary files.
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), "temp") {
+			if err := goos.Remove(filepath.Join(dbPath, file.Name())); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // GetBlockSize returns block size.
@@ -214,15 +219,13 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 
 	block := core.NewBlock(filename, appendBlockNum)
 
-	buf, err := mgr.prepareBytes()
-	if err != nil {
-		return nil, err
-	}
-
 	// extend file size
-	if _, err := file.Seek(int64(numBlock*mgr.config.blockSize), io.SeekStart); err != nil {
+	offset := int64(numBlock * mgr.config.blockSize)
+	if _, err := file.Seek(offset, io.SeekStart); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
+
+	buf := mgr.prepareBytes()
 
 	if _, err = file.Write(buf); err != nil {
 		return nil, fmt.Errorf("%w", err)
@@ -248,38 +251,17 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) {
 		return nil, err
 	}
 
-	lastBlockNum, err := mgr.lastBlockNumber(f)
+	nb, err := mgr.numBlock(f)
 	if err != nil {
 		return nil, err
 	}
 
-	block := core.NewBlock(filename, lastBlockNum)
-
-	return block, nil
-}
-
-// lastBlockNumber returns last block number of given file.
-func (mgr *Manager) lastBlockNumber(file Filer) (core.BlockNumber, error) {
-	fileSize, err := file.Size()
+	lastBlockNumber, err := core.NewBlockNumber(nb - 1)
 	if err != nil {
-		return 0, fmt.Errorf("%w", err)
+		return nil, err
 	}
 
-	if fileSize == 0 {
-		blkNum, err := core.NewBlockNumber(0)
-		if err != nil {
-			return 0, fmt.Errorf("%w", err)
-		}
-
-		return blkNum, nil
-	}
-
-	blockNum, err := core.NewBlockNumber(int(fileSize/int64(mgr.config.blockSize)) - 1)
-	if err != nil {
-		return 0, fmt.Errorf("%w", err)
-	}
-
-	return blockNum, nil
+	return core.NewBlock(filename, lastBlockNumber), nil
 }
 
 // openFile opens file as given filename.
@@ -317,18 +299,27 @@ func (mgr *Manager) closeFile(filename core.FileName) error {
 	return ErrNoSuchFile
 }
 
-// prepareBytes prepares byte slice.
-func (mgr *Manager) prepareBytes() (buf []byte, err error) {
-	if mgr.config.isDirectIO {
-		buf, err = directio.AlignedBlock(mgr.config.blockSize)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-	} else {
-		buf = make([]byte, mgr.config.blockSize)
+func (mgr *Manager) FileSize(filename core.FileName) (int64, error) {
+	file, err := mgr.openFile(filename)
+	if err != nil {
+		return 0, err
 	}
 
-	return
+	return file.Size()
+}
+
+// prepareBytes prepares byte slice.
+func (mgr *Manager) prepareBytes() []byte {
+	if mgr.config.isDirectIO {
+		buf, err := directio.AlignedBlock(mgr.config.blockSize)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return buf
+	}
+
+	return make([]byte, mgr.config.blockSize)
 }
 
 // PreparePage prepares a page.

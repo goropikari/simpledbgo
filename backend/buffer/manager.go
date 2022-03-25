@@ -32,14 +32,6 @@ type Manager struct {
 
 // NewManager is a constructor of Manager.
 func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) (*Manager, error) {
-	if fileMgr.IsZero() {
-		return nil, ErrInvalidArgs
-	}
-
-	if logMgr.IsZero() {
-		return nil, ErrInvalidArgs
-	}
-
 	if numBuffer <= 0 {
 		return nil, ErrInvalidArgs
 	}

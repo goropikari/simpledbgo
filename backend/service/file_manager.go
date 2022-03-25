@@ -24,6 +24,5 @@ type FileManager interface {
 	// PreparePage prepares a page.
 	PreparePage() (*core.Page, error)
 
-	// IsZero checks whether given file manager is zero value or not.
-	IsZero() bool
+	FileSize(core.FileName) (int64, error)
 }

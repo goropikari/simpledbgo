@@ -28,7 +28,8 @@ func TestManager(t *testing.T) {
 		require.NoError(t, err)
 		defer os.RemoveAll(dir)
 
-		config, err := file.NewConfig(dir, directio.BlockSize, true)
+		isDirectIO := true
+		config, err := file.NewConfig(dir, directio.BlockSize, isDirectIO)
 		require.NoError(t, err)
 		fileMgr, err := file.NewManager(config)
 		require.NoError(t, err)

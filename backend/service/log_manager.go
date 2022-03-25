@@ -12,7 +12,4 @@ type LogManager interface {
 
 	// Iterator returns iterator.
 	Iterator() (<-chan []byte, error)
-
-	// IsZero checks whether given file manager is zero value or not.
-	IsZero() bool
 }
