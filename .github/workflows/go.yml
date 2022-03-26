@@ -1,13 +1,9 @@
 name: Go
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  push
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -25,5 +21,18 @@ jobs:
       run: make lint
 
     - name: Test
-      run: make test
+      run: make ci-test
 
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: success()
+      with:
+        name: Go Tests
+        path: 'report.xml'
+        reporter: java-junit
+
+    # - name: Deploy
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: ./public

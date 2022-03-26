@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -eu
+
+test_coverage=`mktemp`
+coverage_html=docs/coverage.html
+go test -cover ./... -coverprofile=${test_coverage}
+go tool cover -html=${test_coverage} -o ${coverage_html}
+sed -i -e "s/black/white/g" ${coverage_html}

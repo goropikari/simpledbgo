@@ -1,2 +1,6 @@
 SimpleDB_3.4*
 bin
+
+site
+report.xml
+docs/coverage.html
