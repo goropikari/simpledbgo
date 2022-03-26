@@ -1,0 +1,1848 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>buffer: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/goropikari/simpledb_go/backend/buffer/buffer.go (92.3%)</option>
+				
+				<option value="file1">github.com/goropikari/simpledb_go/backend/buffer/manager.go (75.4%)</option>
+				
+				<option value="file2">github.com/goropikari/simpledb_go/backend/core/block.go (0.0%)</option>
+				
+				<option value="file3">github.com/goropikari/simpledb_go/backend/core/core.go (0.0%)</option>
+				
+				<option value="file4">github.com/goropikari/simpledb_go/backend/core/page.go (73.3%)</option>
+				
+				<option value="file5">github.com/goropikari/simpledb_go/backend/file/manager.go (56.3%)</option>
+				
+				<option value="file6">github.com/goropikari/simpledb_go/backend/log/iterator.go (81.1%)</option>
+				
+				<option value="file7">github.com/goropikari/simpledb_go/backend/log/manager.go (73.5%)</option>
+				
+				<option value="file8">github.com/goropikari/simpledb_go/lib/bytes/buffer.go (50.9%)</option>
+				
+				<option value="file9">github.com/goropikari/simpledb_go/lib/bytes/direct_buffer.go (0.0%)</option>
+				
+				<option value="file10">github.com/goropikari/simpledb_go/lib/directio/directio.go (62.5%)</option>
+				
+				<option value="file11">github.com/goropikari/simpledb_go/lib/os/os.go (65.2%)</option>
+				
+				<option value="file12">github.com/goropikari/simpledb_go/testing/fake/core.go (0.0%)</option>
+				
+				<option value="file13">github.com/goropikari/simpledb_go/testing/fake/rand.go (88.9%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package buffer
+
+import (
+        "fmt"
+        "log"
+
+        "github.com/goropikari/simpledb_go/backend/core"
+        "github.com/goropikari/simpledb_go/backend/service"
+)
+
+// Buffer is a buffer of database.
+type Buffer struct {
+        fileMgr service.FileManager
+        logMgr  service.LogManager
+        page    *core.Page
+        block   *core.Block
+        pins    int
+        txnum   int32
+        lsn     int32
+}
+
+// NewBuffer creates a buffer.
+func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) *Buffer <span class="cov8" title="1">{
+        page, err := fileMgr.PreparePage()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Buffer{
+                fileMgr: fileMgr,
+                logMgr:  logMgr,
+                page:    page,
+                block:   nil,
+                pins:    0,
+                txnum:   -1,
+                lsn:     -1,
+        }</span>
+}
+
+// GetBlock returns buffer's block.
+func (buf *Buffer) GetBlock() *core.Block <span class="cov8" title="1">{
+        return buf.block
+}</span>
+
+// setModified modifing tx number and lsn.
+func (buf *Buffer) setModified(txnum, lsn int32) <span class="cov8" title="1">{
+        buf.txnum = txnum
+        if lsn &gt;= 0 </span><span class="cov8" title="1">{
+                buf.lsn = lsn
+        }</span>
+}
+
+// isPinned checks whether the buffer is pinned or not.
+func (buf *Buffer) isPinned() bool <span class="cov8" title="1">{
+        return buf.pins &gt; 0
+}</span>
+
+// modifyingTx returns the transaction number which modifies the buffer.
+func (buf *Buffer) modifyingTx() int32 <span class="cov0" title="0">{
+        return buf.txnum
+}</span>
+
+// assignToBlock assigns block to the buffer.
+func (buf *Buffer) assignToBlock(block *core.Block) error <span class="cov8" title="1">{
+        if err := buf.flush(); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">buf.block = block
+        if err := buf.fileMgr.CopyBlockToPage(block, buf.page); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">buf.pins = 0
+
+        return nil</span>
+}
+
+// flush flushes the buffer content.
+func (buf *Buffer) flush() error <span class="cov8" title="1">{
+        if buf.txnum &gt;= 0 </span><span class="cov8" title="1">{
+                if err := buf.logMgr.FlushByLSN(buf.txnum); err != nil </span><span class="cov8" title="1">{
+                        return fmt.Errorf("%w", err)
+                }</span>
+
+                <span class="cov8" title="1">if err := buf.fileMgr.CopyPageToBlock(buf.page, buf.block); err != nil </span><span class="cov8" title="1">{
+                        return fmt.Errorf("%w", err)
+                }</span>
+
+                <span class="cov8" title="1">buf.txnum = -1</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// pin increments the number of pin of the buffer.
+func (buf *Buffer) pin() <span class="cov8" title="1">{
+        buf.pins++
+}</span>
+
+// pin decrements the number of pin of the buffer.
+func (buf *Buffer) unpin() <span class="cov8" title="1">{
+        buf.pins--
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package buffer
+
+import (
+        "errors"
+        "log"
+        "sync"
+        "time"
+
+        "github.com/goropikari/simpledb_go/backend/core"
+        "github.com/goropikari/simpledb_go/backend/service"
+)
+
+const maxTimeoutSecond = 10
+
+var (
+        // ErrFailedPin is an error type that means failed to pin block.
+        ErrFailedPin = errors.New("failed to pin block")
+
+        // ErrTimeoutExceeded is an error type that means timeout exceeded.
+        ErrTimeoutExceeded = errors.New("timeout exceeded")
+
+        // ErrInvalidArgs is an error that means given args is invalid.
+        ErrInvalidArgs = errors.New("arguments is invalid")
+)
+
+// Manager is model of buffer manager.
+type Manager struct {
+        cond               *sync.Cond
+        bufferPool         []*Buffer
+        numAvailableBuffer int
+        timeout            time.Duration
+}
+
+// NewManager is a constructor of Manager.
+func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) *Manager <span class="cov8" title="1">{
+        if numBuffer &lt;= 0 </span><span class="cov0" title="0">{
+                log.Fatal(ErrInvalidArgs)
+        }</span>
+
+        <span class="cov8" title="1">bufferPool := make([]*Buffer, numBuffer)
+
+        for i := 0; i &lt; numBuffer; i++ </span><span class="cov8" title="1">{
+                buf := NewBuffer(fileMgr, logMgr)
+
+                bufferPool[i] = buf
+        }</span>
+
+        <span class="cov8" title="1">cond := sync.NewCond(&amp;sync.Mutex{})
+
+        return &amp;Manager{
+                cond:               cond,
+                bufferPool:         bufferPool,
+                numAvailableBuffer: numBuffer,
+                timeout:            time.Second * maxTimeoutSecond,
+        }</span>
+}
+
+// available returns the number of unpinned buffer.
+func (mgr *Manager) available() int <span class="cov8" title="1">{
+        mgr.cond.L.Lock()
+        defer mgr.cond.L.Unlock()
+
+        return mgr.numAvailableBuffer
+}</span>
+
+// FlushAll flushes all record about given txnum.
+func (mgr *Manager) FlushAll(txnum int32) error <span class="cov0" title="0">{
+        mgr.cond.L.Lock()
+        defer mgr.cond.L.Unlock()
+
+        for _, buf := range mgr.bufferPool </span><span class="cov0" title="0">{
+                n := buf.modifyingTx()
+                if n == txnum </span><span class="cov0" title="0">{
+                        if err := buf.flush(); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// unpin unpins the buffer.
+func (mgr *Manager) unpin(buf *Buffer) error <span class="cov8" title="1">{
+        mgr.cond.L.Lock()
+        defer mgr.cond.L.Unlock()
+
+        buf.unpin()
+
+        if pinned := buf.isPinned(); !pinned </span><span class="cov8" title="1">{
+                mgr.numAvailableBuffer++
+                mgr.cond.Broadcast()
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// pin pins the block and return pinned buffer.
+func (mgr *Manager) pin(block *core.Block) (*Buffer, error) <span class="cov8" title="1">{
+        mgr.cond.L.Lock()
+        defer mgr.cond.L.Unlock()
+
+        startTime := time.Now()
+
+        buf, err := mgr.tryToPin(block, chooseUnpinnedBuffer)
+        if err != nil &amp;&amp; !errors.Is(err, ErrFailedPin) </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for buf == nil &amp;&amp; mgr.waitingTooLong(startTime) </span><span class="cov0" title="0">{
+                mgr.cond.Wait()
+                buf, err = mgr.tryToPin(block, chooseUnpinnedBuffer)
+
+                if err != nil &amp;&amp; !errors.Is(err, ErrFailedPin) </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">if buf == nil </span><span class="cov8" title="1">{
+                return nil, ErrTimeoutExceeded
+        }</span>
+
+        <span class="cov8" title="1">return buf, nil</span>
+}
+
+// tryToPin tries to pin the block to a buffer.
+func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*Buffer) *Buffer) (*Buffer, error) <span class="cov8" title="1">{
+        buf := mgr.findExistingBuffer(block)
+        if buf == nil </span><span class="cov8" title="1">{
+                buf = chooseUnpinnedBuffer(mgr.bufferPool)
+                if buf == nil </span><span class="cov8" title="1">{
+                        return nil, ErrFailedPin
+                }</span>
+
+                <span class="cov8" title="1">if err := buf.assignToBlock(block); err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">if !buf.isPinned() </span><span class="cov8" title="1">{
+                mgr.numAvailableBuffer--
+        }</span>
+
+        <span class="cov8" title="1">buf.pin()
+
+        return buf, nil</span>
+}
+
+// findExistingBuffer returns the buffer whose block is same as given block.
+// If there is no such buffer, returns nil.
+func (mgr *Manager) findExistingBuffer(block *core.Block) *Buffer <span class="cov8" title="1">{
+        for _, buf := range mgr.bufferPool </span><span class="cov8" title="1">{
+                other := buf.GetBlock()
+                if other != nil &amp;&amp; block.Equal(other) </span><span class="cov8" title="1">{
+                        return buf
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// chooseUnpinnedBuffer chooses unpinned buffer.
+func chooseUnpinnedBuffer(bufferPool []*Buffer) *Buffer <span class="cov8" title="1">{
+        for _, buf := range bufferPool </span><span class="cov8" title="1">{
+                if !buf.isPinned() </span><span class="cov8" title="1">{
+                        return buf
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// waitingTooLong checks whether if wait time is too long or not.
+func (mgr *Manager) waitingTooLong(start time.Time) bool <span class="cov8" title="1">{
+        return time.Since(start) &gt; mgr.timeout
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package core
+
+import (
+        "fmt"
+)
+
+// Block is a model representing `filename`'s  `blockNumber` th block.
+type Block struct {
+        fileName    FileName
+        blockNumber BlockNumber
+}
+
+// NewBlock is a constructor of Block.
+func NewBlock(fileName FileName, blockNumber BlockNumber) *Block <span class="cov0" title="0">{
+        return &amp;Block{
+                fileName:    fileName,
+                blockNumber: blockNumber,
+        }
+}</span>
+
+// GetFileName is a getter of fileName.
+func (b *Block) GetFileName() FileName <span class="cov0" title="0">{
+        return b.fileName
+}</span>
+
+// GetBlockNumber is a getter of blockNumber.
+func (b *Block) GetBlockNumber() BlockNumber <span class="cov0" title="0">{
+        return b.blockNumber
+}</span>
+
+// Equal compares equivalence of receiver and other.
+func (b *Block) Equal(other *Block) bool <span class="cov0" title="0">{
+        return b.fileName == other.fileName &amp;&amp; b.blockNumber == other.blockNumber
+}</span>
+
+// String stringfy the receiver.
+func (b *Block) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("[file %v, block %v]", b.fileName, b.blockNumber)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package core
+
+import (
+        "errors"
+        "fmt"
+        "math/rand"
+)
+
+var (
+        // ErrInvalidFileNameFormat is an error that means file name is invalid format.
+        ErrInvalidFileNameFormat = errors.New("invalid filename format")
+
+        // ErrNonNegativeBlockNumber is an error that means BlockNumber is non positive.
+        ErrNonNegativeBlockNumber = errors.New("block number must be non negative")
+
+        // ErrBlockSize is an error that means BlockSize in non positive.
+        ErrBlockSize = errors.New("block size must be positive")
+)
+
+const (
+        // Uint32Length is byte length of uint32.
+        Uint32Length = 4
+
+        // Int32Length is byte length of int32.
+        Int32Length = 4
+)
+
+// FileName is a type for filename.
+type FileName string
+
+// NewFileName is a constructor of FileName.
+func NewFileName(name string) (FileName, error) <span class="cov0" title="0">{
+        if name == "" </span><span class="cov0" title="0">{
+                return "", ErrInvalidFileNameFormat
+        }</span>
+
+        <span class="cov0" title="0">return FileName(name), nil</span>
+}
+
+// BlockNumber is a type for block number.
+type BlockNumber uint32
+
+// NewBlockNumber is a constructor of BlockNumber.
+// TODO 引数 uint32 にする.
+func NewBlockNumber(bn int) (BlockNumber, error) <span class="cov0" title="0">{
+        if bn &lt; 0 </span><span class="cov0" title="0">{
+                return 0, ErrNonNegativeBlockNumber
+        }</span>
+
+        <span class="cov0" title="0">return BlockNumber(bn), nil</span>
+}
+
+// BlockSize is a type for block size.
+type BlockSize uint32
+
+// NewBlockSize is a constructor of BlockSize.
+func NewBlockSize(x int) (BlockSize, error) <span class="cov0" title="0">{
+        if x &lt;= 0 </span><span class="cov0" title="0">{
+                return 0, ErrBlockSize
+        }</span>
+
+        <span class="cov0" title="0">return BlockSize(x), nil</span>
+}
+
+// RandomString returns random string.
+func RandomString() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%v", rand.Uint32())
+}</span>
+
+// StringLength returns needed byte length of string.
+func StringLength(s string) int <span class="cov0" title="0">{
+        return len(s) + Uint32Length
+}</span>
+
+// BytesLength returns needed byte length of byte slice.
+func BytesLength(p []byte) int <span class="cov0" title="0">{
+        return len(p) + Uint32Length
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package core
+
+import (
+        "errors"
+        "fmt"
+        "io"
+
+        "github.com/goropikari/simpledb_go/lib/bytes"
+)
+
+// Page is a model of a page.
+type Page struct {
+        bb bytes.ByteBuffer
+}
+
+// NewPage is a constructor of Page.
+func NewPage(bb bytes.ByteBuffer) *Page <span class="cov8" title="1">{
+        return &amp;Page{
+                bb: bb,
+        }
+}</span>
+
+// GetInt32 returns int32 from buffer.
+func (page *Page) GetInt32(offset int64) (int32, error) <span class="cov8" title="1">{
+        readLen, err := page.bb.GetInt32(offset)
+        if errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return readLen, fmt.Errorf("%w", err)
+        }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return readLen, nil</span>
+}
+
+// SetInt32 returns int32 from buffer.
+// --------------------
+// |  int32 (4 bytes) |
+// --------------------.
+func (page *Page) SetInt32(offset int64, x int32) error <span class="cov8" title="1">{
+        if err := page.bb.SetInt32(offset, x); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetUint32 returns uint32 from buffer.
+func (page *Page) GetUint32(offset int64) (uint32, error) <span class="cov8" title="1">{
+        n, err := page.bb.GetUint32(offset)
+        if err != nil </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return n, nil</span>
+}
+
+// SetUint32 returns uint32 from buffer.
+// --------------------
+// | uint32 (4 bytes) |
+// --------------------.
+func (page *Page) SetUint32(offset int64, x uint32) error <span class="cov8" title="1">{
+        if err := page.bb.SetUint32(offset, x); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetBytes returns bytes from page.
+func (page *Page) GetBytes(offset int64) ([]byte, error) <span class="cov8" title="1">{
+        bytes, err := page.bb.GetBytes(offset)
+        if errors.Is(err, io.EOF) </span><span class="cov8" title="1">{
+                return bytes, nil
+        }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">return bytes, nil</span>
+}
+
+// SetBytes writes bytes to page.
+// ---------------------------------------
+// | bytes length (uint32) | body (bytes)|
+// ---------------------------------------.
+func (page *Page) SetBytes(offset int64, p []byte) error <span class="cov8" title="1">{
+        if err := page.bb.SetBytes(offset, p); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetString returns string from buffer.
+func (page *Page) GetString(offset int64) (string, error) <span class="cov8" title="1">{
+        s, err := page.bb.GetString(offset)
+        if errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return s, nil
+        }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return s, nil</span>
+}
+
+// SetString returns string from buffer.
+// ----------------------------------------
+// | string length (uint32)| body (string)|
+// ----------------------------------------.
+func (page *Page) SetString(offset int64, s string) error <span class="cov8" title="1">{
+        if err := page.bb.SetString(offset, s); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetBufferBytes returns page buffer.
+func (page *Page) GetBufferBytes() []byte <span class="cov0" title="0">{
+        return page.bb.GetBufferBytes()
+}</span>
+
+// Reset resets the page.
+func (page *Page) Reset() <span class="cov0" title="0">{
+        page.bb.Reset()
+}</span>
+
+// Write writes bytes to page.
+func (page *Page) Write(p []byte) (int, error) <span class="cov8" title="1">{
+        n, err := page.bb.Write(p)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return n, nil</span>
+}
+
+// Seek sets the offset for the next Read or Write on file to offset.
+func (page *Page) Seek(offset int64, whence int) (int64, error) <span class="cov0" title="0">{
+        offset, err := page.bb.Seek(offset, whence)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">return offset, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package file
+
+import (
+        "errors"
+        "fmt"
+        "io"
+        "log"
+        "path/filepath"
+        "strings"
+        "sync"
+
+        "github.com/goropikari/simpledb_go/backend/core"
+        "github.com/goropikari/simpledb_go/lib/bytes"
+        "github.com/goropikari/simpledb_go/lib/directio"
+        "github.com/goropikari/simpledb_go/lib/os"
+)
+
+type Filer interface {
+        io.ReadWriteSeeker
+        Close() error
+        Size() (int64, error)
+}
+
+var (
+        // ErrNoSuchFile is an error that means specified file does not exist.
+        ErrNoSuchFile = errors.New("no such file")
+
+        // ErrInvalidArgs is an error that means given args is invalid.
+        ErrInvalidArgs = errors.New("arguments is invalid")
+
+        // ErrInvalidConfig is an error that means given config is invalid.
+        ErrInvalidConfig = errors.New("config is invalid")
+)
+
+// Config is configuration of Manager.
+type Config struct {
+        dbDir      string
+        blockSize  int // for direct io, blockSize must be multiple of 4096
+        isDirectIO bool
+}
+
+// NewConfig is constructor of Config.
+func NewConfig(dbDir string, blockSize int, isDirectIO bool) Config <span class="cov8" title="1">{
+        if isDirectIO &amp;&amp; blockSize%directio.BlockSize != 0 </span><span class="cov0" title="0">{
+                log.Fatal(directio.ErrInvalidBlockSize)
+        }</span>
+
+        <span class="cov8" title="1">abspath, err := filepath.Abs(dbDir)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">config := Config{
+                dbDir:      abspath,
+                blockSize:  blockSize,
+                isDirectIO: isDirectIO,
+        }
+
+        return config</span>
+}
+
+// SetDefaults sets defalut value of config.
+func (config *Config) SetDefaults() <span class="cov8" title="1">{
+        if config.dbDir == "" </span><span class="cov0" title="0">{
+                config.dbDir = "simpledb"
+        }</span>
+
+        <span class="cov8" title="1">if config.blockSize == 0 </span><span class="cov0" title="0">{
+                config.blockSize = directio.BlockSize
+        }</span>
+}
+
+// Manager manages files.
+type Manager struct {
+        mu        sync.Mutex
+        config    Config
+        openFiles map[core.FileName]Filer
+}
+
+// NewManager is constructor of Manager.
+func NewManager(config Config) *Manager <span class="cov8" title="1">{
+        config.SetDefaults()
+
+        if err := os.MkdirAll(config.dbDir); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">if err := deleteTempFiles(config.dbDir); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Manager{
+                mu:        sync.Mutex{},
+                config:    config,
+                openFiles: make(map[core.FileName]Filer, 0),
+        }</span>
+}
+
+func deleteTempFiles(dbPath string) error <span class="cov8" title="1">{
+        files, err := os.ReadDir(dbPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // remove temporary files.
+        <span class="cov8" title="1">for _, file := range files </span><span class="cov8" title="1">{
+                if strings.HasPrefix(file.Name(), "temp") </span><span class="cov0" title="0">{
+                        if err := os.Remove(dbPath, file.Name()); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetBlockSize returns block size.
+func (mgr *Manager) GetBlockSize() int <span class="cov0" title="0">{
+        return mgr.config.blockSize
+}</span>
+
+// CopyBlockToPage copies block to page.
+func (mgr *Manager) CopyBlockToPage(block *core.Block, page *core.Page) error <span class="cov8" title="1">{
+        if block == nil </span><span class="cov0" title="0">{
+                return ErrInvalidArgs
+        }</span>
+
+        <span class="cov8" title="1">if page == nil </span><span class="cov0" title="0">{
+                return ErrInvalidArgs
+        }</span>
+
+        <span class="cov8" title="1">mgr.mu.Lock()
+        defer mgr.mu.Unlock()
+
+        file, err := mgr.openFile(block.GetFileName())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if _, err := page.Seek(0, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        // seek でファイルサイズ以上の位置が指定されていた場合、io.CopyN しても 1 byte も読み込まれず
+        // page に変化がない.
+        // 実際は x00 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
+        <span class="cov8" title="1">page.Reset()
+
+        seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
+
+        if _, err = file.Seek(seekPos, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if _, err = io.CopyN(page, file, int64(mgr.config.blockSize)); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if _, err := page.Seek(0, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// CopyPageToBlock copies page to block.
+func (mgr *Manager) CopyPageToBlock(page *core.Page, block *core.Block) error <span class="cov8" title="1">{
+        if block == nil </span><span class="cov0" title="0">{
+                return ErrInvalidArgs
+        }</span>
+
+        <span class="cov8" title="1">if page == nil </span><span class="cov0" title="0">{
+                return ErrInvalidArgs
+        }</span>
+
+        <span class="cov8" title="1">mgr.mu.Lock()
+        defer mgr.mu.Unlock()
+
+        file, err := mgr.openFile(block.GetFileName())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if _, err = file.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if _, err := file.Write(page.GetBufferBytes()); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if _, err := page.Seek(0, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// AppendBlock appends block to given filename.
+func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) <span class="cov8" title="1">{
+        mgr.mu.Lock()
+        defer mgr.mu.Unlock()
+
+        file, err := mgr.openFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">numBlock, err := mgr.numBlock(file)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">appendBlockNum, err := core.NewBlockNumber(numBlock)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">block := core.NewBlock(filename, appendBlockNum)
+
+        // extend file size
+        offset := int64(numBlock * mgr.config.blockSize)
+        if _, err := file.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">buf := mgr.prepareBytes()
+
+        if _, err = file.Write(buf); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return block, nil</span>
+}
+
+// numBlock returns the number of blocks of given file.
+func (mgr *Manager) numBlock(file Filer) (int, error) <span class="cov8" title="1">{
+        fileSize, err := file.Size()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return int(fileSize) / mgr.config.blockSize, nil</span>
+}
+
+// LastBlock returns last block of given file.
+func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) <span class="cov0" title="0">{
+        f, err := mgr.openFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">nb, err := mgr.numBlock(f)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">lastBlockNumber, err := core.NewBlockNumber(nb - 1)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return core.NewBlock(filename, lastBlockNumber), nil</span>
+}
+
+// openFile opens file as given filename.
+// If there is no such file, create new file.
+func (mgr *Manager) openFile(filename core.FileName) (Filer, error) <span class="cov8" title="1">{
+        if v, ok := mgr.openFiles[filename]; ok </span><span class="cov8" title="1">{
+                return v, nil
+        }</span>
+
+        <span class="cov8" title="1">path := filepath.Join(mgr.config.dbDir, string(filename))
+
+        // open file. If there is no such file, create new file.
+        f, err := os.OpenFile(path, mgr.config.isDirectIO)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">mgr.openFiles[filename] = f
+
+        return f, nil</span>
+}
+
+// CloseFile closes a file.
+func (mgr *Manager) closeFile(filename core.FileName) error <span class="cov8" title="1">{
+        if f, ok := mgr.openFiles[filename]; ok </span><span class="cov8" title="1">{
+                delete(mgr.openFiles, filename)
+
+                if err := f.Close(); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("%w", err)
+                }</span>
+
+                <span class="cov8" title="1">return nil</span>
+        }
+
+        <span class="cov0" title="0">return ErrNoSuchFile</span>
+}
+
+func (mgr *Manager) FileSize(filename core.FileName) (int64, error) <span class="cov0" title="0">{
+        file, err := mgr.openFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return file.Size()</span>
+}
+
+// prepareBytes prepares byte slice.
+func (mgr *Manager) prepareBytes() []byte <span class="cov8" title="1">{
+        if mgr.config.isDirectIO </span><span class="cov8" title="1">{
+                buf, err := directio.AlignedBlock(mgr.config.blockSize)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatal(err)
+                }</span>
+
+                <span class="cov8" title="1">return buf</span>
+        }
+
+        <span class="cov0" title="0">return make([]byte, mgr.config.blockSize)</span>
+}
+
+// PreparePage prepares a page.
+// If file manager's config specifies direct IO support, this returns page
+// satisfying direct IO constraints.
+func (mgr *Manager) PreparePage() (*core.Page, error) <span class="cov0" title="0">{
+        if mgr.config.isDirectIO </span><span class="cov0" title="0">{
+                bb, err := bytes.NewDirectBuffer(mgr.config.blockSize)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("%w", err)
+                }</span>
+
+                <span class="cov0" title="0">return core.NewPage(bb), nil</span>
+        }
+
+        <span class="cov0" title="0">bb := bytes.NewBuffer(mgr.config.blockSize)
+
+        return core.NewPage(bb), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package log
+
+import (
+        "errors"
+        "fmt"
+        "io"
+        "log"
+
+        "github.com/goropikari/simpledb_go/backend/core"
+        "github.com/goropikari/simpledb_go/backend/service"
+)
+
+// Iterator is iterator of log manager.
+type Iterator struct {
+        fileMgr               service.FileManager
+        block                 *core.Block
+        page                  *core.Page
+        currentRecordPosition uint32
+        boundary              uint32
+}
+
+func iterator(fileMgr service.FileManager, block *core.Block) (&lt;-chan []byte, error) <span class="cov8" title="1">{
+        ch := make(chan []byte)
+
+        iter, err := newIterator(fileMgr, block)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">go func() </span><span class="cov8" title="1">{
+                for iter.hasNext() </span><span class="cov8" title="1">{
+                        ch &lt;- iter.next()
+                }</span>
+                <span class="cov8" title="1">close(ch)</span>
+        }()
+
+        <span class="cov8" title="1">return ch, nil</span>
+}
+
+func newIterator(fileMgr service.FileManager, block *core.Block) (*Iterator, error) <span class="cov8" title="1">{
+        page, err := fileMgr.PreparePage()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := fileMgr.CopyBlockToPage(block, page); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">boundary, err := page.GetUint32(0)
+        if err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Iterator{
+                fileMgr:               fileMgr,
+                block:                 block,
+                page:                  page,
+                currentRecordPosition: boundary,
+                boundary:              boundary,
+        }, nil</span>
+}
+
+func (logIt *Iterator) hasNext() bool <span class="cov8" title="1">{
+        blockSize := logIt.fileMgr.GetBlockSize()
+
+        return int(logIt.currentRecordPosition) &lt; blockSize || logIt.block.GetBlockNumber() &gt; 0
+}</span>
+
+func (logIt *Iterator) next() []byte <span class="cov8" title="1">{
+        blockSize := logIt.fileMgr.GetBlockSize()
+
+        if logIt.currentRecordPosition == uint32(blockSize) </span><span class="cov8" title="1">{
+                block := core.NewBlock(logIt.block.GetFileName(), logIt.block.GetBlockNumber()-1)
+                logIt.moveToBlock(block)
+        }</span>
+
+        <span class="cov8" title="1">record, err := logIt.page.GetBytes(int64(logIt.currentRecordPosition))
+        if err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">logIt.currentRecordPosition += uint32(core.Uint32Length + len(record))
+
+        return record</span>
+}
+
+func (logIt *Iterator) moveToBlock(block *core.Block) <span class="cov8" title="1">{
+        err := logIt.fileMgr.CopyBlockToPage(block, logIt.page)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">boundary, err := logIt.page.GetUint32(0)
+        if err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">logIt.currentRecordPosition = boundary
+
+        logIt.block = block</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package log
+
+import (
+        "errors"
+        "fmt"
+        "io"
+        "log"
+        "sync"
+
+        "github.com/goropikari/simpledb_go/backend/core"
+        "github.com/goropikari/simpledb_go/backend/service"
+)
+
+// ErrInvalidArgs is an error that means given args is invalid.
+var ErrInvalidArgs = errors.New("arguments is invalid")
+
+// Config is configuration of log manager.
+type Config struct {
+        logfile core.FileName
+}
+
+// NewConfig is constructor of Config.
+func NewConfig(logfile core.FileName) Config <span class="cov8" title="1">{
+        config := Config{
+                logfile: logfile,
+        }
+        config.SetDefaults()
+
+        return config
+}</span>
+
+// SetDefaults sets default value of config.
+func (config *Config) SetDefaults() <span class="cov8" title="1">{
+        config.logfile = "logfile"
+}</span>
+
+// Manager is a log manager of database.
+type Manager struct {
+        mu           sync.Mutex
+        fileMgr      service.FileManager
+        currentBlock *core.Block
+        page         *core.Page
+        latestLSN    int32 // reset when server restart
+        lastSavedLSN int32
+        config       Config
+}
+
+// NewManager is constructor of Manager.
+func NewManager(fileMgr service.FileManager, config Config) *Manager <span class="cov8" title="1">{
+        page, err := fileMgr.PreparePage()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">n, err := fileMgr.FileSize(config.logfile)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        // logfile のサイズが 0 だったら block size 分ファイルを作る
+        <span class="cov8" title="1">if n == 0 </span><span class="cov8" title="1">{
+                _, _, err := appendNewLogBlock(fileMgr, config.logfile)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatal(err)
+                }</span>
+        }
+
+        <span class="cov8" title="1">lastBlock, err := fileMgr.LastBlock(config.logfile)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">if err := fileMgr.CopyBlockToPage(lastBlock, page); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Manager{
+                mu:           sync.Mutex{},
+                fileMgr:      fileMgr,
+                currentBlock: lastBlock,
+                page:         page,
+                latestLSN:    0,
+                lastSavedLSN: 0,
+                config:       config,
+        }</span>
+}
+
+// flush flushes page into current block.
+func (mgr *Manager) flush() error <span class="cov8" title="1">{
+        if err := mgr.fileMgr.CopyPageToBlock(mgr.page, mgr.currentBlock); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to flush: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">mgr.lastSavedLSN = mgr.latestLSN
+
+        return nil</span>
+}
+
+// FlushByLSN flushes given LSN block.
+func (mgr *Manager) FlushByLSN(lsn int32) error <span class="cov8" title="1">{
+        if lsn &gt;= mgr.lastSavedLSN </span><span class="cov8" title="1">{
+                return mgr.flush()
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// AppendRecord appends record into the log page.
+func (mgr *Manager) AppendRecord(record []byte) error <span class="cov8" title="1">{
+        mgr.mu.Lock()
+        defer mgr.mu.Unlock()
+
+        boundary, err := mgr.page.GetUint32(0)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to get boundary: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">recordLength := len(record)
+        bytesNeeded := recordLength + core.Uint32Length
+
+        // If there is no enough space, append new block to logfile.
+        if int(boundary)-bytesNeeded &lt; core.Uint32Length </span><span class="cov8" title="1">{
+                if err := mgr.flush(); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">page, block, err := appendNewLogBlock(mgr.fileMgr, mgr.config.logfile)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">mgr.page = page
+                mgr.currentBlock = block
+
+                boundary, err = mgr.page.GetUint32(0)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("%w", err)
+                }</span>
+        }
+
+        <span class="cov8" title="1">recordPosition := int(boundary) - bytesNeeded
+
+        if err := mgr.page.SetBytes(int64(recordPosition), record); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := mgr.page.SetUint32(0, uint32(recordPosition)); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">mgr.latestLSN++
+
+        return nil</span>
+}
+
+// Iterator returns iterator.
+func (mgr *Manager) Iterator() (&lt;-chan []byte, error) <span class="cov8" title="1">{
+        it, err := iterator(mgr.fileMgr, mgr.currentBlock)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return it, nil</span>
+}
+
+// appendNewLogBlock appends new block to log file.
+func appendNewLogBlock(fileMgr service.FileManager, filename core.FileName) (*core.Page, *core.Block, error) <span class="cov8" title="1">{
+        page, err := fileMgr.PreparePage()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+
+        <span class="cov8" title="1">blockSize := fileMgr.GetBlockSize()
+
+        if err := page.SetUint32(0, uint32(blockSize)); err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+
+        // extend new block
+        <span class="cov8" title="1">block, err := fileMgr.AppendBlock(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+
+        <span class="cov8" title="1">if err := fileMgr.CopyPageToBlock(page, block); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+
+        <span class="cov8" title="1">return page, block, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package bytes
+
+import (
+        "encoding/binary"
+        "errors"
+        "fmt"
+        "io"
+)
+
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
+// ErrInvalidOffset is an error that means given offset is invalid.
+var ErrInvalidOffset = errors.New("invalid offset")
+
+var endianness = binary.BigEndian
+
+// ByteBuffer is an interface that implement io.ReadWriteSeeker.
+type ByteBuffer interface {
+        io.ReadWriteSeeker
+        GetBufferBytes() []byte
+        GetInt32(int64) (int32, error)
+        SetInt32(int64, int32) error
+        GetUint32(int64) (uint32, error)
+        SetUint32(int64, uint32) error
+        GetString(int64) (string, error)
+        SetString(int64, string) error
+        GetBytes(int64) ([]byte, error)
+        SetBytes(int64, []byte) error
+        Reset()
+}
+
+var (
+        // ErrOutOfRange is an error type that refer out of range.
+        ErrOutOfRange = errors.New("reference out of range of buffer")
+
+        // ErrUnsupportedWhence is an error type that given whence is unsupported.
+        ErrUnsupportedWhence = errors.New("unsupported whence")
+)
+
+const (
+        int32Length  = 4
+        uint32Length = 4
+)
+
+// Buffer is a buffer.
+type Buffer struct {
+        capacity int64
+        buf      []byte
+        off      int64
+}
+
+// NewBuffer is a constructor of Buffer.
+func NewBuffer(n int) *Buffer <span class="cov0" title="0">{
+        return NewBufferBytes(make([]byte, n))
+}</span>
+
+// NewBufferBytes is a constructor of Buffer by byte slice.
+func NewBufferBytes(buf []byte) *Buffer <span class="cov8" title="1">{
+        return &amp;Buffer{
+                capacity: int64(len(buf)),
+                buf:      buf,
+                off:      0,
+        }
+}</span>
+
+// Read reads bytes from Reader.
+func (buf *Buffer) Read(p []byte) (n int, err error) <span class="cov8" title="1">{
+        if buf.off &lt; 0 || buf.off &gt;= buf.capacity </span><span class="cov0" title="0">{
+                return 0, io.EOF
+        }</span>
+
+        <span class="cov8" title="1">cnt := copy(p, buf.buf[buf.off:])
+
+        buf.off += int64(cnt)
+        if buf.off == buf.capacity </span><span class="cov8" title="1">{
+                return cnt, io.EOF
+        }</span>
+
+        <span class="cov8" title="1">return cnt, nil</span>
+}
+
+// Write writes given bytes to writer.
+func (buf *Buffer) Write(p []byte) (n int, err error) <span class="cov8" title="1">{
+        if buf.off &lt; 0 || buf.off &gt;= buf.capacity </span><span class="cov0" title="0">{
+                return 0, io.EOF
+        }</span>
+
+        <span class="cov8" title="1">cnt := copy(buf.buf[buf.off:], p)
+
+        buf.off += int64(cnt)
+        // if buf.off == buf.capacity {
+        //         return cnt, io.EOF
+        // }
+
+        return cnt, nil</span>
+}
+
+// Seek seeks position.
+func (buf *Buffer) Seek(offset int64, whence int) (int64, error) <span class="cov8" title="1">{
+        off := int64(0)
+
+        switch whence </span>{
+        case io.SeekStart:<span class="cov8" title="1">
+                off = offset</span>
+        case io.SeekCurrent:<span class="cov8" title="1">
+                off += offset</span>
+        default:<span class="cov0" title="0">
+                return 0, ErrUnsupportedWhence</span>
+        }
+
+        <span class="cov8" title="1">if off &lt; 0 || off &gt; buf.capacity </span><span class="cov8" title="1">{
+                return 0, ErrOutOfRange
+        }</span>
+
+        <span class="cov8" title="1">buf.off = off
+
+        return off, nil</span>
+}
+
+// GetBufferBytes returns buffer.
+func (buf *Buffer) GetBufferBytes() []byte <span class="cov8" title="1">{
+        return buf.buf
+}</span>
+
+// Reset resets buffer.
+func (buf *Buffer) Reset() <span class="cov0" title="0">{
+        buf.off = 0
+        for i := 0; i &lt; int(buf.capacity); i++ </span><span class="cov0" title="0">{
+                buf.buf[i] = 0
+        }</span>
+}
+
+// GetInt32 returns int32 from buffer.
+func (buf *Buffer) GetInt32(offset int64) (int32, error) <span class="cov8" title="1">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if !buf.hasSpace(int32Length) </span><span class="cov8" title="1">{
+                return 0, ErrInvalidOffset
+        }</span>
+
+        <span class="cov8" title="1">var ret int32
+        if err := binary.Read(buf, endianness, &amp;ret); err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                        return ret, fmt.Errorf("%w", err)
+                }</span>
+
+                <span class="cov0" title="0">return 0, fmt.Errorf("%w", err)</span>
+        }
+
+        <span class="cov8" title="1">return ret, nil</span>
+}
+
+// SetInt32 returns int32 from buffer.
+// --------------------
+// |  int32 (4 bytes) |
+// --------------------.
+func (buf *Buffer) SetInt32(offset int64, x int32) error <span class="cov8" title="1">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if !buf.hasSpace(int32Length) </span><span class="cov8" title="1">{
+                return ErrInvalidOffset
+        }</span>
+
+        <span class="cov8" title="1">if err := binary.Write(buf, endianness, x); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetUint32 returns uint32 from buffer.
+func (buf *Buffer) GetUint32(offset int64) (uint32, error) <span class="cov8" title="1">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if !buf.hasSpace(uint32Length) </span><span class="cov8" title="1">{
+                return 0, ErrInvalidOffset
+        }</span>
+
+        <span class="cov8" title="1">var ret uint32
+        err := binary.Read(buf, endianness, &amp;ret)
+        if err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return ret, nil</span>
+}
+
+// SetUint32 returns uint32 from buffer.
+// --------------------
+// | uint32 (4 bytes) |
+// --------------------.
+func (buf *Buffer) SetUint32(offset int64, x uint32) error <span class="cov8" title="1">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">if !buf.hasSpace(uint32Length) </span><span class="cov8" title="1">{
+                return ErrInvalidOffset
+        }</span>
+
+        <span class="cov8" title="1">err := binary.Write(buf, endianness, x)
+        if err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetString returns string from buffer.
+func (buf *Buffer) GetString(offset int64) (string, error) <span class="cov8" title="1">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to get string: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">length, err := buf.GetUint32(offset)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">if !buf.hasSpace(int(length)) </span><span class="cov0" title="0">{
+                return "", ErrInvalidOffset
+        }</span>
+
+        <span class="cov8" title="1">bytes := make([]byte, length)
+
+        _, err = buf.Read(bytes)
+        if errors.Is(err, io.EOF) </span><span class="cov8" title="1">{
+                return string(bytes), nil
+        }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">return string(bytes), err</span>
+}
+
+// SetString returns string from buffer.
+// ----------------------------------------
+// | string length (uint32)| body (string)|
+// ----------------------------------------.
+func (buf *Buffer) SetString(offset int64, str string) error <span class="cov0" title="0">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">if !buf.hasSpace(uint32Length + len(str)) </span><span class="cov0" title="0">{
+                return ErrInvalidOffset
+        }</span>
+
+        <span class="cov0" title="0">if err := buf.SetUint32(offset, uint32(len(str))); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to set string: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if _, err := buf.Write([]byte(str)); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// GetBytes returns bytes from page.
+func (buf *Buffer) GetBytes(offset int64) ([]byte, error) <span class="cov0" title="0">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">length, err := buf.GetUint32(offset)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get bytes: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if !buf.hasSpace(int(length)) </span><span class="cov0" title="0">{
+                return nil, ErrInvalidOffset
+        }</span>
+
+        <span class="cov0" title="0">bytes := make([]byte, length)
+
+        _, err = buf.Read(bytes)
+        if errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return bytes, fmt.Errorf("%w", err)
+        }</span> else<span class="cov0" title="0"> if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">return bytes, nil</span>
+}
+
+// SetBytes writes bytes to page.
+// ---------------------------------------
+// | bytes length (uint32) | body (bytes)|
+// ---------------------------------------.
+func (buf *Buffer) SetBytes(offset int64, p []byte) error <span class="cov0" title="0">{
+        if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">if !buf.hasSpace(uint32Length + len(p)) </span><span class="cov0" title="0">{
+                return ErrInvalidOffset
+        }</span>
+
+        <span class="cov0" title="0">if err := buf.SetUint32(offset, uint32(len(p))); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to set bytes: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if _, err := buf.Write(p); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (buf *Buffer) hasSpace(x int) bool <span class="cov8" title="1">{
+        return buf.capacity-buf.off &gt;= int64(x)
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package bytes
+
+import (
+        "errors"
+        "fmt"
+
+        "github.com/goropikari/simpledb_go/lib/directio"
+)
+
+// ErrInvalidDirectIO is an error that means invalid direct io.
+var ErrInvalidDirectIO = errors.New("invalid direct io")
+
+// NewDirectBuffer is a constructor of DirectBuffer.
+func NewDirectBuffer(n int) (*Buffer, error) <span class="cov0" title="0">{
+        buf, err := directio.AlignedBlock(n)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov0" title="0">buffer, err := NewDirectBufferBytes(buf)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return buffer, nil</span>
+}
+
+// NewDirectBufferBytes is a constructor of DirectBuffer by byte slice.
+func NewDirectBufferBytes(buf []byte) (*Buffer, error) <span class="cov0" title="0">{
+        if !directio.IsAligned(buf) </span><span class="cov0" title="0">{
+                return nil, ErrInvalidDirectIO
+        }</span>
+
+        <span class="cov0" title="0">return NewBufferBytes(buf), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package directio
+
+import (
+        "fmt"
+        "os"
+
+        "github.com/ncw/directio"
+)
+
+// ErrInvalidBlockSize is error type indicating given block does not satisfy direct IO constraint.
+var ErrInvalidBlockSize = fmt.Errorf("block size must be multiple of %d", BlockSize)
+
+// BlockSize is block size for direct IO.
+const BlockSize = directio.BlockSize
+
+// AlignedBlock returns byte slice satisfying direct IO.
+func AlignedBlock(n int) ([]byte, error) <span class="cov8" title="1">{
+        if n%BlockSize != 0 </span><span class="cov0" title="0">{
+                return nil, ErrInvalidBlockSize
+        }</span>
+
+        <span class="cov8" title="1">return directio.AlignedBlock(n), nil</span>
+}
+
+// IsAligned check whether given byte slice satisfy direct IO constraint or not.
+func IsAligned(p []byte) bool <span class="cov0" title="0">{
+        return directio.IsAligned(p)
+}</span>
+
+// OpenFile opens file with direct IO option.
+func OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) <span class="cov8" title="1">{
+        file, err := directio.OpenFile(name, flag, perm)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("%w", err)
+        }</span>
+
+        <span class="cov8" title="1">return file, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package os
+
+import (
+        "os"
+        "path/filepath"
+
+        "github.com/goropikari/simpledb_go/lib/directio"
+)
+
+func MkdirAll(path string) error <span class="cov0" title="0">{
+        return os.MkdirAll(path, os.ModePerm)
+}</span>
+
+func ReadDir(name string) ([]os.DirEntry, error) <span class="cov0" title="0">{
+        return os.ReadDir(name)
+}</span>
+
+func Remove(dir string, file string) error <span class="cov0" title="0">{
+        return os.Remove(filepath.Join(dir, file))
+}</span>
+
+type File struct {
+        f *os.File
+}
+
+func NewFile(f *os.File) *File <span class="cov8" title="1">{
+        return &amp;File{
+                f: f,
+        }
+}</span>
+
+func (f *File) Read(p []byte) (n int, err error) <span class="cov8" title="1">{
+        return f.f.Read(p)
+}</span>
+
+func (f *File) Write(p []byte) (n int, err error) <span class="cov8" title="1">{
+        return f.f.Write(p)
+}</span>
+
+func (f *File) Seek(offset int64, whence int) (int64, error) <span class="cov8" title="1">{
+        return f.f.Seek(offset, whence)
+}</span>
+
+func (f *File) Close() error <span class="cov8" title="1">{
+        return f.f.Close()
+}</span>
+
+func (f *File) Size() (int64, error) <span class="cov8" title="1">{
+        info, err := f.f.Stat()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return info.Size(), nil</span>
+}
+
+func OpenFile(path string, isDirectIO bool) (*File, error) <span class="cov8" title="1">{
+        flag := os.O_RDWR | os.O_CREATE
+
+        var f *os.File
+        var err error
+
+        if isDirectIO </span><span class="cov0" title="0">{
+                f, err = directio.OpenFile(path, flag, os.ModePerm)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        } else<span class="cov8" title="1"> {
+                f, err = os.OpenFile(path, flag, os.ModePerm)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return NewFile(f), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package fake
+
+import "github.com/goropikari/simpledb_go/backend/core"
+
+// Block returns fake block.
+func Block() *core.Block <span class="cov0" title="0">{
+        filename, err := core.NewFileName(RandString(10))
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">blkNum, err := core.NewBlockNumber(RandInt())
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return core.NewBlock(filename, blkNum)</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package fake
+
+import "math/rand"
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func RandInt() int <span class="cov0" title="0">{
+        return rand.Int()
+}</span>
+
+func RandInt32() int32 <span class="cov8" title="1">{
+        return rand.Int31()
+}</span>
+
+func RandUint32() uint32 <span class="cov8" title="1">{
+        return uint32(rand.Int31())
+}</span>
+
+// RandInt32n returns random number from [0, n).
+func RandInt32n(n int32) int32 <span class="cov8" title="1">{
+        return rand.Int31n(n)
+}</span>
+
+func RandString(length int) string <span class="cov8" title="1">{
+        kindChars := int32(len(charset))
+        b := make([]byte, length)
+
+        for i := 0; i &lt; length; i++ </span><span class="cov8" title="1">{
+                b[i] = charset[int(RandInt32n(kindChars))]
+        }</span>
+
+        <span class="cov8" title="1">return string(b)</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
