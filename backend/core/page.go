@@ -122,9 +122,9 @@ func (page *Page) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-// GetFullBytes returns page buffer.
-func (page *Page) GetFullBytes() []byte {
-	return page.bb.GetFullBytes()
+// GetBufferBytes returns page buffer.
+func (page *Page) GetBufferBytes() []byte {
+	return page.bb.GetBufferBytes()
 }
 
 func (page *Page) Reset() {

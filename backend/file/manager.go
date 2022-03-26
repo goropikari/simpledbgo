@@ -186,7 +186,7 @@ func (mgr *Manager) CopyPageToBlock(page *core.Page, block *core.Block) error {
 		return fmt.Errorf("%w", err)
 	}
 
-	if _, err := file.Write(page.GetFullBytes()); err != nil {
+	if _, err := file.Write(page.GetBufferBytes()); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 

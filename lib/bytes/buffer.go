@@ -7,17 +7,17 @@ import (
 	"io"
 )
 
-//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/tests/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 
-// ErrGetFromBuffer is an error that means failed to get object from buffer.
-var ErrGetFromBuffer = errors.New("failed to get from buffer")
+// ErrInvalidOffset is an error that means given offset is invalid.
+var ErrInvalidOffset = errors.New("invalid offset")
 
 var endianness = binary.BigEndian
 
 // ByteBuffer is an interface that implement io.ReadWriteSeeker.
 type ByteBuffer interface {
 	io.ReadWriteSeeker
-	GetFullBytes() []byte
+	GetBufferBytes() []byte
 	GetInt32(int64) (int32, error)
 	SetInt32(int64, int32) error
 	GetUint32(int64) (uint32, error)
@@ -37,9 +37,14 @@ var (
 	ErrUnsupportedWhence = errors.New("unsupported whence")
 )
 
+const (
+	int32Length  = 4
+	uint32Length = 4
+)
+
 // Buffer is a buffer.
 type Buffer struct {
-	capacity int
+	capacity int64
 	buf      []byte
 	off      int64
 }
@@ -52,7 +57,7 @@ func NewBuffer(n int) (*Buffer, error) {
 // NewBufferBytes is a constructor of Buffer by byte slice.
 func NewBufferBytes(buf []byte) *Buffer {
 	return &Buffer{
-		capacity: len(buf),
+		capacity: int64(len(buf)),
 		buf:      buf,
 		off:      0,
 	}
@@ -60,14 +65,14 @@ func NewBufferBytes(buf []byte) *Buffer {
 
 // Read reads bytes from Reader.
 func (buf *Buffer) Read(p []byte) (n int, err error) {
-	if buf.off < 0 || buf.off >= int64(buf.capacity) {
+	if buf.off < 0 || buf.off >= buf.capacity {
 		return 0, io.EOF
 	}
 
 	cnt := copy(p, buf.buf[buf.off:])
 
 	buf.off += int64(cnt)
-	if int(buf.off) == buf.capacity {
+	if buf.off == buf.capacity {
 		return cnt, io.EOF
 	}
 
@@ -76,14 +81,14 @@ func (buf *Buffer) Read(p []byte) (n int, err error) {
 
 // Write writes given bytes to writer.
 func (buf *Buffer) Write(p []byte) (n int, err error) {
-	if buf.off < 0 || buf.off >= int64(buf.capacity) {
+	if buf.off < 0 || buf.off >= buf.capacity {
 		return 0, io.EOF
 	}
 
 	cnt := copy(buf.buf[buf.off:], p)
 
 	buf.off += int64(cnt)
-	if buf.off == int64(buf.capacity) {
+	if buf.off == buf.capacity {
 		return cnt, io.EOF
 	}
 
@@ -103,7 +108,7 @@ func (buf *Buffer) Seek(offset int64, whence int) (int64, error) {
 		return 0, ErrUnsupportedWhence
 	}
 
-	if off < 0 || off > int64(buf.capacity) {
+	if off < 0 || off > buf.capacity {
 		return 0, ErrOutOfRange
 	}
 
@@ -112,15 +117,15 @@ func (buf *Buffer) Seek(offset int64, whence int) (int64, error) {
 	return off, nil
 }
 
-// GetFullBytes returns buffer.
-func (buf *Buffer) GetFullBytes() []byte {
+// GetBufferBytes returns buffer.
+func (buf *Buffer) GetBufferBytes() []byte {
 	return buf.buf
 }
 
 // Reset resets buffer.
 func (buf *Buffer) Reset() {
 	buf.off = 0
-	for i := 0; i < buf.capacity; i++ {
+	for i := 0; i < int(buf.capacity); i++ {
 		buf.buf[i] = 0
 	}
 }
@@ -129,6 +134,10 @@ func (buf *Buffer) Reset() {
 func (buf *Buffer) GetInt32(offset int64) (int32, error) {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
 		return 0, fmt.Errorf("%w", err)
+	}
+
+	if !buf.hasSpace(int32Length) {
+		return 0, ErrInvalidOffset
 	}
 
 	var ret int32
@@ -152,7 +161,11 @@ func (buf *Buffer) SetInt32(offset int64, x int32) error {
 		return fmt.Errorf("%w", err)
 	}
 
-	if err := binary.Write(buf, endianness, x); err != nil {
+	if !buf.hasSpace(int32Length) {
+		return ErrInvalidOffset
+	}
+
+	if err := binary.Write(buf, endianness, x); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -165,8 +178,13 @@ func (buf *Buffer) GetUint32(offset int64) (uint32, error) {
 		return 0, fmt.Errorf("%w", err)
 	}
 
+	if !buf.hasSpace(uint32Length) {
+		return 0, ErrInvalidOffset
+	}
+
 	var ret uint32
-	if err := binary.Read(buf, endianness, &ret); err != nil {
+	err := binary.Read(buf, endianness, &ret)
+	if err != nil && !errors.Is(err, io.EOF) {
 		return 0, fmt.Errorf("%w", err)
 	}
 
@@ -182,7 +200,12 @@ func (buf *Buffer) SetUint32(offset int64, x uint32) error {
 		return fmt.Errorf("%w", err)
 	}
 
-	if err := binary.Write(buf, endianness, x); err != nil {
+	if !buf.hasSpace(uint32Length) {
+		return ErrInvalidOffset
+	}
+
+	err := binary.Write(buf, endianness, x)
+	if err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -200,17 +223,17 @@ func (buf *Buffer) GetString(offset int64) (string, error) {
 		return "", err
 	}
 
-	bytes := make([]byte, length)
-	readLen, err := buf.Read(bytes)
-
-	if errors.Is(err, io.EOF) {
-		return "", fmt.Errorf("%w", err)
-	} else if err != nil {
-		return "", err
+	if !buf.hasSpace(int(length)) {
+		return "", ErrInvalidOffset
 	}
 
-	if uint32(readLen) != length {
-		return "", ErrGetFromBuffer
+	bytes := make([]byte, length)
+
+	_, err = buf.Read(bytes)
+	if errors.Is(err, io.EOF) {
+		return string(bytes), nil
+	} else if err != nil {
+		return "", err
 	}
 
 	return string(bytes), err
@@ -223,6 +246,10 @@ func (buf *Buffer) GetString(offset int64) (string, error) {
 func (buf *Buffer) SetString(offset int64, str string) error {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
+	}
+
+	if !buf.hasSpace(uint32Length + len(str)) {
+		return ErrInvalidOffset
 	}
 
 	if err := buf.SetUint32(offset, uint32(len(str))); err != nil {
@@ -247,19 +274,17 @@ func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 		return nil, fmt.Errorf("failed to get bytes: %w", err)
 	}
 
-	bytes := make([]byte, length)
-	readLen, err := buf.Read(bytes)
-
-	if !errors.Is(err, io.EOF) && err != nil {
-		return nil, fmt.Errorf("%w", err)
+	if !buf.hasSpace(int(length)) {
+		return nil, ErrInvalidOffset
 	}
 
+	bytes := make([]byte, length)
+
+	_, err = buf.Read(bytes)
 	if errors.Is(err, io.EOF) {
 		return bytes, fmt.Errorf("%w", err)
-	}
-
-	if uint32(readLen) != length {
-		return nil, ErrGetFromBuffer
+	} else if err != nil {
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return bytes, nil
@@ -270,13 +295,25 @@ func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 // | bytes length (uint32) | body (bytes)|
 // ---------------------------------------.
 func (buf *Buffer) SetBytes(offset int64, p []byte) error {
+	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
+		return err
+	}
+
+	if !buf.hasSpace(uint32Length + len(p)) {
+		return ErrInvalidOffset
+	}
+
 	if err := buf.SetUint32(offset, uint32(len(p))); err != nil {
 		return fmt.Errorf("failed to set bytes: %w", err)
 	}
 
-	if _, err := buf.Write(p); err != nil {
+	if _, err := buf.Write(p); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("%w", err)
 	}
 
 	return nil
+}
+
+func (buf *Buffer) hasSpace(x int) bool {
+	return buf.capacity-buf.off >= int64(x)
 }

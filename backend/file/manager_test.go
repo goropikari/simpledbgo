@@ -89,7 +89,7 @@ func TestManager(t *testing.T) {
 		block = core.NewBlock(filename, 0)
 		err = fileMgr.CopyBlockToPage(block, page)
 		require.NoError(t, err)
-		require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetFullBytes()))
+		require.Equal(t, strings.Repeat("A", directio.BlockSize), string(page.GetBufferBytes()))
 
 		buf, err = directio.AlignedBlock(directio.BlockSize)
 		require.NoError(t, err)
@@ -99,6 +99,6 @@ func TestManager(t *testing.T) {
 		block = core.NewBlock(filename, 1)
 		err = fileMgr.CopyBlockToPage(block, page)
 		require.NoError(t, err)
-		require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetFullBytes()))
+		require.Equal(t, strings.Repeat("B", directio.BlockSize), string(page.GetBufferBytes()))
 	})
 }

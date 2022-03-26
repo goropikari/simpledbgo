@@ -77,6 +77,21 @@ func (mr *MockFileManagerMockRecorder) CopyPageToBlock(page, block interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CopyPageToBlock", reflect.TypeOf((*MockFileManager)(nil).CopyPageToBlock), page, block)
 }
 
+// FileSize mocks base method.
+func (m *MockFileManager) FileSize(arg0 core.FileName) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FileSize", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FileSize indicates an expected call of FileSize.
+func (mr *MockFileManagerMockRecorder) FileSize(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FileSize", reflect.TypeOf((*MockFileManager)(nil).FileSize), arg0)
+}
+
 // GetBlockSize mocks base method.
 func (m *MockFileManager) GetBlockSize() int {
 	m.ctrl.T.Helper()
@@ -89,20 +104,6 @@ func (m *MockFileManager) GetBlockSize() int {
 func (mr *MockFileManagerMockRecorder) GetBlockSize() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockSize", reflect.TypeOf((*MockFileManager)(nil).GetBlockSize))
-}
-
-// IsZero mocks base method.
-func (m *MockFileManager) IsZero() bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsZero")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsZero indicates an expected call of IsZero.
-func (mr *MockFileManagerMockRecorder) IsZero() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsZero", reflect.TypeOf((*MockFileManager)(nil).IsZero))
 }
 
 // LastBlock mocks base method.

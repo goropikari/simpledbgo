@@ -16,6 +16,8 @@ import (
 func TestLogIterator(t *testing.T) {
 	t.Run("test iterator", func(t *testing.T) {
 		dir := "test_db_dir"
+		defer os.RemoveAll(dir)
+
 		filename := "log_iterator"
 		config, err := file.NewConfig(dir, 400, false)
 		require.NoError(t, err)
@@ -76,7 +78,7 @@ func createLogRecord(s string, n uint32) []byte {
 	page.SetString(0, s)
 	page.SetUint32(int64(len(s)+core.Uint32Length), n)
 
-	return page.GetFullBytes()
+	return page.GetBufferBytes()
 }
 
 func expectedRecords(start, end int) []string {

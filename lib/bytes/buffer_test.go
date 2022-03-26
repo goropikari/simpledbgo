@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 
@@ -275,6 +276,287 @@ func TestBuffer_Seek_Error(t *testing.T) {
 			require.EqualError(t, err, tt.errMsg)
 			require.Equal(t, tt.expected, n)
 			require.Equal(t, tt.expected, buf.GetOff())
+		})
+	}
+}
+
+func TestBuffer_GetInt32(t *testing.T) {
+	tests := []struct {
+		name     string
+		buf      []byte
+		expected int32
+	}{
+		{
+			name:     "valid request",
+			buf:      []byte{0, 0, 0, 3},
+			expected: int32(3),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+
+			n, err := bb.GetInt32(0)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, n)
+		})
+	}
+}
+
+func TestBuffer_GetInt32_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		buf    []byte
+		errMsg string
+	}{
+		{
+			name:   "EOF",
+			buf:    []byte{0, 0, 3},
+			errMsg: "EOF",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+			_, err := bb.GetInt32(0)
+
+			require.Error(t, err, tt.errMsg)
+
+		})
+	}
+}
+
+func TestBuffer_SetInt32(t *testing.T) {
+	tests := []struct {
+		name     string
+		buf      []byte
+		setint   int32
+		expected []byte
+	}{
+		{
+			name:     "valid request",
+			buf:      []byte{0, 0, 0, 0},
+			setint:   int32(3),
+			expected: []byte{0, 0, 0, 3},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+
+			err := bb.SetInt32(0, tt.setint)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, bb.GetBufferBytes())
+		})
+	}
+}
+
+func TestBuffer_SetInt32_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		buf    []byte
+		setint int32
+		errMsg string
+	}{
+		{
+			name:   "not enough space",
+			buf:    []byte{0, 0, 0},
+			setint: 3,
+			errMsg: "invalid offset",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+			err := bb.SetInt32(0, tt.setint)
+
+			require.EqualError(t, err, tt.errMsg)
+		})
+	}
+}
+
+func TestSetGetInt32(t *testing.T) {
+	t.Run("test set/get int32", func(t *testing.T) {
+		for i := 0; i < 10000; i++ {
+			buf := make([]byte, 4)
+			bb := bytes.NewBufferBytes(buf)
+
+			x := fake.RandInt32()
+
+			err := bb.SetInt32(0, x)
+			require.NoError(t, err)
+
+			n, err := bb.GetInt32(0)
+			require.NoError(t, err)
+			require.Equal(t, x, n)
+		}
+
+		for i := 0; i < 10000; i++ {
+			buf := make([]byte, 4)
+			bb := bytes.NewBufferBytes(buf)
+
+			x := -fake.RandInt32()
+
+			err := bb.SetInt32(0, x)
+			require.NoError(t, err)
+
+			n, err := bb.GetInt32(0)
+			require.NoError(t, err)
+			require.Equal(t, x, n)
+		}
+	})
+}
+
+func TestBuffer_GetUint32(t *testing.T) {
+	tests := []struct {
+		name     string
+		buf      []byte
+		expected uint32
+	}{
+		{
+			name:     "valid request",
+			buf:      []byte{0, 0, 0, 3},
+			expected: uint32(3),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+
+			n, err := bb.GetUint32(0)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, n)
+		})
+	}
+}
+
+func TestBuffer_GetUint32_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		buf    []byte
+		errMsg string
+	}{
+		{
+			name:   "not enough space",
+			buf:    []byte{0, 0, 3},
+			errMsg: "invalid offset",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+			_, err := bb.GetUint32(0)
+
+			require.EqualError(t, err, tt.errMsg)
+		})
+	}
+}
+func TestBuffer_SetUint32(t *testing.T) {
+	tests := []struct {
+		name     string
+		buf      []byte
+		setuint  uint32
+		expected []byte
+	}{
+		{
+			name:     "valid request",
+			buf:      []byte{0, 0, 0, 0},
+			setuint:  3,
+			expected: []byte{0, 0, 0, 3},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+
+			err := bb.SetUint32(0, tt.setuint)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, bb.GetBufferBytes())
+		})
+	}
+}
+
+func TestBuffer_SetUint32_Error(t *testing.T) {
+	tests := []struct {
+		name    string
+		buf     []byte
+		setuint uint32
+		errMsg  string
+	}{
+		{
+			name:    "invalid request",
+			buf:     []byte{0, 0, 0},
+			setuint: 3,
+			errMsg:  "invalid offset",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+
+			err := bb.SetUint32(0, tt.setuint)
+
+			require.EqualError(t, err, tt.errMsg)
+		})
+	}
+}
+
+func TestSetGetUint32(t *testing.T) {
+	t.Run("test set/get uint32", func(t *testing.T) {
+		for i := 0; i < 10000; i++ {
+			buf := make([]byte, 4)
+			bb := bytes.NewBufferBytes(buf)
+
+			x := fake.RandUint32()
+
+			err := bb.SetUint32(0, x)
+			require.NoError(t, err)
+
+			n, err := bb.GetUint32(0)
+			require.NoError(t, err)
+			require.Equal(t, x, n)
+		}
+	})
+}
+
+func TestBuffer_GetString(t *testing.T) {
+	tests := []struct {
+		name     string
+		buf      []byte
+		expected string
+	}{
+		{
+			name:     "valid request",
+			buf:      []byte{0, 0, 0, 4, 65, 66, 67, 68, 0, 0},
+			expected: "ABCD",
+		},
+		{
+			name:     "valid request: reach EOF",
+			buf:      []byte{0, 0, 0, 4, 65, 66, 67, 68},
+			expected: "ABCD",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBufferBytes(tt.buf)
+
+			s, err := bb.GetString(0)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, s)
 		})
 	}
 }

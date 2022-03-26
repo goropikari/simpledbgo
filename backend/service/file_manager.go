@@ -2,7 +2,7 @@ package service
 
 import "github.com/goropikari/simpledb_go/backend/core"
 
-//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/tests/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 
 // FileManager is an interface of file manager.
 type FileManager interface {
@@ -24,5 +24,6 @@ type FileManager interface {
 	// PreparePage prepares a page.
 	PreparePage() (*core.Page, error)
 
+	// FileSize returns size of given file.
 	FileSize(core.FileName) (int64, error)
 }

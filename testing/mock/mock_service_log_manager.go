@@ -61,20 +61,6 @@ func (mr *MockLogManagerMockRecorder) FlushByLSN(lsn interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FlushByLSN", reflect.TypeOf((*MockLogManager)(nil).FlushByLSN), lsn)
 }
 
-// IsZero mocks base method.
-func (m *MockLogManager) IsZero() bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsZero")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsZero indicates an expected call of IsZero.
-func (mr *MockLogManagerMockRecorder) IsZero() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsZero", reflect.TypeOf((*MockLogManager)(nil).IsZero))
-}
-
 // Iterator mocks base method.
 func (m *MockLogManager) Iterator() (<-chan []byte, error) {
 	m.ctrl.T.Helper()
