@@ -30,3 +30,8 @@ mockgen:
 .PHONY: coverage
 coverage:
 	ci/coverage
+
+.PHONY: site
+site: coverage
+	mkdocs build
+	mkdocs serve
