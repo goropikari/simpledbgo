@@ -7,6 +7,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestRandInt(t *testing.T) {
+	t.Run("test RandInt", func(t *testing.T) {
+		for i := 0; i < 10000; i++ {
+			x := fake.RandInt()
+
+			require.GreaterOrEqual(t, x, 0)
+		}
+	})
+}
 func TestRandInt32(t *testing.T) {
 	t.Run("test RandInt32", func(t *testing.T) {
 		for i := 0; i < 10000; i++ {
@@ -36,6 +45,16 @@ func TestRandUint32(t *testing.T) {
 			x := fake.RandUint32()
 
 			require.GreaterOrEqual(t, x, uint32(0))
+		}
+	})
+}
+
+func TestRandInt64(t *testing.T) {
+	t.Run("test RandInt64", func(t *testing.T) {
+		for i := 0; i < 10000; i++ {
+			x := fake.RandInt64()
+
+			require.GreaterOrEqual(t, x, int64(0))
 		}
 	})
 }

@@ -252,6 +252,13 @@ func TestBuffer_Seek_Error(t *testing.T) {
 	}
 }
 
+func TestBuffer_Reset(t *testing.T) {
+	t.Run("test buffer reset", func(t *testing.T) {
+		b := bytes.NewBuffer(10)
+		b.Reset()
+	})
+}
+
 func TestBuffer_GetInt32(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -529,6 +536,83 @@ func TestBuffer_GetString(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, tt.expected, s)
+		})
+	}
+}
+
+func TestBuffer_SetGetString(t *testing.T) {
+	var tests = []struct {
+		name      string
+		bufsize   int
+		setstring string
+		offset    int64
+	}{
+		{
+			name:      "valid request",
+			bufsize:   10,
+			setstring: "hoge",
+			offset:    0,
+		},
+		{
+			name:      "full size",
+			bufsize:   8,
+			setstring: "hoge",
+			offset:    0,
+		},
+		{
+			name:      "non zero offset",
+			bufsize:   12,
+			setstring: "hoge",
+			offset:    4,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBuffer(tt.bufsize)
+
+			err := bb.SetString(tt.offset, tt.setstring)
+			require.NoError(t, err, "set string")
+
+			b, err := bb.GetString(tt.offset)
+			require.NoError(t, err, "get string")
+			require.Equal(t, tt.setstring, b)
+		})
+	}
+}
+
+func TestBuffer_SetGetBytes(t *testing.T) {
+	var tests = []struct {
+		name     string
+		bufsize  int
+		setbytes []byte
+		offset   int64
+	}{
+		{
+			name:     "valid request",
+			bufsize:  8,
+			setbytes: []byte("hoge"),
+			offset:   0,
+		},
+		{
+			name:     "valid request: non zero offset",
+			bufsize:  20,
+			setbytes: []byte("hoge"),
+			offset:   4,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			bb := bytes.NewBuffer(tt.bufsize)
+
+			err := bb.SetBytes(tt.offset, tt.setbytes)
+			require.NoError(t, err)
+
+			b, err := bb.GetBytes(tt.offset)
+			require.NoError(t, err)
+			require.Equal(t, tt.setbytes, b)
 		})
 	}
 }

@@ -3,6 +3,7 @@ package os_test
 import (
 	"io"
 	goos "os"
+	"path/filepath"
 	"testing"
 
 	"github.com/goropikari/simpledb_go/lib/os"
@@ -13,7 +14,8 @@ import (
 func TestFile(t *testing.T) {
 	t.Run("test file", func(t *testing.T) {
 		filename := fake.RandString(10)
-		f, err := os.OpenFile(filename, false)
+		exp := os.NewExplorer()
+		f, err := exp.OpenFile(filename, false)
 		defer goos.RemoveAll(filename)
 
 		require.NoError(t, err)
@@ -41,6 +43,28 @@ func TestFile(t *testing.T) {
 		require.Equal(t, []byte{1, 2, 3, 4}, buf)
 
 		err = f.Close()
+		require.NoError(t, err)
+	})
+}
+
+func TestExplorer(t *testing.T) {
+	t.Run("test Explorer", func(t *testing.T) {
+		exp := os.NewExplorer()
+
+		path := filepath.Join("/tmp", fake.RandString(10))
+		err := exp.MkdirAll(path)
+		require.NoError(t, err)
+
+		_, err = exp.ReadDir(path)
+		require.NoError(t, err)
+
+		err = exp.RemoveAll(path)
+		require.NoError(t, err)
+
+		f, err := goos.CreateTemp("", "hoge")
+		require.NoError(t, err)
+
+		err = exp.Remove("/", f.Name())
 		require.NoError(t, err)
 	})
 }

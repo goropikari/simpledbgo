@@ -1,7 +1,7 @@
 package buffer_test
 
 import (
-	"os"
+	goos "os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -10,6 +10,8 @@ import (
 	"github.com/goropikari/simpledb_go/backend/file"
 	"github.com/goropikari/simpledb_go/backend/log"
 	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledb_go/lib/os"
+	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/goropikari/simpledb_go/testing/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -66,16 +68,49 @@ func TestBufferManager_mock(t *testing.T) {
 	})
 }
 
+func TestBufferManager_FlushAll(t *testing.T) {
+	t.Run("test FlushAll", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		fm := mock.NewMockFileManager(ctrl)
+		lm := mock.NewMockLogManager(ctrl)
+
+		bb := bytes.NewBuffer(100)
+		page := core.NewPage(bb)
+
+		fm.EXPECT().PreparePage().Return(page, nil).AnyTimes()
+		fm.EXPECT().CopyBlockToPage(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+		fm.EXPECT().CopyPageToBlock(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+
+		lm.EXPECT().FlushByLSN(gomock.Any()).Return(nil).AnyTimes()
+
+		numBuffer := 3
+		bm := buffer.NewManager(fm, lm, numBuffer)
+
+		for i := 0; i < numBuffer; i++ {
+			buf, err := bm.Pin(fake.Block())
+			require.NoError(t, err)
+			buf.SetModified(1, 0)
+		}
+
+		err := bm.FlushAll(1)
+		require.NoError(t, err)
+	})
+}
+
 func TestBufferManager_pin(t *testing.T) {
+	exp := os.NewExplorer()
+
 	blockSize := 400
 	isDirectIO := false
-	dir := "test" + core.RandomString()
-	logFile := core.FileName("logfile" + core.RandomString())
-	fileName := core.FileName("testfile" + core.RandomString())
-	defer os.RemoveAll(dir)
+	dir := "test" + fake.RandString(10)
+	logFile := core.FileName("logfile" + fake.RandString(10))
+	fileName := core.FileName("testfile" + fake.RandString(10))
+	defer exp.RemoveAll(dir)
 	fileConfig := file.NewConfig(dir, blockSize, isDirectIO)
 
-	fm := file.NewManager(fileConfig)
+	fm := file.NewManager(exp, fileConfig)
 
 	logConfig := log.NewConfig(logFile)
 	lm := log.NewManager(fm, logConfig)
@@ -123,13 +158,14 @@ func TestBufferManager_pin(t *testing.T) {
 func TestBufferManager(t *testing.T) {
 	blockSize := 400
 	isDirectIO := false
-	dir := "test" + core.RandomString()
-	logFile := core.FileName("logfile" + core.RandomString())
-	fileName := core.FileName("testfile" + core.RandomString())
-	defer os.RemoveAll(dir)
+	dir := "test" + fake.RandString(10)
+	logFile := core.FileName("logfile" + fake.RandString(10))
+	fileName := core.FileName("testfile" + fake.RandString(10))
+	defer goos.RemoveAll(dir)
 	fileConfig := file.NewConfig(dir, blockSize, isDirectIO)
 
-	fm := file.NewManager(fileConfig)
+	exp := os.NewExplorer()
+	fm := file.NewManager(exp, fileConfig)
 
 	logConfig := log.NewConfig(logFile)
 	lm := log.NewManager(fm, logConfig)

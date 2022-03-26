@@ -2,8 +2,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
-	"math/rand"
 )
 
 var (
@@ -60,19 +58,4 @@ func NewBlockSize(x int) (BlockSize, error) {
 	}
 
 	return BlockSize(x), nil
-}
-
-// RandomString returns random string.
-func RandomString() string {
-	return fmt.Sprintf("%v", rand.Uint32())
-}
-
-// StringLength returns needed byte length of string.
-func StringLength(s string) int {
-	return len(s) + Uint32Length
-}
-
-// BytesLength returns needed byte length of byte slice.
-func BytesLength(p []byte) int {
-	return len(p) + Uint32Length
 }

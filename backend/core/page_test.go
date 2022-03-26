@@ -1,11 +1,15 @@
 package core_test
 
 import (
+	"errors"
+	"io"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/testing/fake"
+	"github.com/goropikari/simpledb_go/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -173,7 +177,7 @@ func TestPage_SetGetBytes(t *testing.T) {
 		},
 		{
 			name:     "valid request: non zero offset",
-			bufsize:  12,
+			bufsize:  20,
 			setbytes: []byte("hoge"),
 			offset:   4,
 		},
@@ -293,6 +297,50 @@ func TestPage_SetGetString(t *testing.T) {
 	}
 }
 
+func TestPage_GetBufferBytes(t *testing.T) {
+	var tests = []struct {
+		name     string
+		expected []byte
+	}{
+		{
+			name:     "valid request",
+			expected: []byte("hello"),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run("test GetBufferBytes", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			bb := mock.NewMockByteBuffer(ctrl)
+			bb.EXPECT().GetBufferBytes().Return(tt.expected).AnyTimes()
+
+			page := core.NewPage(bb)
+
+			b := page.GetBufferBytes()
+			require.Equal(t, b, tt.expected)
+		})
+	}
+
+}
+
+func TestPage_Reset(t *testing.T) {
+	t.Run("test Reset", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		bb := mock.NewMockByteBuffer(ctrl)
+		bb.EXPECT().Reset().AnyTimes()
+
+		page := core.NewPage(bb)
+
+		page.Reset()
+	})
+}
+
 func TestPage_Write(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -319,6 +367,94 @@ func TestPage_Write(t *testing.T) {
 
 			_, err := page.Write(tt.writebyte)
 			require.NoError(t, err)
+		})
+	}
+}
+
+func TestPage_Write_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		bytes  []byte
+		err    error
+		errMsg string
+	}{
+		{
+			name:   "write page",
+			bytes:  []byte{1, 2, 3},
+			err:    errors.New("unexpected error"),
+			errMsg: "unexpected error",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			bb := mock.NewMockByteBuffer(ctrl)
+			bb.EXPECT().Write(gomock.Any()).Return(0, tt.err).AnyTimes()
+
+			page := core.NewPage(bb)
+
+			_, err := page.Write(tt.bytes)
+			require.EqualError(t, err, tt.errMsg)
+		})
+	}
+}
+
+func TestPage_Seek(t *testing.T) {
+	var tests = []struct {
+		name   string
+		offset int64
+	}{
+		{
+			name:   "valid request",
+			offset: fake.RandInt64(),
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			bb := mock.NewMockByteBuffer(ctrl)
+			bb.EXPECT().Seek(gomock.Any(), gomock.Any()).Return(tt.offset, nil).AnyTimes()
+
+			page := core.NewPage(bb)
+
+			_, err := page.Seek(tt.offset, io.SeekStart)
+			require.NoError(t, err)
+		})
+	}
+}
+
+func TestPage_Seek_Error(t *testing.T) {
+	var tests = []struct {
+		name   string
+		err    error
+		errMsg string
+	}{
+		{
+			name:   "valid request",
+			err:    errors.New("unexpected error"),
+			errMsg: "unexpected error",
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			bb := mock.NewMockByteBuffer(ctrl)
+			bb.EXPECT().Seek(gomock.Any(), gomock.Any()).Return(fake.RandInt64(), tt.err).AnyTimes()
+
+			page := core.NewPage(bb)
+
+			_, err := page.Seek(0, io.SeekStart)
+			require.EqualError(t, err, tt.errMsg)
 		})
 	}
 }

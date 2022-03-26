@@ -2,7 +2,7 @@ package file_test
 
 import (
 	"io/ioutil"
-	"os"
+	goos "os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -11,34 +11,122 @@ import (
 	"github.com/goropikari/simpledb_go/backend/file"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
+	"github.com/goropikari/simpledb_go/lib/os"
+	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/stretchr/testify/require"
 )
+
+func TestFileManager_Config(t *testing.T) {
+	t.Run("test file config", func(t *testing.T) {
+		config := file.Config{}
+		config.SetDefaults()
+
+		dbDir := "simpledb"
+		expected := file.NewConfig(dbDir, directio.BlockSize, false)
+
+		require.Equal(t, expected, config)
+	})
+}
+
+func TestFileManager_LastBlock(t *testing.T) {
+	t.Run("test LastBlock", func(t *testing.T) {
+		db := "/tmp"
+		blocksize := 100
+		isDirectIO := false
+		config := file.NewConfig(db, blocksize, isDirectIO)
+
+		filename := fake.RandString(10)
+		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
+		f.Write(make([]byte, blocksize))
+		f.Close()
+		defer goos.Remove(db + "/" + filename)
+
+		exp := os.NewExplorer()
+
+		mgr := file.NewManager(exp, config)
+		actual, err := mgr.LastBlock(core.FileName(filename))
+		blk := core.NewBlock(core.FileName(filename), core.BlockNumber(0))
+
+		require.NoError(t, err)
+		require.Equal(t, blk, actual)
+
+		n, err := mgr.FileSize(core.FileName(filename))
+		require.NoError(t, err)
+		require.Equal(t, int64(blocksize), n)
+	})
+}
+
+func TestFileManager_PreparePage(t *testing.T) {
+	t.Run("test PreparePage", func(t *testing.T) {
+		db := "/tmp"
+		blocksize := 100
+		isDirectIO := false
+		config := file.NewConfig(db, blocksize, isDirectIO)
+
+		filename := fake.RandString(10)
+		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
+		f.Write(make([]byte, blocksize))
+		f.Close()
+		defer goos.Remove(db + "/" + filename)
+
+		exp := os.NewExplorer()
+
+		mgr := file.NewManager(exp, config)
+
+		_, err := mgr.PreparePage()
+		require.NoError(t, err)
+	})
+
+	t.Run("test PreparePage direct io", func(t *testing.T) {
+		db := "."
+		blocksize := directio.BlockSize
+		isDirectIO := true
+		config := file.NewConfig(db, blocksize, isDirectIO)
+
+		filename := fake.RandString(10)
+		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
+		f.Write(make([]byte, blocksize))
+		f.Close()
+		defer goos.Remove(db + "/" + filename)
+
+		exp := os.NewExplorer()
+
+		mgr := file.NewManager(exp, config)
+
+		_, err := mgr.PreparePage()
+		require.NoError(t, err)
+	})
+}
 
 func TestManager(t *testing.T) {
 	t.Run("test file manager", func(t *testing.T) {
 		// Since tmpfs doesn't support O_DIRECT, dummy data is created at current directory
 		// https://github.com/ncw/directio/issues/9
-		dir, _ := os.MkdirTemp(".", "manager-")
-		f, _ := os.CreateTemp(dir, "")
+		dir, _ := goos.MkdirTemp(".", "manager-")
+		f, _ := goos.CreateTemp(dir, "")
 		filename, err := core.NewFileName(filepath.Base(f.Name()))
 		require.NoError(t, err)
 		err = f.Close()
 		require.NoError(t, err)
-		err = os.MkdirAll(dir, os.ModePerm)
+		err = goos.MkdirAll(dir, goos.ModePerm)
 		require.NoError(t, err)
-		defer os.RemoveAll(dir)
+		defer goos.RemoveAll(dir)
 
 		isDirectIO := true
 		config := file.NewConfig(dir, directio.BlockSize, isDirectIO)
-		fileMgr := file.NewManager(config)
+		exp := os.NewExplorer()
+		fileMgr := file.NewManager(exp, config)
 
 		testFilePath := filepath.Join(dir, string(filename))
+
+		// block size
+		require.Equal(t, directio.BlockSize, fileMgr.GetBlockSize())
 
 		// create new file
 		_, err = fileMgr.AppendBlock(filename)
 		require.NoError(t, err)
 
-		f, err = os.OpenFile(testFilePath, os.O_RDONLY, os.ModePerm)
+		f, err = goos.OpenFile(testFilePath, goos.O_RDONLY, goos.ModePerm)
 		require.NoError(t, err)
 		info, err := f.Stat()
 		require.NoError(t, err)

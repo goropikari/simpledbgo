@@ -1,7 +1,6 @@
 package directio_test
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -11,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDirectBuffer(t *testing.T) {
+func TestDirectIO(t *testing.T) {
 	t.Run("test direct io", func(t *testing.T) {
 		// Since tmpfs doesn't support O_DIRECT, dummy data is created at current directory
 		// https://github.com/ncw/directio/issues/9
@@ -21,26 +20,44 @@ func TestDirectBuffer(t *testing.T) {
 
 		filename := fake.RandString(10)
 		flag := os.O_RDWR | os.O_CREATE
-		f, err := directio.OpenFile(filepath.Join(dir, filename), flag, os.ModePerm)
+
+		// OpenFile
+		_, err = directio.OpenFile(filepath.Join(dir, filename), flag, os.ModePerm)
 		require.NoError(t, err)
 
-		buf, err := directio.AlignedBlock(directio.BlockSize)
+		// AlignedBlock
+		_, err = directio.AlignedBlock(directio.BlockSize)
 		require.NoError(t, err)
 
-		s := fake.RandString(directio.BlockSize)
-		copy(buf, []byte(s))
+		// IsAligned
+		require.Equal(t, false, directio.IsAligned(make([]byte, 4)))
+	})
+}
 
-		_, err = f.Write(buf)
+func TestDirectIO_AlignedBlock(t *testing.T) {
+	t.Run("test direct io: AlignedBlock", func(t *testing.T) {
+		_, err := directio.AlignedBlock(directio.BlockSize)
 		require.NoError(t, err)
 
-		_, err = f.Seek(0, io.SeekStart)
-		require.NoError(t, err)
+		_, err = directio.AlignedBlock(10)
+		require.Error(t, err)
+	})
+}
 
-		readbytes, err := directio.AlignedBlock(directio.BlockSize)
+func TestDirectIO_IsAligned(t *testing.T) {
+	t.Run("test direct io: IsAligned", func(t *testing.T) {
+		b, err := directio.AlignedBlock(directio.BlockSize)
 		require.NoError(t, err)
+		require.Equal(t, true, directio.IsAligned(b))
 
-		_, err = f.Read(readbytes)
+		require.Equal(t, false, directio.IsAligned(make([]byte, 10)))
+	})
+}
+
+func TestDirectIO_OpenFile(t *testing.T) {
+	t.Run("test direct io: IsAligned", func(t *testing.T) {
+		_, err := directio.OpenFile("hoge", os.O_CREATE, os.ModePerm)
 		require.NoError(t, err)
-		require.Equal(t, string(readbytes), s)
+		defer os.Remove("hoge")
 	})
 }

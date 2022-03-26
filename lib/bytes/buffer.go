@@ -282,7 +282,7 @@ func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 
 	_, err = buf.Read(bytes)
 	if errors.Is(err, io.EOF) {
-		return bytes, fmt.Errorf("%w", err)
+		return bytes, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}

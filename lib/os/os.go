@@ -7,18 +7,6 @@ import (
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
-func MkdirAll(path string) error {
-	return os.MkdirAll(path, os.ModePerm)
-}
-
-func ReadDir(name string) ([]os.DirEntry, error) {
-	return os.ReadDir(name)
-}
-
-func Remove(dir string, file string) error {
-	return os.Remove(filepath.Join(dir, file))
-}
-
 type File struct {
 	f *os.File
 }
@@ -54,7 +42,29 @@ func (f *File) Size() (int64, error) {
 	return info.Size(), nil
 }
 
-func OpenFile(path string, isDirectIO bool) (*File, error) {
+type Explorer struct{}
+
+func NewExplorer() *Explorer {
+	return &Explorer{}
+}
+
+func (ex *Explorer) MkdirAll(path string) error {
+	return os.MkdirAll(path, os.ModePerm)
+}
+
+func (ex *Explorer) RemoveAll(path string) error {
+	return os.RemoveAll(path)
+}
+
+func (ex *Explorer) ReadDir(name string) ([]os.DirEntry, error) {
+	return os.ReadDir(name)
+}
+
+func (ex *Explorer) Remove(dir string, file string) error {
+	return os.Remove(filepath.Join(dir, file))
+}
+
+func (ex *Explorer) OpenFile(path string, isDirectIO bool) (*File, error) {
 	flag := os.O_RDWR | os.O_CREATE
 
 	var f *os.File

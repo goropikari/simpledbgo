@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	goos "os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -15,10 +16,14 @@ import (
 	"github.com/goropikari/simpledb_go/lib/os"
 )
 
-type Filer interface {
-	io.ReadWriteSeeker
-	Close() error
-	Size() (int64, error)
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
+// Explorer is an interface of file explorer.
+type Explorer interface {
+	MkdirAll(path string) error
+	ReadDir(name string) ([]goos.DirEntry, error)
+	Remove(dir string, file string) error
+	OpenFile(path string, isDirectIO bool) (*os.File, error)
 }
 
 var (
@@ -62,7 +67,8 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) Config {
 // SetDefaults sets defalut value of config.
 func (config *Config) SetDefaults() {
 	if config.dbDir == "" {
-		config.dbDir = "simpledb"
+		abspath, _ := filepath.Abs("simpledb")
+		config.dbDir = abspath
 	}
 
 	if config.blockSize == 0 {
@@ -74,30 +80,32 @@ func (config *Config) SetDefaults() {
 type Manager struct {
 	mu        sync.Mutex
 	config    Config
-	openFiles map[core.FileName]Filer
+	explorer  Explorer
+	openFiles map[core.FileName]*os.File
 }
 
 // NewManager is constructor of Manager.
-func NewManager(config Config) *Manager {
+func NewManager(exp Explorer, config Config) *Manager {
 	config.SetDefaults()
 
-	if err := os.MkdirAll(config.dbDir); err != nil {
+	if err := exp.MkdirAll(config.dbDir); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := deleteTempFiles(config.dbDir); err != nil {
+	if err := deleteTempFiles(exp, config.dbDir); err != nil {
 		log.Fatal(err)
 	}
 
 	return &Manager{
 		mu:        sync.Mutex{},
 		config:    config,
-		openFiles: make(map[core.FileName]Filer, 0),
+		explorer:  exp,
+		openFiles: make(map[core.FileName]*os.File, 0),
 	}
 }
 
-func deleteTempFiles(dbPath string) error {
-	files, err := os.ReadDir(dbPath)
+func deleteTempFiles(exp Explorer, dbPath string) error {
+	files, err := exp.ReadDir(dbPath)
 	if err != nil {
 		return err
 	}
@@ -105,7 +113,7 @@ func deleteTempFiles(dbPath string) error {
 	// remove temporary files.
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), "temp") {
-			if err := os.Remove(dbPath, file.Name()); err != nil {
+			if err := exp.Remove(dbPath, file.Name()); err != nil {
 				return err
 			}
 		}
@@ -234,7 +242,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 }
 
 // numBlock returns the number of blocks of given file.
-func (mgr *Manager) numBlock(file Filer) (int, error) {
+func (mgr *Manager) numBlock(file *os.File) (int, error) {
 	fileSize, err := file.Size()
 	if err != nil {
 		return 0, fmt.Errorf("%w", err)
@@ -265,7 +273,7 @@ func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) {
 
 // openFile opens file as given filename.
 // If there is no such file, create new file.
-func (mgr *Manager) openFile(filename core.FileName) (Filer, error) {
+func (mgr *Manager) openFile(filename core.FileName) (*os.File, error) {
 	if v, ok := mgr.openFiles[filename]; ok {
 		return v, nil
 	}
@@ -273,7 +281,7 @@ func (mgr *Manager) openFile(filename core.FileName) (Filer, error) {
 	path := filepath.Join(mgr.config.dbDir, string(filename))
 
 	// open file. If there is no such file, create new file.
-	f, err := os.OpenFile(path, mgr.config.isDirectIO)
+	f, err := mgr.explorer.OpenFile(path, mgr.config.isDirectIO)
 	if err != nil {
 		return nil, err
 	}

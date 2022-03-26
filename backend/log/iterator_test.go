@@ -2,7 +2,6 @@ package log_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/goropikari/simpledb_go/backend/core"
@@ -10,18 +9,21 @@ import (
 	"github.com/goropikari/simpledb_go/backend/log"
 	"github.com/goropikari/simpledb_go/backend/service"
 	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledb_go/lib/os"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLogIterator(t *testing.T) {
 	t.Run("test iterator", func(t *testing.T) {
+		exp := os.NewExplorer()
+
 		dir := "test_db_dir"
-		defer os.RemoveAll(dir)
+		defer exp.RemoveAll(dir)
 
 		filename := "log_iterator"
 		isDirectIO := false
 		config := file.NewConfig(dir, 400, isDirectIO)
-		fileMgr := file.NewManager(config)
+		fileMgr := file.NewManager(exp, config)
 
 		fileName, err := core.NewFileName(filename)
 		require.NoError(t, err)
@@ -43,7 +45,7 @@ func TestLogIterator(t *testing.T) {
 		expected = expectedRecords(1, 70)
 		require.Equal(t, expected, actual)
 
-		err = os.RemoveAll(dir)
+		err = exp.RemoveAll(dir)
 		require.NoError(t, err)
 	})
 }
