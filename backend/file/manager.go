@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	goos "os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -82,7 +81,7 @@ type Manager struct {
 func NewManager(config Config) (*Manager, error) {
 	config.SetDefaults()
 
-	if err := goos.MkdirAll(config.dbDir, goos.ModePerm); err != nil {
+	if err := os.MkdirAll(config.dbDir); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 
@@ -98,7 +97,7 @@ func NewManager(config Config) (*Manager, error) {
 }
 
 func deleteTempFiles(dbPath string) error {
-	files, err := goos.ReadDir(dbPath)
+	files, err := os.ReadDir(dbPath)
 	if err != nil {
 		return err
 	}
@@ -106,7 +105,7 @@ func deleteTempFiles(dbPath string) error {
 	// remove temporary files.
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), "temp") {
-			if err := goos.Remove(filepath.Join(dbPath, file.Name())); err != nil {
+			if err := os.Remove(dbPath, file.Name()); err != nil {
 				return err
 			}
 		}

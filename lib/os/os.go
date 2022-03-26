@@ -2,9 +2,22 @@ package os
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
+
+func MkdirAll(path string) error {
+	return os.MkdirAll(path, os.ModePerm)
+}
+
+func ReadDir(name string) ([]os.DirEntry, error) {
+	return os.ReadDir(name)
+}
+
+func Remove(dir string, file string) error {
+	return os.Remove(filepath.Join(dir, file))
+}
 
 type File struct {
 	f *os.File
