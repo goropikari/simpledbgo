@@ -1,5 +1,6 @@
 linters:
   disable:
+    - godox
     - golint
     - interfacer
     - ireturn
@@ -16,3 +17,4 @@ issues:
 run:
   skip-files:
     - _test.go
+    - testing

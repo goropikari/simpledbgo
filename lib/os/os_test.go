@@ -2,15 +2,20 @@ package os_test
 
 import (
 	"io"
+	goos "os"
 	"testing"
 
 	"github.com/goropikari/simpledb_go/lib/os"
+	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFile(t *testing.T) {
 	t.Run("test file", func(t *testing.T) {
-		f, err := os.OpenFile("test", false)
+		filename := fake.RandString(10)
+		f, err := os.OpenFile(filename, false)
+		defer goos.RemoveAll(filename)
+
 		require.NoError(t, err)
 
 		n, err := f.Write(make([]byte, 100))

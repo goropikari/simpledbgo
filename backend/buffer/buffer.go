@@ -2,25 +2,28 @@ package buffer
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/service"
 )
 
+// Buffer is a buffer of database.
 type Buffer struct {
 	fileMgr service.FileManager
 	logMgr  service.LogManager
 	page    *core.Page
 	block   *core.Block
 	pins    int
-	txnum   int
-	lsn     int
+	txnum   int32
+	lsn     int32
 }
 
-func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*Buffer, error) {
+// NewBuffer creates a buffer.
+func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) *Buffer {
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		log.Fatal(err)
 	}
 
 	return &Buffer{
@@ -31,47 +34,33 @@ func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*Buffer,
 		pins:    0,
 		txnum:   -1,
 		lsn:     -1,
-	}, nil
+	}
 }
 
+// GetBlock returns buffer's block.
 func (buf *Buffer) GetBlock() *core.Block {
 	return buf.block
 }
 
-func (buf *Buffer) GetInt32(offset int64) (int32, error) {
-	n, err := buf.page.GetInt32(offset)
-	if err != nil {
-		return 0, fmt.Errorf("%w", err)
-	}
-
-	return n, nil
-}
-
-func (buf *Buffer) setModified(txnum, lsn int) {
+// setModified modifing tx number and lsn.
+func (buf *Buffer) setModified(txnum, lsn int32) {
 	buf.txnum = txnum
 	if lsn >= 0 {
 		buf.lsn = lsn
 	}
 }
 
-// GetString returns string from page.
-func (buf *Buffer) GetString(offset int64) (string, error) {
-	s, err := buf.page.GetString(offset)
-	if err != nil {
-		return "", fmt.Errorf("%w", err)
-	}
-
-	return s, nil
-}
-
+// isPinned checks whether the buffer is pinned or not.
 func (buf *Buffer) isPinned() bool {
 	return buf.pins > 0
 }
 
-func (buf *Buffer) modifyingTx() int {
+// modifyingTx returns the transaction number which modifies the buffer.
+func (buf *Buffer) modifyingTx() int32 {
 	return buf.txnum
 }
 
+// assignToBlock assigns block to the buffer.
 func (buf *Buffer) assignToBlock(block *core.Block) error {
 	if err := buf.flush(); err != nil {
 		return err
@@ -87,6 +76,7 @@ func (buf *Buffer) assignToBlock(block *core.Block) error {
 	return nil
 }
 
+// flush flushes the buffer content.
 func (buf *Buffer) flush() error {
 	if buf.txnum >= 0 {
 		if err := buf.logMgr.FlushByLSN(buf.txnum); err != nil {
@@ -103,10 +93,12 @@ func (buf *Buffer) flush() error {
 	return nil
 }
 
+// pin increments the number of pin of the buffer.
 func (buf *Buffer) pin() {
 	buf.pins++
 }
 
+// pin decrements the number of pin of the buffer.
 func (buf *Buffer) unpin() {
 	buf.pins--
 }

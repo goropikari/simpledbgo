@@ -48,7 +48,7 @@ func (mr *MockLogManagerMockRecorder) AppendRecord(record interface{}) *gomock.C
 }
 
 // FlushByLSN mocks base method.
-func (m *MockLogManager) FlushByLSN(lsn int) error {
+func (m *MockLogManager) FlushByLSN(lsn int32) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FlushByLSN", lsn)
 	ret0, _ := ret[0].(error)

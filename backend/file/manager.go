@@ -40,14 +40,14 @@ type Config struct {
 }
 
 // NewConfig is constructor of Config.
-func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
+func NewConfig(dbDir string, blockSize int, isDirectIO bool) Config {
 	if isDirectIO && blockSize%directio.BlockSize != 0 {
-		return Config{}, directio.ErrInvalidBlockSize
+		log.Fatal(directio.ErrInvalidBlockSize)
 	}
 
 	abspath, err := filepath.Abs(dbDir)
 	if err != nil {
-		return Config{}, fmt.Errorf("%w", err)
+		log.Fatal(err)
 	}
 
 	config := Config{
@@ -56,7 +56,7 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) (Config, error) {
 		isDirectIO: isDirectIO,
 	}
 
-	return config, nil
+	return config
 }
 
 // SetDefaults sets defalut value of config.
@@ -78,22 +78,22 @@ type Manager struct {
 }
 
 // NewManager is constructor of Manager.
-func NewManager(config Config) (*Manager, error) {
+func NewManager(config Config) *Manager {
 	config.SetDefaults()
 
 	if err := os.MkdirAll(config.dbDir); err != nil {
-		return nil, fmt.Errorf("%w", err)
+		log.Fatal(err)
 	}
 
 	if err := deleteTempFiles(config.dbDir); err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
 	return &Manager{
 		mu:        sync.Mutex{},
 		config:    config,
 		openFiles: make(map[core.FileName]Filer, 0),
-	}, nil
+	}
 }
 
 func deleteTempFiles(dbPath string) error {
@@ -334,10 +334,7 @@ func (mgr *Manager) PreparePage() (*core.Page, error) {
 		return core.NewPage(bb), nil
 	}
 
-	bb, err := bytes.NewBuffer(mgr.config.blockSize)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
+	bb := bytes.NewBuffer(mgr.config.blockSize)
 
 	return core.NewPage(bb), nil
 }

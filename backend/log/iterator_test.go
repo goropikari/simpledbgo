@@ -19,15 +19,13 @@ func TestLogIterator(t *testing.T) {
 		defer os.RemoveAll(dir)
 
 		filename := "log_iterator"
-		config, err := file.NewConfig(dir, 400, false)
-		require.NoError(t, err)
-		fileMgr, err := file.NewManager(config)
-		require.NoError(t, err)
+		isDirectIO := false
+		config := file.NewConfig(dir, 400, isDirectIO)
+		fileMgr := file.NewManager(config)
 
 		fileName, err := core.NewFileName(filename)
 		require.NoError(t, err)
-		logMgr, err := log.NewManager(fileMgr, log.NewConfig(fileName))
-		require.NoError(t, err)
+		logMgr := log.NewManager(fileMgr, log.NewConfig(fileName))
 
 		createRecord(logMgr, 1, 35)
 		actual := iteratorRecords(logMgr)
@@ -73,7 +71,7 @@ func createRecord(logMgr service.LogManager, start, end int) {
 
 func createLogRecord(s string, n uint32) []byte {
 	bufferSize := len(s) + core.Uint32Length*2
-	bb, _ := bytes.NewBuffer(bufferSize)
+	bb := bytes.NewBuffer(bufferSize)
 	page := core.NewPage(bb)
 	page.SetString(0, s)
 	page.SetUint32(int64(len(s)+core.Uint32Length), n)

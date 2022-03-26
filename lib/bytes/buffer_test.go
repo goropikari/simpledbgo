@@ -149,7 +149,21 @@ func TestBuffer_Write(t *testing.T) {
 			sliceSize: 10,
 			retSize:   5,
 			given:     []byte("hello"),
-			expected:  []byte{104, 101, 108, 108, 111, 0, 0, 0, 0, 0},
+			expected:  append([]byte("hello"), []byte{0, 0, 0, 0, 0}...),
+		},
+		{
+			name:      "write full size",
+			sliceSize: 4,
+			retSize:   4,
+			given:     []byte("hoge"),
+			expected:  []byte("hoge"),
+		},
+		{
+			name:      "write overflow",
+			sliceSize: 4,
+			retSize:   4,
+			given:     []byte("hello"),
+			expected:  []byte("hell"),
 		},
 	}
 
@@ -161,48 +175,6 @@ func TestBuffer_Write(t *testing.T) {
 			actual := buf.GetBuf()
 
 			require.NoError(t, err)
-			require.Equal(t, tt.retSize, n)
-			require.Equal(t, tt.expected, actual)
-		})
-	}
-}
-
-func TestBuffer_Write_Error(t *testing.T) {
-	tests := []struct {
-		name      string
-		sliceSize int
-		retSize   int
-		errMsg    string
-		given     []byte
-		expected  []byte
-	}{
-		{
-			name:      "write overflow",
-			sliceSize: 3,
-			retSize:   3,
-			errMsg:    "EOF",
-			given:     []byte("hello"),
-			expected:  []byte("hel"),
-		},
-		{
-			name:      "write full size",
-			sliceSize: 10,
-			retSize:   10,
-			errMsg:    "EOF",
-			given:     []byte("hellohello"),
-			expected:  []byte("hellohello"),
-		},
-	}
-
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			buf := bytes.NewBufferBytes(make([]byte, tt.sliceSize))
-			n, err := buf.Write(tt.given)
-
-			actual := buf.GetBuf()
-
-			require.EqualError(t, err, tt.errMsg)
 			require.Equal(t, tt.retSize, n)
 			require.Equal(t, tt.expected, actual)
 		})

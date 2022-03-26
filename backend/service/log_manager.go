@@ -5,7 +5,7 @@ package service
 // LogManager is an interface of log manager.
 type LogManager interface {
 	// FlushByLSN flushes given lsn part.
-	FlushByLSN(lsn int) error
+	FlushByLSN(lsn int32) error
 
 	// AppendRecord appends a log record.
 	AppendRecord(record []byte) error

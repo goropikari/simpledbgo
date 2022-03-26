@@ -70,7 +70,7 @@ func (page *Page) SetUint32(offset int64, x uint32) error {
 func (page *Page) GetBytes(offset int64) ([]byte, error) {
 	bytes, err := page.bb.GetBytes(offset)
 	if errors.Is(err, io.EOF) {
-		return bytes, fmt.Errorf("%w", err)
+		return bytes, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
@@ -93,7 +93,9 @@ func (page *Page) SetBytes(offset int64, p []byte) error {
 // GetString returns string from buffer.
 func (page *Page) GetString(offset int64) (string, error) {
 	s, err := page.bb.GetString(offset)
-	if err != nil {
+	if errors.Is(err, io.EOF) {
+		return s, nil
+	} else if err != nil {
 		return "", fmt.Errorf("%w", err)
 	}
 
@@ -112,6 +114,16 @@ func (page *Page) SetString(offset int64, s string) error {
 	return nil
 }
 
+// GetBufferBytes returns page buffer.
+func (page *Page) GetBufferBytes() []byte {
+	return page.bb.GetBufferBytes()
+}
+
+// Reset resets the page.
+func (page *Page) Reset() {
+	page.bb.Reset()
+}
+
 // Write writes bytes to page.
 func (page *Page) Write(p []byte) (int, error) {
 	n, err := page.bb.Write(p)
@@ -122,15 +134,7 @@ func (page *Page) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-// GetBufferBytes returns page buffer.
-func (page *Page) GetBufferBytes() []byte {
-	return page.bb.GetBufferBytes()
-}
-
-func (page *Page) Reset() {
-	page.bb.Reset()
-}
-
+// Seek sets the offset for the next Read or Write on file to offset.
 func (page *Page) Seek(offset int64, whence int) (int64, error) {
 	offset, err := page.bb.Seek(offset, whence)
 	if err != nil {

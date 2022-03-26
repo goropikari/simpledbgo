@@ -41,6 +41,7 @@ func NewFileName(name string) (FileName, error) {
 type BlockNumber uint32
 
 // NewBlockNumber is a constructor of BlockNumber.
+// TODO 引数 uint32 にする.
 func NewBlockNumber(bn int) (BlockNumber, error) {
 	if bn < 0 {
 		return 0, ErrNonNegativeBlockNumber

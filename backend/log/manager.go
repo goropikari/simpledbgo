@@ -40,16 +40,16 @@ type Manager struct {
 	fileMgr      service.FileManager
 	currentBlock *core.Block
 	page         *core.Page
-	latestLSN    int // reset when server restart
-	lastSavedLSN int
+	latestLSN    int32 // reset when server restart
+	lastSavedLSN int32
 	config       Config
 }
 
 // NewManager is constructor of Manager.
-func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
+func NewManager(fileMgr service.FileManager, config Config) *Manager {
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		log.Fatal(err)
 	}
 
 	n, err := fileMgr.FileSize(config.logfile)
@@ -67,23 +67,11 @@ func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 
 	lastBlock, err := fileMgr.LastBlock(config.logfile)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		log.Fatal(err)
 	}
 
 	if err := fileMgr.CopyBlockToPage(lastBlock, page); err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-
-	boundary, err := page.GetUint32(0)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-
-	if boundary == 0 {
-		blockSize := fileMgr.GetBlockSize()
-		if err = page.SetUint32(0, uint32(blockSize)); err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
+		log.Fatal(err)
 	}
 
 	return &Manager{
@@ -94,13 +82,13 @@ func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 		latestLSN:    0,
 		lastSavedLSN: 0,
 		config:       config,
-	}, nil
+	}
 }
 
 // flush flushes page into current block.
 func (mgr *Manager) flush() error {
 	if err := mgr.fileMgr.CopyPageToBlock(mgr.page, mgr.currentBlock); err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to flush: %w", err)
 	}
 
 	mgr.lastSavedLSN = mgr.latestLSN
@@ -109,7 +97,7 @@ func (mgr *Manager) flush() error {
 }
 
 // FlushByLSN flushes given LSN block.
-func (mgr *Manager) FlushByLSN(lsn int) error {
+func (mgr *Manager) FlushByLSN(lsn int32) error {
 	if lsn >= mgr.lastSavedLSN {
 		return mgr.flush()
 	}
@@ -124,13 +112,13 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 
 	boundary, err := mgr.page.GetUint32(0)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to get boundary: %w", err)
 	}
 
 	recordLength := len(record)
 	bytesNeeded := recordLength + core.Uint32Length
 
-	// There is no enough space. Append new block to logfile.
+	// If there is no enough space, append new block to logfile.
 	if int(boundary)-bytesNeeded < core.Uint32Length {
 		if err := mgr.flush(); err != nil {
 			return err
@@ -159,6 +147,7 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 	if err := mgr.page.SetUint32(0, uint32(recordPosition)); err != nil {
 		return fmt.Errorf("%w", err)
 	}
+
 	mgr.latestLSN++
 
 	return nil

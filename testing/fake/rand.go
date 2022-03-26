@@ -4,6 +4,10 @@ import "math/rand"
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+func RandInt() int {
+	return rand.Int()
+}
+
 func RandInt32() int32 {
 	return rand.Int31()
 }

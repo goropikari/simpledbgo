@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"errors"
+	"log"
 	"sync"
 	"time"
 
@@ -15,10 +16,10 @@ var (
 	// ErrFailedPin is an error type that means failed to pin block.
 	ErrFailedPin = errors.New("failed to pin block")
 
-	// ErrTimeout is an error type that means timeout exceeded.
+	// ErrTimeoutExceeded is an error type that means timeout exceeded.
 	ErrTimeoutExceeded = errors.New("timeout exceeded")
 
-	// ErrArgsInvalid is an error that means given args is invalid.
+	// ErrInvalidArgs is an error that means given args is invalid.
 	ErrInvalidArgs = errors.New("arguments is invalid")
 )
 
@@ -31,20 +32,17 @@ type Manager struct {
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) (*Manager, error) {
+func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) *Manager {
 	if numBuffer <= 0 {
-		return nil, ErrInvalidArgs
+		log.Fatal(ErrInvalidArgs)
 	}
 
-	bufferPool := make([]*Buffer, 0, numBuffer)
+	bufferPool := make([]*Buffer, numBuffer)
 
 	for i := 0; i < numBuffer; i++ {
-		buf, err := NewBuffer(fileMgr, logMgr)
-		if err != nil {
-			return nil, err
-		}
+		buf := NewBuffer(fileMgr, logMgr)
 
-		bufferPool = append(bufferPool, buf)
+		bufferPool[i] = buf
 	}
 
 	cond := sync.NewCond(&sync.Mutex{})
@@ -54,7 +52,7 @@ func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffe
 		bufferPool:         bufferPool,
 		numAvailableBuffer: numBuffer,
 		timeout:            time.Second * maxTimeoutSecond,
-	}, nil
+	}
 }
 
 // available returns the number of unpinned buffer.
@@ -66,7 +64,7 @@ func (mgr *Manager) available() int {
 }
 
 // FlushAll flushes all record about given txnum.
-func (mgr *Manager) FlushAll(txnum int) error {
+func (mgr *Manager) FlushAll(txnum int32) error {
 	mgr.cond.L.Lock()
 	defer mgr.cond.L.Unlock()
 
@@ -153,7 +151,7 @@ func (mgr *Manager) tryToPin(block *core.Block, chooseUnpinnedBuffer func([]*Buf
 func (mgr *Manager) findExistingBuffer(block *core.Block) *Buffer {
 	for _, buf := range mgr.bufferPool {
 		other := buf.GetBlock()
-		if other != nil && other.Equal(block) {
+		if other != nil && block.Equal(other) {
 			return buf
 		}
 	}

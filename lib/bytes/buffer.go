@@ -50,8 +50,8 @@ type Buffer struct {
 }
 
 // NewBuffer is a constructor of Buffer.
-func NewBuffer(n int) (*Buffer, error) {
-	return NewBufferBytes(make([]byte, n)), nil
+func NewBuffer(n int) *Buffer {
+	return NewBufferBytes(make([]byte, n))
 }
 
 // NewBufferBytes is a constructor of Buffer by byte slice.
@@ -88,9 +88,9 @@ func (buf *Buffer) Write(p []byte) (n int, err error) {
 	cnt := copy(buf.buf[buf.off:], p)
 
 	buf.off += int64(cnt)
-	if buf.off == buf.capacity {
-		return cnt, io.EOF
-	}
+	// if buf.off == buf.capacity {
+	// 	return cnt, io.EOF
+	// }
 
 	return cnt, nil
 }
