@@ -55,33 +55,33 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/goropikari/simpledb_go/backend/buffer/buffer.go (92.3%)</option>
+				<option value="file0">github.com/goropikari/simpledb_go/backend/buffer/buffer.go (96.2%)</option>
 				
-				<option value="file1">github.com/goropikari/simpledb_go/backend/buffer/manager.go (75.4%)</option>
+				<option value="file1">github.com/goropikari/simpledb_go/backend/buffer/manager.go (86.9%)</option>
 				
-				<option value="file2">github.com/goropikari/simpledb_go/backend/core/block.go (0.0%)</option>
+				<option value="file2">github.com/goropikari/simpledb_go/backend/core/block.go (100.0%)</option>
 				
-				<option value="file3">github.com/goropikari/simpledb_go/backend/core/core.go (0.0%)</option>
+				<option value="file3">github.com/goropikari/simpledb_go/backend/core/core.go (100.0%)</option>
 				
-				<option value="file4">github.com/goropikari/simpledb_go/backend/core/page.go (73.3%)</option>
+				<option value="file4">github.com/goropikari/simpledb_go/backend/core/page.go (88.9%)</option>
 				
-				<option value="file5">github.com/goropikari/simpledb_go/backend/file/manager.go (56.3%)</option>
+				<option value="file5">github.com/goropikari/simpledb_go/backend/file/manager.go (71.7%)</option>
 				
 				<option value="file6">github.com/goropikari/simpledb_go/backend/log/iterator.go (81.1%)</option>
 				
 				<option value="file7">github.com/goropikari/simpledb_go/backend/log/manager.go (73.5%)</option>
 				
-				<option value="file8">github.com/goropikari/simpledb_go/lib/bytes/buffer.go (50.9%)</option>
+				<option value="file8">github.com/goropikari/simpledb_go/lib/bytes/buffer.go (73.1%)</option>
 				
-				<option value="file9">github.com/goropikari/simpledb_go/lib/bytes/direct_buffer.go (0.0%)</option>
+				<option value="file9">github.com/goropikari/simpledb_go/lib/bytes/direct_buffer.go (90.0%)</option>
 				
-				<option value="file10">github.com/goropikari/simpledb_go/lib/directio/directio.go (62.5%)</option>
+				<option value="file10">github.com/goropikari/simpledb_go/lib/directio/directio.go (87.5%)</option>
 				
-				<option value="file11">github.com/goropikari/simpledb_go/lib/os/os.go (65.2%)</option>
+				<option value="file11">github.com/goropikari/simpledb_go/lib/os/os.go (80.0%)</option>
 				
-				<option value="file12">github.com/goropikari/simpledb_go/testing/fake/core.go (0.0%)</option>
+				<option value="file12">github.com/goropikari/simpledb_go/testing/fake/core.go (71.4%)</option>
 				
-				<option value="file13">github.com/goropikari/simpledb_go/testing/fake/rand.go (88.9%)</option>
+				<option value="file13">github.com/goropikari/simpledb_go/testing/fake/rand.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -153,7 +153,7 @@ func (buf *Buffer) isPinned() bool <span class="cov8" title="1">{
 }</span>
 
 // modifyingTx returns the transaction number which modifies the buffer.
-func (buf *Buffer) modifyingTx() int32 <span class="cov0" title="0">{
+func (buf *Buffer) modifyingTx() int32 <span class="cov8" title="1">{
         return buf.txnum
 }</span>
 
@@ -267,20 +267,20 @@ func (mgr *Manager) available() int <span class="cov8" title="1">{
 }</span>
 
 // FlushAll flushes all record about given txnum.
-func (mgr *Manager) FlushAll(txnum int32) error <span class="cov0" title="0">{
+func (mgr *Manager) FlushAll(txnum int32) error <span class="cov8" title="1">{
         mgr.cond.L.Lock()
         defer mgr.cond.L.Unlock()
 
-        for _, buf := range mgr.bufferPool </span><span class="cov0" title="0">{
+        for _, buf := range mgr.bufferPool </span><span class="cov8" title="1">{
                 n := buf.modifyingTx()
-                if n == txnum </span><span class="cov0" title="0">{
+                if n == txnum </span><span class="cov8" title="1">{
                         if err := buf.flush(); err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
                 }
         }
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // unpin unpins the buffer.
@@ -392,7 +392,7 @@ type Block struct {
 }
 
 // NewBlock is a constructor of Block.
-func NewBlock(fileName FileName, blockNumber BlockNumber) *Block <span class="cov0" title="0">{
+func NewBlock(fileName FileName, blockNumber BlockNumber) *Block <span class="cov8" title="1">{
         return &amp;Block{
                 fileName:    fileName,
                 blockNumber: blockNumber,
@@ -400,22 +400,22 @@ func NewBlock(fileName FileName, blockNumber BlockNumber) *Block <span class="co
 }</span>
 
 // GetFileName is a getter of fileName.
-func (b *Block) GetFileName() FileName <span class="cov0" title="0">{
+func (b *Block) GetFileName() FileName <span class="cov8" title="1">{
         return b.fileName
 }</span>
 
 // GetBlockNumber is a getter of blockNumber.
-func (b *Block) GetBlockNumber() BlockNumber <span class="cov0" title="0">{
+func (b *Block) GetBlockNumber() BlockNumber <span class="cov8" title="1">{
         return b.blockNumber
 }</span>
 
 // Equal compares equivalence of receiver and other.
-func (b *Block) Equal(other *Block) bool <span class="cov0" title="0">{
+func (b *Block) Equal(other *Block) bool <span class="cov8" title="1">{
         return b.fileName == other.fileName &amp;&amp; b.blockNumber == other.blockNumber
 }</span>
 
 // String stringfy the receiver.
-func (b *Block) String() string <span class="cov0" title="0">{
+func (b *Block) String() string <span class="cov8" title="1">{
         return fmt.Sprintf("[file %v, block %v]", b.fileName, b.blockNumber)
 }</span>
 </pre>
@@ -424,8 +424,6 @@ func (b *Block) String() string <span class="cov0" title="0">{
 
 import (
         "errors"
-        "fmt"
-        "math/rand"
 )
 
 var (
@@ -451,12 +449,12 @@ const (
 type FileName string
 
 // NewFileName is a constructor of FileName.
-func NewFileName(name string) (FileName, error) <span class="cov0" title="0">{
-        if name == "" </span><span class="cov0" title="0">{
+func NewFileName(name string) (FileName, error) <span class="cov8" title="1">{
+        if name == "" </span><span class="cov8" title="1">{
                 return "", ErrInvalidFileNameFormat
         }</span>
 
-        <span class="cov0" title="0">return FileName(name), nil</span>
+        <span class="cov8" title="1">return FileName(name), nil</span>
 }
 
 // BlockNumber is a type for block number.
@@ -464,40 +462,25 @@ type BlockNumber uint32
 
 // NewBlockNumber is a constructor of BlockNumber.
 // TODO 引数 uint32 にする.
-func NewBlockNumber(bn int) (BlockNumber, error) <span class="cov0" title="0">{
-        if bn &lt; 0 </span><span class="cov0" title="0">{
+func NewBlockNumber(bn int) (BlockNumber, error) <span class="cov8" title="1">{
+        if bn &lt; 0 </span><span class="cov8" title="1">{
                 return 0, ErrNonNegativeBlockNumber
         }</span>
 
-        <span class="cov0" title="0">return BlockNumber(bn), nil</span>
+        <span class="cov8" title="1">return BlockNumber(bn), nil</span>
 }
 
 // BlockSize is a type for block size.
 type BlockSize uint32
 
 // NewBlockSize is a constructor of BlockSize.
-func NewBlockSize(x int) (BlockSize, error) <span class="cov0" title="0">{
-        if x &lt;= 0 </span><span class="cov0" title="0">{
+func NewBlockSize(x int) (BlockSize, error) <span class="cov8" title="1">{
+        if x &lt;= 0 </span><span class="cov8" title="1">{
                 return 0, ErrBlockSize
         }</span>
 
-        <span class="cov0" title="0">return BlockSize(x), nil</span>
+        <span class="cov8" title="1">return BlockSize(x), nil</span>
 }
-
-// RandomString returns random string.
-func RandomString() string <span class="cov0" title="0">{
-        return fmt.Sprintf("%v", rand.Uint32())
-}</span>
-
-// StringLength returns needed byte length of string.
-func StringLength(s string) int <span class="cov0" title="0">{
-        return len(s) + Uint32Length
-}</span>
-
-// BytesLength returns needed byte length of byte slice.
-func BytesLength(p []byte) int <span class="cov0" title="0">{
-        return len(p) + Uint32Length
-}</span>
 </pre>
 		
 		<pre class="file" id="file4" style="display: none">package core
@@ -571,13 +554,13 @@ func (page *Page) SetUint32(offset int64, x uint32) error <span class="cov8" tit
 // GetBytes returns bytes from page.
 func (page *Page) GetBytes(offset int64) ([]byte, error) <span class="cov8" title="1">{
         bytes, err := page.bb.GetBytes(offset)
-        if errors.Is(err, io.EOF) </span><span class="cov8" title="1">{
+        if errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
                 return bytes, nil
         }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">return bytes, nil</span>
+        <span class="cov8" title="1">return bytes, nil</span>
 }
 
 // SetBytes writes bytes to page.
@@ -617,19 +600,19 @@ func (page *Page) SetString(offset int64, s string) error <span class="cov8" tit
 }
 
 // GetBufferBytes returns page buffer.
-func (page *Page) GetBufferBytes() []byte <span class="cov0" title="0">{
+func (page *Page) GetBufferBytes() []byte <span class="cov8" title="1">{
         return page.bb.GetBufferBytes()
 }</span>
 
 // Reset resets the page.
-func (page *Page) Reset() <span class="cov0" title="0">{
+func (page *Page) Reset() <span class="cov8" title="1">{
         page.bb.Reset()
 }</span>
 
 // Write writes bytes to page.
 func (page *Page) Write(p []byte) (int, error) <span class="cov8" title="1">{
         n, err := page.bb.Write(p)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return 0, fmt.Errorf("%w", err)
         }</span>
 
@@ -637,13 +620,13 @@ func (page *Page) Write(p []byte) (int, error) <span class="cov8" title="1">{
 }
 
 // Seek sets the offset for the next Read or Write on file to offset.
-func (page *Page) Seek(offset int64, whence int) (int64, error) <span class="cov0" title="0">{
+func (page *Page) Seek(offset int64, whence int) (int64, error) <span class="cov8" title="1">{
         offset, err := page.bb.Seek(offset, whence)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return 0, fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">return offset, nil</span>
+        <span class="cov8" title="1">return offset, nil</span>
 }
 </pre>
 		
@@ -654,6 +637,7 @@ import (
         "fmt"
         "io"
         "log"
+        goos "os"
         "path/filepath"
         "strings"
         "sync"
@@ -664,10 +648,14 @@ import (
         "github.com/goropikari/simpledb_go/lib/os"
 )
 
-type Filer interface {
-        io.ReadWriteSeeker
-        Close() error
-        Size() (int64, error)
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
+// Explorer is an interface of file explorer.
+type Explorer interface {
+        MkdirAll(path string) error
+        ReadDir(name string) ([]goos.DirEntry, error)
+        Remove(dir string, file string) error
+        OpenFile(path string, isDirectIO bool) (*os.File, error)
 }
 
 var (
@@ -710,11 +698,12 @@ func NewConfig(dbDir string, blockSize int, isDirectIO bool) Config <span class=
 
 // SetDefaults sets defalut value of config.
 func (config *Config) SetDefaults() <span class="cov8" title="1">{
-        if config.dbDir == "" </span><span class="cov0" title="0">{
-                config.dbDir = "simpledb"
+        if config.dbDir == "" </span><span class="cov8" title="1">{
+                abspath, _ := filepath.Abs("simpledb")
+                config.dbDir = abspath
         }</span>
 
-        <span class="cov8" title="1">if config.blockSize == 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if config.blockSize == 0 </span><span class="cov8" title="1">{
                 config.blockSize = directio.BlockSize
         }</span>
 }
@@ -723,30 +712,32 @@ func (config *Config) SetDefaults() <span class="cov8" title="1">{
 type Manager struct {
         mu        sync.Mutex
         config    Config
-        openFiles map[core.FileName]Filer
+        explorer  Explorer
+        openFiles map[core.FileName]*os.File
 }
 
 // NewManager is constructor of Manager.
-func NewManager(config Config) *Manager <span class="cov8" title="1">{
+func NewManager(exp Explorer, config Config) *Manager <span class="cov8" title="1">{
         config.SetDefaults()
 
-        if err := os.MkdirAll(config.dbDir); err != nil </span><span class="cov0" title="0">{
+        if err := exp.MkdirAll(config.dbDir); err != nil </span><span class="cov0" title="0">{
                 log.Fatal(err)
         }</span>
 
-        <span class="cov8" title="1">if err := deleteTempFiles(config.dbDir); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := deleteTempFiles(exp, config.dbDir); err != nil </span><span class="cov0" title="0">{
                 log.Fatal(err)
         }</span>
 
         <span class="cov8" title="1">return &amp;Manager{
                 mu:        sync.Mutex{},
                 config:    config,
-                openFiles: make(map[core.FileName]Filer, 0),
+                explorer:  exp,
+                openFiles: make(map[core.FileName]*os.File, 0),
         }</span>
 }
 
-func deleteTempFiles(dbPath string) error <span class="cov8" title="1">{
-        files, err := os.ReadDir(dbPath)
+func deleteTempFiles(exp Explorer, dbPath string) error <span class="cov8" title="1">{
+        files, err := exp.ReadDir(dbPath)
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -754,7 +745,7 @@ func deleteTempFiles(dbPath string) error <span class="cov8" title="1">{
         // remove temporary files.
         <span class="cov8" title="1">for _, file := range files </span><span class="cov8" title="1">{
                 if strings.HasPrefix(file.Name(), "temp") </span><span class="cov0" title="0">{
-                        if err := os.Remove(dbPath, file.Name()); err != nil </span><span class="cov0" title="0">{
+                        if err := exp.Remove(dbPath, file.Name()); err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
                 }
@@ -764,7 +755,7 @@ func deleteTempFiles(dbPath string) error <span class="cov8" title="1">{
 }
 
 // GetBlockSize returns block size.
-func (mgr *Manager) GetBlockSize() int <span class="cov0" title="0">{
+func (mgr *Manager) GetBlockSize() int <span class="cov8" title="1">{
         return mgr.config.blockSize
 }</span>
 
@@ -883,7 +874,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) <sp
 }
 
 // numBlock returns the number of blocks of given file.
-func (mgr *Manager) numBlock(file Filer) (int, error) <span class="cov8" title="1">{
+func (mgr *Manager) numBlock(file *os.File) (int, error) <span class="cov8" title="1">{
         fileSize, err := file.Size()
         if err != nil </span><span class="cov0" title="0">{
                 return 0, fmt.Errorf("%w", err)
@@ -893,28 +884,28 @@ func (mgr *Manager) numBlock(file Filer) (int, error) <span class="cov8" title="
 }
 
 // LastBlock returns last block of given file.
-func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) <span class="cov0" title="0">{
+func (mgr *Manager) LastBlock(filename core.FileName) (*core.Block, error) <span class="cov8" title="1">{
         f, err := mgr.openFile(filename)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">nb, err := mgr.numBlock(f)
+        <span class="cov8" title="1">nb, err := mgr.numBlock(f)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">lastBlockNumber, err := core.NewBlockNumber(nb - 1)
+        <span class="cov8" title="1">lastBlockNumber, err := core.NewBlockNumber(nb - 1)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">return core.NewBlock(filename, lastBlockNumber), nil</span>
+        <span class="cov8" title="1">return core.NewBlock(filename, lastBlockNumber), nil</span>
 }
 
 // openFile opens file as given filename.
 // If there is no such file, create new file.
-func (mgr *Manager) openFile(filename core.FileName) (Filer, error) <span class="cov8" title="1">{
+func (mgr *Manager) openFile(filename core.FileName) (*os.File, error) <span class="cov8" title="1">{
         if v, ok := mgr.openFiles[filename]; ok </span><span class="cov8" title="1">{
                 return v, nil
         }</span>
@@ -922,7 +913,7 @@ func (mgr *Manager) openFile(filename core.FileName) (Filer, error) <span class=
         <span class="cov8" title="1">path := filepath.Join(mgr.config.dbDir, string(filename))
 
         // open file. If there is no such file, create new file.
-        f, err := os.OpenFile(path, mgr.config.isDirectIO)
+        f, err := mgr.explorer.OpenFile(path, mgr.config.isDirectIO)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
@@ -947,13 +938,13 @@ func (mgr *Manager) closeFile(filename core.FileName) error <span class="cov8" t
         <span class="cov0" title="0">return ErrNoSuchFile</span>
 }
 
-func (mgr *Manager) FileSize(filename core.FileName) (int64, error) <span class="cov0" title="0">{
+func (mgr *Manager) FileSize(filename core.FileName) (int64, error) <span class="cov8" title="1">{
         file, err := mgr.openFile(filename)
         if err != nil </span><span class="cov0" title="0">{
                 return 0, err
         }</span>
 
-        <span class="cov0" title="0">return file.Size()</span>
+        <span class="cov8" title="1">return file.Size()</span>
 }
 
 // prepareBytes prepares byte slice.
@@ -973,17 +964,17 @@ func (mgr *Manager) prepareBytes() []byte <span class="cov8" title="1">{
 // PreparePage prepares a page.
 // If file manager's config specifies direct IO support, this returns page
 // satisfying direct IO constraints.
-func (mgr *Manager) PreparePage() (*core.Page, error) <span class="cov0" title="0">{
-        if mgr.config.isDirectIO </span><span class="cov0" title="0">{
+func (mgr *Manager) PreparePage() (*core.Page, error) <span class="cov8" title="1">{
+        if mgr.config.isDirectIO </span><span class="cov8" title="1">{
                 bb, err := bytes.NewDirectBuffer(mgr.config.blockSize)
                 if err != nil </span><span class="cov0" title="0">{
                         return nil, fmt.Errorf("%w", err)
                 }</span>
 
-                <span class="cov0" title="0">return core.NewPage(bb), nil</span>
+                <span class="cov8" title="1">return core.NewPage(bb), nil</span>
         }
 
-        <span class="cov0" title="0">bb := bytes.NewBuffer(mgr.config.blockSize)
+        <span class="cov8" title="1">bb := bytes.NewBuffer(mgr.config.blockSize)
 
         return core.NewPage(bb), nil</span>
 }
@@ -1337,7 +1328,7 @@ type Buffer struct {
 }
 
 // NewBuffer is a constructor of Buffer.
-func NewBuffer(n int) *Buffer <span class="cov0" title="0">{
+func NewBuffer(n int) *Buffer <span class="cov8" title="1">{
         return NewBufferBytes(make([]byte, n))
 }</span>
 
@@ -1410,9 +1401,9 @@ func (buf *Buffer) GetBufferBytes() []byte <span class="cov8" title="1">{
 }</span>
 
 // Reset resets buffer.
-func (buf *Buffer) Reset() <span class="cov0" title="0">{
+func (buf *Buffer) Reset() <span class="cov8" title="1">{
         buf.off = 0
-        for i := 0; i &lt; int(buf.capacity); i++ </span><span class="cov0" title="0">{
+        for i := 0; i &lt; int(buf.capacity); i++ </span><span class="cov8" title="1">{
                 buf.buf[i] = 0
         }</span>
 }
@@ -1530,75 +1521,75 @@ func (buf *Buffer) GetString(offset int64) (string, error) <span class="cov8" ti
 // ----------------------------------------
 // | string length (uint32)| body (string)|
 // ----------------------------------------.
-func (buf *Buffer) SetString(offset int64, str string) error <span class="cov0" title="0">{
+func (buf *Buffer) SetString(offset int64, str string) error <span class="cov8" title="1">{
         if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">if !buf.hasSpace(uint32Length + len(str)) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !buf.hasSpace(uint32Length + len(str)) </span><span class="cov0" title="0">{
                 return ErrInvalidOffset
         }</span>
 
-        <span class="cov0" title="0">if err := buf.SetUint32(offset, uint32(len(str))); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := buf.SetUint32(offset, uint32(len(str))); err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("failed to set string: %w", err)
         }</span>
 
-        <span class="cov0" title="0">if _, err := buf.Write([]byte(str)); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if _, err := buf.Write([]byte(str)); err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // GetBytes returns bytes from page.
-func (buf *Buffer) GetBytes(offset int64) ([]byte, error) <span class="cov0" title="0">{
+func (buf *Buffer) GetBytes(offset int64) ([]byte, error) <span class="cov8" title="1">{
         if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">length, err := buf.GetUint32(offset)
+        <span class="cov8" title="1">length, err := buf.GetUint32(offset)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to get bytes: %w", err)
         }</span>
 
-        <span class="cov0" title="0">if !buf.hasSpace(int(length)) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !buf.hasSpace(int(length)) </span><span class="cov0" title="0">{
                 return nil, ErrInvalidOffset
         }</span>
 
-        <span class="cov0" title="0">bytes := make([]byte, length)
+        <span class="cov8" title="1">bytes := make([]byte, length)
 
         _, err = buf.Read(bytes)
-        if errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
-                return bytes, fmt.Errorf("%w", err)
-        }</span> else<span class="cov0" title="0"> if err != nil </span><span class="cov0" title="0">{
+        if errors.Is(err, io.EOF) </span><span class="cov8" title="1">{
+                return bytes, nil
+        }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">return bytes, nil</span>
+        <span class="cov8" title="1">return bytes, nil</span>
 }
 
 // SetBytes writes bytes to page.
 // ---------------------------------------
 // | bytes length (uint32) | body (bytes)|
 // ---------------------------------------.
-func (buf *Buffer) SetBytes(offset int64, p []byte) error <span class="cov0" title="0">{
+func (buf *Buffer) SetBytes(offset int64, p []byte) error <span class="cov8" title="1">{
         if _, err := buf.Seek(offset, io.SeekStart); err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">if !buf.hasSpace(uint32Length + len(p)) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !buf.hasSpace(uint32Length + len(p)) </span><span class="cov0" title="0">{
                 return ErrInvalidOffset
         }</span>
 
-        <span class="cov0" title="0">if err := buf.SetUint32(offset, uint32(len(p))); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := buf.SetUint32(offset, uint32(len(p))); err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("failed to set bytes: %w", err)
         }</span>
 
-        <span class="cov0" title="0">if _, err := buf.Write(p); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if _, err := buf.Write(p); err != nil &amp;&amp; !errors.Is(err, io.EOF) </span><span class="cov0" title="0">{
                 return fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 func (buf *Buffer) hasSpace(x int) bool <span class="cov8" title="1">{
@@ -1619,27 +1610,27 @@ import (
 var ErrInvalidDirectIO = errors.New("invalid direct io")
 
 // NewDirectBuffer is a constructor of DirectBuffer.
-func NewDirectBuffer(n int) (*Buffer, error) <span class="cov0" title="0">{
+func NewDirectBuffer(n int) (*Buffer, error) <span class="cov8" title="1">{
         buf, err := directio.AlignedBlock(n)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("%w", err)
         }</span>
 
-        <span class="cov0" title="0">buffer, err := NewDirectBufferBytes(buf)
+        <span class="cov8" title="1">buffer, err := NewDirectBufferBytes(buf)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">return buffer, nil</span>
+        <span class="cov8" title="1">return buffer, nil</span>
 }
 
 // NewDirectBufferBytes is a constructor of DirectBuffer by byte slice.
-func NewDirectBufferBytes(buf []byte) (*Buffer, error) <span class="cov0" title="0">{
-        if !directio.IsAligned(buf) </span><span class="cov0" title="0">{
+func NewDirectBufferBytes(buf []byte) (*Buffer, error) <span class="cov8" title="1">{
+        if !directio.IsAligned(buf) </span><span class="cov8" title="1">{
                 return nil, ErrInvalidDirectIO
         }</span>
 
-        <span class="cov0" title="0">return NewBufferBytes(buf), nil</span>
+        <span class="cov8" title="1">return NewBufferBytes(buf), nil</span>
 }
 </pre>
 		
@@ -1660,7 +1651,7 @@ const BlockSize = directio.BlockSize
 
 // AlignedBlock returns byte slice satisfying direct IO.
 func AlignedBlock(n int) ([]byte, error) <span class="cov8" title="1">{
-        if n%BlockSize != 0 </span><span class="cov0" title="0">{
+        if n%BlockSize != 0 </span><span class="cov8" title="1">{
                 return nil, ErrInvalidBlockSize
         }</span>
 
@@ -1668,7 +1659,7 @@ func AlignedBlock(n int) ([]byte, error) <span class="cov8" title="1">{
 }
 
 // IsAligned check whether given byte slice satisfy direct IO constraint or not.
-func IsAligned(p []byte) bool <span class="cov0" title="0">{
+func IsAligned(p []byte) bool <span class="cov8" title="1">{
         return directio.IsAligned(p)
 }</span>
 
@@ -1691,18 +1682,6 @@ import (
 
         "github.com/goropikari/simpledb_go/lib/directio"
 )
-
-func MkdirAll(path string) error <span class="cov0" title="0">{
-        return os.MkdirAll(path, os.ModePerm)
-}</span>
-
-func ReadDir(name string) ([]os.DirEntry, error) <span class="cov0" title="0">{
-        return os.ReadDir(name)
-}</span>
-
-func Remove(dir string, file string) error <span class="cov0" title="0">{
-        return os.Remove(filepath.Join(dir, file))
-}</span>
 
 type File struct {
         f *os.File
@@ -1739,7 +1718,29 @@ func (f *File) Size() (int64, error) <span class="cov8" title="1">{
         <span class="cov8" title="1">return info.Size(), nil</span>
 }
 
-func OpenFile(path string, isDirectIO bool) (*File, error) <span class="cov8" title="1">{
+type Explorer struct{}
+
+func NewExplorer() *Explorer <span class="cov8" title="1">{
+        return &amp;Explorer{}
+}</span>
+
+func (ex *Explorer) MkdirAll(path string) error <span class="cov8" title="1">{
+        return os.MkdirAll(path, os.ModePerm)
+}</span>
+
+func (ex *Explorer) RemoveAll(path string) error <span class="cov8" title="1">{
+        return os.RemoveAll(path)
+}</span>
+
+func (ex *Explorer) ReadDir(name string) ([]os.DirEntry, error) <span class="cov8" title="1">{
+        return os.ReadDir(name)
+}</span>
+
+func (ex *Explorer) Remove(dir string, file string) error <span class="cov8" title="1">{
+        return os.Remove(filepath.Join(dir, file))
+}</span>
+
+func (ex *Explorer) OpenFile(path string, isDirectIO bool) (*File, error) <span class="cov8" title="1">{
         flag := os.O_RDWR | os.O_CREATE
 
         var f *os.File
@@ -1766,18 +1767,18 @@ func OpenFile(path string, isDirectIO bool) (*File, error) <span class="cov8" ti
 import "github.com/goropikari/simpledb_go/backend/core"
 
 // Block returns fake block.
-func Block() *core.Block <span class="cov0" title="0">{
+func Block() *core.Block <span class="cov8" title="1">{
         filename, err := core.NewFileName(RandString(10))
         if err != nil </span><span class="cov0" title="0">{
                 panic(err)</span>
         }
 
-        <span class="cov0" title="0">blkNum, err := core.NewBlockNumber(RandInt())
+        <span class="cov8" title="1">blkNum, err := core.NewBlockNumber(RandInt())
         if err != nil </span><span class="cov0" title="0">{
                 panic(err)</span>
         }
 
-        <span class="cov0" title="0">return core.NewBlock(filename, blkNum)</span>
+        <span class="cov8" title="1">return core.NewBlock(filename, blkNum)</span>
 }
 </pre>
 		
@@ -1787,7 +1788,7 @@ import "math/rand"
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-func RandInt() int <span class="cov0" title="0">{
+func RandInt() int <span class="cov8" title="1">{
         return rand.Int()
 }</span>
 
@@ -1795,13 +1796,17 @@ func RandInt32() int32 <span class="cov8" title="1">{
         return rand.Int31()
 }</span>
 
-func RandUint32() uint32 <span class="cov8" title="1">{
-        return uint32(rand.Int31())
-}</span>
-
 // RandInt32n returns random number from [0, n).
 func RandInt32n(n int32) int32 <span class="cov8" title="1">{
         return rand.Int31n(n)
+}</span>
+
+func RandInt64() int64 <span class="cov8" title="1">{
+        return rand.Int63()
+}</span>
+
+func RandUint32() uint32 <span class="cov8" title="1">{
+        return uint32(rand.Int31())
 }</span>
 
 func RandString(length int) string <span class="cov8" title="1">{
