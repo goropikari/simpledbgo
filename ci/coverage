@@ -2,8 +2,10 @@
 
 set -eu
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 test_coverage=`mktemp`
-coverage_html=docs/coverage.html
+coverage_html=docs/coverage
 go test -cover ./... -coverprofile=${test_coverage}
-go tool cover -html=${test_coverage} -o ${coverage_html}
-sed -i -e "s/black/white/g" ${coverage_html}
+${SCRIPT_DIR}/../bin/gcov2lcov -infile=${test_coverage} -outfile=coverage.lcov
+genhtml coverage.lcov -o docs/coverage
