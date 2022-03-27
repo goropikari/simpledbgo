@@ -11,7 +11,10 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 COPY requirements.txt .
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends python3 python3-pip \
+    && apt-get -y install --no-install-recommends \
+    python3 python3-pip \
+    lcov \
+    # install mkdocs
     && pip3 install -r ./requirements.txt
 
 # [Optional] Uncomment the next lines to use go get to install anything else you need
