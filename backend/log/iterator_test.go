@@ -15,7 +15,7 @@ import (
 
 func TestLogIterator(t *testing.T) {
 	t.Run("test iterator", func(t *testing.T) {
-		exp := os.NewExplorer()
+		exp := os.NewNormalExplorer()
 
 		dir := "test_db_dir"
 		defer exp.RemoveAll(dir)

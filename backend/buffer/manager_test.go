@@ -100,7 +100,7 @@ func TestBufferManager_FlushAll(t *testing.T) {
 }
 
 func TestBufferManager_pin(t *testing.T) {
-	exp := os.NewExplorer()
+	exp := os.NewNormalExplorer()
 
 	blockSize := 400
 	isDirectIO := false
@@ -164,7 +164,7 @@ func TestBufferManager(t *testing.T) {
 	defer goos.RemoveAll(dir)
 	fileConfig := file.NewConfig(dir, blockSize, isDirectIO)
 
-	exp := os.NewExplorer()
+	exp := os.NewNormalExplorer()
 	fm := file.NewManager(exp, fileConfig)
 
 	logConfig := log.NewConfig(logFile)

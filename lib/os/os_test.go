@@ -14,8 +14,8 @@ import (
 func TestFile(t *testing.T) {
 	t.Run("test file", func(t *testing.T) {
 		filename := fake.RandString(10)
-		exp := os.NewExplorer()
-		f, err := exp.OpenFile(filename, false)
+		exp := os.NewNormalExplorer()
+		f, err := exp.OpenFile(filename)
 		defer goos.RemoveAll(filename)
 
 		require.NoError(t, err)
@@ -47,9 +47,9 @@ func TestFile(t *testing.T) {
 	})
 }
 
-func TestExplorer(t *testing.T) {
-	t.Run("test Explorer", func(t *testing.T) {
-		exp := os.NewExplorer()
+func TestNormalExplorer(t *testing.T) {
+	t.Run("test NormalExplorer", func(t *testing.T) {
+		exp := os.NewNormalExplorer()
 
 		path := filepath.Join("/tmp", fake.RandString(10))
 		err := exp.MkdirAll(path)

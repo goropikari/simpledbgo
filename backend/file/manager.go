@@ -23,7 +23,7 @@ type Explorer interface {
 	MkdirAll(path string) error
 	ReadDir(name string) ([]goos.DirEntry, error)
 	Remove(dir string, file string) error
-	OpenFile(path string, isDirectIO bool) (*os.File, error)
+	OpenFile(path string) (*os.File, error)
 }
 
 var (
@@ -281,7 +281,7 @@ func (mgr *Manager) openFile(filename core.FileName) (*os.File, error) {
 	path := filepath.Join(mgr.config.dbDir, string(filename))
 
 	// open file. If there is no such file, create new file.
-	f, err := mgr.explorer.OpenFile(path, mgr.config.isDirectIO)
+	f, err := mgr.explorer.OpenFile(path)
 	if err != nil {
 		return nil, err
 	}

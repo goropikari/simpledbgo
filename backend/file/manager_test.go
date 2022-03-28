@@ -41,7 +41,7 @@ func TestFileManager_LastBlock(t *testing.T) {
 		f.Close()
 		defer goos.Remove(db + "/" + filename)
 
-		exp := os.NewExplorer()
+		exp := os.NewNormalExplorer()
 
 		mgr := file.NewManager(exp, config)
 		actual, err := mgr.LastBlock(core.FileName(filename))
@@ -69,7 +69,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 		f.Close()
 		defer goos.Remove(db + "/" + filename)
 
-		exp := os.NewExplorer()
+		exp := os.NewNormalExplorer()
 
 		mgr := file.NewManager(exp, config)
 
@@ -89,7 +89,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 		f.Close()
 		defer goos.Remove(db + "/" + filename)
 
-		exp := os.NewExplorer()
+		exp := os.NewNormalExplorer()
 
 		mgr := file.NewManager(exp, config)
 
@@ -114,7 +114,7 @@ func TestManager(t *testing.T) {
 
 		isDirectIO := true
 		config := file.NewConfig(dir, directio.BlockSize, isDirectIO)
-		exp := os.NewExplorer()
+		exp := os.NewNormalExplorer()
 		fileMgr := file.NewManager(exp, config)
 
 		testFilePath := filepath.Join(dir, string(filename))

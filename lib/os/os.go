@@ -42,44 +42,54 @@ func (f *File) Size() (int64, error) {
 	return info.Size(), nil
 }
 
-type Explorer struct{}
-
-func NewExplorer() *Explorer {
-	return &Explorer{}
+type NormalExplorer struct {
 }
 
-func (ex *Explorer) MkdirAll(path string) error {
+func NewNormalExplorer() *NormalExplorer {
+	return &NormalExplorer{}
+}
+
+type DirectIOExplorer struct {
+	NormalExplorer
+}
+
+func NewDirectIOExplorer() *DirectIOExplorer {
+	return &DirectIOExplorer{}
+}
+
+func (ex *NormalExplorer) MkdirAll(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
 }
 
-func (ex *Explorer) RemoveAll(path string) error {
+func (ex *NormalExplorer) RemoveAll(path string) error {
 	return os.RemoveAll(path)
 }
 
-func (ex *Explorer) ReadDir(name string) ([]os.DirEntry, error) {
+func (ex *NormalExplorer) ReadDir(name string) ([]os.DirEntry, error) {
 	return os.ReadDir(name)
 }
 
-func (ex *Explorer) Remove(dir string, file string) error {
+func (ex *NormalExplorer) Remove(dir string, file string) error {
 	return os.Remove(filepath.Join(dir, file))
 }
 
-func (ex *Explorer) OpenFile(path string, isDirectIO bool) (*File, error) {
+func (ex *NormalExplorer) OpenFile(path string) (*File, error) {
 	flag := os.O_RDWR | os.O_CREATE
 
-	var f *os.File
-	var err error
+	f, err := os.OpenFile(path, flag, os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
 
-	if isDirectIO {
-		f, err = directio.OpenFile(path, flag, os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		f, err = os.OpenFile(path, flag, os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
+	return NewFile(f), nil
+}
+
+func (ex *DirectIOExplorer) OpenFile(path string) (*File, error) {
+	flag := os.O_RDWR | os.O_CREATE
+
+	f, err := directio.OpenFile(path, flag, os.ModePerm)
+	if err != nil {
+		return nil, err
 	}
 
 	return NewFile(f), nil
