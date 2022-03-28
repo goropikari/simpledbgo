@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/core"
+	"github.com/goropikari/simpledb_go/infra"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/goropikari/simpledb_go/lib/os"
@@ -37,62 +38,23 @@ var (
 	ErrInvalidConfig = errors.New("config is invalid")
 )
 
-// Config is configuration of Manager.
-type Config struct {
-	dbDir      string
-	blockSize  int // for direct io, blockSize must be multiple of 4096
-	isDirectIO bool
-}
-
-// NewConfig is constructor of Config.
-func NewConfig(dbDir string, blockSize int, isDirectIO bool) Config {
-	if isDirectIO && blockSize%directio.BlockSize != 0 {
-		log.Fatal(directio.ErrInvalidBlockSize)
-	}
-
-	abspath, err := filepath.Abs(dbDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	config := Config{
-		dbDir:      abspath,
-		blockSize:  blockSize,
-		isDirectIO: isDirectIO,
-	}
-
-	return config
-}
-
-// SetDefaults sets defalut value of config.
-func (config *Config) SetDefaults() {
-	if config.dbDir == "" {
-		abspath, _ := filepath.Abs("simpledb")
-		config.dbDir = abspath
-	}
-
-	if config.blockSize == 0 {
-		config.blockSize = directio.BlockSize
-	}
-}
-
 // Manager manages files.
 type Manager struct {
 	mu        sync.Mutex
-	config    Config
+	config    infra.Config
 	explorer  Explorer
 	openFiles map[core.FileName]*os.File
 }
 
 // NewManager is constructor of Manager.
-func NewManager(exp Explorer, config Config) *Manager {
+func NewManager(exp Explorer, config infra.Config) *Manager {
 	config.SetDefaults()
 
-	if err := exp.MkdirAll(config.dbDir); err != nil {
+	if err := exp.MkdirAll(config.DBPath); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := deleteTempFiles(exp, config.dbDir); err != nil {
+	if err := deleteTempFiles(exp, config.DBPath); err != nil {
 		log.Fatal(err)
 	}
 
@@ -124,7 +86,7 @@ func deleteTempFiles(exp Explorer, dbPath string) error {
 
 // GetBlockSize returns block size.
 func (mgr *Manager) GetBlockSize() int {
-	return mgr.config.blockSize
+	return mgr.config.BlockSize
 }
 
 // CopyBlockToPage copies block to page.
@@ -154,13 +116,13 @@ func (mgr *Manager) CopyBlockToPage(block *core.Block, page *core.Page) error {
 	// 実際は x00 を blocksize 分読み込んだということにしたいので、page を 0 reset しておく
 	page.Reset()
 
-	seekPos := int64(mgr.config.blockSize * int(block.GetBlockNumber()))
+	seekPos := int64(mgr.config.BlockSize * int(block.GetBlockNumber()))
 
 	if _, err = file.Seek(seekPos, io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	if _, err = io.CopyN(page, file, int64(mgr.config.blockSize)); err != nil && !errors.Is(err, io.EOF) {
+	if _, err = io.CopyN(page, file, int64(mgr.config.BlockSize)); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -189,7 +151,7 @@ func (mgr *Manager) CopyPageToBlock(page *core.Page, block *core.Block) error {
 		return err
 	}
 
-	if _, err = file.Seek(int64(mgr.config.blockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
+	if _, err = file.Seek(int64(mgr.config.BlockSize*int(block.GetBlockNumber())), io.SeekStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -227,7 +189,7 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 	block := core.NewBlock(filename, appendBlockNum)
 
 	// extend file size
-	offset := int64(numBlock * mgr.config.blockSize)
+	offset := int64(numBlock * mgr.config.BlockSize)
 	if _, err := file.Seek(offset, io.SeekStart); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
@@ -248,7 +210,7 @@ func (mgr *Manager) numBlock(file *os.File) (int, error) {
 		return 0, fmt.Errorf("%w", err)
 	}
 
-	return int(fileSize) / mgr.config.blockSize, nil
+	return int(fileSize) / mgr.config.BlockSize, nil
 }
 
 // LastBlock returns last block of given file.
@@ -278,7 +240,7 @@ func (mgr *Manager) openFile(filename core.FileName) (*os.File, error) {
 		return v, nil
 	}
 
-	path := filepath.Join(mgr.config.dbDir, string(filename))
+	path := filepath.Join(mgr.config.DBPath, string(filename))
 
 	// open file. If there is no such file, create new file.
 	f, err := mgr.explorer.OpenFile(path)
@@ -317,8 +279,8 @@ func (mgr *Manager) FileSize(filename core.FileName) (int64, error) {
 
 // prepareBytes prepares byte slice.
 func (mgr *Manager) prepareBytes() []byte {
-	if mgr.config.isDirectIO {
-		buf, err := directio.AlignedBlock(mgr.config.blockSize)
+	if mgr.config.IsDirectIO {
+		buf, err := directio.AlignedBlock(mgr.config.BlockSize)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -326,15 +288,15 @@ func (mgr *Manager) prepareBytes() []byte {
 		return buf
 	}
 
-	return make([]byte, mgr.config.blockSize)
+	return make([]byte, mgr.config.BlockSize)
 }
 
 // PreparePage prepares a page.
 // If file manager's config specifies direct IO support, this returns page
 // satisfying direct IO constraints.
 func (mgr *Manager) PreparePage() (*core.Page, error) {
-	if mgr.config.isDirectIO {
-		bb, err := bytes.NewDirectBuffer(mgr.config.blockSize)
+	if mgr.config.IsDirectIO {
+		bb, err := bytes.NewDirectBuffer(mgr.config.BlockSize)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
@@ -342,7 +304,7 @@ func (mgr *Manager) PreparePage() (*core.Page, error) {
 		return core.NewPage(bb), nil
 	}
 
-	bb := bytes.NewBuffer(mgr.config.blockSize)
+	bb := bytes.NewBuffer(mgr.config.BlockSize)
 
 	return core.NewPage(bb), nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/goropikari/simpledb_go/backend/file"
 	"github.com/goropikari/simpledb_go/backend/log"
 	"github.com/goropikari/simpledb_go/backend/service"
+	"github.com/goropikari/simpledb_go/infra"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/os"
 	"github.com/stretchr/testify/require"
@@ -21,8 +22,7 @@ func TestLogIterator(t *testing.T) {
 		defer exp.RemoveAll(dir)
 
 		filename := "log_iterator"
-		isDirectIO := false
-		config := file.NewConfig(dir, 400, isDirectIO)
+		config := infra.NewConfig(dir, 400, "logfile")
 		fileMgr := file.NewManager(exp, config)
 
 		fileName, err := core.NewFileName(filename)

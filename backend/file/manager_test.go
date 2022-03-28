@@ -9,6 +9,7 @@ import (
 
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/file"
+	"github.com/goropikari/simpledb_go/infra"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/goropikari/simpledb_go/lib/os"
@@ -18,11 +19,11 @@ import (
 
 func TestFileManager_Config(t *testing.T) {
 	t.Run("test file config", func(t *testing.T) {
-		config := file.Config{}
+		config := infra.Config{}
 		config.SetDefaults()
 
 		dbDir := "simpledb"
-		expected := file.NewConfig(dbDir, directio.BlockSize, false)
+		expected := infra.NewConfig(dbDir, directio.BlockSize, "logfile")
 
 		require.Equal(t, expected, config)
 	})
@@ -32,8 +33,7 @@ func TestFileManager_LastBlock(t *testing.T) {
 	t.Run("test LastBlock", func(t *testing.T) {
 		db := "/tmp"
 		blocksize := 100
-		isDirectIO := false
-		config := file.NewConfig(db, blocksize, isDirectIO)
+		config := infra.NewConfig(db, blocksize, "logfile")
 
 		filename := fake.RandString(10)
 		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
@@ -60,8 +60,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 	t.Run("test PreparePage", func(t *testing.T) {
 		db := "/tmp"
 		blocksize := 100
-		isDirectIO := false
-		config := file.NewConfig(db, blocksize, isDirectIO)
+		config := infra.NewConfig(db, blocksize, "logfile")
 
 		filename := fake.RandString(10)
 		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
@@ -80,8 +79,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 	t.Run("test PreparePage direct io", func(t *testing.T) {
 		db := "."
 		blocksize := directio.BlockSize
-		isDirectIO := true
-		config := file.NewConfig(db, blocksize, isDirectIO)
+		config := infra.NewConfig(db, blocksize, "logfile")
 
 		filename := fake.RandString(10)
 		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
@@ -89,7 +87,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 		f.Close()
 		defer goos.Remove(db + "/" + filename)
 
-		exp := os.NewNormalExplorer()
+		exp := os.NewDirectIOExplorer()
 
 		mgr := file.NewManager(exp, config)
 
@@ -112,8 +110,7 @@ func TestManager(t *testing.T) {
 		require.NoError(t, err)
 		defer goos.RemoveAll(dir)
 
-		isDirectIO := true
-		config := file.NewConfig(dir, directio.BlockSize, isDirectIO)
+		config := infra.NewConfig(dir, directio.BlockSize, "logfile")
 		exp := os.NewNormalExplorer()
 		fileMgr := file.NewManager(exp, config)
 

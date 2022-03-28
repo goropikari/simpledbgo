@@ -9,6 +9,7 @@ import (
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/file"
 	"github.com/goropikari/simpledb_go/backend/log"
+	"github.com/goropikari/simpledb_go/infra"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/lib/os"
 	"github.com/goropikari/simpledb_go/testing/fake"
@@ -103,12 +104,11 @@ func TestBufferManager_pin(t *testing.T) {
 	exp := os.NewNormalExplorer()
 
 	blockSize := 400
-	isDirectIO := false
 	dir := "test" + fake.RandString(10)
 	logFile := core.FileName("logfile" + fake.RandString(10))
 	fileName := core.FileName("testfile" + fake.RandString(10))
 	defer exp.RemoveAll(dir)
-	fileConfig := file.NewConfig(dir, blockSize, isDirectIO)
+	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
 
 	fm := file.NewManager(exp, fileConfig)
 
@@ -157,12 +157,11 @@ func TestBufferManager_pin(t *testing.T) {
 
 func TestBufferManager(t *testing.T) {
 	blockSize := 400
-	isDirectIO := false
 	dir := "test" + fake.RandString(10)
 	logFile := core.FileName("logfile" + fake.RandString(10))
 	fileName := core.FileName("testfile" + fake.RandString(10))
 	defer goos.RemoveAll(dir)
-	fileConfig := file.NewConfig(dir, blockSize, isDirectIO)
+	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
 
 	exp := os.NewNormalExplorer()
 	fm := file.NewManager(exp, fileConfig)
