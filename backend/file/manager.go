@@ -13,7 +13,6 @@ import (
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/infra"
 	"github.com/goropikari/simpledb_go/lib/bytes"
-	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/goropikari/simpledb_go/lib/os"
 )
 
@@ -194,9 +193,12 @@ func (mgr *Manager) AppendBlock(filename core.FileName) (*core.Block, error) {
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	buf := mgr.prepareBytes()
+	page, err := mgr.PreparePage()
+	if err != nil {
+		return nil, err
+	}
 
-	if _, err = file.Write(buf); err != nil {
+	if _, err = file.Write(page.GetBufferBytes()); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 
@@ -275,20 +277,6 @@ func (mgr *Manager) FileSize(filename core.FileName) (int64, error) {
 	}
 
 	return file.Size()
-}
-
-// prepareBytes prepares byte slice.
-func (mgr *Manager) prepareBytes() []byte {
-	if mgr.config.IsDirectIO {
-		buf, err := directio.AlignedBlock(mgr.config.BlockSize)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return buf
-	}
-
-	return make([]byte, mgr.config.BlockSize)
 }
 
 // PreparePage prepares a page.

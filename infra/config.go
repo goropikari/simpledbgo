@@ -1,5 +1,14 @@
 package infra
 
+import (
+	"errors"
+	"log"
+
+	"github.com/goropikari/simpledb_go/lib/directio"
+)
+
+var ErrInvalidBlockSize = errors.New("invalid block size")
+
 type Config struct {
 	DBPath      string
 	LogFileName string
@@ -12,6 +21,20 @@ func NewConfig(dbPath string, blockSize int, logFileName string) Config {
 		DBPath:      dbPath,
 		BlockSize:   blockSize,
 		LogFileName: logFileName,
+		IsDirectIO:  false,
+	}
+}
+
+func NewDirectIOConfig(dbPath string, blockSize int, logFileName string) Config {
+	if blockSize%directio.BlockSize != 0 {
+		log.Fatal(ErrInvalidBlockSize)
+	}
+
+	return Config{
+		DBPath:      dbPath,
+		BlockSize:   blockSize,
+		LogFileName: logFileName,
+		IsDirectIO:  true,
 	}
 }
 
