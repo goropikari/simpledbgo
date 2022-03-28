@@ -156,7 +156,7 @@ struct Manager {
     txnum  int
 }
 
-func (mgr *Manager) commit(tx TransactionVisitor) {
+func (mgr *Manager) rollback(tx TransactionVisitor) {
     mgr.doRollback(tx)
 }
 
