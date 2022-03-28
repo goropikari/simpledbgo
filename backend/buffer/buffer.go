@@ -2,7 +2,6 @@ package buffer
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/service"
@@ -20,10 +19,10 @@ type Buffer struct {
 }
 
 // NewBuffer creates a buffer.
-func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) *Buffer {
+func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) (*Buffer, error) {
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &Buffer{
@@ -34,7 +33,7 @@ func NewBuffer(fileMgr service.FileManager, logMgr service.LogManager) *Buffer {
 		pins:    0,
 		txnum:   -1,
 		lsn:     -1,
-	}
+	}, nil
 }
 
 // GetBlock returns buffer's block.

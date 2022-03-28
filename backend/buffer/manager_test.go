@@ -33,7 +33,8 @@ func TestBufferManager_mock(t *testing.T) {
 	lm.EXPECT().FlushByLSN(gomock.Any()).Return(nil).AnyTimes()
 
 	numBeffer := 3
-	bm := buffer.NewManager(fm, lm, numBeffer)
+	bm, err := buffer.NewManager(fm, lm, numBeffer)
+	require.NoError(t, err)
 
 	t.Run("test buffer", func(t *testing.T) {
 		fileName, _ := core.NewFileName("hoge")
@@ -87,7 +88,8 @@ func TestBufferManager_FlushAll(t *testing.T) {
 		lm.EXPECT().FlushByLSN(gomock.Any()).Return(nil).AnyTimes()
 
 		numBuffer := 3
-		bm := buffer.NewManager(fm, lm, numBuffer)
+		bm, err := buffer.NewManager(fm, lm, numBuffer)
+		require.NoError(t, err)
 
 		for i := 0; i < numBuffer; i++ {
 			buf, err := bm.Pin(fake.Block())
@@ -95,7 +97,7 @@ func TestBufferManager_FlushAll(t *testing.T) {
 			buf.SetModified(1, 0)
 		}
 
-		err := bm.FlushAll(1)
+		err = bm.FlushAll(1)
 		require.NoError(t, err)
 	})
 }
@@ -110,13 +112,16 @@ func TestBufferManager_pin(t *testing.T) {
 	defer exp.RemoveAll(dir)
 	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
 
-	fm := file.NewManager(exp, fileConfig)
+	fm, err := file.NewManager(exp, fileConfig)
+	require.NoError(t, err)
 
 	logConfig := log.NewConfig(logFile)
-	lm := log.NewManager(fm, logConfig)
+	lm, err := log.NewManager(fm, logConfig)
+	require.NoError(t, err)
 
 	numBeffer := 3
-	bm := buffer.NewManager(fm, lm, numBeffer)
+	bm, err := buffer.NewManager(fm, lm, numBeffer)
+	require.NoError(t, err)
 
 	t.Run("test buffer", func(t *testing.T) {
 		block := core.NewBlock(fileName, 1)
@@ -164,13 +169,16 @@ func TestBufferManager(t *testing.T) {
 	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
 
 	exp := os.NewNormalExplorer()
-	fm := file.NewManager(exp, fileConfig)
+	fm, err := file.NewManager(exp, fileConfig)
+	require.NoError(t, err)
 
 	logConfig := log.NewConfig(logFile)
-	lm := log.NewManager(fm, logConfig)
+	lm, err := log.NewManager(fm, logConfig)
+	require.NoError(t, err)
 
 	numBeffer := 3
-	bm := buffer.NewManager(fm, lm, numBeffer)
+	bm, err := buffer.NewManager(fm, lm, numBeffer)
+	require.NoError(t, err)
 
 	t.Run("test buffer manager", func(t *testing.T) {
 		var err error

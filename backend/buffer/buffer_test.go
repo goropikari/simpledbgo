@@ -43,7 +43,8 @@ func TestBuffer_pin_unpin(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			buf := buffer.NewBuffer(fm, lm)
+			buf, err := buffer.NewBuffer(fm, lm)
+			require.NoError(t, err)
 
 			for i := 0; i < tt.niter; i++ {
 				buf.Pin()
@@ -87,7 +88,8 @@ func TestBuffer_setModified(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			buf := buffer.NewBuffer(fm, lm)
+			buf, err := buffer.NewBuffer(fm, lm)
+			require.NoError(t, err)
 
 			buf.SetModified(tt.txnum, tt.lsn)
 
@@ -123,9 +125,10 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			buf := buffer.NewBuffer(fm, lm)
+			buf, err := buffer.NewBuffer(fm, lm)
+			require.NoError(t, err)
 
-			err := buf.AssignToBlock(tt.blk)
+			err = buf.AssignToBlock(tt.blk)
 
 			require.NoError(t, err)
 			require.Equal(t, tt.blk, buf.GetBlock())
@@ -185,10 +188,12 @@ func TestBuffer_AssignToBlock_Error(t *testing.T) {
 
 			lm.EXPECT().FlushByLSN(tt.txnum).Return(tt.errFlushLSN).AnyTimes()
 
-			buf := buffer.NewBuffer(fm, lm)
+			buf, err := buffer.NewBuffer(fm, lm)
+			require.NoError(t, err)
+
 			buf.SetModified(tt.txnum, -1)
 
-			err := buf.AssignToBlock(tt.blk)
+			err = buf.AssignToBlock(tt.blk)
 
 			require.EqualError(t, err, tt.errMsg)
 		})

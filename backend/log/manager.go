@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/core"
@@ -46,32 +45,32 @@ type Manager struct {
 }
 
 // NewManager is constructor of Manager.
-func NewManager(fileMgr service.FileManager, config Config) *Manager {
+func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
 	page, err := fileMgr.PreparePage()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	n, err := fileMgr.FileSize(config.logfile)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// logfile のサイズが 0 だったら block size 分ファイルを作る
 	if n == 0 {
 		_, _, err := appendNewLogBlock(fileMgr, config.logfile)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 	}
 
 	lastBlock, err := fileMgr.LastBlock(config.logfile)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if err := fileMgr.CopyBlockToPage(lastBlock, page); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &Manager{
@@ -82,7 +81,7 @@ func NewManager(fileMgr service.FileManager, config Config) *Manager {
 		latestLSN:    0,
 		lastSavedLSN: 0,
 		config:       config,
-	}
+	}, nil
 }
 
 // flush flushes page into current block.

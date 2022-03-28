@@ -23,11 +23,13 @@ func TestLogIterator(t *testing.T) {
 
 		filename := "log_iterator"
 		config := infra.NewConfig(dir, 400, "logfile")
-		fileMgr := file.NewManager(exp, config)
+		fileMgr, err := file.NewManager(exp, config)
+		require.NoError(t, err)
 
 		fileName, err := core.NewFileName(filename)
 		require.NoError(t, err)
-		logMgr := log.NewManager(fileMgr, log.NewConfig(fileName))
+		logMgr, err := log.NewManager(fileMgr, log.NewConfig(fileName))
+		require.NoError(t, err)
 
 		createRecord(logMgr, 1, 35)
 		actual := iteratorRecords(logMgr)

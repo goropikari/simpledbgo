@@ -2,7 +2,6 @@ package buffer
 
 import (
 	"errors"
-	"log"
 	"sync"
 	"time"
 
@@ -21,6 +20,9 @@ var (
 
 	// ErrInvalidArgs is an error that means given args is invalid.
 	ErrInvalidArgs = errors.New("arguments is invalid")
+
+	// ErrInvalidNumberOfBuffer is an error that means number of buffer must be positive.
+	ErrInvalidNumberOfBuffer = errors.New("number of buffer must be positive")
 )
 
 // Manager is model of buffer manager.
@@ -32,15 +34,18 @@ type Manager struct {
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) *Manager {
+func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffer int) (*Manager, error) {
 	if numBuffer <= 0 {
-		log.Fatal(ErrInvalidArgs)
+		return nil, ErrInvalidNumberOfBuffer
 	}
 
 	bufferPool := make([]*Buffer, numBuffer)
 
 	for i := 0; i < numBuffer; i++ {
-		buf := NewBuffer(fileMgr, logMgr)
+		buf, err := NewBuffer(fileMgr, logMgr)
+		if err != nil {
+			return nil, err
+		}
 
 		bufferPool[i] = buf
 	}
@@ -52,7 +57,7 @@ func NewManager(fileMgr service.FileManager, logMgr service.LogManager, numBuffe
 		bufferPool:         bufferPool,
 		numAvailableBuffer: numBuffer,
 		timeout:            time.Second * maxTimeoutSecond,
-	}
+	}, nil
 }
 
 // available returns the number of unpinned buffer.

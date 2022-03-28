@@ -43,7 +43,8 @@ func TestFileManager_LastBlock(t *testing.T) {
 
 		exp := os.NewNormalExplorer()
 
-		mgr := file.NewManager(exp, config)
+		mgr, err := file.NewManager(exp, config)
+		require.NoError(t, err)
 		actual, err := mgr.LastBlock(core.FileName(filename))
 		blk := core.NewBlock(core.FileName(filename), core.BlockNumber(0))
 
@@ -70,9 +71,10 @@ func TestFileManager_PreparePage(t *testing.T) {
 
 		exp := os.NewNormalExplorer()
 
-		mgr := file.NewManager(exp, config)
+		mgr, err := file.NewManager(exp, config)
+		require.NoError(t, err)
 
-		_, err := mgr.PreparePage()
+		_, err = mgr.PreparePage()
 		require.NoError(t, err)
 	})
 
@@ -89,9 +91,10 @@ func TestFileManager_PreparePage(t *testing.T) {
 
 		exp := os.NewDirectIOExplorer()
 
-		mgr := file.NewManager(exp, config)
+		mgr, err := file.NewManager(exp, config)
+		require.NoError(t, err)
 
-		_, err := mgr.PreparePage()
+		_, err = mgr.PreparePage()
 		require.NoError(t, err)
 	})
 }
@@ -112,7 +115,8 @@ func TestManager(t *testing.T) {
 
 		config := infra.NewConfig(dir, directio.BlockSize, "logfile")
 		exp := os.NewNormalExplorer()
-		fileMgr := file.NewManager(exp, config)
+		fileMgr, err := file.NewManager(exp, config)
+		require.NoError(t, err)
 
 		testFilePath := filepath.Join(dir, string(filename))
 

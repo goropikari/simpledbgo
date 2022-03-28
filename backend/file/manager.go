@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	goos "os"
 	"path/filepath"
 	"strings"
@@ -46,15 +45,15 @@ type Manager struct {
 }
 
 // NewManager is constructor of Manager.
-func NewManager(exp Explorer, config infra.Config) *Manager {
+func NewManager(exp Explorer, config infra.Config) (*Manager, error) {
 	config.SetDefaults()
 
 	if err := exp.MkdirAll(config.DBPath); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if err := deleteTempFiles(exp, config.DBPath); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &Manager{
@@ -62,7 +61,7 @@ func NewManager(exp Explorer, config infra.Config) *Manager {
 		config:    config,
 		explorer:  exp,
 		openFiles: make(map[core.FileName]*os.File, 0),
-	}
+	}, nil
 }
 
 func deleteTempFiles(exp Explorer, dbPath string) error {
