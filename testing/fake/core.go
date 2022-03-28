@@ -4,7 +4,7 @@ import "github.com/goropikari/simpledb_go/backend/core"
 
 // Block returns fake block.
 func Block() *core.Block {
-	filename, err := core.NewFileName(RandString(10))
+	filename, err := core.NewFileName(RandString())
 	if err != nil {
 		panic(err)
 	}

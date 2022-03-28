@@ -35,7 +35,7 @@ func TestFileManager_LastBlock(t *testing.T) {
 		blocksize := 100
 		config := infra.NewConfig(db, blocksize, "logfile")
 
-		filename := fake.RandString(10)
+		filename := fake.RandString()
 		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
 		f.Write(make([]byte, blocksize))
 		f.Close()
@@ -62,7 +62,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 		blocksize := 100
 		config := infra.NewConfig(db, blocksize, "logfile")
 
-		filename := fake.RandString(10)
+		filename := fake.RandString()
 		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
 		f.Write(make([]byte, blocksize))
 		f.Close()
@@ -81,7 +81,7 @@ func TestFileManager_PreparePage(t *testing.T) {
 		blocksize := directio.BlockSize
 		config := infra.NewConfig(db, blocksize, "logfile")
 
-		filename := fake.RandString(10)
+		filename := fake.RandString()
 		f, _ := goos.OpenFile(db+"/"+filename, goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
 		f.Write(make([]byte, blocksize))
 		f.Close()

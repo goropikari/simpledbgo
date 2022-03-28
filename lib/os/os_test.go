@@ -13,7 +13,7 @@ import (
 
 func TestFile(t *testing.T) {
 	t.Run("test file", func(t *testing.T) {
-		filename := fake.RandString(10)
+		filename := fake.RandString()
 		exp := os.NewNormalExplorer()
 		f, err := exp.OpenFile(filename)
 		defer goos.RemoveAll(filename)
@@ -51,7 +51,7 @@ func TestNormalExplorer(t *testing.T) {
 	t.Run("test NormalExplorer", func(t *testing.T) {
 		exp := os.NewNormalExplorer()
 
-		path := filepath.Join("/tmp", fake.RandString(10))
+		path := filepath.Join("/tmp", fake.RandString())
 		err := exp.MkdirAll(path)
 		require.NoError(t, err)
 

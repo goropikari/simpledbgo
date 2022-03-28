@@ -104,9 +104,9 @@ func TestBufferManager_pin(t *testing.T) {
 	exp := os.NewNormalExplorer()
 
 	blockSize := 400
-	dir := "test" + fake.RandString(10)
-	logFile := core.FileName("logfile" + fake.RandString(10))
-	fileName := core.FileName("testfile" + fake.RandString(10))
+	dir := "test" + fake.RandString()
+	logFile := core.FileName("logfile" + fake.RandString())
+	fileName := core.FileName("testfile" + fake.RandString())
 	defer exp.RemoveAll(dir)
 	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
 
@@ -157,9 +157,9 @@ func TestBufferManager_pin(t *testing.T) {
 
 func TestBufferManager(t *testing.T) {
 	blockSize := 400
-	dir := "test" + fake.RandString(10)
-	logFile := core.FileName("logfile" + fake.RandString(10))
-	fileName := core.FileName("testfile" + fake.RandString(10))
+	dir := "test" + fake.RandString()
+	logFile := core.FileName("logfile" + fake.RandString())
+	fileName := core.FileName("testfile" + fake.RandString())
 	defer goos.RemoveAll(dir)
 	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
 

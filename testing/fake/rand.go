@@ -25,7 +25,8 @@ func RandUint32() uint32 {
 	return uint32(rand.Int31())
 }
 
-func RandString(length int) string {
+func RandString() string {
+	length := 10
 	kindChars := int32(len(charset))
 	b := make([]byte, length)
 

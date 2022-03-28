@@ -64,7 +64,7 @@ func TestRandString(t *testing.T) {
 
 	t.Run("test RandString", func(t *testing.T) {
 		for i := 0; i < 10000; i++ {
-			s := fake.RandString(length)
+			s := fake.RandString()
 
 			require.Equal(t, length, len(s))
 			require.Regexp(t, "[a-zA-Z]", s)

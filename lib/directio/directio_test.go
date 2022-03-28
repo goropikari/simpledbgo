@@ -18,7 +18,7 @@ func TestDirectIO(t *testing.T) {
 		require.NoError(t, err)
 		defer os.RemoveAll(dir)
 
-		filename := fake.RandString(10)
+		filename := fake.RandString()
 		flag := os.O_RDWR | os.O_CREATE
 
 		// OpenFile
