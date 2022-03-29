@@ -30,7 +30,9 @@ mockgen:
 
 .PHONY: coverage
 coverage:
-	ci/coverage
+	go test -cover ./... -coverprofile=coverage.out
+	bin/gcov2lcov -infile=coverage.out -outfile=coverage.lcov
+	genhtml coverage.lcov -o docs/coverage
 
 .PHONY: site
 site: coverage

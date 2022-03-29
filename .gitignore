@@ -4,4 +4,4 @@ bin
 site
 report.xml
 docs/coverage
-coverage.lcov
+coverage.*
