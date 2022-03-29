@@ -21,14 +21,14 @@ func TestLogIterator(t *testing.T) {
 		dir := "test_db_dir"
 		defer exp.RemoveAll(dir)
 
-		filename := "log_iterator"
 		config := infra.NewConfig(dir, 400, "logfile")
+		infra.InitServer(config)
+
 		fileMgr, err := file.NewManager(exp, config)
 		require.NoError(t, err)
 
-		fileName, err := core.NewFileName(filename)
 		require.NoError(t, err)
-		logMgr, err := log.NewManager(fileMgr, log.NewConfig(fileName))
+		logMgr, err := log.NewManager(fileMgr, config)
 		require.NoError(t, err)
 
 		createRecord(logMgr, 1, 35)

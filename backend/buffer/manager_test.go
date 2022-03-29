@@ -21,6 +21,13 @@ func TestBufferManager_mock(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	dbPath := "simpledb_test"
+	blockSize := 100
+	logFileName := fake.RandString()
+	config := infra.NewConfig(dbPath, blockSize, logFileName)
+	err := infra.InitServer(config)
+	require.NoError(t, err)
+
 	fm := mock.NewMockFileManager(ctrl)
 	lm := mock.NewMockLogManager(ctrl)
 
@@ -107,16 +114,15 @@ func TestBufferManager_pin(t *testing.T) {
 
 	blockSize := 400
 	dir := "test" + fake.RandString()
-	logFile := core.FileName("logfile" + fake.RandString())
 	fileName := core.FileName("testfile" + fake.RandString())
 	defer exp.RemoveAll(dir)
-	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
+	config := infra.NewConfig(dir, blockSize, "logfile")
+	infra.InitServer(config)
 
-	fm, err := file.NewManager(exp, fileConfig)
+	fm, err := file.NewManager(exp, config)
 	require.NoError(t, err)
 
-	logConfig := log.NewConfig(logFile)
-	lm, err := log.NewManager(fm, logConfig)
+	lm, err := log.NewManager(fm, config)
 	require.NoError(t, err)
 
 	numBeffer := 3
@@ -163,17 +169,17 @@ func TestBufferManager_pin(t *testing.T) {
 func TestBufferManager(t *testing.T) {
 	blockSize := 400
 	dir := "test" + fake.RandString()
-	logFile := core.FileName("logfile" + fake.RandString())
 	fileName := core.FileName("testfile" + fake.RandString())
 	defer goos.RemoveAll(dir)
-	fileConfig := infra.NewConfig(dir, blockSize, "logfile")
+
+	config := infra.NewConfig(dir, blockSize, "logfile")
+	infra.InitServer(config)
 
 	exp := os.NewNormalExplorer()
-	fm, err := file.NewManager(exp, fileConfig)
+	fm, err := file.NewManager(exp, config)
 	require.NoError(t, err)
 
-	logConfig := log.NewConfig(logFile)
-	lm, err := log.NewManager(fm, logConfig)
+	lm, err := log.NewManager(fm, config)
 	require.NoError(t, err)
 
 	numBeffer := 3

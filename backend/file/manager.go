@@ -6,7 +6,6 @@ import (
 	"io"
 	goos "os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/core"
@@ -48,38 +47,12 @@ type Manager struct {
 func NewManager(exp Explorer, config infra.Config) (*Manager, error) {
 	config.SetDefaults()
 
-	if err := exp.MkdirAll(config.DBPath); err != nil {
-		return nil, err
-	}
-
-	if err := deleteTempFiles(exp, config.DBPath); err != nil {
-		return nil, err
-	}
-
 	return &Manager{
 		mu:        sync.Mutex{},
 		config:    config,
 		explorer:  exp,
 		openFiles: make(map[core.FileName]*os.File, 0),
 	}, nil
-}
-
-func deleteTempFiles(exp Explorer, dbPath string) error {
-	files, err := exp.ReadDir(dbPath)
-	if err != nil {
-		return err
-	}
-
-	// remove temporary files.
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), "temp") {
-			if err := exp.Remove(dbPath, file.Name()); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 // GetBlockSize returns block size.
@@ -269,6 +242,7 @@ func (mgr *Manager) closeFile(filename core.FileName) error {
 	return ErrNoSuchFile
 }
 
+// FileSize returns given file size.
 func (mgr *Manager) FileSize(filename core.FileName) (int64, error) {
 	file, err := mgr.openFile(filename)
 	if err != nil {

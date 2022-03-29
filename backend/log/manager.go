@@ -8,30 +8,11 @@ import (
 
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/service"
+	"github.com/goropikari/simpledb_go/infra"
 )
 
 // ErrInvalidArgs is an error that means given args is invalid.
 var ErrInvalidArgs = errors.New("arguments is invalid")
-
-// Config is configuration of log manager.
-type Config struct {
-	logfile core.FileName
-}
-
-// NewConfig is constructor of Config.
-func NewConfig(logfile core.FileName) Config {
-	config := Config{
-		logfile: logfile,
-	}
-	config.SetDefaults()
-
-	return config
-}
-
-// SetDefaults sets default value of config.
-func (config *Config) SetDefaults() {
-	config.logfile = "logfile"
-}
 
 // Manager is a log manager of database.
 type Manager struct {
@@ -41,30 +22,35 @@ type Manager struct {
 	page         *core.Page
 	latestLSN    int32 // reset when server restart
 	lastSavedLSN int32
-	config       Config
+	config       infra.Config
 }
 
 // NewManager is constructor of Manager.
-func NewManager(fileMgr service.FileManager, config Config) (*Manager, error) {
+func NewManager(fileMgr service.FileManager, config infra.Config) (*Manager, error) {
 	page, err := fileMgr.PreparePage()
 	if err != nil {
 		return nil, err
 	}
 
-	n, err := fileMgr.FileSize(config.logfile)
+	logFileName, err := core.NewFileName(config.LogFileName)
+	if err != nil {
+		return nil, err
+	}
+
+	n, err := fileMgr.FileSize(logFileName)
 	if err != nil {
 		return nil, err
 	}
 
 	// logfile のサイズが 0 だったら block size 分ファイルを作る
 	if n == 0 {
-		_, _, err := appendNewLogBlock(fileMgr, config.logfile)
+		_, _, err := appendNewLogBlock(fileMgr, logFileName)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	lastBlock, err := fileMgr.LastBlock(config.logfile)
+	lastBlock, err := fileMgr.LastBlock(logFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +109,12 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 			return err
 		}
 
-		page, block, err := appendNewLogBlock(mgr.fileMgr, mgr.config.logfile)
+		logFileName, err := core.NewFileName(mgr.config.LogFileName)
+		if err != nil {
+			return err
+		}
+
+		page, block, err := appendNewLogBlock(mgr.fileMgr, logFileName)
 		if err != nil {
 			return err
 		}
