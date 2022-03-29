@@ -17,10 +17,3 @@ func TestDirectBuffer(t *testing.T) {
 		require.Error(t, err)
 	})
 }
-
-func TestDirectBufferBytes(t *testing.T) {
-	t.Run("test DirectBufferBytes", func(t *testing.T) {
-		_, err := bytes.NewDirectBufferBytes(make([]byte, 10))
-		require.Error(t, err)
-	})
-}

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// InitServer initializes server.
 func InitServer(config Config) error {
 	if err := os.MkdirAll(config.DBPath, os.ModePerm); err != nil {
 		log.Fatal(err)

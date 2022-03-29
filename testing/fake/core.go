@@ -16,3 +16,7 @@ func Block() *core.Block {
 
 	return core.NewBlock(filename, blkNum)
 }
+
+func Page() *core.Page {
+	return &core.Page{}
+}

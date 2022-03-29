@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/file"
 	"github.com/goropikari/simpledb_go/infra"
@@ -14,19 +15,88 @@ import (
 	"github.com/goropikari/simpledb_go/lib/directio"
 	"github.com/goropikari/simpledb_go/lib/os"
 	"github.com/goropikari/simpledb_go/testing/fake"
+	"github.com/goropikari/simpledb_go/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileManager_Config(t *testing.T) {
-	t.Run("test file config", func(t *testing.T) {
-		config := infra.Config{}
-		config.SetDefaults()
+func TestFileManager_CopyBlockToPage_Error(t *testing.T) {
+	tests := []struct {
+		name     string
+		block    *core.Block
+		page     *core.Page
+		err      error
+		expected string
+	}{
+		{
+			name:     "nil block",
+			page:     fake.Page(),
+			err:      file.ErrInvalidArgs,
+			expected: file.ErrInvalidArgs.Error(),
+		},
+		{
+			name:     "nil block",
+			block:    fake.Block(),
+			err:      file.ErrInvalidArgs,
+			expected: file.ErrInvalidArgs.Error(),
+		},
+	}
 
-		dbDir := "simpledb"
-		expected := infra.NewConfig(dbDir, directio.BlockSize, "logfile")
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		require.Equal(t, expected, config)
-	})
+			config := infra.Config{}
+			exp := mock.NewMockExplorer(ctrl)
+
+			mgr, err := file.NewManager(exp, config)
+			require.NoError(t, err)
+
+			err = mgr.CopyBlockToPage(tt.block, tt.page)
+			require.Error(t, err)
+		})
+	}
+}
+
+func TestFileManager_CopyPageToBlock_Error(t *testing.T) {
+	tests := []struct {
+		name     string
+		block    *core.Block
+		page     *core.Page
+		err      error
+		expected string
+	}{
+		{
+			name:     "nil block",
+			page:     fake.Page(),
+			err:      file.ErrInvalidArgs,
+			expected: file.ErrInvalidArgs.Error(),
+		},
+		{
+			name:     "nil block",
+			block:    fake.Block(),
+			err:      file.ErrInvalidArgs,
+			expected: file.ErrInvalidArgs.Error(),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			config := infra.Config{}
+			exp := mock.NewMockExplorer(ctrl)
+
+			mgr, err := file.NewManager(exp, config)
+			require.NoError(t, err)
+
+			err = mgr.CopyPageToBlock(tt.page, tt.block)
+			require.Error(t, err)
+		})
+	}
 }
 
 func TestFileManager_LastBlock(t *testing.T) {

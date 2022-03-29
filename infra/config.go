@@ -7,8 +7,10 @@ import (
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
+// ErrInvalidBlockSize is an error type that means given block size is invalid.
 var ErrInvalidBlockSize = errors.New("invalid block size")
 
+// Config is config of database server.
 type Config struct {
 	DBPath      string
 	LogFileName string
@@ -16,6 +18,7 @@ type Config struct {
 	IsDirectIO  bool
 }
 
+// NewConfig is a constructor of Config.
 func NewConfig(dbPath string, blockSize int, logFileName string) Config {
 	return Config{
 		DBPath:      dbPath,
@@ -25,6 +28,7 @@ func NewConfig(dbPath string, blockSize int, logFileName string) Config {
 	}
 }
 
+// NewDirectIOConfig is a constructor of config for DirectIO.
 func NewDirectIOConfig(dbPath string, blockSize int, logFileName string) Config {
 	if blockSize%directio.BlockSize != 0 {
 		log.Fatal(ErrInvalidBlockSize)
@@ -38,6 +42,7 @@ func NewDirectIOConfig(dbPath string, blockSize int, logFileName string) Config 
 	}
 }
 
+// SetDefaults sets default configuration value.
 func (config *Config) SetDefaults() {
 	if config.DBPath == "" {
 		config.DBPath = "simpledb"
