@@ -31,13 +31,13 @@
             <td class="headerValue">coverage.lcov</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">21</td>
+            <td class="headerCovTableEntry">32</td>
             <td class="headerCovTableEntry">36</td>
-            <td class="headerCovTableEntryLo">58.3 %</td>
+            <td class="headerCovTableEntryMed">88.9 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-03-29 11:48:01</td>
+            <td class="headerValue">2022-03-29 14:08:29</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -79,11 +79,11 @@
 <a name="17"><span class="lineNum">      17 </span>            :         *NormalExplorer</a>
 <a name="18"><span class="lineNum">      18 </span>            : }</a>
 <a name="19"><span class="lineNum">      19 </span>            : </a>
-<a name="20"><span class="lineNum">      20 </span><span class="lineNoCov">          0 : func NewDirectIOExplorer() *DirectIOExplorer {</span></a>
-<a name="21"><span class="lineNum">      21 </span><span class="lineNoCov">          0 :         return &amp;DirectIOExplorer{</span></a>
-<a name="22"><span class="lineNum">      22 </span><span class="lineNoCov">          0 :                 NormalExplorer: NewNormalExplorer(),</span></a>
-<a name="23"><span class="lineNum">      23 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="24"><span class="lineNum">      24 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="20"><span class="lineNum">      20 </span><span class="lineCov">          1 : func NewDirectIOExplorer() *DirectIOExplorer {</span></a>
+<a name="21"><span class="lineNum">      21 </span><span class="lineCov">          1 :         return &amp;DirectIOExplorer{</span></a>
+<a name="22"><span class="lineNum">      22 </span><span class="lineCov">          1 :                 NormalExplorer: NewNormalExplorer(),</span></a>
+<a name="23"><span class="lineNum">      23 </span><span class="lineCov">          1 :         }</span></a>
+<a name="24"><span class="lineNum">      24 </span><span class="lineCov">          1 : }</span></a>
 <a name="25"><span class="lineNum">      25 </span>            : </a>
 <a name="26"><span class="lineNum">      26 </span><span class="lineCov">          1 : func (ex *NormalExplorer) MkdirAll(path string) error {</span></a>
 <a name="27"><span class="lineNum">      27 </span><span class="lineCov">          1 :         return os.MkdirAll(path, os.ModePerm)</span></a>
@@ -112,15 +112,15 @@
 <a name="50"><span class="lineNum">      50 </span><span class="lineCov">          1 :         return NewFile(f), nil</span></a>
 <a name="51"><span class="lineNum">      51 </span>            : }</a>
 <a name="52"><span class="lineNum">      52 </span>            : </a>
-<a name="53"><span class="lineNum">      53 </span><span class="lineNoCov">          0 : func (ex *DirectIOExplorer) OpenFile(path string) (*File, error) {</span></a>
-<a name="54"><span class="lineNum">      54 </span><span class="lineNoCov">          0 :         flag := os.O_RDWR | os.O_CREATE</span></a>
-<a name="55"><span class="lineNum">      55 </span><span class="lineNoCov">          0 : </span></a>
-<a name="56"><span class="lineNum">      56 </span><span class="lineNoCov">          0 :         f, err := directio.OpenFile(path, flag, os.ModePerm)</span></a>
-<a name="57"><span class="lineNum">      57 </span><span class="lineNoCov">          0 :         if err != nil {</span></a>
+<a name="53"><span class="lineNum">      53 </span><span class="lineCov">          1 : func (ex *DirectIOExplorer) OpenFile(path string) (*File, error) {</span></a>
+<a name="54"><span class="lineNum">      54 </span><span class="lineCov">          1 :         flag := os.O_RDWR | os.O_CREATE</span></a>
+<a name="55"><span class="lineNum">      55 </span><span class="lineCov">          1 : </span></a>
+<a name="56"><span class="lineNum">      56 </span><span class="lineCov">          1 :         f, err := directio.OpenFile(path, flag, os.ModePerm)</span></a>
+<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="58"><span class="lineNum">      58 </span><span class="lineNoCov">          0 :                 return nil, err</span></a>
 <a name="59"><span class="lineNum">      59 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="60"><span class="lineNum">      60 </span>            : </a>
-<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :         return NewFile(f), nil</span></a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineCov">          1 :         return NewFile(f), nil</span></a>
 <a name="62"><span class="lineNum">      62 </span>            : }</a>
 </pre>
       </td>
