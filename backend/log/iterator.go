@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/goropikari/simpledb_go/backend/core"
 	"github.com/goropikari/simpledb_go/backend/service"
@@ -19,25 +18,8 @@ type Iterator struct {
 	boundary              uint32
 }
 
-func iterator(fileMgr service.FileManager, block *core.Block) (<-chan []byte, error) {
-	ch := make(chan []byte)
-
-	iter, err := newIterator(fileMgr, block)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		for iter.hasNext() {
-			ch <- iter.next()
-		}
-		close(ch)
-	}()
-
-	return ch, nil
-}
-
-func newIterator(fileMgr service.FileManager, block *core.Block) (*Iterator, error) {
+// NewIterator is an iterator of log.
+func NewIterator(fileMgr service.FileManager, block *core.Block) (*Iterator, error) {
 	page, err := fileMgr.PreparePage()
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
@@ -61,42 +43,49 @@ func newIterator(fileMgr service.FileManager, block *core.Block) (*Iterator, err
 	}, nil
 }
 
-func (logIt *Iterator) hasNext() bool {
-	blockSize := logIt.fileMgr.GetBlockSize()
+// HasNext checks whether there is another next item.
+func (it *Iterator) HasNext() bool {
+	blockSize := it.fileMgr.GetBlockSize()
 
-	return int(logIt.currentRecordPosition) < blockSize || logIt.block.GetBlockNumber() > 0
+	return int(it.currentRecordPosition) < blockSize || it.block.GetBlockNumber() > 0
 }
 
-func (logIt *Iterator) next() []byte {
-	blockSize := logIt.fileMgr.GetBlockSize()
+// Next returns next item.
+func (it *Iterator) Next() ([]byte, error) {
+	blockSize := it.fileMgr.GetBlockSize()
 
-	if logIt.currentRecordPosition == uint32(blockSize) {
-		block := core.NewBlock(logIt.block.GetFileName(), logIt.block.GetBlockNumber()-1)
-		logIt.moveToBlock(block)
+	if it.currentRecordPosition == uint32(blockSize) {
+		block := core.NewBlock(it.block.GetFileName(), it.block.GetBlockNumber()-1)
+		err := it.moveToBlock(block)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	record, err := logIt.page.GetBytes(int64(logIt.currentRecordPosition))
+	record, err := it.page.GetBytes(int64(it.currentRecordPosition))
 	if err != nil && !errors.Is(err, io.EOF) {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	logIt.currentRecordPosition += uint32(core.Uint32Length + len(record))
+	it.currentRecordPosition += uint32(core.Uint32Length + len(record))
 
-	return record
+	return record, nil
 }
 
-func (logIt *Iterator) moveToBlock(block *core.Block) {
-	err := logIt.fileMgr.CopyBlockToPage(block, logIt.page)
+func (it *Iterator) moveToBlock(block *core.Block) error {
+	err := it.fileMgr.CopyBlockToPage(block, it.page)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	boundary, err := logIt.page.GetUint32(0)
+	boundary, err := it.page.GetUint32(0)
 	if err != nil && !errors.Is(err, io.EOF) {
-		log.Fatal(err)
+		return err
 	}
 
-	logIt.currentRecordPosition = boundary
+	it.currentRecordPosition = boundary
 
-	logIt.block = block
+	it.block = block
+
+	return nil
 }

@@ -11,5 +11,5 @@ type LogManager interface {
 	AppendRecord(record []byte) error
 
 	// Iterator returns iterator.
-	Iterator() (<-chan []byte, error)
+	Iterator() (Iterator, error)
 }

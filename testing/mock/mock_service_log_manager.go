@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	service "github.com/goropikari/simpledb_go/backend/service"
 )
 
 // MockLogManager is a mock of LogManager interface.
@@ -62,10 +63,10 @@ func (mr *MockLogManagerMockRecorder) FlushByLSN(lsn interface{}) *gomock.Call {
 }
 
 // Iterator mocks base method.
-func (m *MockLogManager) Iterator() (<-chan []byte, error) {
+func (m *MockLogManager) Iterator() (service.Iterator, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Iterator")
-	ret0, _ := ret[0].(<-chan []byte)
+	ret0, _ := ret[0].(service.Iterator)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

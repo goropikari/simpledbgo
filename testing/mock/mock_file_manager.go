@@ -50,18 +50,18 @@ func (mr *MockExplorerMockRecorder) MkdirAll(path interface{}) *gomock.Call {
 }
 
 // OpenFile mocks base method.
-func (m *MockExplorer) OpenFile(path string, isDirectIO bool) (*os.File, error) {
+func (m *MockExplorer) OpenFile(path string) (*os.File, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OpenFile", path, isDirectIO)
+	ret := m.ctrl.Call(m, "OpenFile", path)
 	ret0, _ := ret[0].(*os.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // OpenFile indicates an expected call of OpenFile.
-func (mr *MockExplorerMockRecorder) OpenFile(path, isDirectIO interface{}) *gomock.Call {
+func (mr *MockExplorerMockRecorder) OpenFile(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenFile", reflect.TypeOf((*MockExplorer)(nil).OpenFile), path, isDirectIO)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenFile", reflect.TypeOf((*MockExplorer)(nil).OpenFile), path)
 }
 
 // ReadDir mocks base method.

@@ -32,18 +32,23 @@ func TestLogIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		createRecord(logMgr, 1, 35)
-		actual := iteratorRecords(logMgr)
+		actual, err := iteratorRecords(logMgr)
+		require.NoError(t, err)
 		expected := expectedRecords(1, 20)
 		require.Equal(t, expected, actual)
 
 		createRecord(logMgr, 36, 70)
-		actual = iteratorRecords(logMgr)
+		actual, err = iteratorRecords(logMgr)
+		require.NoError(t, err)
+
 		expected = expectedRecords(1, 58)
 		require.Equal(t, expected, actual)
 
 		err = logMgr.FlushByLSN(65)
 		require.NoError(t, err)
-		actual = iteratorRecords(logMgr)
+		actual, err = iteratorRecords(logMgr)
+		require.NoError(t, err)
+
 		expected = expectedRecords(1, 70)
 		require.Equal(t, expected, actual)
 
@@ -52,35 +57,64 @@ func TestLogIterator(t *testing.T) {
 	})
 }
 
-func iteratorRecords(logMgr service.LogManager) []string {
+func iteratorRecords(logMgr service.LogManager) ([]string, error) {
 	strs := make([]string, 0, 400)
-	ch, _ := logMgr.Iterator()
-	for v := range ch {
+	it, _ := logMgr.Iterator()
+	for it.HasNext() {
+		v, err := it.Next()
+		if err != nil {
+			return nil, err
+		}
+
 		bb := bytes.NewBufferBytes(v)
 		page := core.NewPage(bb)
-		s, _ := page.GetString(0)
-		x, _ := page.GetUint32(int64(len(s) + 4))
+		s, err := page.GetString(0)
+		if err != nil {
+			return nil, err
+		}
+
+		x, err := page.GetUint32(int64(len(s) + 4))
+		if err != nil {
+			return nil, err
+		}
+
 		strs = append(strs, fmt.Sprintf("%v %v", s, x))
 	}
 
-	return strs
+	return strs, nil
 }
 
-func createRecord(logMgr service.LogManager, start, end int) {
+func createRecord(logMgr service.LogManager, start, end int) error {
 	for i := start; i <= end; i++ {
-		record := createLogRecord(fmt.Sprintf("record%d", i), uint32(i+100))
-		logMgr.AppendRecord(record)
+		record, err := createLogRecord(fmt.Sprintf("record%d", i), uint32(i+100))
+		if err != nil {
+			return err
+		}
+
+		err = logMgr.AppendRecord(record)
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func createLogRecord(s string, n uint32) []byte {
+func createLogRecord(s string, n uint32) ([]byte, error) {
 	bufferSize := len(s) + core.Uint32Length*2
 	bb := bytes.NewBuffer(bufferSize)
 	page := core.NewPage(bb)
-	page.SetString(0, s)
-	page.SetUint32(int64(len(s)+core.Uint32Length), n)
+	err := page.SetString(0, s)
+	if err != nil {
+		return nil, err
+	}
 
-	return page.GetBufferBytes()
+	err = page.SetUint32(int64(len(s)+core.Uint32Length), n)
+	if err != nil {
+		return nil, err
+	}
+
+	return page.GetBufferBytes(), nil
 }
 
 func expectedRecords(start, end int) []string {

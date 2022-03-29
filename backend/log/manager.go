@@ -153,8 +153,8 @@ func (mgr *Manager) AppendRecord(record []byte) error {
 }
 
 // Iterator returns iterator.
-func (mgr *Manager) Iterator() (<-chan []byte, error) {
-	it, err := iterator(mgr.fileMgr, mgr.currentBlock)
+func (mgr *Manager) Iterator() (service.Iterator, error) {
+	it, err := NewIterator(mgr.fileMgr, mgr.currentBlock)
 	if err != nil {
 		return nil, err
 	}
