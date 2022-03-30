@@ -1,8 +1,13 @@
 package domain
 
 import (
+	"errors"
+	"io"
 	"os"
 )
+
+// ErrInvalidFileName is an error that means invalid file name.
+var ErrInvalidFileName = errors.New("invalid file name")
 
 // FileName is a value object of file name.
 type FileName string
@@ -44,8 +49,8 @@ func (f *File) Write(b []byte) (n int, err error) {
 }
 
 // Seek sets the offset for the next Read or Write on file to offset.
-func (f *File) Seek(offset int64, whence int) (int64, error) {
-	return f.file.Seek(offset, whence)
+func (f *File) Seek(offset int64) (int64, error) {
+	return f.file.Seek(offset, io.SeekStart)
 }
 
 // Close closes the File.

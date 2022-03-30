@@ -1,7 +1,6 @@
 package domain_test
 
 import (
-	"io"
 	"os"
 	"testing"
 
@@ -44,7 +43,7 @@ func TestFile_Read(t *testing.T) {
 		require.Equal(t, 5, n)
 
 		// Seek
-		offset, err := file.Seek(1, io.SeekStart)
+		offset, err := file.Seek(1)
 		require.NoError(t, err)
 		require.Equal(t, int64(1), offset)
 

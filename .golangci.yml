@@ -1,6 +1,7 @@
 linters:
   disable:
     - godox
+    - goerr113
     - golint
     - interfacer
     - ireturn

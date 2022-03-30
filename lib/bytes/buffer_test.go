@@ -104,7 +104,15 @@ func TestBuffer_GetInt32(t *testing.T) {
 		require.Equal(t, int32(9), n)
 	})
 
-	t.Run("invalid request", func(t *testing.T) {
+	t.Run("invalid request: invalid offset", func(t *testing.T) {
+		data := []byte{0, 0, 9}
+		buf := bytes.NewBufferBytes(data)
+		n, err := buf.GetInt32(10)
+		require.Error(t, err)
+		require.Equal(t, int32(0), n)
+	})
+
+	t.Run("invalid request: has no space", func(t *testing.T) {
 		data := []byte{0, 0, 9}
 		buf := bytes.NewBufferBytes(data)
 		n, err := buf.GetInt32(0)
@@ -121,7 +129,13 @@ func TestBuffer_SetInt32(t *testing.T) {
 		require.Equal(t, []byte{0, 0, 0, 9}, buf.GetData())
 	})
 
-	t.Run("invalid request", func(t *testing.T) {
+	t.Run("invalid request: invalid offset", func(t *testing.T) {
+		buf := bytes.NewBuffer(3)
+		err := buf.SetInt32(10, 9)
+		require.Error(t, err)
+	})
+
+	t.Run("invalid request: has no space", func(t *testing.T) {
 		buf := bytes.NewBuffer(3)
 		err := buf.SetInt32(0, 9)
 		require.Error(t, err)
@@ -135,6 +149,14 @@ func TestBuffer_GetUint32(t *testing.T) {
 		n, err := buf.GetUint32(0)
 		require.NoError(t, err)
 		require.Equal(t, uint32(9), n)
+	})
+
+	t.Run("invalid request: invalid offset", func(t *testing.T) {
+		data := []byte{0, 0, 9}
+		buf := bytes.NewBufferBytes(data)
+		n, err := buf.GetUint32(10)
+		require.Error(t, err)
+		require.Equal(t, uint32(0), n)
 	})
 
 	t.Run("invalid request", func(t *testing.T) {
@@ -152,6 +174,12 @@ func TestBuffer_SetUint32(t *testing.T) {
 		err := buf.SetUint32(0, 9)
 		require.NoError(t, err)
 		require.Equal(t, []byte{0, 0, 0, 9}, buf.GetData())
+	})
+
+	t.Run("invalid request: invalid offset", func(t *testing.T) {
+		buf := bytes.NewBuffer(3)
+		err := buf.SetUint32(10, 9)
+		require.Error(t, err)
 	})
 
 	t.Run("invalid request", func(t *testing.T) {
