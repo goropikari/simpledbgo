@@ -18,7 +18,7 @@ import (
 
 func TestFileManager_NewFileManager(t *testing.T) {
 	t.Run("test file manager", func(t *testing.T) {
-		config := domain.FileManagerConfig{DatabasePath: "test", BlockSize: fake.RandInt32()}
+		config := domain.FileManagerConfig{BlockSize: fake.RandInt32()}
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -32,21 +32,8 @@ func TestFileManager_NewFileManager(t *testing.T) {
 }
 
 func TestFileManager_NewFileManager_Error(t *testing.T) {
-	t.Run("test file manager: empty path", func(t *testing.T) {
-		config := domain.FileManagerConfig{DatabasePath: ""}
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		exp := mock.NewMockExplorer(ctrl)
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-
-		_, err := domain.NewFileManager(exp, bsf, config)
-		require.Error(t, err)
-	})
-
 	t.Run("test file manager: non positive block size", func(t *testing.T) {
-		config := domain.FileManagerConfig{DatabasePath: "test", BlockSize: 0}
+		config := domain.FileManagerConfig{BlockSize: 0}
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -87,7 +74,7 @@ func TestFileManager_CopyBlockToPage(t *testing.T) {
 		defer ctrl.Finish()
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 
-		config := domain.FileManagerConfig{DatabasePath: dbpath, BlockSize: int32(blocksize)}
+		config := domain.FileManagerConfig{BlockSize: int32(blocksize)}
 		mgr, err := domain.NewFileManager(exp, bsf, config)
 		require.NoError(t, err)
 
@@ -107,8 +94,7 @@ func TestFileManager_CopyBlockToPage_Error(t *testing.T) {
 
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 
-		dbpath := "."
-		config := domain.FileManagerConfig{DatabasePath: dbpath, BlockSize: 10}
+		config := domain.FileManagerConfig{BlockSize: 10}
 		mgr, err := domain.NewFileManager(exp, bsf, config)
 		require.NoError(t, err)
 
@@ -150,7 +136,7 @@ func TestFileManager_CopyPageToBlock(t *testing.T) {
 		defer ctrl.Finish()
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 
-		config := domain.FileManagerConfig{DatabasePath: dbpath, BlockSize: int32(blocksize)}
+		config := domain.FileManagerConfig{BlockSize: int32(blocksize)}
 		mgr, err := domain.NewFileManager(exp, bsf, config)
 		require.NoError(t, err)
 
@@ -173,8 +159,7 @@ func TestFileManager_ExtendFile(t *testing.T) {
 		exp := os.NewDirectIOExplorer(dbpath)
 		bsc := bytes.NewDirectSliceCreater()
 		config := domain.FileManagerConfig{
-			DatabasePath: dbpath,
-			BlockSize:    int32(blocksize),
+			BlockSize: int32(blocksize),
 		}
 
 		mgr, err := domain.NewFileManager(exp, bsc, config)

@@ -1,28 +1,14 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"sync"
 )
 
-// DatabasePath is a value object of database path.
-type DatabasePath string
-
-// NewDatabasePath is a constructor of DatabasePath.
-func NewDatabasePath(path string) (DatabasePath, error) {
-	if path == "" {
-		return "", errors.New("invalid path")
-	}
-
-	return DatabasePath(path), nil
-}
-
 // FileManagerConfig is configuration of file manager.
 type FileManagerConfig struct {
-	DatabasePath string
-	BlockSize    int32
+	BlockSize int32
 }
 
 // FileManager is a model of file manager.
@@ -30,17 +16,11 @@ type FileManager struct {
 	mu        sync.Mutex
 	explorer  Explorer
 	bsf       ByteSliceFactory
-	dbPath    DatabasePath
 	blockSize BlockSize
 }
 
 // NewFileManager is a constructor of FileManager.
 func NewFileManager(explorer Explorer, bsf ByteSliceFactory, config FileManagerConfig) (*FileManager, error) {
-	dbPath, err := NewDatabasePath(config.DatabasePath)
-	if err != nil {
-		return nil, err
-	}
-
 	blkSize, err := NewBlockSize(config.BlockSize)
 	if err != nil {
 		return nil, err
@@ -50,7 +30,6 @@ func NewFileManager(explorer Explorer, bsf ByteSliceFactory, config FileManagerC
 		mu:        sync.Mutex{},
 		explorer:  explorer,
 		bsf:       bsf,
-		dbPath:    dbPath,
 		blockSize: blkSize,
 	}, nil
 }
@@ -62,7 +41,7 @@ func (mgr *FileManager) CopyBlockToPage(blk *Block, page *Page) error {
 
 	page.Reset()
 
-	file, err := mgr.OpenFile(blk.FileName())
+	file, err := mgr.explorer.OpenFile(blk.FileName())
 	if err != nil {
 		return err
 	}
@@ -90,7 +69,7 @@ func (mgr *FileManager) CopyPageToBlock(page *Page, block *Block) error {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
-	file, err := mgr.OpenFile(block.FileName())
+	file, err := mgr.explorer.OpenFile(block.FileName())
 	if err != nil {
 		return err
 	}
@@ -115,7 +94,7 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
-	file, err := mgr.OpenFile(filename)
+	file, err := mgr.explorer.OpenFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +129,6 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 	return blk, nil
 }
 
-// OpenFile opens file.
 func (mgr *FileManager) OpenFile(filename FileName) (*File, error) {
 	return mgr.explorer.OpenFile(filename)
 }

@@ -19,3 +19,4 @@ run:
   skip-files:
     - _test.go
     - testing
+    - server.go
