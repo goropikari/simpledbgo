@@ -110,7 +110,7 @@ func (mgr *FileManager) CopyPageToBlock(page *Page, block *Block) error {
 	return nil
 }
 
-// ExtendFile extends file size by block size.
+// ExtendFile extends file size by block size and returns last block.
 func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()

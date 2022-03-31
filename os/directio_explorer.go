@@ -10,18 +10,24 @@ import (
 
 // DirectIOExplorer is a file explorer for supporting direct io.
 type DirectIOExplorer struct {
-	rootDir string
+	rootDir   string
+	openFiles map[domain.FileName]*domain.File
 }
 
 // NewDirectIOExplorer is a constructor of DirectIOExplorer.
 func NewDirectIOExplorer(rootDir string) *DirectIOExplorer {
 	return &DirectIOExplorer{
-		rootDir: rootDir,
+		rootDir:   rootDir,
+		openFiles: make(map[domain.FileName]*domain.File),
 	}
 }
 
 // OpenFile opens file as direct io mode.
 func (exp *DirectIOExplorer) OpenFile(filename domain.FileName) (*domain.File, error) {
+	if f, ok := exp.openFiles[filename]; ok {
+		return f, nil
+	}
+
 	path := filepath.Join(exp.rootDir, string(filename))
 	flag := os.O_RDWR | os.O_CREATE
 	f, err := directio.OpenFile(path, flag, os.ModePerm)
@@ -29,5 +35,8 @@ func (exp *DirectIOExplorer) OpenFile(filename domain.FileName) (*domain.File, e
 		return nil, err
 	}
 
-	return domain.NewFile(f), nil
+	file := domain.NewFile(f)
+	exp.openFiles[filename] = file
+
+	return file, nil
 }
