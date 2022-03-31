@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-03-30 17:06:09</td>
+            <td class="headerValue">2022-03-31 13:01:22</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -172,7 +172,7 @@
 <a name="110"><span class="lineNum">     110 </span><span class="lineCov">          1 :         return nil</span></a>
 <a name="111"><span class="lineNum">     111 </span>            : }</a>
 <a name="112"><span class="lineNum">     112 </span>            : </a>
-<a name="113"><span class="lineNum">     113 </span>            : // ExtendFile extends file size by block size.</a>
+<a name="113"><span class="lineNum">     113 </span>            : // ExtendFile extends file size by block size and returns last block.</a>
 <a name="114"><span class="lineNum">     114 </span><span class="lineCov">          1 : func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {</span></a>
 <a name="115"><span class="lineNum">     115 </span><span class="lineCov">          1 :         mgr.mu.Lock()</span></a>
 <a name="116"><span class="lineNum">     116 </span><span class="lineCov">          1 :         defer mgr.mu.Unlock()</span></a>
