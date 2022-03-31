@@ -49,8 +49,10 @@ func TestFileManager_NewFileManager_Error(t *testing.T) {
 func TestFileManager_CopyBlockToPage(t *testing.T) {
 	t.Run("test CopyBlockToPage", func(t *testing.T) {
 		blocksize := directio.BlockSize
-		bb, err := bytes.NewDirectBuffer(blocksize)
+		bsf := bytes.NewDirectSliceCreater()
+		buf, err := bsf.Create(blocksize)
 		require.NoError(t, err)
+		bb := bytes.NewBufferBytes(buf)
 
 		dbpath := "."
 		exp := os.NewDirectIOExplorer(dbpath)
@@ -60,7 +62,6 @@ func TestFileManager_CopyBlockToPage(t *testing.T) {
 		require.NoError(t, err)
 		defer file.Remove()
 
-		buf, _ := directio.AlignedBlock(blocksize)
 		buf[0] = 65
 		file.Write(buf)
 		file.Seek(0)
@@ -69,10 +70,6 @@ func TestFileManager_CopyBlockToPage(t *testing.T) {
 
 		blk := domain.NewBlock(file.Name(), domain.BlockSize(blocksize), domain.BlockNumber(0))
 		page := domain.NewPage(bb)
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		bsf := mock.NewMockByteSliceFactory(ctrl)
 
 		config := domain.FileManagerConfig{BlockSize: int32(blocksize)}
 		mgr, err := domain.NewFileManager(exp, bsf, config)
@@ -111,9 +108,11 @@ func TestFileManager_CopyBlockToPage_Error(t *testing.T) {
 func TestFileManager_CopyPageToBlock(t *testing.T) {
 	t.Run("test CopyPageToBlock", func(t *testing.T) {
 		blocksize := directio.BlockSize
-
-		bb, err := bytes.NewDirectBuffer(blocksize)
+		bsf := bytes.NewDirectSliceCreater()
+		buf, err := bsf.Create(blocksize)
 		require.NoError(t, err)
+		bb := bytes.NewBufferBytes(buf)
+
 		page := domain.NewPage(bb)
 		page.SetString(0, "hoge")
 		page.Seek(0, io.SeekStart)
@@ -126,15 +125,10 @@ func TestFileManager_CopyPageToBlock(t *testing.T) {
 		require.NoError(t, err)
 		defer file.Remove()
 
-		buf, _ := directio.AlignedBlock(blocksize)
 		file.Write(buf)
 		file.Seek(0)
 
 		blk := domain.NewBlock(file.Name(), domain.BlockSize(blocksize), domain.BlockNumber(0))
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		bsf := mock.NewMockByteSliceFactory(ctrl)
 
 		config := domain.FileManagerConfig{BlockSize: int32(blocksize)}
 		mgr, err := domain.NewFileManager(exp, bsf, config)
@@ -168,14 +162,15 @@ func TestFileManager_ExtendFile(t *testing.T) {
 		filename := fake.FileName()
 		defer goos.Remove(string(filename))
 
-		blk, err := mgr.ExtendFile(filename)
+		// first extend
+		_, err = mgr.ExtendFile(filename)
 		require.NoError(t, err)
-		blk, err = mgr.ExtendFile(filename)
+
+		// second extend
+		blk, err := mgr.ExtendFile(filename)
 		require.NoError(t, err)
 
 		expected := domain.NewBlock(filename, domain.BlockSize(blocksize), domain.BlockNumber(1))
-		require.Equal(t, expected, blk)
-
 		require.Equal(t, expected, blk)
 	})
 }
