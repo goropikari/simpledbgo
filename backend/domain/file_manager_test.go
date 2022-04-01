@@ -163,14 +163,59 @@ func TestFileManager_ExtendFile(t *testing.T) {
 		defer goos.Remove(string(filename))
 
 		// first extend
-		_, err = mgr.ExtendFile(filename)
-		require.NoError(t, err)
-
-		// second extend
 		blk, err := mgr.ExtendFile(filename)
 		require.NoError(t, err)
+		require.Equal(t, domain.BlockNumber(0), blk.Number())
 
-		expected := domain.NewBlock(filename, domain.BlockSize(blocksize), domain.BlockNumber(1))
-		require.Equal(t, expected, blk)
+		// second extend
+		blk, err = mgr.ExtendFile(filename)
+		require.NoError(t, err)
+		require.Equal(t, domain.BlockNumber(1), blk.Number())
+
+		f, err := mgr.OpenFile(filename)
+		require.NoError(t, err)
+
+		n, err := f.Size()
+		require.NoError(t, err)
+		require.Equal(t, int64(blocksize)*2, n)
+	})
+}
+
+func TestFileManager_BlockLength(t *testing.T) {
+	t.Run("test extend file", func(t *testing.T) {
+		blocksize := directio.BlockSize
+
+		dbpath := "."
+		exp := os.NewDirectIOExplorer(dbpath)
+		bsc := bytes.NewDirectSliceCreater()
+		config := domain.FileManagerConfig{
+			BlockSize: int32(blocksize),
+		}
+
+		mgr, err := domain.NewFileManager(exp, bsc, config)
+		require.NoError(t, err)
+
+		filename, err := domain.NewFileName(fake.RandString())
+		require.NoError(t, err)
+		defer goos.Remove(string(filename))
+
+		// empty file
+		nb, err := mgr.BlockLength(filename)
+		require.NoError(t, err)
+		require.Equal(t, int32(0), nb)
+
+		// extend file
+		_, err = mgr.ExtendFile(filename)
+		require.NoError(t, err)
+		nb, err = mgr.BlockLength(filename)
+		require.NoError(t, err)
+		require.Equal(t, int32(1), nb)
+
+		// extend file: second
+		_, err = mgr.ExtendFile(filename)
+		require.NoError(t, err)
+		nb, err = mgr.BlockLength(filename)
+		require.NoError(t, err)
+		require.Equal(t, int32(2), nb)
 	})
 }

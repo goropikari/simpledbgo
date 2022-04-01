@@ -66,6 +66,11 @@ func (b *Block) Size() BlockSize {
 	return b.size
 }
 
+// Number returns block number.
+func (b *Block) Number() BlockNumber {
+	return b.number
+}
+
 // Offset returns file's corresponding offset.
 func (b *Block) Offset() int64 {
 	return b.offset

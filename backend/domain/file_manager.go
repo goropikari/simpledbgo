@@ -94,17 +94,25 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
+	blkLen, err := mgr.BlockLength(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	numBlk, err := NewBlockNumber(blkLen)
+	blk := NewBlock(filename, mgr.blockSize, numBlk)
+
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	blk, err := mgr.LastBlock(filename)
+	n, err := file.Size()
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = file.Seek(blk.Offset())
+	_, err = file.Seek(n)
 	if err != nil {
 		return nil, err
 	}
@@ -122,26 +130,23 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 	return blk, nil
 }
 
-// LastBlock returns last block of a file.
-func (mgr *FileManager) LastBlock(filename FileName) (*Block, error) {
+// BlockLength returns the number of block of the file.
+func (mgr *FileManager) BlockLength(filename FileName) (int32, error) {
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	n, err := file.Size()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	newBlkNum, err := NewBlockNumber(int32(n) / int32(mgr.blockSize))
-	if err != nil {
-		return nil, err
-	}
+	return int32(n) / int32(mgr.blockSize), nil
+}
 
-	blk := NewBlock(filename, mgr.blockSize, newBlkNum)
-
-	return blk, nil
+func (mgr *FileManager) BlockSize() BlockSize {
+	return mgr.blockSize
 }
 
 // OpenFile opens a file.
