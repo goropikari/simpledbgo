@@ -74,6 +74,10 @@ func PrepareLogManager(fileMgr *FileManager, factory *PageFactory, fileName File
 	}
 
 	blknum, err := NewBlockNumber(blklen - 1)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	blk := NewBlock(fileName, fileMgr.BlockSize(), blknum)
 
 	err = fileMgr.CopyBlockToPage(blk, page)
@@ -117,11 +121,11 @@ func (mgr *LogManager) AppendRecord(record []byte) (int32, error) {
 
 	bytesNeeded := int32(int32Length + len(record))
 
-	if boundary-bytesNeeded < int32Length {
-		if bytesNeeded+int32Length > int32(mgr.fileMgr.BlockSize()) {
-			return 0, errors.New("too long record")
-		}
+	if bytesNeeded+int32Length > int32(mgr.fileMgr.BlockSize()) {
+		return 0, errors.New("too long record")
+	}
 
+	if boundary-bytesNeeded < int32Length {
 		err = mgr.Flush()
 		if err != nil {
 			return 0, err

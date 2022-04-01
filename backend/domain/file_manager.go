@@ -100,6 +100,10 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 	}
 
 	numBlk, err := NewBlockNumber(blkLen)
+	if err != nil {
+		return nil, err
+	}
+
 	blk := NewBlock(filename, mgr.blockSize, numBlk)
 
 	file, err := mgr.OpenFile(filename)
