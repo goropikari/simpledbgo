@@ -7,16 +7,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDirectSliceCreater(t *testing.T) {
+func TestDirectByteSliceCreater(t *testing.T) {
 	t.Run("test direct slice creater", func(t *testing.T) {
-		sc := bytes.NewDirectSliceCreater()
+		sc := bytes.NewDirectByteSliceCreater()
 		b, err := sc.Create(4096)
 		require.NoError(t, err)
 		require.Equal(t, 4096, len(b))
 	})
 
 	t.Run("invalid request, test direct slice creater", func(t *testing.T) {
-		sc := bytes.NewDirectSliceCreater()
+		sc := bytes.NewDirectByteSliceCreater()
 		b, err := sc.Create(10)
 		require.Error(t, err)
 		require.Equal(t, 0, len(b))

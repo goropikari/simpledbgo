@@ -1,32 +1,34 @@
-package domain
+package file
 
 import (
 	"fmt"
 	"io"
 	"sync"
+
+	"github.com/goropikari/simpledb_go/backend/domain"
 )
 
-// FileManagerConfig is configuration of file manager.
-type FileManagerConfig struct {
+// ManagerConfig is configuration of file manager.
+type ManagerConfig struct {
 	BlockSize int32
 }
 
-// FileManager is a model of file manager.
-type FileManager struct {
+// Manager is a model of file manager.
+type Manager struct {
 	mu        sync.Mutex
-	explorer  Explorer
-	bsf       ByteSliceFactory
-	blockSize BlockSize
+	explorer  domain.Explorer
+	bsf       domain.ByteSliceFactory
+	blockSize domain.BlockSize
 }
 
-// NewFileManager is a constructor of FileManager.
-func NewFileManager(explorer Explorer, bsf ByteSliceFactory, config FileManagerConfig) (*FileManager, error) {
-	blkSize, err := NewBlockSize(config.BlockSize)
+// NewManager is a constructor of Manager.
+func NewManager(explorer domain.Explorer, bsf domain.ByteSliceFactory, config ManagerConfig) (*Manager, error) {
+	blkSize, err := domain.NewBlockSize(config.BlockSize)
 	if err != nil {
 		return nil, err
 	}
 
-	return &FileManager{
+	return &Manager{
 		mu:        sync.Mutex{},
 		explorer:  explorer,
 		bsf:       bsf,
@@ -35,7 +37,7 @@ func NewFileManager(explorer Explorer, bsf ByteSliceFactory, config FileManagerC
 }
 
 // CopyBlockToPage copies block content to page.
-func (mgr *FileManager) CopyBlockToPage(blk *Block, page *Page) error {
+func (mgr *Manager) CopyBlockToPage(blk *domain.Block, page *domain.Page) error {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -65,7 +67,7 @@ func (mgr *FileManager) CopyBlockToPage(blk *Block, page *Page) error {
 }
 
 // CopyPageToBlock copies page to block.
-func (mgr *FileManager) CopyPageToBlock(page *Page, block *Block) error {
+func (mgr *Manager) CopyPageToBlock(page *domain.Page, block *domain.Block) error {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -90,7 +92,7 @@ func (mgr *FileManager) CopyPageToBlock(page *Page, block *Block) error {
 }
 
 // ExtendFile extends file size by block size and returns last block.
-func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
+func (mgr *Manager) ExtendFile(filename domain.FileName) (*domain.Block, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -99,12 +101,12 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 		return nil, err
 	}
 
-	numBlk, err := NewBlockNumber(blkLen)
+	numBlk, err := domain.NewBlockNumber(blkLen)
 	if err != nil {
 		return nil, err
 	}
 
-	blk := NewBlock(filename, mgr.blockSize, numBlk)
+	blk := domain.NewBlock(filename, mgr.blockSize, numBlk)
 
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
@@ -135,7 +137,7 @@ func (mgr *FileManager) ExtendFile(filename FileName) (*Block, error) {
 }
 
 // BlockLength returns the number of block of the file.
-func (mgr *FileManager) BlockLength(filename FileName) (int32, error) {
+func (mgr *Manager) BlockLength(filename domain.FileName) (int32, error) {
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
 		return 0, err
@@ -149,11 +151,12 @@ func (mgr *FileManager) BlockLength(filename FileName) (int32, error) {
 	return int32(n) / int32(mgr.blockSize), nil
 }
 
-func (mgr *FileManager) BlockSize() BlockSize {
+// BlockSize returns block size.
+func (mgr *Manager) BlockSize() domain.BlockSize {
 	return mgr.blockSize
 }
 
 // OpenFile opens a file.
-func (mgr *FileManager) OpenFile(filename FileName) (*File, error) {
+func (mgr *Manager) OpenFile(filename domain.FileName) (*domain.File, error) {
 	return mgr.explorer.OpenFile(filename)
 }

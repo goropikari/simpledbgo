@@ -5,6 +5,7 @@ linters:
     - golint
     - interfacer
     - ireturn
+    - lll
     - maligned
     - scopelint
     - varnamelen

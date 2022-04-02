@@ -281,5 +281,5 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 }
 
 func (buf *Buffer) hasSpace(x int) bool {
-	return buf.capacity-buf.offset >= int64(x)
+	return int64(x)+buf.offset <= buf.capacity
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSliceCreater(t *testing.T) {
+func TestByteSliceCreater(t *testing.T) {
 	t.Run("test slice creater", func(t *testing.T) {
-		sc := bytes.NewSliceCreater()
+		sc := bytes.NewByteSliceCreater()
 		b, err := sc.Create(10)
 		require.NoError(t, err)
 		require.Equal(t, 10, len(b))

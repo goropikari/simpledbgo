@@ -1,28 +1,30 @@
-package domain_test
+package log_test
 
 import (
 	goos "os"
 	"testing"
 
 	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledb_go/backend/file"
+	"github.com/goropikari/simpledb_go/backend/log"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/os"
 	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLogManager_Flush(t *testing.T) {
+func TestManager_Flush(t *testing.T) {
 	t.Run("flush", func(t *testing.T) {
 		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewSliceCreater()
+		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
 		dbPath := "."
 		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := domain.FileManagerConfig{BlockSize: size}
-		fileMgr, _ := domain.NewFileManager(explorer, bsf, fileConfig)
+		fileConfig := file.ManagerConfig{BlockSize: size}
+		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
@@ -30,11 +32,11 @@ func TestLogManager_Flush(t *testing.T) {
 		logFileName, err := domain.NewFileName(logfile)
 		require.NoError(t, err)
 
-		logConfig := domain.LogManagerConfig{LogFileName: logfile}
-		logBlock, logPage, err := domain.PrepareLogManager(fileMgr, pageFactory, logFileName)
+		logConfig := log.ManagerConfig{LogFileName: logfile}
+		logBlock, logPage, err := log.PrepareManager(fileMgr, pageFactory, logFileName)
 		require.NoError(t, err)
 
-		logMgr, err := domain.NewLogManager(fileMgr, logBlock, logPage, logConfig)
+		logMgr, err := log.NewManager(fileMgr, logBlock, logPage, logConfig)
 		require.NoError(t, err)
 
 		err = logPage.SetInt32(0, 15)
@@ -45,7 +47,7 @@ func TestLogManager_Flush(t *testing.T) {
 	})
 }
 
-func TestLogManager_FlushLSN(t *testing.T) {
+func TestManager_FlushLSN(t *testing.T) {
 	var tests = []struct {
 		name   string
 		latest int32
@@ -70,14 +72,14 @@ func TestLogManager_FlushLSN(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			const size = 10
 			blockSize, _ := domain.NewBlockSize(size)
-			bsf := bytes.NewSliceCreater()
+			bsf := bytes.NewByteSliceCreater()
 			pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 			// initialize file manager
 			dbPath := "."
 			explorer := os.NewNormalExplorer(dbPath)
-			fileConfig := domain.FileManagerConfig{BlockSize: size}
-			fileMgr, _ := domain.NewFileManager(explorer, bsf, fileConfig)
+			fileConfig := file.ManagerConfig{BlockSize: size}
+			fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
 			// initialize log manager
 			logfile := "logfile_" + fake.RandString()
@@ -85,11 +87,11 @@ func TestLogManager_FlushLSN(t *testing.T) {
 			logFileName, err := domain.NewFileName(logfile)
 			require.NoError(t, err)
 
-			logConfig := domain.LogManagerConfig{LogFileName: logfile}
-			logBlock, logPage, err := domain.PrepareLogManager(fileMgr, pageFactory, logFileName)
+			logConfig := log.ManagerConfig{LogFileName: logfile}
+			logBlock, logPage, err := log.PrepareManager(fileMgr, pageFactory, logFileName)
 			require.NoError(t, err)
 
-			logMgr, err := domain.NewLogManager(fileMgr, logBlock, logPage, logConfig)
+			logMgr, err := log.NewManager(fileMgr, logBlock, logPage, logConfig)
 			require.NoError(t, err)
 
 			logMgr.SetLastSavedLSN(tt.saved)
@@ -104,18 +106,18 @@ func TestLogManager_FlushLSN(t *testing.T) {
 	}
 }
 
-func TestLogManager_AppendRecord(t *testing.T) {
+func TestManager_AppendRecord(t *testing.T) {
 	t.Run("append record", func(t *testing.T) {
 		const size = 15
 		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewSliceCreater()
+		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
 		dbPath := "."
 		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := domain.FileManagerConfig{BlockSize: size}
-		fileMgr, _ := domain.NewFileManager(explorer, bsf, fileConfig)
+		fileConfig := file.ManagerConfig{BlockSize: size}
+		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
@@ -123,11 +125,11 @@ func TestLogManager_AppendRecord(t *testing.T) {
 		logFileName, err := domain.NewFileName(logfile)
 		require.NoError(t, err)
 
-		logConfig := domain.LogManagerConfig{LogFileName: logfile}
-		logBlock, logPage, err := domain.PrepareLogManager(fileMgr, pageFactory, logFileName)
+		logConfig := log.ManagerConfig{LogFileName: logfile}
+		logBlock, logPage, err := log.PrepareManager(fileMgr, pageFactory, logFileName)
 		require.NoError(t, err)
 
-		logMgr, err := domain.NewLogManager(fileMgr, logBlock, logPage, logConfig)
+		logMgr, err := log.NewManager(fileMgr, logBlock, logPage, logConfig)
 		require.NoError(t, err)
 
 		_, err = logMgr.AppendRecord([]byte("hello"))
@@ -141,14 +143,14 @@ func TestLogManager_AppendRecord(t *testing.T) {
 	t.Run("append record error: too long record", func(t *testing.T) {
 		const size = 10
 		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewSliceCreater()
+		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
 		dbPath := "."
 		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := domain.FileManagerConfig{BlockSize: size}
-		fileMgr, _ := domain.NewFileManager(explorer, bsf, fileConfig)
+		fileConfig := file.ManagerConfig{BlockSize: size}
+		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
@@ -156,11 +158,11 @@ func TestLogManager_AppendRecord(t *testing.T) {
 		logFileName, err := domain.NewFileName(logfile)
 		require.NoError(t, err)
 
-		logConfig := domain.LogManagerConfig{LogFileName: logfile}
-		logBlock, logPage, err := domain.PrepareLogManager(fileMgr, pageFactory, logFileName)
+		logConfig := log.ManagerConfig{LogFileName: logfile}
+		logBlock, logPage, err := log.PrepareManager(fileMgr, pageFactory, logFileName)
 		require.NoError(t, err)
 
-		logMgr, err := domain.NewLogManager(fileMgr, logBlock, logPage, logConfig)
+		logMgr, err := log.NewManager(fileMgr, logBlock, logPage, logConfig)
 		require.NoError(t, err)
 
 		_, err = logMgr.AppendRecord([]byte("hello"))
@@ -168,18 +170,18 @@ func TestLogManager_AppendRecord(t *testing.T) {
 	})
 }
 
-func TestLogManager_AppendNewBlock(t *testing.T) {
+func TestManager_AppendNewBlock(t *testing.T) {
 	t.Run("prepare from empty file", func(t *testing.T) {
 		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewSliceCreater()
+		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
 		dbPath := "."
 		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := domain.FileManagerConfig{BlockSize: size}
-		fileMgr, _ := domain.NewFileManager(explorer, bsf, fileConfig)
+		fileConfig := file.ManagerConfig{BlockSize: size}
+		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
@@ -187,11 +189,11 @@ func TestLogManager_AppendNewBlock(t *testing.T) {
 		logFileName, err := domain.NewFileName(logfile)
 		require.NoError(t, err)
 
-		logConfig := domain.LogManagerConfig{LogFileName: logfile}
-		logBlock, logPage, err := domain.PrepareLogManager(fileMgr, pageFactory, logFileName)
+		logConfig := log.ManagerConfig{LogFileName: logfile}
+		logBlock, logPage, err := log.PrepareManager(fileMgr, pageFactory, logFileName)
 		require.NoError(t, err)
 
-		logMgr, err := domain.NewLogManager(fileMgr, logBlock, logPage, logConfig)
+		logMgr, err := log.NewManager(fileMgr, logBlock, logPage, logConfig)
 		require.NoError(t, err)
 
 		blk0, err := logMgr.AppendNewBlock()
@@ -208,14 +210,14 @@ func TestLogManager_AppendNewBlock(t *testing.T) {
 	t.Run("prepare from exsting file", func(t *testing.T) {
 		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewSliceCreater()
+		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
 		dbPath := "."
 		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := domain.FileManagerConfig{BlockSize: size}
-		fileMgr, err := domain.NewFileManager(explorer, bsf, fileConfig)
+		fileConfig := file.ManagerConfig{BlockSize: size}
+		fileMgr, err := file.NewManager(explorer, bsf, fileConfig)
 		require.NoError(t, err)
 
 		// initialize log manager
@@ -230,7 +232,7 @@ func TestLogManager_AppendNewBlock(t *testing.T) {
 		_, err = fileMgr.ExtendFile(logFileName)
 		require.NoError(t, err)
 
-		blk, _, err := domain.PrepareLogManager(fileMgr, pageFactory, logFileName)
+		blk, _, err := log.PrepareManager(fileMgr, pageFactory, logFileName)
 		require.NoError(t, err)
 
 		expected := domain.NewBlock(logFileName, blockSize, domain.BlockNumber(1))

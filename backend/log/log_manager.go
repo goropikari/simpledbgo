@@ -1,36 +1,40 @@
-package domain
+package log
 
 import (
 	"errors"
 	"sync"
+
+	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledb_go/backend/file"
 )
 
 const int32Length = 4
 
-// LogManagerConfig is a configuration of log manager.
-type LogManagerConfig struct {
+// ManagerConfig is a configuration of log manager.
+type ManagerConfig struct {
 	LogFileName string
 }
 
-// LogManager is a log manager.
-type LogManager struct {
+// Manager is a log manager.
+type Manager struct {
 	mu           sync.Mutex
-	fileMgr      *FileManager
-	logFileName  FileName
-	currentBlock *Block
-	logPage      *Page
+	fileMgr      *file.Manager
+	logFileName  domain.FileName
+	currentBlock *domain.Block
+	logPage      *domain.Page
+	// Reset when server restarts. Increment when record is appended.
 	latestLSN    int32
 	lastSavedLSN int32
 }
 
-// NewLogManager is a constructor of LogManager.
-func NewLogManager(fileMgr *FileManager, block *Block, page *Page, config LogManagerConfig) (*LogManager, error) {
-	logFileName, err := NewFileName(config.LogFileName)
+// NewManager is a constructor of Manager.
+func NewManager(fileMgr *file.Manager, block *domain.Block, page *domain.Page, config ManagerConfig) (*Manager, error) {
+	logFileName, err := domain.NewFileName(config.LogFileName)
 	if err != nil {
 		return nil, err
 	}
 
-	return &LogManager{
+	return &Manager{
 		mu:           sync.Mutex{},
 		fileMgr:      fileMgr,
 		logFileName:  logFileName,
@@ -41,9 +45,9 @@ func NewLogManager(fileMgr *FileManager, block *Block, page *Page, config LogMan
 	}, nil
 }
 
-// PrepareLogManager prepares a block and a page for initializing LogManager.
+// PrepareManager prepares a block and a page for initializing Manager.
 // If given file is empty, extend a file by block size.
-func PrepareLogManager(fileMgr *FileManager, factory *PageFactory, fileName FileName) (*Block, *Page, error) {
+func PrepareManager(fileMgr *file.Manager, factory *domain.PageFactory, fileName domain.FileName) (*domain.Block, *domain.Page, error) {
 	page, err := factory.Create()
 	if err != nil {
 		return nil, nil, err
@@ -73,12 +77,12 @@ func PrepareLogManager(fileMgr *FileManager, factory *PageFactory, fileName File
 		return blk, page, nil
 	}
 
-	blknum, err := NewBlockNumber(blklen - 1)
+	blknum, err := domain.NewBlockNumber(blklen - 1)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	blk := NewBlock(fileName, fileMgr.BlockSize(), blknum)
+	blk := domain.NewBlock(fileName, fileMgr.BlockSize(), blknum)
 
 	err = fileMgr.CopyBlockToPage(blk, page)
 	if err != nil {
@@ -89,7 +93,7 @@ func PrepareLogManager(fileMgr *FileManager, factory *PageFactory, fileName File
 }
 
 // FlushLSN flushes by lsn.
-func (mgr *LogManager) FlushLSN(lsn int32) error {
+func (mgr *Manager) FlushLSN(lsn int32) error {
 	if lsn >= mgr.lastSavedLSN {
 		return mgr.Flush()
 	}
@@ -98,7 +102,7 @@ func (mgr *LogManager) FlushLSN(lsn int32) error {
 }
 
 // Flush flushes the log page.
-func (mgr *LogManager) Flush() error {
+func (mgr *Manager) Flush() error {
 	err := mgr.fileMgr.CopyPageToBlock(mgr.logPage, mgr.currentBlock)
 	if err != nil {
 		return err
@@ -110,7 +114,7 @@ func (mgr *LogManager) Flush() error {
 }
 
 // AppendRecord appends a record to block.
-func (mgr *LogManager) AppendRecord(record []byte) (int32, error) {
+func (mgr *Manager) AppendRecord(record []byte) (int32, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -164,7 +168,7 @@ func (mgr *LogManager) AppendRecord(record []byte) (int32, error) {
 }
 
 // AppendNewBlock appends a block to log file and return the appended block.
-func (mgr *LogManager) AppendNewBlock() (*Block, error) {
+func (mgr *Manager) AppendNewBlock() (*domain.Block, error) {
 	blk, err := mgr.fileMgr.ExtendFile(mgr.logFileName)
 	if err != nil {
 		return nil, err

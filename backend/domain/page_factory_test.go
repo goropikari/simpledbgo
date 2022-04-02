@@ -9,7 +9,7 @@ import (
 )
 
 func TestPageFactory_Create(t *testing.T) {
-	bsf := bytes.NewDirectSliceCreater()
+	bsf := bytes.NewDirectByteSliceCreater()
 
 	t.Run("test page factory", func(t *testing.T) {
 		blockSize, err := domain.NewBlockSize(4096)
