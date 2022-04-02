@@ -16,10 +16,10 @@ tools:
 
 .PHONY: test
 test:
-	go test ./...
+	go test -shuffle=on ./...
 
 ci-test:
-	go test -v -cover ./... 2>&1 | go-junit-report > report.xml
+	go test -v -cover -shuffle=on ./... 2>&1 | go-junit-report > report.xml
 
 .PHONY: lint
 lint:

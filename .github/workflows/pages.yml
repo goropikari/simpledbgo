@@ -23,7 +23,16 @@ jobs:
         run: make tools
 
       - name: coverage
-        run: make coverage
+        run: |
+          percent=$(make coverage | grep lines | sed -r 's/[^0-9]*(.*\.[0-9]*)%.*/\1/' | sed -e 's/%/%25/')
+          int=${percent%.*}
+          if [ $int -gt 90 ]; then
+            curl -o docs/coverage.svg https://img.shields.io/badge/coverage-${percent}%25-green
+          elif [ $int -gt 75 ]; then
+            curl -o docs/coverage.svg https://img.shields.io/badge/coverage-${percent}%25-yellow
+          else
+            curl -o docs/coverage.svg https://img.shields.io/badge/coverage-${percent}%25-red
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v3
