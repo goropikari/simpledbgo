@@ -1,6 +1,7 @@
 package os
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -16,6 +17,11 @@ type DirectIOExplorer struct {
 
 // NewDirectIOExplorer is a constructor of DirectIOExplorer.
 func NewDirectIOExplorer(rootDir string) *DirectIOExplorer {
+	err := os.MkdirAll(rootDir, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &DirectIOExplorer{
 		rootDir:   rootDir,
 		openFiles: make(map[domain.FileName]*domain.File),

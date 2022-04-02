@@ -1,6 +1,7 @@
 package os
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -15,6 +16,11 @@ type NormalExplorer struct {
 
 // NewNormalExplorer is a constructor of NewNormalExplorer.
 func NewNormalExplorer(rootDir string) *NormalExplorer {
+	err := os.MkdirAll(rootDir, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &NormalExplorer{
 		rootDir:   rootDir,
 		openFiles: make(map[domain.FileName]*domain.File),

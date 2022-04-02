@@ -89,7 +89,6 @@ func TestManager_Flush(t *testing.T) {
 
 		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
-		// bsf := bytes.NewByteSliceCreater()
 		buf := make([]byte, size)
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 		bsf.EXPECT().Create(gomock.Any()).Return(buf, nil).AnyTimes()
@@ -153,10 +152,10 @@ func TestManager_FlushLSN(t *testing.T) {
 			pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 			// initialize file manager
-			dbPath := "."
-			explorer := os.NewNormalExplorer(dbPath)
-			fileConfig := file.ManagerConfig{BlockSize: size}
-			fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
+			dbPath := fake.RandString()
+			fileMgrFactory := fake.NewNonDirectFileManagerFactory(dbPath, size)
+			defer fileMgrFactory.Finish()
+			fileMgr := fileMgrFactory.Create()
 
 			// initialize log manager
 			logfile := "logfile_" + fake.RandString()
@@ -181,26 +180,12 @@ func TestManager_FlushLSN(t *testing.T) {
 func TestManager_AppendRecord(t *testing.T) {
 	t.Run("append record", func(t *testing.T) {
 		const size = 15
-		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, blockSize)
+		dbPath := fake.RandString()
+		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
+		defer logMgrFactory.Finish()
+		logMgr := logMgrFactory.Create()
 
-		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
-
-		// initialize log manager
-		logfile := "logfile_" + fake.RandString()
-		defer goos.Remove(logfile)
-
-		logConfig := log.ManagerConfig{LogFileName: logfile}
-
-		logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
-		require.NoError(t, err)
-
-		_, err = logMgr.AppendRecord([]byte("hello"))
+		_, err := logMgr.AppendRecord([]byte("hello"))
 		require.NoError(t, err)
 		_, err = logMgr.AppendRecord([]byte("world"))
 		require.NoError(t, err)
@@ -210,26 +195,12 @@ func TestManager_AppendRecord(t *testing.T) {
 
 	t.Run("append record error: too long record", func(t *testing.T) {
 		const size = 10
-		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, blockSize)
+		dbPath := fake.RandString()
+		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
+		defer logMgrFactory.Finish()
+		logMgr := logMgrFactory.Create()
 
-		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
-
-		// initialize log manager
-		logfile := "logfile_" + fake.RandString()
-		defer goos.Remove(logfile)
-
-		logConfig := log.ManagerConfig{LogFileName: logfile}
-
-		logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
-		require.NoError(t, err)
-
-		_, err = logMgr.AppendRecord([]byte("hello"))
+		_, err := logMgr.AppendRecord([]byte("hello"))
 		require.Error(t, err)
 	})
 }
@@ -237,36 +208,18 @@ func TestManager_AppendRecord(t *testing.T) {
 func TestManager_AppendNewBlock(t *testing.T) {
 	t.Run("prepare from empty file", func(t *testing.T) {
 		const size = 20
-		blockSize, _ := domain.NewBlockSize(size)
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, blockSize)
-
-		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
-
-		// initialize log manager
-		logfile := "logfile_" + fake.RandString()
-		defer goos.Remove(logfile)
-		logFileName, err := domain.NewFileName(logfile)
-		require.NoError(t, err)
-
-		logConfig := log.ManagerConfig{LogFileName: logfile}
-
-		logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
-		require.NoError(t, err)
+		dbPath := fake.RandString()
+		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
+		defer logMgrFactory.Finish()
+		logMgr := logMgrFactory.Create()
 
 		blk0, err := logMgr.AppendNewBlock()
 		require.NoError(t, err)
-		expected0 := domain.NewBlock(logFileName, blockSize, domain.BlockNumber(1))
-		require.Equal(t, expected0, blk0)
+		require.Equal(t, domain.BlockNumber(1), blk0.Number())
 
 		blk1, err := logMgr.AppendNewBlock()
 		require.NoError(t, err)
-		expected1 := domain.NewBlock(logFileName, blockSize, domain.BlockNumber(2))
-		require.Equal(t, expected1, blk1)
+		require.Equal(t, domain.BlockNumber(2), blk1.Number())
 	})
 
 	t.Run("prepare from exsting file", func(t *testing.T) {
@@ -276,11 +229,10 @@ func TestManager_AppendNewBlock(t *testing.T) {
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, err := file.NewManager(explorer, bsf, fileConfig)
-		require.NoError(t, err)
+		dbPath := fake.RandString()
+		fileMgrFactory := fake.NewNonDirectFileManagerFactory(dbPath, size)
+		defer fileMgrFactory.Finish()
+		fileMgr := fileMgrFactory.Create()
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
