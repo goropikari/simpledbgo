@@ -4,7 +4,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>LCOV - coverage.lcov - lib/bytes/direct_slice_creater.go</title>
+  <title>LCOV - coverage.lcov - lib/bytes/direct_byte_slice_creater.go</title>
   <link rel="stylesheet" type="text/css" href="../../gcov.css">
 </head>
 
@@ -19,7 +19,7 @@
         <table cellpadding=1 border=0 width="100%">
           <tr>
             <td width="10%" class="headerItem">Current view:</td>
-            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">lib/bytes</a> - direct_slice_creater.go<span style="font-size: 80%;"> (source / <a href="direct_slice_creater.go.func-sort-c.html">functions</a>)</span></td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">lib/bytes</a> - direct_byte_slice_creater.go<span style="font-size: 80%;"> (source / <a href="direct_byte_slice_creater.go.func-sort-c.html">functions</a>)</span></td>
             <td width="5%"></td>
             <td width="15%"></td>
             <td width="10%" class="headerCovTableHead">Hit</td>
@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-01 18:31:18</td>
+            <td class="headerValue">2022-04-02 17:12:34</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -64,16 +64,16 @@
 <a name="2"><span class="lineNum">       2 </span>            : </a>
 <a name="3"><span class="lineNum">       3 </span>            : import &quot;github.com/goropikari/simpledb_go/lib/directio&quot;</a>
 <a name="4"><span class="lineNum">       4 </span>            : </a>
-<a name="5"><span class="lineNum">       5 </span>            : // DirectSliceCreater is a slice creature with direct io.</a>
-<a name="6"><span class="lineNum">       6 </span>            : type DirectSliceCreater struct{}</a>
+<a name="5"><span class="lineNum">       5 </span>            : // DirectByteSliceCreater is a slice creature with direct io.</a>
+<a name="6"><span class="lineNum">       6 </span>            : type DirectByteSliceCreater struct{}</a>
 <a name="7"><span class="lineNum">       7 </span>            : </a>
-<a name="8"><span class="lineNum">       8 </span>            : // NewDirectSliceCreater is a constructor of DirectSliceCreater.</a>
-<a name="9"><span class="lineNum">       9 </span><span class="lineCov">          1 : func NewDirectSliceCreater() *DirectSliceCreater {</span></a>
-<a name="10"><span class="lineNum">      10 </span><span class="lineCov">          1 :         return &amp;DirectSliceCreater{}</span></a>
+<a name="8"><span class="lineNum">       8 </span>            : // NewDirectByteSliceCreater is a constructor of DirectByteSliceCreater.</a>
+<a name="9"><span class="lineNum">       9 </span><span class="lineCov">          1 : func NewDirectByteSliceCreater() *DirectByteSliceCreater {</span></a>
+<a name="10"><span class="lineNum">      10 </span><span class="lineCov">          1 :         return &amp;DirectByteSliceCreater{}</span></a>
 <a name="11"><span class="lineNum">      11 </span><span class="lineCov">          1 : }</span></a>
 <a name="12"><span class="lineNum">      12 </span>            : </a>
 <a name="13"><span class="lineNum">      13 </span>            : // Create creates a byte slice.</a>
-<a name="14"><span class="lineNum">      14 </span><span class="lineCov">          1 : func (s *DirectSliceCreater) Create(n int) ([]byte, error) {</span></a>
+<a name="14"><span class="lineNum">      14 </span><span class="lineCov">          1 : func (s *DirectByteSliceCreater) Create(n int) ([]byte, error) {</span></a>
 <a name="15"><span class="lineNum">      15 </span><span class="lineCov">          1 :         b, err := directio.AlignedBlock(n)</span></a>
 <a name="16"><span class="lineNum">      16 </span><span class="lineCov">          2 :         if err != nil {</span></a>
 <a name="17"><span class="lineNum">      17 </span><span class="lineCov">          1 :                 return nil, err</span></a>

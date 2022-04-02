@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-01 18:31:18</td>
+            <td class="headerValue">2022-04-02 17:12:34</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -343,7 +343,7 @@
 <a name="281"><span class="lineNum">     281 </span>            : }</a>
 <a name="282"><span class="lineNum">     282 </span>            : </a>
 <a name="283"><span class="lineNum">     283 </span><span class="lineCov">          1 : func (buf *Buffer) hasSpace(x int) bool {</span></a>
-<a name="284"><span class="lineNum">     284 </span><span class="lineCov">          1 :         return buf.capacity-buf.offset &gt;= int64(x)</span></a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineCov">          1 :         return int64(x)+buf.offset &lt;= buf.capacity</span></a>
 <a name="285"><span class="lineNum">     285 </span><span class="lineCov">          1 : }</span></a>
 </pre>
       </td>
