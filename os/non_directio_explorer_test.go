@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNormalExplorer(t *testing.T) {
+func TestNonDirectIOExplorer(t *testing.T) {
 	t.Run("test normal explorer", func(t *testing.T) {
-		exp := os.NewNormalExplorer(".")
+		exp := os.NewNonDirectIOExplorer(".")
 
 		filename := fake.RandString()
 		defer goos.Remove(filename)

@@ -8,34 +8,40 @@ import (
 	"github.com/goropikari/simpledb_go/backend/domain"
 )
 
-// NormalExplorer is a file explorer on normal mode.
-type NormalExplorer struct {
-	rootDir   string
-	openFiles map[domain.FileName]*domain.File
+type opener interface {
+	OpenFile(string, int, os.FileMode) (*os.File, error)
 }
 
-// NewNormalExplorer is a constructor of NewNormalExplorer.
-func NewNormalExplorer(rootDir string) *NormalExplorer {
+// Explorer is a file explorer.
+type Explorer struct {
+	rootDir   string
+	openFiles map[domain.FileName]*domain.File
+	opener    opener
+}
+
+// NewExplorer is a constructor of NewExplorer.
+func NewExplorer(rootDir string, opener opener) *Explorer {
 	err := os.MkdirAll(rootDir, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return &NormalExplorer{
+	return &Explorer{
 		rootDir:   rootDir,
 		openFiles: make(map[domain.FileName]*domain.File),
+		opener:    opener,
 	}
 }
 
 // OpenFile opens a file.
-func (exp *NormalExplorer) OpenFile(filename domain.FileName) (*domain.File, error) {
+func (exp *Explorer) OpenFile(filename domain.FileName) (*domain.File, error) {
 	if f, ok := exp.openFiles[filename]; ok {
 		return f, nil
 	}
 
 	path := filepath.Join(exp.rootDir, string(filename))
 	flag := os.O_RDWR | os.O_CREATE
-	f, err := os.OpenFile(path, flag, os.ModePerm)
+	f, err := exp.opener.OpenFile(path, flag, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}

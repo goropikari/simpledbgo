@@ -19,7 +19,7 @@ func NewNonDirectFileManagerFactory(dbPath string, blockSize int32) *NonDirectFi
 	bsf := bytes.NewByteSliceCreater()
 
 	// initialize file manager
-	explorer := os.NewNormalExplorer(dbPath)
+	explorer := os.NewNonDirectIOExplorer(dbPath)
 	fileConfig := file.ManagerConfig{BlockSize: blockSize}
 	fileMgr, err := file.NewManager(explorer, bsf, fileConfig)
 	if err != nil {

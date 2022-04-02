@@ -30,7 +30,7 @@ func TestManager_NewManager(t *testing.T) {
 
 		// initialize file manager
 		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
+		explorer := os.NewNonDirectIOExplorer(dbPath)
 		fileConfig := file.ManagerConfig{BlockSize: size}
 		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
@@ -68,7 +68,7 @@ func TestManager_NewManager(t *testing.T) {
 
 		// initialize file manager
 		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
+		explorer := os.NewNonDirectIOExplorer(dbPath)
 		fileConfig := file.ManagerConfig{BlockSize: size}
 		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
@@ -97,7 +97,7 @@ func TestManager_Flush(t *testing.T) {
 
 		// initialize file manager
 		dbPath := "."
-		explorer := os.NewNormalExplorer(dbPath)
+		explorer := os.NewNonDirectIOExplorer(dbPath)
 		fileConfig := file.ManagerConfig{BlockSize: size}
 		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 

@@ -1,48 +1,32 @@
 package os
 
 import (
-	"log"
 	"os"
-	"path/filepath"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/lib/directio"
 )
 
 // DirectIOExplorer is a file explorer for supporting direct io.
 type DirectIOExplorer struct {
-	rootDir   string
-	openFiles map[domain.FileName]*domain.File
+	*Explorer
 }
 
 // NewDirectIOExplorer is a constructor of DirectIOExplorer.
 func NewDirectIOExplorer(rootDir string) *DirectIOExplorer {
-	err := os.MkdirAll(rootDir, os.ModePerm)
-	if err != nil {
-		log.Fatal(err)
-	}
+	opener := newDirectIOOpener()
+	explorer := NewExplorer(rootDir, opener)
 
 	return &DirectIOExplorer{
-		rootDir:   rootDir,
-		openFiles: make(map[domain.FileName]*domain.File),
+		Explorer: explorer,
 	}
 }
 
-// OpenFile opens file as direct io mode.
-func (exp *DirectIOExplorer) OpenFile(filename domain.FileName) (*domain.File, error) {
-	if f, ok := exp.openFiles[filename]; ok {
-		return f, nil
-	}
+type directIOOpener struct{}
 
-	path := filepath.Join(exp.rootDir, string(filename))
-	flag := os.O_RDWR | os.O_CREATE
-	f, err := directio.OpenFile(path, flag, os.ModePerm)
-	if err != nil {
-		return nil, err
-	}
+func newDirectIOOpener() *directIOOpener {
+	return &directIOOpener{}
+}
 
-	file := domain.NewFile(f)
-	exp.openFiles[filename] = file
-
-	return file, nil
+func (op *directIOOpener) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+	return directio.OpenFile(name, flag, perm)
 }
