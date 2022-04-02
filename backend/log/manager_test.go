@@ -118,9 +118,9 @@ func TestManager_Flush(t *testing.T) {
 func TestManager_FlushLSN(t *testing.T) {
 	var tests = []struct {
 		name   string
-		latest int32
-		saved  int32
-		lsn    int32
+		latest domain.LSN
+		saved  domain.LSN
+		lsn    domain.LSN
 	}{
 		{
 			name:   "flush by lsn",

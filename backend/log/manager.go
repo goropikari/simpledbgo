@@ -23,8 +23,8 @@ type Manager struct {
 	logPage      *domain.Page
 	pageFactory  *domain.PageFactory
 	// Reset when server restarts. Increment when record is appended.
-	latestLSN    int32
-	lastSavedLSN int32
+	latestLSN    domain.LSN
+	lastSavedLSN domain.LSN
 }
 
 // NewManager is a constructor of Manager.
@@ -99,7 +99,7 @@ func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fil
 }
 
 // FlushLSN flushes by lsn.
-func (mgr *Manager) FlushLSN(lsn int32) error {
+func (mgr *Manager) FlushLSN(lsn domain.LSN) error {
 	if lsn >= mgr.lastSavedLSN {
 		return mgr.Flush()
 	}
@@ -120,7 +120,7 @@ func (mgr *Manager) Flush() error {
 }
 
 // AppendRecord appends a record to block.
-func (mgr *Manager) AppendRecord(record []byte) (int32, error) {
+func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
@@ -197,6 +197,7 @@ func (mgr *Manager) AppendNewBlock() (*domain.Block, error) {
 	return blk, nil
 }
 
+// Iterator returns log record iterator.
 func (mgr *Manager) Iterator() (domain.LogIterator, error) {
 	page, err := mgr.pageFactory.Create()
 	if err != nil {

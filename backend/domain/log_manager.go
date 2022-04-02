@@ -4,9 +4,9 @@ package domain
 
 // LogManager is an interface of log manager.
 type LogManager interface {
-	FlushLSN(int32) error
+	FlushLSN(LSN) error
 	Flush() error
-	AppendRecord([]byte) (int32, error)
+	AppendRecord([]byte) (LSN, error)
 	AppendNewBlock() (*Block, error)
 	Iterator() (LogIterator, error)
 }
