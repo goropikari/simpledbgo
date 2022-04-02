@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/backend/file"
 )
 
 const int32Length = 4
@@ -18,18 +17,24 @@ type ManagerConfig struct {
 // Manager is a log manager.
 type Manager struct {
 	mu           sync.Mutex
-	fileMgr      *file.Manager
+	fileMgr      domain.FileManager
 	logFileName  domain.FileName
 	currentBlock *domain.Block
 	logPage      *domain.Page
+	pageFactory  *domain.PageFactory
 	// Reset when server restarts. Increment when record is appended.
 	latestLSN    int32
 	lastSavedLSN int32
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(fileMgr *file.Manager, block *domain.Block, page *domain.Page, config ManagerConfig) (*Manager, error) {
+func NewManager(fileMgr domain.FileManager, pageFactory *domain.PageFactory, config ManagerConfig) (*Manager, error) {
 	logFileName, err := domain.NewFileName(config.LogFileName)
+	if err != nil {
+		return nil, err
+	}
+
+	block, page, err := prepareManager(fileMgr, pageFactory, logFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +43,7 @@ func NewManager(fileMgr *file.Manager, block *domain.Block, page *domain.Page, c
 		mu:           sync.Mutex{},
 		fileMgr:      fileMgr,
 		logFileName:  logFileName,
+		pageFactory:  pageFactory,
 		currentBlock: block,
 		logPage:      page,
 		latestLSN:    0,
@@ -45,9 +51,9 @@ func NewManager(fileMgr *file.Manager, block *domain.Block, page *domain.Page, c
 	}, nil
 }
 
-// PrepareManager prepares a block and a page for initializing Manager.
+// prepareManager prepares a block and a page for initializing Manager.
 // If given file is empty, extend a file by block size.
-func PrepareManager(fileMgr *file.Manager, factory *domain.PageFactory, fileName domain.FileName) (*domain.Block, *domain.Page, error) {
+func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fileName domain.FileName) (*domain.Block, *domain.Page, error) {
 	page, err := factory.Create()
 	if err != nil {
 		return nil, nil, err
