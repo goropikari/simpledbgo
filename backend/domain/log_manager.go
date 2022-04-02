@@ -8,4 +8,10 @@ type LogManager interface {
 	Flush() error
 	AppendRecord([]byte) (int32, error)
 	AppendNewBlock() (*Block, error)
+	Iterator() (LogIterator, error)
+}
+
+type LogIterator interface {
+	HasNext() bool
+	Next() ([]byte, error)
 }

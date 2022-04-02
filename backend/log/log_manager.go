@@ -196,3 +196,12 @@ func (mgr *Manager) AppendNewBlock() (*domain.Block, error) {
 
 	return blk, nil
 }
+
+func (mgr *Manager) Iterator() (domain.LogIterator, error) {
+	page, err := mgr.pageFactory.Create()
+	if err != nil {
+		return nil, err
+	}
+
+	return NewIterator(mgr.fileMgr, mgr.currentBlock, page)
+}
