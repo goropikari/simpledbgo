@@ -19,7 +19,7 @@ func TestIterator(t *testing.T) {
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
-		logMgr := logMgrFactory.Create()
+		_, logMgr := logMgrFactory.Create()
 
 		createRecord(logMgr, 1, 35)
 

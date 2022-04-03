@@ -183,7 +183,7 @@ func TestManager_AppendRecord(t *testing.T) {
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
-		logMgr := logMgrFactory.Create()
+		_, logMgr := logMgrFactory.Create()
 
 		_, err := logMgr.AppendRecord([]byte("hello"))
 		require.NoError(t, err)
@@ -198,7 +198,7 @@ func TestManager_AppendRecord(t *testing.T) {
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
-		logMgr := logMgrFactory.Create()
+		_, logMgr := logMgrFactory.Create()
 
 		_, err := logMgr.AppendRecord([]byte("hello"))
 		require.Error(t, err)
@@ -211,7 +211,7 @@ func TestManager_AppendNewBlock(t *testing.T) {
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
-		logMgr := logMgrFactory.Create()
+		_, logMgr := logMgrFactory.Create()
 
 		blk0, err := logMgr.AppendNewBlock()
 		require.NoError(t, err)

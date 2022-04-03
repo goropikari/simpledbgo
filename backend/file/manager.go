@@ -1,6 +1,7 @@
 package file
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -53,8 +54,10 @@ func (mgr *Manager) CopyBlockToPage(blk *domain.Block, page *domain.Page) error 
 		return err
 	}
 
+	// file size が 0 のとき CopyN は EOF を返す。
+	// block size 分読んだことにしたいので EOF は無視する。
 	_, err = io.CopyN(page, file, int64(blk.Size()))
-	if err != nil {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 

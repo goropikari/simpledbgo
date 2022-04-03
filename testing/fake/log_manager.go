@@ -27,7 +27,7 @@ func NewNonDirectLogManagerFactory(dbPath string, blockSize int32) *NonDirectLog
 	fileMgrFactory := NewNonDirectFileManagerFactory(dbPath, blockSize)
 	fileMgr := fileMgrFactory.Create()
 
-	logConfig := log.ManagerConfig{LogFileName: RandString()}
+	logConfig := log.ManagerConfig{LogFileName: "logfile_" + RandString()}
 	logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
 	if err != nil {
 		golog.Fatal(err)
@@ -40,8 +40,8 @@ func NewNonDirectLogManagerFactory(dbPath string, blockSize int32) *NonDirectLog
 	}
 }
 
-func (factory *NonDirectLogManagerFactory) Create() domain.LogManager {
-	return factory.logMgr
+func (factory *NonDirectLogManagerFactory) Create() (domain.FileManager, domain.LogManager) {
+	return factory.fileMgr, factory.logMgr
 }
 
 func (factory *NonDirectLogManagerFactory) Finish() {

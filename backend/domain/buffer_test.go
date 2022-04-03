@@ -118,30 +118,24 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 	t.Run("valid request", func(t *testing.T) {
 		dbPath := fake.RandString()
 		blockSize := int32(10)
-		factory := fake.NewNonDirectFileManagerFactory(dbPath, blockSize)
-		defer factory.Finish()
-		fileMgr := factory.Create()
-
 		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(blockSize))
 
-		logFileName := fake.RandString()
-		logConfig := log.ManagerConfig{LogFileName: logFileName}
-		logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
-		require.NoError(t, err)
-
-		fileName := fake.RandString()
-		block := domain.NewBlock(domain.FileName(fileName), domain.BlockSize(blockSize), domain.BlockNumber(0))
+		factory := fake.NewNonDirectLogManagerFactory(dbPath, blockSize)
+		defer factory.Finish()
+		fileMgr, logMgr := factory.Create()
 
 		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
 		require.NoError(t, err)
 
+		fileName := fake.RandString()
 		f, _ := goos.OpenFile(filepath.Join(dbPath, fileName), goos.O_RDWR|goos.O_CREATE, goos.ModePerm)
 		f.Write(make([]byte, blockSize))
 		f.Seek(0, io.SeekStart)
 		f.Write([]byte("hello"))
 		f.Close()
 
+		block := domain.NewBlock(domain.FileName(fileName), domain.BlockSize(blockSize), domain.BlockNumber(0))
 		buf.AssignToBlock(block)
 		expected := make([]byte, blockSize)
 		copy(expected, []byte("hello"))

@@ -59,7 +59,7 @@ func (buf *Buffer) TxNumber() TransactionNumber {
 
 // AssignToBlock assigns block to the buffer.
 func (buf *Buffer) AssignToBlock(block *Block) error {
-	err := buf.flush()
+	err := buf.Flush()
 	if err != nil {
 		return err
 	}
@@ -75,8 +75,8 @@ func (buf *Buffer) AssignToBlock(block *Block) error {
 	return nil
 }
 
-// flush flushes the buffer content.
-func (buf *Buffer) flush() error {
+// Flush flushes the buffer content.
+func (buf *Buffer) Flush() error {
 	if buf.txnum >= 0 {
 		err := buf.logMgr.FlushLSN(buf.lsn)
 		if err != nil {

@@ -53,6 +53,10 @@ func NewBlock(filename FileName, size BlockSize, number BlockNumber) *Block {
 
 // Equal compares equality of two blocks.
 func (b *Block) Equal(other *Block) bool {
+	if b == nil || other == nil {
+		return false
+	}
+
 	return b.filename == other.filename && b.number == other.number
 }
 
