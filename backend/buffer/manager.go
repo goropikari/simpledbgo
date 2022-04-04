@@ -8,8 +8,6 @@ import (
 	"github.com/goropikari/simpledb_go/backend/domain"
 )
 
-const item = 1
-
 var (
 	// ErrTimeoutExceeded is an error type that means timeout exceeded.
 	ErrTimeoutExceeded = errors.New("timeout exceeded")
@@ -26,8 +24,8 @@ type Config struct {
 
 // Manager is model of buffer manager.
 type Manager struct {
-	mu                 sync.Mutex
-	ch                 chan int
+	mu                 *sync.Mutex
+	cond               *sync.Cond
 	bufferPool         []*domain.Buffer
 	numAvailableBuffer int
 	timeout            time.Duration
@@ -51,14 +49,12 @@ func NewManager(fileMgr domain.FileManager, logMgr domain.LogManager, pageFactor
 		bufferPool[i] = buf
 	}
 
-	ch := make(chan int, config.NumberBuffer)
-	for i := 0; i < config.NumberBuffer; i++ {
-		ch <- item
-	}
+	mu := &sync.Mutex{}
+	cond := sync.NewCond(mu)
 
 	return &Manager{
-		mu:                 sync.Mutex{},
-		ch:                 ch,
+		mu:                 mu,
+		cond:               cond,
 		bufferPool:         bufferPool,
 		numAvailableBuffer: numBuffer,
 		timeout:            time.Millisecond * time.Duration(config.TimeoutMillisecond),
@@ -98,40 +94,32 @@ func (mgr *Manager) Unpin(buf *domain.Buffer) {
 	buf.Unpin()
 	if !buf.IsPinned() {
 		mgr.numAvailableBuffer++
-		mgr.ch <- item
+		mgr.cond.Broadcast()
 	}
 }
 
 // Pin pins buffer.
 func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
 	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
 
 	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 	if err != nil {
-		mgr.mu.Unlock()
-
 		return nil, err
 	}
 
-	if buf == nil {
-		mgr.mu.Unlock()
-		select {
-		case <-mgr.ch:
-			mgr.mu.Lock()
-			mgr.ch <- item
+	now := time.Now()
 
-			buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
-			if err != nil {
-				mgr.mu.Unlock()
-
-				return nil, err
-			}
-		case <-time.After(mgr.timeout):
+	for buf == nil {
+		mgr.cond.Wait()
+		if time.Since(now) > mgr.timeout {
 			return nil, ErrTimeoutExceeded
 		}
+		buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	mgr.mu.Unlock()
 
 	return buf, nil
 }
@@ -151,7 +139,6 @@ func (mgr *Manager) tryToPin(block *domain.Block, chooseUnpinnedBuffer func([]*d
 
 	if !buf.IsPinned() {
 		mgr.numAvailableBuffer--
-		<-mgr.ch
 	}
 
 	buf.Pin()
