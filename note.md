@@ -97,6 +97,184 @@ Go で Java の wait, notify, notifyAll と同じことをしようとしたら�
 ただ、Java と違って timeout がない。timeout がないせいで運の悪い goroutine がいつまでも残りそうな気がするが一旦無視する。
 
 
+2022/4/6
+
+goroutine の timeout は channel と select を使うのが Go ではよくあるので試しに実装してみたがだいぶ処理が複雑になってしまった。
+https://github.com/goropikari/simpledb-go/blame/972526679d15cf5eb5d6d10a78b5192767714d38/backend/buffer/manager.go
+
+```go
+func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
+	mgr.mu.Lock()
+
+	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+	if err != nil {
+		mgr.mu.Unlock()
+
+		return nil, err
+	}
+
+	if buf == nil {
+		mgr.mu.Unlock()
+		select {
+		case <-mgr.ch:
+			mgr.mu.Lock()
+			mgr.ch <- item
+
+			buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+			if err != nil {
+				mgr.mu.Unlock()
+
+				return nil, err
+			}
+		case <-time.After(mgr.timeout):
+			return nil, ErrTimeoutExceeded
+		}
+	}
+
+	mgr.mu.Unlock()
+
+	return buf, nil
+}
+
+// tryToPin tries to pin the block to a buffer.
+func (mgr *Manager) tryToPin(block *domain.Block, chooseUnpinnedBuffer func([]*domain.Buffer) *domain.Buffer) (*domain.Buffer, error) {
+	buf := mgr.findExistingBuffer(block)
+	if buf == nil {
+		buf = chooseUnpinnedBuffer(mgr.bufferPool)
+		if buf == nil {
+			return buf, nil
+		}
+		if err := buf.AssignToBlock(block); err != nil {
+			return nil, err
+		}
+	}
+
+	if !buf.IsPinned() {
+		mgr.numAvailableBuffer--
+		<-mgr.ch
+	}
+
+	buf.Pin()
+
+	return buf, nil
+}
+
+// Unpin unpins buffer.
+func (mgr *Manager) Unpin(buf *domain.Buffer) {
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
+
+	buf.Unpin()
+	if !buf.IsPinned() {
+		mgr.numAvailableBuffer++
+		mgr.ch <- item
+	}
+}
+```
+
+```
+case <-mgr.ch:
+	mgr.mu.Lock()
+	mgr.ch <- item
+```
+
+の部分で条件を満たした goroutine が Lock をとって処理を進めるという風に考えていたが、channel から要素を引っ張ってくる
+goroutine と Lock を取る goroutine が同じになるとは限らないのでこの方法ではだめだと気づいた。
+
+次のような場合を考える
+- buffer pool size: 1
+- goroutine 1 が block 1 を Pin している
+- goroutine 2 が block 2 を Pin しようとするが空き buffer がないので select 文で待つ
+- goroutine 1 が Unpin するタイミングとほぼ同時に goroutine 3 が Pin をする。
+
+このような状況のとき、まず goroutine 2 は channel から要素を取れるので次に進める。
+問題はここでの Lock を goroutine 2 と 3 でどちらが取るかということである。
+goroutine 2 が Lock を取れれば期待した動きになるが、goroutine 3 が Lock を取ると問題がおきる。
+
+goroutine 3 が Lock をとった時点で空き buffer があるので goroutine 3 は buffer に新たな block を割り当てることができる。
+goroutine 3 が Unlock したあと goroutine 2 の select 内の処理が走るが、この中の処理では確実に buffer の割当が
+できることを期待しているが実際は goroutine 3 による block 割当がすでになされているので goroutine 2 は割当をすることができない。
+そのため select 内では Lock をとったあとにまた条件を満たしているかの判定をしないといけない。
+channel を使った場合だと Lock を取るタイミングや、channel の要素の出し入れ等についてかなり考えないといけないので
+最終的に素直に sync.Cond を使うのが一番最適だという結論に至った。
+
+```go
+// Pin pins buffer.
+func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
+
+	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+
+	for buf == nil {
+		mgr.cond.Wait()
+		if time.Since(now) > mgr.timeout {
+			return nil, ErrTimeoutExceeded
+		}
+		buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return buf, nil
+}
+```
+
+https://github.com/goropikari/simpledb-go/blob/b1ba3f41fbc782214829c25b57e23e376f2cf052/backend/buffer/manager.go
+
+
+上の方法で良いかと思ったが、`Wait()` が timeout しないせいで deadlock を起こす可能性に気づいた。
+concurrency manager がうまく捌いてくれそうな気もするがやはり timeout が欲しくなったので goroutine 使った実装を改めて書いた
+
+```
+type result struct {
+	buf *domain.Buffer
+	err error
+}
+
+// Pin pins buffer.
+func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
+	done := make(chan *result)
+
+	go mgr.pin(done, block)
+	select {
+	case result := <-done:
+		return result.buf, result.err
+	case <-time.After(mgr.timeout):
+		return nil, ErrTimeoutExceeded
+	}
+}
+
+func (mgr *Manager) pin(done chan *result, block *domain.Block) {
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
+	defer close(done)
+
+	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+	if err != nil {
+		done <- &result{err: err}
+		return
+	}
+
+	for buf == nil {
+		mgr.cond.Wait()
+		buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
+		if err != nil {
+			done <- &result{err: err}
+			return
+		}
+	}
+
+	done <- &result{buf: buf}
+}
+```
+
 # Chapter 5: Transaction Management
 
 元の Java の実装だと RecoveryMgr class が Transaction class に依存し、また逆に

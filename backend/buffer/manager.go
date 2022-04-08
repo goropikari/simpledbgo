@@ -98,30 +98,45 @@ func (mgr *Manager) Unpin(buf *domain.Buffer) {
 	}
 }
 
+type result struct {
+	buf *domain.Buffer
+	err error
+}
+
 // Pin pins buffer.
 func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
+	done := make(chan *result)
+
+	go mgr.pin(done, block)
+	select {
+	case result := <-done:
+		return result.buf, result.err
+	case <-time.After(mgr.timeout):
+		return nil, ErrTimeoutExceeded
+	}
+}
+
+func (mgr *Manager) pin(done chan *result, block *domain.Block) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
+	defer close(done)
 
 	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 	if err != nil {
-		return nil, err
+		done <- &result{err: err}
+		return
 	}
-
-	now := time.Now()
 
 	for buf == nil {
 		mgr.cond.Wait()
-		if time.Since(now) > mgr.timeout {
-			return nil, ErrTimeoutExceeded
-		}
 		buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 		if err != nil {
-			return nil, err
+			done <- &result{err: err}
+			return
 		}
 	}
 
-	return buf, nil
+	done <- &result{buf: buf}
 }
 
 // tryToPin tries to pin the block to a buffer.

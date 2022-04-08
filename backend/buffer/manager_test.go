@@ -1,7 +1,6 @@
 package buffer_test
 
 import (
-	"sync"
 	"testing"
 	"time"
 
@@ -159,9 +158,6 @@ func TestBufferMgr_Pin(t *testing.T) {
 			filenames = append(filenames, "file_"+fake.RandString())
 		}
 
-		var wg sync.WaitGroup
-		wg.Add(1)
-
 		go func() {
 			block := domain.NewBlock(domain.FileName(filenames[0]), domain.BlockSize(size), domain.BlockNumber(0))
 			_, err := bufMgr.Pin(block)
@@ -176,11 +172,8 @@ func TestBufferMgr_Pin(t *testing.T) {
 
 		go func() {
 			block := domain.NewBlock(domain.FileName(filenames[2]), domain.BlockSize(size), domain.BlockNumber(0))
-			buf, err := bufMgr.Pin(block)
+			_, err := bufMgr.Pin(block)
 			require.NoError(t, err)
-			time.Sleep(time.Millisecond * 50)
-			bufMgr.Unpin(buf)
-			wg.Done()
 		}()
 
 		// 先の goroutine よりも後で実行するために sleep
@@ -189,8 +182,6 @@ func TestBufferMgr_Pin(t *testing.T) {
 		block := domain.NewBlock(domain.FileName(filenames[3]), domain.BlockSize(size), domain.BlockNumber(0))
 		_, err = bufMgr.Pin(block)
 		require.EqualError(t, err, "timeout exceeded")
-
-		wg.Wait()
 	})
 }
 
