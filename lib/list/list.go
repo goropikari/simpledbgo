@@ -35,3 +35,11 @@ func (list *List[T]) Remove(x T) {
 
 	list.data = list.data[1:]
 }
+
+func (list List[T]) Data() []T {
+	return list.data
+}
+
+func (list List[T]) Length() int {
+	return len(list.data)
+}

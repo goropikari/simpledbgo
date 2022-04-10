@@ -18,6 +18,9 @@ func TestList(t *testing.T) {
 		list.Add(blk)
 		list.Add(blk)
 
+		require.Equal(t, 2, list.Length())
+		require.Equal(t, []*domain.Block{blk, blk}, list.Data())
+
 		ok := list.Contains(blk)
 		require.Equal(t, true, ok)
 
