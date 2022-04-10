@@ -8,7 +8,7 @@ MOCK_FILE := $(shell find -name "*.go" | xargs grep mockgen | cut -d: -f1)
 
 .PHONY: tools
 tools:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.45.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.45.2
 	GOBIN=$(GOBIN) go install github.com/golang/mock/mockgen@v1.6.0
 	GOBIN=$(GOBIN) go install github.com/jstemmer/go-junit-report@v1.0.0
 	GOBIN=$(GOBIN) go install github.com/jandelgado/gcov2lcov@v1.0.5
