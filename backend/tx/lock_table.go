@@ -50,6 +50,7 @@ func (lt *LockTable) SLock(blk domain.Block) error {
 		if result.err != nil {
 			return result.err
 		}
+
 		return nil
 	case <-time.After(lt.timeoutMillisecond):
 		return ErrTransactionTimeoutExceeded
@@ -66,6 +67,7 @@ func (lt *LockTable) slock(done chan *result, blk domain.Block) {
 	if time.Since(now) > lt.timeoutMillisecond {
 		lock.(*sync.RWMutex).RUnlock()
 		done <- &result{err: ErrTransactionTimeoutExceeded}
+
 		return
 	}
 
@@ -91,6 +93,7 @@ func (lt *LockTable) XLock(blk domain.Block) error {
 		if result.err != nil {
 			return result.err
 		}
+
 		return nil
 	case <-time.After(lt.timeoutMillisecond):
 		return ErrTransactionTimeoutExceeded
@@ -107,6 +110,7 @@ func (lt *LockTable) xlock(done chan *result, blk domain.Block) {
 	if time.Since(now) > lt.timeoutMillisecond {
 		lock.(*sync.RWMutex).Unlock()
 		done <- &result{err: ErrTransactionTimeoutExceeded}
+
 		return
 	}
 

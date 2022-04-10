@@ -123,7 +123,8 @@ func (mgr *Manager) pin(done chan *result, block *domain.Block) {
 
 	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 	if err != nil {
-		done <- &result{err: err}
+		done <- &result{buf: nil, err: err}
+
 		return
 	}
 
@@ -131,12 +132,13 @@ func (mgr *Manager) pin(done chan *result, block *domain.Block) {
 		mgr.cond.Wait()
 		buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 		if err != nil {
-			done <- &result{err: err}
+			done <- &result{buf: nil, err: err}
+
 			return
 		}
 	}
 
-	done <- &result{buf: buf}
+	done <- &result{buf: buf, err: nil}
 }
 
 // tryToPin tries to pin the block to a buffer.

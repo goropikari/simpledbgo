@@ -16,6 +16,11 @@ issues:
   exclude:
     - "endianness"
     - "G404:"
+  exclude-rules:
+    - path: backend/tx/lock_table.go
+      linters:
+        - forcetypeassert
+        - ifshort
 run:
   skip-files:
     - _test.go
