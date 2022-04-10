@@ -376,3 +376,93 @@ func (tx *Transaction) VisitSetIntRecord(rec recovery.SetIntRecord) {
     tx.unpin(rec.block)
 }
 ```
+
+## 2022/4/10
+### recovery manager は必要ないのでは?
+本で recovery manager までを読んでいたときは visitor pattern でいいかと思っていたが、
+chapter 5 を全て読んで concurrency manager も含めてどうするのが理想形をなのか再考すると
+そもそも recovery manager なんてものは作らないので、Transaction の中に全て押し込めれば
+よいのではないかという気がした。
+grep する限り recovery manager は transaction でしか使われていないのでそれでも問題なさそう。
+また recovery manager の methods にはどこにも synchronized ついてないからそういう意味でも
+transaction の中に持っていって問題なさそう。
+
+
+### `sync.RWMutex` の落とし穴
+
+Go の `sync.RWMutex` は名前から想像できるように Read に関する lock は複数取れる、read が lock しているうちは write は lock を取れない。
+逆に write が lock をとっているときは read も write をさらに lock はできない。
+ここで次のような処理を考える
+- R1: 時間 0 で read lock を取る。100 msec 後に unlock
+- W: 時間 10 msec で write lock を取ろうとする。10 msec 後に unlock
+- R2: 時間 20 msec で read lock を取ろうとする。10 msec 後に unlock
+
+上のような処理を流したとき read lock はいくつでも取れるから R1, R2, W の順で lock を取って、
+トータルの実行時間としては 110 msec になると思っていた。
+だが実際に試してみると 120 msec になった。
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	mu := &sync.RWMutex{}
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+
+	now := time.Now()
+
+	go func() {
+		mu.RLock()
+		time.Sleep(100 * time.Millisecond)
+		mu.RUnlock()
+		wg.Done()
+	}()
+
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		mu.Lock()
+		time.Sleep(10 * time.Millisecond)
+		mu.Unlock()
+		wg.Done()
+	}()
+
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		mu.RLock()
+		time.Sleep(10 * time.Millisecond)
+		mu.RUnlock()
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	fmt.Println(time.Now().Sub(now))
+}
+```
+
+自分の実装方法が悪いのだと思っていたが、read lock 取ったあとに write lock を
+取ろうとする goroutine がいる場合、他の goroutine が lock を取ろうとしても
+最初の read lock が release されるまで追加で read lock  はとれないと公式 doc に書いてあった。
+
+> If a goroutine holds a RWMutex for reading and another goroutine might call Lock, no goroutine should expect to be able to acquire a read lock until the initial read lock is released. In particular, this prohibits recursive read locking. This is to ensure that the lock eventually becomes available; a blocked Lock call excludes new readers from acquiring the lock.
+
+https://pkg.go.dev/sync#RWMutex
+
+write lock が取れないのはわかるが read lock まで取れないとは思っていなかった。
+`a blocked Lock call excludes new readers from acquiring the lock.` とあるのでどうやら
+writer lock が優先されるようである。
+reader lock を優先するか、writer lock を優先するかという問題は結構メジャーなものだったらしい。
+wikipedia にそれぞれのメリット・デメリットが書いてあった。
+
+https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock#Priority_policies
+
+この辺の優先度がなかったら運の悪い writer がなかなか lock を取れないだろうなぁと思っていたが
+writer 優先ならばその心配はなさそうである。
+write の頻度が少なくて read の頻度が高いならば writer 優先にしても並列度への影響は
+少ないということでなるほどなぁと思った。
