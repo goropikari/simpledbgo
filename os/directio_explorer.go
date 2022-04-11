@@ -27,6 +27,7 @@ func newDirectIOOpener() *directIOOpener {
 	return &directIOOpener{}
 }
 
+// OpenFile opens a file.
 func (op *directIOOpener) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
 	return directio.OpenFile(name, flag, perm)
 }

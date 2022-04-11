@@ -11,6 +11,7 @@ type LogManager interface {
 	Iterator() (LogIterator, error)
 }
 
+// LogIterator is a iterator of log record.
 type LogIterator interface {
 	HasNext() bool
 	Next() ([]byte, error)

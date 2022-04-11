@@ -3,7 +3,6 @@ package tx_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/backend/tx"
 	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/stretchr/testify/require"
@@ -14,11 +13,9 @@ func TestConcurrencyManager(t *testing.T) {
 		config := tx.NewConfig(100)
 		lt := tx.NewLockTable(config)
 
-		blkSize := domain.BlockSize(100)
-		blkNum := domain.BlockNumber(0)
-		blk1 := *domain.NewBlock(domain.FileName(fake.RandString()), blkSize, blkNum)
-		blk2 := *domain.NewBlock(domain.FileName(fake.RandString()), blkSize, blkNum)
-		blk3 := *domain.NewBlock(domain.FileName(fake.RandString()), blkSize, blkNum)
+		blk1 := *fake.Block()
+		blk2 := *fake.Block()
+		blk3 := *fake.Block()
 
 		mgr := tx.NewConcurrencyManager(lt)
 

@@ -19,12 +19,14 @@ func NewNonDirectIOExplorer(rootDir string) *NonDirectIOExplorer {
 	}
 }
 
+// nonDirectIOOpener is opener for non direct io.
 type nonDirectIOOpener struct{}
 
 func newNonDirectIOOpener() *nonDirectIOOpener {
 	return &nonDirectIOOpener{}
 }
 
+// OpenFile opens a file.
 func (op *nonDirectIOOpener) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
 	return os.OpenFile(name, flag, perm)
 }
