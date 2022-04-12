@@ -2,7 +2,9 @@ package domain
 
 const (
 	noTransaction = -1
-	noLSN         = -1
+
+	// DummyLSN is dummy lsn.
+	DummyLSN = -1
 )
 
 // Buffer is a buffer of database.
@@ -30,7 +32,7 @@ func NewBuffer(fileMgr FileManager, logMgr LogManager, pageFactory *PageFactory)
 		block:   nil,
 		pins:    0,
 		txnum:   noTransaction,
-		lsn:     noLSN,
+		lsn:     DummyLSN,
 	}, nil
 }
 

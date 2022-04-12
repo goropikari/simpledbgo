@@ -26,7 +26,9 @@ var (
 )
 
 const (
-	int32Length  = 4
+	int32Length = 4
+	// Int32Length is byte length of Int32.
+	Int32Length  = 4
 	uint32Length = 4
 )
 

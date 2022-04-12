@@ -107,6 +107,20 @@ func (mr *MockLogManagerMockRecorder) Iterator() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Iterator", reflect.TypeOf((*MockLogManager)(nil).Iterator))
 }
 
+// LogFileName mocks base method.
+func (m *MockLogManager) LogFileName() domain.FileName {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogFileName")
+	ret0, _ := ret[0].(domain.FileName)
+	return ret0
+}
+
+// LogFileName indicates an expected call of LogFileName.
+func (mr *MockLogManagerMockRecorder) LogFileName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogFileName", reflect.TypeOf((*MockLogManager)(nil).LogFileName))
+}
+
 // MockLogIterator is a mock of LogIterator interface.
 type MockLogIterator struct {
 	ctrl     *gomock.Controller

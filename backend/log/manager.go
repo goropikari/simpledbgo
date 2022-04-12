@@ -206,3 +206,8 @@ func (mgr *Manager) Iterator() (domain.LogIterator, error) {
 
 	return NewIterator(mgr.fileMgr, mgr.currentBlock, page)
 }
+
+// LogFileName returns log file name.
+func (mgr *Manager) LogFileName() domain.FileName {
+	return mgr.logFileName
+}

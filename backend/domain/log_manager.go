@@ -9,6 +9,7 @@ type LogManager interface {
 	AppendRecord([]byte) (LSN, error)
 	AppendNewBlock() (*Block, error)
 	Iterator() (LogIterator, error)
+	LogFileName() FileName
 }
 
 // LogIterator is a iterator of log record.

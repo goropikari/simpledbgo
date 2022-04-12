@@ -26,6 +26,7 @@ issues:
     - "G404:"
     - "G304:"
     - "stdmethods:"
+    - "mnd: Magic number: 2"
   exclude-rules:
     - path: backend/tx/lock_table.go
       linters:
