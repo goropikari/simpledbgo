@@ -26,3 +26,11 @@ func TestSetInt32Record(t *testing.T) {
 		require.Equal(t, *rec, *rec2)
 	})
 }
+
+func TestSetInt32Record_Error(t *testing.T) {
+	t.Run("marshal/unmarshal", func(t *testing.T) {
+		rec := &logrecord.SetInt32Record{}
+		err := rec.Unmarshal([]byte{1, 2, 3})
+		require.Error(t, err)
+	})
+}
