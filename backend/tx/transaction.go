@@ -11,8 +11,11 @@ import (
 type RecordType = int32
 
 const (
+	// Start is start record type.
+	Start RecordType = iota
+
 	// Commit is commit record type.
-	Commit RecordType = iota
+	Commit
 
 	// SetInt32 is set int32 record type.
 	SetInt32
@@ -29,8 +32,8 @@ type Transaction struct {
 }
 
 // NewTransaction constructs Transaction.
-func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferManager, concurMgr *ConcurrencyManager, gen *NumberGenerator) *Transaction {
-	return &Transaction{
+func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferManager, concurMgr *ConcurrencyManager, gen *NumberGenerator) (*Transaction, error) {
+	txn := &Transaction{
 		fileMgr:    fileMgr,
 		logMgr:     logMgr,
 		bufferMgr:  bufferMgr,
@@ -38,6 +41,21 @@ func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, buffer
 		bufferList: NewBufferList(bufferMgr),
 		number:     gen.Generate(),
 	}
+
+	if _, err := txn.writeStartLog(); err != nil {
+		return nil, err
+	}
+
+	return txn, nil
+}
+
+// Pin pins the blk by tx.
+func (tx *Transaction) Pin(blk domain.Block) error {
+	if err := tx.bufferList.Pin(blk); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Commit commits the transaction.
@@ -67,19 +85,6 @@ func (tx *Transaction) commit() error {
 	}
 
 	return nil
-}
-
-func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
-	buf := bytes.NewBuffer(typ.Int32Length * 2)
-	if err := buf.SetInt32(0, Commit); err != nil {
-		return domain.DummyLSN, err
-	}
-
-	if err := buf.SetInt32(typ.Int32Length, int32(tx.number)); err != nil {
-		return domain.DummyLSN, err
-	}
-
-	return tx.logMgr.AppendRecord(buf.GetData())
 }
 
 // GetInt32 gets int32 from the blk at offset.
@@ -127,6 +132,32 @@ func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, write
 	return nil
 }
 
+func (tx *Transaction) writeStartLog() (domain.LSN, error) {
+	buf := bytes.NewBuffer(typ.Int32Length * 2)
+	if err := buf.SetInt32(0, Start); err != nil {
+		return domain.DummyLSN, err
+	}
+
+	if err := buf.SetInt32(typ.Int32Length, int32(tx.number)); err != nil {
+		return domain.DummyLSN, err
+	}
+
+	return tx.logMgr.AppendRecord(buf.GetData())
+}
+
+func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
+	buf := bytes.NewBuffer(typ.Int32Length * 2)
+	if err := buf.SetInt32(0, Commit); err != nil {
+		return domain.DummyLSN, err
+	}
+
+	if err := buf.SetInt32(typ.Int32Length, int32(tx.number)); err != nil {
+		return domain.DummyLSN, err
+	}
+
+	return tx.logMgr.AppendRecord(buf.GetData())
+}
+
 func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {
 	record := &logrecord.SetInt32Record{
 		FileName:    blk.FileName(),
@@ -156,13 +187,4 @@ func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int3
 	}
 
 	return lsn, nil
-}
-
-// Pin pins the blk by tx.
-func (tx *Transaction) Pin(blk domain.Block) error {
-	if err := tx.bufferList.Pin(blk); err != nil {
-		return err
-	}
-
-	return nil
 }
