@@ -8,3 +8,7 @@ import (
 func (list *BufferList) PinnedBlocks() list.List[*domain.Block] {
 	return list.pinnedBlocks
 }
+
+func (tx *Transaction) Number() domain.TransactionNumber {
+	return tx.number
+}

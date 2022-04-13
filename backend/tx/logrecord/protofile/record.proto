@@ -3,10 +3,26 @@ package protobuf;
 
 option go_package = "./protobuf";
 
+message StartRecord {
+  int32 txnum = 1;
+}
+
+message CommitRecord {
+  int32 txnum = 1;
+}
+
 message SetInt32Record {
   string filename    = 1;
   int32 txnum        = 2;
   int32 block_number = 3;
   int64 offset       = 4;
   int32 val          = 5;
+}
+
+message SetStringRecord {
+  string filename    = 1;
+  int32 txnum        = 2;
+  int32 block_number = 3;
+  int64 offset       = 4;
+  string val         = 5;
 }

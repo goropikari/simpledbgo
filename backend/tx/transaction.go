@@ -19,6 +19,9 @@ const (
 
 	// SetInt32 is set int32 record type.
 	SetInt32
+
+	// SetString is set string record type.
+	SetString
 )
 
 // Transaction is a model of transaction.
@@ -132,30 +135,59 @@ func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, write
 	return nil
 }
 
+// GetString gets string from the blk.
+func (tx *Transaction) GetString(blk domain.Block, offset int64) (string, error) {
+	if err := tx.concurMgr.SLock(blk); err != nil {
+		return "", err
+	}
+
+	buf := tx.bufferList.GetBuffer(blk)
+
+	return buf.Page().GetString(offset)
+}
+
+// SetString sets string on the blk.
+func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, writeLog bool) error {
+	if err := tx.concurMgr.XLock(blk); err != nil {
+		return err
+	}
+
+	buf := tx.bufferList.GetBuffer(blk)
+	lsn := domain.DummyLSN
+	if writeLog {
+		// recoveryMgr.setString
+		oldval, err := buf.Page().GetString(offset)
+		if err != nil {
+			return err
+		}
+		lsn, err = tx.writeSetStringLog(*buf.Block(), offset, oldval)
+		if err != nil {
+			return err
+		}
+	}
+
+	page := buf.Page()
+	if err := page.SetString(offset, val); err != nil {
+		return err
+	}
+
+	buf.SetModifiedTxNumber(tx.number, lsn)
+
+	return nil
+}
+
 func (tx *Transaction) writeStartLog() (domain.LSN, error) {
-	buf := bytes.NewBuffer(meta.Int32Length * 2)
-	if err := buf.SetInt32(0, Start); err != nil {
-		return domain.DummyLSN, err
+	record := &logrecord.StartRecord{
+		TxNum: tx.number,
 	}
 
-	if err := buf.SetInt32(meta.Int32Length, int32(tx.number)); err != nil {
-		return domain.DummyLSN, err
-	}
-
-	return tx.logMgr.AppendRecord(buf.GetData())
+	return tx.writeLog(Start, record)
 }
 
 func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
-	buf := bytes.NewBuffer(meta.Int32Length * 2)
-	if err := buf.SetInt32(0, Commit); err != nil {
-		return domain.DummyLSN, err
-	}
+	record := &logrecord.CommitRecord{TxNum: tx.number}
 
-	if err := buf.SetInt32(meta.Int32Length, int32(tx.number)); err != nil {
-		return domain.DummyLSN, err
-	}
-
-	return tx.logMgr.AppendRecord(buf.GetData())
+	return tx.writeLog(Commit, record)
 }
 
 func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {
@@ -167,13 +199,29 @@ func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int3
 		Val:         val,
 	}
 
+	return tx.writeLog(SetInt32, record)
+}
+
+func (tx *Transaction) writeSetStringLog(blk domain.Block, offset int64, val string) (domain.LSN, error) {
+	record := &logrecord.SetStringRecord{
+		FileName:    blk.FileName(),
+		TxNum:       tx.number,
+		BlockNumber: blk.Number(),
+		Offset:      offset,
+		Val:         val,
+	}
+
+	return tx.writeLog(SetString, record)
+}
+
+func (tx *Transaction) writeLog(typ RecordType, record logrecord.LogRecorder) (domain.LSN, error) {
 	data, err := record.Marshal()
 	if err != nil {
 		return domain.DummyLSN, err
 	}
 
 	buf := bytes.NewBuffer(meta.Int32Length*2 + len(data))
-	if err := buf.SetInt32(0, SetInt32); err != nil {
+	if err := buf.SetInt32(0, typ); err != nil {
 		return domain.DummyLSN, err
 	}
 

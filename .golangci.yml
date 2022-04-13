@@ -22,12 +22,12 @@ linters:
 issues:
   exclude-use-default: false
   exclude:
-    - "endianness"
-    - "G404:"
     - "G304:"
-    - "stdmethods:"
+    - "G404:"
+    - "Txnum"
+    - "endianness"
     - "mnd: Magic number: 2"
-    - "SetInt32Record"
+    - "stdmethods:"
   exclude-rules:
     - path: backend/tx/lock_table.go
       linters:
