@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/typ"
+	"github.com/goropikari/simpledb_go/meta"
 )
 
 // ManagerConfig is a configuration of log manager.
@@ -128,13 +128,13 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 		return 0, err
 	}
 
-	bytesNeeded := int32(typ.Int32Length + len(record))
+	bytesNeeded := int32(meta.Int32Length + len(record))
 
-	if bytesNeeded+typ.Int32Length > int32(mgr.fileMgr.BlockSize()) {
+	if bytesNeeded+meta.Int32Length > int32(mgr.fileMgr.BlockSize()) {
 		return 0, errors.New("too long record")
 	}
 
-	if boundary-bytesNeeded < typ.Int32Length {
+	if boundary-bytesNeeded < meta.Int32Length {
 		err = mgr.Flush()
 		if err != nil {
 			return 0, err

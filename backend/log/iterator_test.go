@@ -8,7 +8,7 @@ import (
 	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/testing/fake"
-	"github.com/goropikari/simpledb_go/typ"
+	"github.com/goropikari/simpledb_go/meta"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,14 +52,14 @@ func createRecord(logMgr domain.LogManager, start, end int) {
 }
 
 func createLogRecord(s string, n int32) []byte {
-	needed := len(s) + typ.Int32Length*2
+	needed := len(s) + meta.Int32Length*2
 	bb := bytes.NewBuffer(needed)
 
 	err := bb.SetString(0, s)
 	if err != nil {
 		golog.Fatal(err)
 	}
-	err = bb.SetInt32(int64(needed-typ.Int32Length), n)
+	err = bb.SetInt32(int64(needed-meta.Int32Length), n)
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func actualRecord(logMgr domain.LogManager) []string {
 			golog.Fatal(err)
 		}
 
-		n, err := bb.GetInt32(int64(len(s) + typ.Int32Length))
+		n, err := bb.GetInt32(int64(len(s) + meta.Int32Length))
 		if err != nil {
 			golog.Fatal(err)
 		}

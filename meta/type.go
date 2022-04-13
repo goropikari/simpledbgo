@@ -1,4 +1,4 @@
-package typ
+package meta
 
 const (
 	// Int32Length is byte length of int32.
