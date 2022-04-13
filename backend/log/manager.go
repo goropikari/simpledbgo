@@ -5,9 +5,8 @@ import (
 	"sync"
 
 	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledb_go/typ"
 )
-
-const int32Length = 4
 
 // ManagerConfig is a configuration of log manager.
 type ManagerConfig struct {
@@ -129,13 +128,13 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 		return 0, err
 	}
 
-	bytesNeeded := int32(int32Length + len(record))
+	bytesNeeded := int32(typ.Int32Length + len(record))
 
-	if bytesNeeded+int32Length > int32(mgr.fileMgr.BlockSize()) {
+	if bytesNeeded+typ.Int32Length > int32(mgr.fileMgr.BlockSize()) {
 		return 0, errors.New("too long record")
 	}
 
-	if boundary-bytesNeeded < int32Length {
+	if boundary-bytesNeeded < typ.Int32Length {
 		err = mgr.Flush()
 		if err != nil {
 			return 0, err

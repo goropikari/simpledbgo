@@ -4,6 +4,7 @@ import (
 	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/backend/tx/logrecord"
 	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledb_go/typ"
 )
 
 // RecordType is type of log record.
@@ -69,12 +70,12 @@ func (tx *Transaction) commit() error {
 }
 
 func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
-	buf := bytes.NewBuffer(bytes.Int32Length * 2)
+	buf := bytes.NewBuffer(typ.Int32Length * 2)
 	if err := buf.SetInt32(0, Commit); err != nil {
 		return domain.DummyLSN, err
 	}
 
-	if err := buf.SetInt32(bytes.Int32Length, int32(tx.number)); err != nil {
+	if err := buf.SetInt32(typ.Int32Length, int32(tx.number)); err != nil {
 		return domain.DummyLSN, err
 	}
 
@@ -140,12 +141,12 @@ func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int3
 		return domain.DummyLSN, err
 	}
 
-	buf := bytes.NewBuffer(bytes.Int32Length*2 + len(data))
+	buf := bytes.NewBuffer(typ.Int32Length*2 + len(data))
 	if err := buf.SetInt32(0, SetInt32); err != nil {
 		return domain.DummyLSN, err
 	}
 
-	if err := buf.SetBytes(bytes.Int32Length, data); err != nil {
+	if err := buf.SetBytes(typ.Int32Length, data); err != nil {
 		return domain.DummyLSN, err
 	}
 
@@ -157,6 +158,7 @@ func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int3
 	return lsn, nil
 }
 
+// Pin pins the blk by tx.
 func (tx *Transaction) Pin(blk domain.Block) error {
 	if err := tx.bufferList.Pin(blk); err != nil {
 		return err

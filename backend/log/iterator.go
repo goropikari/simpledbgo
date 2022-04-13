@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledb_go/typ"
 )
 
 // Iterator is iterator of log.
@@ -55,7 +56,7 @@ func (iter *Iterator) Next() ([]byte, error) {
 		return nil, err
 	}
 
-	iter.currentPos += int32Length + int32(len(record))
+	iter.currentPos += typ.Int32Length + int32(len(record))
 
 	return record, nil
 }

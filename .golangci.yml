@@ -27,6 +27,7 @@ issues:
     - "G304:"
     - "stdmethods:"
     - "mnd: Magic number: 2"
+    - "SetInt32Record"
   exclude-rules:
     - path: backend/tx/lock_table.go
       linters:
