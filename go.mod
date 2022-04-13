@@ -6,6 +6,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/ncw/directio v1.0.5-0.20220118110502-743c0ba8bd96
 	github.com/stretchr/testify v1.7.0
+	google.golang.org/protobuf v1.28.0
 )
 
 require (

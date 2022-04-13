@@ -12,7 +12,10 @@ tools:
 	GOBIN=$(GOBIN) go install github.com/golang/mock/mockgen@v1.6.0
 	GOBIN=$(GOBIN) go install github.com/jstemmer/go-junit-report@v1.0.0
 	GOBIN=$(GOBIN) go install github.com/jandelgado/gcov2lcov@v1.0.5
-
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
+	curl -Lf -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-linux-x86_64.zip
+	unzip protoc.zip bin/protoc
+	rm -f protoc.zip
 
 .PHONY: test
 test:
@@ -38,3 +41,7 @@ coverage:
 site: coverage
 	mkdocs build
 	mkdocs serve
+
+.PHONY: protoc
+protoc:
+	bin/protoc -I=. --go_out=./backend/tx/logrecord ./backend/tx/logrecord/protofile/*.proto
