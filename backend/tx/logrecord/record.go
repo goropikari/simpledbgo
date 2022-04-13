@@ -6,10 +6,34 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// RecordType is type of log record.
+type RecordType = int32
+
+const (
+	// Unknown is an unknown record type.
+	Unknown RecordType = iota
+
+	// Start is start record type.
+	Start
+
+	// Commit is commit record type.
+	Commit
+
+	// Rollback is rollback record type.
+	Rollback
+
+	// SetInt32 is set int32 record type.
+	SetInt32
+
+	// SetString is set string record type.
+	SetString
+)
+
 // LogRecorder is an interface of log record.
 type LogRecorder interface {
 	Unmarshal([]byte) error
 	Marshal() ([]byte, error)
+	Operator() RecordType
 }
 
 // StartRecord is a model of start log record.
@@ -38,6 +62,11 @@ func (rec *StartRecord) Marshal() ([]byte, error) {
 	return proto.Marshal(pb)
 }
 
+// Operator returns Start.
+func (rec *StartRecord) Operator() RecordType {
+	return Start
+}
+
 // CommitRecord is a model of commit log record.
 type CommitRecord struct {
 	TxNum domain.TransactionNumber
@@ -62,6 +91,11 @@ func (rec *CommitRecord) Marshal() ([]byte, error) {
 	}
 
 	return proto.Marshal(pb)
+}
+
+// Operator returns Commit.
+func (rec *CommitRecord) Operator() RecordType {
+	return Commit
 }
 
 // SetInt32Record is a model of set int32 log record.
@@ -111,6 +145,11 @@ func (rec *SetInt32Record) Marshal() ([]byte, error) {
 	return proto.Marshal(pb)
 }
 
+// Operator returns SetInt32.
+func (rec *SetInt32Record) Operator() RecordType {
+	return SetInt32
+}
+
 // SetStringRecord is a model of set string log record.
 type SetStringRecord struct {
 	FileName    domain.FileName
@@ -156,4 +195,9 @@ func (rec *SetStringRecord) Marshal() ([]byte, error) {
 	}
 
 	return proto.Marshal(pb)
+}
+
+// Operator returns SetString.
+func (rec *SetStringRecord) Operator() RecordType {
+	return SetString
 }

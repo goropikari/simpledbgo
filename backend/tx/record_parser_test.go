@@ -13,22 +13,22 @@ import (
 func TestRecordParse(t *testing.T) {
 	var tests = []struct {
 		name   string
-		typ    tx.RecordType
+		typ    logrecord.RecordType
 		record logrecord.LogRecorder
 	}{
 		{
 			name:   "start log",
-			typ:    tx.Start,
+			typ:    logrecord.Start,
 			record: &logrecord.StartRecord{TxNum: 1},
 		},
 		{
 			name:   "commit log",
-			typ:    tx.Commit,
+			typ:    logrecord.Commit,
 			record: &logrecord.CommitRecord{TxNum: 1},
 		},
 		{
 			name: "set int32 log",
-			typ:  tx.SetInt32,
+			typ:  logrecord.SetInt32,
 			record: &logrecord.SetInt32Record{
 				FileName:    "hoge",
 				TxNum:       1,
@@ -39,7 +39,7 @@ func TestRecordParse(t *testing.T) {
 		},
 		{
 			name: "set string log",
-			typ:  tx.SetString,
+			typ:  logrecord.SetString,
 			record: &logrecord.SetStringRecord{
 				FileName:    "hoge",
 				TxNum:       1,

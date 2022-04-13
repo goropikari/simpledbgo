@@ -1,27 +1,12 @@
 package tx
 
 import (
+	"errors"
+
 	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/backend/tx/logrecord"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 	"github.com/goropikari/simpledb_go/meta"
-)
-
-// RecordType is type of log record.
-type RecordType = int32
-
-const (
-	// Start is start record type.
-	Start RecordType = iota
-
-	// Commit is commit record type.
-	Commit
-
-	// SetInt32 is set int32 record type.
-	SetInt32
-
-	// SetString is set string record type.
-	SetString
 )
 
 // Transaction is a model of transaction.
@@ -88,6 +73,22 @@ func (tx *Transaction) commit() error {
 	}
 
 	return nil
+}
+
+// Rollback rollbacks the transaction.
+func (tx *Transaction) Rollback() error {
+	if err := tx.rollback(); err != nil {
+		return err
+	}
+
+	tx.concurMgr.Release()
+	tx.bufferList.UnpinAll()
+
+	return nil
+}
+
+func (tx *Transaction) rollback() error {
+	return errors.New("not implemented")
 }
 
 // GetInt32 gets int32 from the blk at offset.
@@ -181,13 +182,13 @@ func (tx *Transaction) writeStartLog() (domain.LSN, error) {
 		TxNum: tx.number,
 	}
 
-	return tx.writeLog(Start, record)
+	return tx.writeLog(logrecord.Start, record)
 }
 
 func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
 	record := &logrecord.CommitRecord{TxNum: tx.number}
 
-	return tx.writeLog(Commit, record)
+	return tx.writeLog(logrecord.Commit, record)
 }
 
 func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {
@@ -199,7 +200,7 @@ func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int3
 		Val:         val,
 	}
 
-	return tx.writeLog(SetInt32, record)
+	return tx.writeLog(logrecord.SetInt32, record)
 }
 
 func (tx *Transaction) writeSetStringLog(blk domain.Block, offset int64, val string) (domain.LSN, error) {
@@ -211,10 +212,10 @@ func (tx *Transaction) writeSetStringLog(blk domain.Block, offset int64, val str
 		Val:         val,
 	}
 
-	return tx.writeLog(SetString, record)
+	return tx.writeLog(logrecord.SetString, record)
 }
 
-func (tx *Transaction) writeLog(typ RecordType, record logrecord.LogRecorder) (domain.LSN, error) {
+func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {
 	data, err := record.Marshal()
 	if err != nil {
 		return domain.DummyLSN, err

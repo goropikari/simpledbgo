@@ -23,13 +23,13 @@ func RecordParse(b []byte) (logrecord.LogRecorder, error) {
 
 	var rec logrecord.LogRecorder
 	switch typ {
-	case Start:
+	case logrecord.Start:
 		rec = &logrecord.StartRecord{}
-	case Commit:
+	case logrecord.Commit:
 		rec = &logrecord.CommitRecord{}
-	case SetInt32:
+	case logrecord.SetInt32:
 		rec = &logrecord.SetInt32Record{}
-	case SetString:
+	case logrecord.SetString:
 		rec = &logrecord.SetStringRecord{}
 	default:
 		panic(fmt.Errorf("unexpected record type: %v", typ))
