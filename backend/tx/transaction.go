@@ -2,6 +2,7 @@ package tx
 
 import (
 	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledb_go/backend/tx/logrecord"
 	"github.com/goropikari/simpledb_go/lib/bytes"
 )
 
@@ -11,6 +12,9 @@ type RecordType = int32
 const (
 	// Commit is commit record type.
 	Commit RecordType = iota
+
+	// SetInt32 is set int32 record type.
+	SetInt32
 )
 
 // Transaction is a model of transaction.
@@ -67,14 +71,96 @@ func (tx *Transaction) commit() error {
 func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
 	buf := bytes.NewBuffer(bytes.Int32Length * 2)
 	if err := buf.SetInt32(0, Commit); err != nil {
-		return domain.DummyLSN, nil
+		return domain.DummyLSN, err
 	}
 
 	if err := buf.SetInt32(bytes.Int32Length, int32(tx.number)); err != nil {
-		return domain.DummyLSN, nil
+		return domain.DummyLSN, err
 	}
 
-	record := buf.GetData()
+	return tx.logMgr.AppendRecord(buf.GetData())
+}
 
-	return tx.logMgr.AppendRecord(record)
+// GetInt32 gets int32 from the blk at offset.
+func (tx *Transaction) GetInt32(blk domain.Block, offset int64) (int32, error) {
+	if err := tx.concurMgr.SLock(blk); err != nil {
+		return 0, err
+	}
+
+	buf := tx.bufferList.GetBuffer(blk)
+	x, err := buf.Page().GetInt32(offset)
+	if err != nil {
+		return 0, err
+	}
+
+	return x, nil
+}
+
+// SetInt32 sets int32 on the given block.
+func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, writeLog bool) error {
+	if err := tx.concurMgr.XLock(blk); err != nil {
+		return err
+	}
+
+	buf := tx.bufferList.GetBuffer(blk)
+	lsn := domain.DummyLSN
+	if writeLog {
+		var err error
+		oldval, err := buf.Page().GetInt32(offset)
+		if err != nil {
+			return err
+		}
+
+		lsn, err = tx.writeSetInt32Log(*buf.Block(), offset, oldval)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := buf.Page().SetInt32(offset, val); err != nil {
+		return err
+	}
+
+	buf.SetModifiedTxNumber(tx.number, lsn)
+
+	return nil
+}
+
+func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {
+	record := &logrecord.SetInt32Record{
+		FileName:    blk.FileName(),
+		TxNum:       tx.number,
+		BlockNumber: blk.Number(),
+		Offset:      offset,
+		Val:         val,
+	}
+
+	data, err := record.Marshal()
+	if err != nil {
+		return domain.DummyLSN, err
+	}
+
+	buf := bytes.NewBuffer(bytes.Int32Length*2 + len(data))
+	if err := buf.SetInt32(0, SetInt32); err != nil {
+		return domain.DummyLSN, err
+	}
+
+	if err := buf.SetBytes(bytes.Int32Length, data); err != nil {
+		return domain.DummyLSN, err
+	}
+
+	lsn, err := tx.logMgr.AppendRecord(buf.GetData())
+	if err != nil {
+		return domain.DummyLSN, err
+	}
+
+	return lsn, nil
+}
+
+func (tx *Transaction) Pin(blk domain.Block) error {
+	if err := tx.bufferList.Pin(blk); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -4,7 +4,7 @@ const (
 	noTransaction = -1
 
 	// DummyLSN is dummy lsn.
-	DummyLSN = -1
+	DummyLSN = LSN(-1)
 )
 
 // Buffer is a buffer of database.
@@ -104,4 +104,9 @@ func (buf *Buffer) Pin() {
 // Unpin decrements the number of pin of the buffer.
 func (buf *Buffer) Unpin() {
 	buf.pins--
+}
+
+// Page returns buffer's page.
+func (buf *Buffer) Page() *Page {
+	return buf.page
 }
