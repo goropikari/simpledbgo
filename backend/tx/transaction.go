@@ -1,8 +1,6 @@
 package tx
 
 import (
-	"errors"
-
 	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/backend/tx/logrecord"
 	"github.com/goropikari/simpledb_go/lib/bytes"
@@ -44,6 +42,11 @@ func (tx *Transaction) Pin(blk domain.Block) error {
 	}
 
 	return nil
+}
+
+// Unpin unpins the blk by tx.
+func (tx *Transaction) Unpin(blk domain.Block) {
+	tx.bufferList.Unpin(blk)
 }
 
 // Commit commits the transaction.
@@ -88,7 +91,80 @@ func (tx *Transaction) Rollback() error {
 }
 
 func (tx *Transaction) rollback() error {
-	return errors.New("not implemented")
+	iter, err := tx.logMgr.Iterator()
+	if err != nil {
+		return err
+	}
+
+	for iter.HasNext() {
+		data, err := iter.Next()
+		if err != nil {
+			return err
+		}
+
+		record, err := RecordParse(data)
+		if err != nil {
+			return err
+		}
+
+		if record.TxNumber() == tx.number {
+			if record.Operator() == logrecord.Start {
+				break
+			}
+			if err := record.Undo(tx); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
+		return err
+	}
+
+	lsn, err := tx.writeRollbackLog()
+	if err != nil {
+		return err
+	}
+
+	if err := tx.logMgr.FlushLSN(lsn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UndoSetInt32 is behavior of SetInt32Record.
+func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
+	blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
+
+	if err := tx.Pin(blk); err != nil {
+		return err
+	}
+
+	if err := tx.SetInt32(blk, rec.Offset, rec.Val, false); err != nil {
+		return err
+	}
+
+	tx.Unpin(blk)
+
+	return nil
+}
+
+// UndoSetString undoes SetStringRecord.
+func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {
+	blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
+
+	if err := tx.Pin(blk); err != nil {
+		return err
+	}
+
+	if err := tx.SetString(blk, rec.Offset, rec.Val, false); err != nil {
+		return err
+	}
+
+	tx.Unpin(blk)
+
+	return nil
 }
 
 // GetInt32 gets int32 from the blk at offset.
@@ -213,6 +289,12 @@ func (tx *Transaction) writeSetStringLog(blk domain.Block, offset int64, val str
 	}
 
 	return tx.writeLog(logrecord.SetString, record)
+}
+
+func (tx *Transaction) writeRollbackLog() (domain.LSN, error) {
+	record := &logrecord.RollbackRecord{TxNum: tx.number}
+
+	return tx.writeLog(logrecord.Rollback, record)
 }
 
 func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {

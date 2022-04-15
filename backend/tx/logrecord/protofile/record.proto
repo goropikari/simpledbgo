@@ -11,6 +11,10 @@ message CommitRecord {
   int32 txnum = 1;
 }
 
+message RollbackRecord {
+  int32 txnum = 1;
+}
+
 message SetInt32Record {
   string filename    = 1;
   int32 txnum        = 2;

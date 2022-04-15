@@ -30,15 +30,19 @@ func (list *List[T]) Add(x T) {
 
 // Remove removes element from the list.
 func (list *List[T]) Remove(x T) {
+	found := false
 	for i, v := range list.data {
 		if v.Equal(x) {
 			list.data[0], list.data[i] = list.data[i], list.data[0]
+			found = true
 
 			break
 		}
 	}
 
-	list.data = list.data[1:]
+	if found {
+		list.data = list.data[1:]
+	}
 }
 
 // Data returns list's data.

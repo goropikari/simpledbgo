@@ -198,6 +198,9 @@ func (mgr *Manager) AppendNewBlock() (*domain.Block, error) {
 
 // Iterator returns log record iterator.
 func (mgr *Manager) Iterator() (domain.LogIterator, error) {
+	if err := mgr.Flush(); err != nil {
+		return nil, err
+	}
 	page, err := mgr.pageFactory.Create()
 	if err != nil {
 		return nil, err

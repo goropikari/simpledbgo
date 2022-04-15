@@ -41,6 +41,22 @@ func TestCommitRecord(t *testing.T) {
 	})
 }
 
+func TestRollbackRecord(t *testing.T) {
+	t.Run("marshal/unmarshal", func(t *testing.T) {
+		rec := &logrecord.RollbackRecord{
+			TxNum: domain.TransactionNumber(fake.RandInt32()),
+		}
+
+		bytes, err := rec.Marshal()
+		require.NoError(t, err)
+
+		rec2 := &logrecord.RollbackRecord{}
+		rec2.Unmarshal(bytes)
+
+		require.Equal(t, *rec, *rec2)
+	})
+}
+
 func TestSetInt32Record(t *testing.T) {
 	t.Run("marshal/unmarshal", func(t *testing.T) {
 		rec := &logrecord.SetInt32Record{

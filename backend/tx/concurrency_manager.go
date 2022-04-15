@@ -61,4 +61,5 @@ func (conMgr *ConcurrencyManager) Release() {
 			conMgr.lt.XUnlock(blk)
 		}
 	}
+	conMgr.locks = make(map[domain.Block]LockType)
 }

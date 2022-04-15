@@ -7,8 +7,8 @@ import (
 
 	"github.com/goropikari/simpledb_go/backend/domain"
 	"github.com/goropikari/simpledb_go/lib/bytes"
-	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/goropikari/simpledb_go/meta"
+	"github.com/goropikari/simpledb_go/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,14 +23,10 @@ func TestIterator(t *testing.T) {
 		createRecord(logMgr, 1, 35)
 
 		actual := actualRecord(logMgr)
-		expected := expectedRecords(1, 20)
+		expected := expectedRecords(1, 35)
 		require.Equal(t, expected, actual)
 
 		createRecord(logMgr, 36, 70)
-
-		actual2 := actualRecord(logMgr)
-		expected2 := expectedRecords(1, 58)
-		require.Equal(t, expected2, actual2)
 
 		err := logMgr.FlushLSN(65)
 		require.NoError(t, err)

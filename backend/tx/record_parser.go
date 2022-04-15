@@ -31,8 +31,10 @@ func RecordParse(b []byte) (logrecord.LogRecorder, error) {
 		rec = &logrecord.SetInt32Record{}
 	case logrecord.SetString:
 		rec = &logrecord.SetStringRecord{}
+	case logrecord.Rollback:
+		rec = &logrecord.RollbackRecord{}
 	default:
-		panic(fmt.Errorf("unexpected record type: %v", typ))
+		return nil, fmt.Errorf("unexpected record type: %v", typ)
 	}
 
 	if err := rec.Unmarshal(data); err != nil {
