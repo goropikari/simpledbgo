@@ -133,6 +133,66 @@ func (tx *Transaction) rollback() error {
 	return nil
 }
 
+// Recover recovers a database.
+func (tx *Transaction) Recover() error {
+	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
+		return err
+	}
+
+	if err := tx.recover(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tx *Transaction) recover() error {
+	finishedTxns := make(map[domain.TransactionNumber]bool)
+	iter, err := tx.logMgr.Iterator()
+	if err != nil {
+		return err
+	}
+
+	for iter.HasNext() {
+		data, err := iter.Next()
+		if err != nil {
+			return err
+		}
+
+		record, err := RecordParse(data)
+		if err != nil {
+			return err
+		}
+
+		if record.Operator() == logrecord.Checkpoint {
+			break
+		}
+
+		if record.Operator() == logrecord.Commit || record.Operator() == logrecord.Rollback {
+			finishedTxns[record.TxNumber()] = true
+		} else if _, found := finishedTxns[record.TxNumber()]; !found {
+			if err := record.Undo(tx); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
+		return err
+	}
+
+	lsn, err := tx.writeCheckpointLog()
+	if err != nil {
+		return err
+	}
+
+	if err := tx.logMgr.FlushLSN(lsn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // UndoSetInt32 is behavior of SetInt32Record.
 func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
 	blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
@@ -232,7 +292,6 @@ func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, wri
 	buf := tx.bufferList.GetBuffer(blk)
 	lsn := domain.DummyLSN
 	if writeLog {
-		// recoveryMgr.setString
 		oldval, err := buf.Page().GetString(offset)
 		if err != nil {
 			return err
@@ -265,6 +324,12 @@ func (tx *Transaction) writeCommitLog() (domain.LSN, error) {
 	record := &logrecord.CommitRecord{TxNum: tx.number}
 
 	return tx.writeLog(logrecord.Commit, record)
+}
+
+func (tx *Transaction) writeCheckpointLog() (domain.LSN, error) {
+	record := &logrecord.CheckpointRecord{}
+
+	return tx.writeLog(logrecord.Checkpoint, record)
 }
 
 func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {

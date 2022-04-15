@@ -22,6 +22,9 @@ const (
 	// Rollback is rollback record type.
 	Rollback
 
+	// Checkpoint is checkpoint record type.
+	Checkpoint
+
 	// SetInt32 is set int32 record type.
 	SetInt32
 
@@ -135,7 +138,7 @@ type RollbackRecord struct {
 
 // Unmarshal parses the proto message in b and places the result in rec.
 func (rec *RollbackRecord) Unmarshal(b []byte) error {
-	pb := &protobuf.CommitRecord{}
+	pb := &protobuf.RollbackRecord{}
 	if err := proto.Unmarshal(b, pb); err != nil {
 		return err
 	}
@@ -147,7 +150,7 @@ func (rec *RollbackRecord) Unmarshal(b []byte) error {
 
 // Marshal encodes the rec.
 func (rec *RollbackRecord) Marshal() ([]byte, error) {
-	pb := &protobuf.CommitRecord{
+	pb := &protobuf.RollbackRecord{
 		Txnum: int32(rec.TxNum),
 	}
 
@@ -162,6 +165,38 @@ func (rec *RollbackRecord) Operator() RecordType {
 // TxNumber returns the transaction number.
 func (rec *RollbackRecord) TxNumber() domain.TransactionNumber {
 	return rec.TxNum
+}
+
+// CheckpointRecord is a model of commit log record.
+type CheckpointRecord struct {
+	baseRecord
+}
+
+// Unmarshal parses the proto message in b and places the result in rec.
+func (rec *CheckpointRecord) Unmarshal(b []byte) error {
+	pb := &protobuf.CheckpointRecord{}
+	if err := proto.Unmarshal(b, pb); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Marshal encodes the rec.
+func (rec *CheckpointRecord) Marshal() ([]byte, error) {
+	pb := &protobuf.CheckpointRecord{}
+
+	return proto.Marshal(pb)
+}
+
+// Operator returns Commit.
+func (rec *CheckpointRecord) Operator() RecordType {
+	return Checkpoint
+}
+
+// TxNumber returns the transaction number.
+func (rec *CheckpointRecord) TxNumber() domain.TransactionNumber {
+	return domain.DummyTransactionNumber
 }
 
 // SetInt32Record is a model of set int32 log record.

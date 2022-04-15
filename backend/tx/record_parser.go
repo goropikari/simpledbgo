@@ -27,6 +27,8 @@ func RecordParse(b []byte) (logrecord.LogRecorder, error) {
 		rec = &logrecord.StartRecord{}
 	case logrecord.Commit:
 		rec = &logrecord.CommitRecord{}
+	case logrecord.Checkpoint:
+		rec = &logrecord.CheckpointRecord{}
 	case logrecord.SetInt32:
 		rec = &logrecord.SetInt32Record{}
 	case logrecord.SetString:

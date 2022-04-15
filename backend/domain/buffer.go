@@ -1,8 +1,6 @@
 package domain
 
 const (
-	noTransaction = -1
-
 	// DummyLSN is dummy lsn.
 	DummyLSN = LSN(-1)
 )
@@ -31,7 +29,7 @@ func NewBuffer(fileMgr FileManager, logMgr LogManager, pageFactory *PageFactory)
 		page:    page,
 		block:   nil,
 		pins:    0,
-		txnum:   noTransaction,
+		txnum:   DummyTransactionNumber,
 		lsn:     DummyLSN,
 	}, nil
 }
@@ -90,7 +88,7 @@ func (buf *Buffer) Flush() error {
 			return err
 		}
 
-		buf.txnum = noTransaction
+		buf.txnum = DummyTransactionNumber
 	}
 
 	return nil

@@ -379,3 +379,180 @@ func TestTransaction_Rollback(t *testing.T) {
 		require.Equal(t, expected, records)
 	})
 }
+
+func TestTransaction_Recover(t *testing.T) {
+	t.Run("test commit", func(t *testing.T) {
+		const (
+			blockSize = 100
+			numBuf    = 2
+		)
+
+		dbPath := fake.RandString()
+		factory := fake.NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
+		fileMgr, logMgr, bufMgr := factory.Create()
+		defer factory.Finish()
+
+		ltConfig := tx.NewConfig(1000)
+		lt := tx.NewLockTable(ltConfig)
+		concurMgr := tx.NewConcurrencyManager(lt)
+
+		gen := tx.NewNumberGenerator()
+
+		filename := "table_" + fake.RandString()
+		blk := *domain.NewBlock(
+			domain.FileName(filename),
+			domain.BlockSize(blockSize),
+			domain.BlockNumber(0),
+		)
+		blk2 := *domain.NewBlock(
+			domain.FileName(filename),
+			domain.BlockSize(blockSize),
+			domain.BlockNumber(1),
+		)
+
+		offset := int64(10)
+		val := int32(100)
+		writeLog := true
+
+		// commit
+		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+		err = txn1.Pin(blk)
+		require.NoError(t, err)
+		err = txn1.SetInt32(blk, offset, val, writeLog)
+		require.NoError(t, err)
+		err = txn1.SetString(blk, offset+4, "foo", writeLog)
+		require.NoError(t, err)
+		txn1.Commit()
+
+		// uncommit
+		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+		err = txn2.Pin(blk2)
+		require.NoError(t, err)
+		err = txn2.SetInt32(blk2, offset, val+1, writeLog)
+		require.NoError(t, err)
+		err = txn2.SetString(blk2, offset+4, "bar", writeLog)
+		require.NoError(t, err)
+		err = txn2.SetInt32(blk2, offset, val+2, writeLog)
+		require.NoError(t, err)
+		v, err := txn2.GetInt32(blk2, offset)
+		require.NoError(t, err)
+		require.Equal(t, val+2, v)
+		vs, err := txn2.GetString(blk2, offset+4)
+		require.NoError(t, err)
+		require.Equal(t, "bar", vs)
+		txn2.Unpin(blk2)
+
+		// recover
+		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+		err = txn3.Recover()
+		require.NoError(t, err)
+
+		// uncommit
+		txn4, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+		err = txn4.Pin(blk)
+		require.NoError(t, err)
+		vs4, err := txn4.GetString(blk, offset+4)
+		require.NoError(t, err)
+		require.Equal(t, "foo", vs4)
+		v4, err := txn4.GetInt32(blk, offset)
+		require.NoError(t, err)
+		require.Equal(t, val, v4)
+
+		// uncommit
+		txn5, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+		err = txn5.Pin(blk2)
+		require.NoError(t, err)
+		err = txn5.SetInt32(blk2, offset, val+1, writeLog)
+		require.NoError(t, err)
+		err = txn5.SetString(blk2, offset+4, "baz", writeLog)
+		require.NoError(t, err)
+
+		// recover
+		txn6, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+		err = txn6.Recover()
+		require.NoError(t, err)
+
+		it, err := logMgr.Iterator()
+		require.NoError(t, err)
+		records := make([]logrecord.LogRecorder, 0)
+		for it.HasNext() {
+			data, err := it.Next()
+			require.NoError(t, err)
+			rec, err := tx.RecordParse(data)
+			require.NoError(t, err)
+			records = append(records, rec)
+		}
+
+		expected := []logrecord.LogRecorder{
+			&logrecord.CheckpointRecord{},
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(6)},
+			// fifth transaction
+			&logrecord.SetStringRecord{
+				FileName:    blk2.FileName(),
+				TxNum:       txn5.Number(),
+				BlockNumber: blk2.Number(),
+				Offset:      offset + 4,
+				Val:         "",
+			},
+			&logrecord.SetInt32Record{
+				FileName:    blk2.FileName(),
+				TxNum:       txn5.Number(),
+				BlockNumber: blk2.Number(),
+				Offset:      offset,
+				Val:         0,
+			},
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(5)},
+			// forth transaction
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(4)},
+			// third transaction
+			&logrecord.CheckpointRecord{},
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(3)},
+			&logrecord.SetInt32Record{
+				FileName:    blk2.FileName(),
+				TxNum:       txn2.Number(),
+				BlockNumber: blk2.Number(),
+				Offset:      offset,
+				Val:         val + 1,
+			},
+			&logrecord.SetStringRecord{
+				FileName:    blk2.FileName(),
+				TxNum:       txn2.Number(),
+				BlockNumber: blk2.Number(),
+				Offset:      offset + 4,
+				Val:         "",
+			},
+			&logrecord.SetInt32Record{
+				FileName:    blk2.FileName(),
+				TxNum:       txn2.Number(),
+				BlockNumber: blk2.Number(),
+				Offset:      offset,
+				Val:         0,
+			},
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(2)},
+			// first transaction
+			&logrecord.CommitRecord{TxNum: domain.TransactionNumber(1)},
+			&logrecord.SetStringRecord{
+				FileName:    blk.FileName(),
+				TxNum:       txn1.Number(),
+				BlockNumber: blk.Number(),
+				Offset:      offset + 4,
+				Val:         "",
+			},
+			&logrecord.SetInt32Record{
+				FileName:    blk.FileName(),
+				TxNum:       txn1.Number(),
+				BlockNumber: blk.Number(),
+				Offset:      offset,
+				Val:         0,
+			},
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(1)},
+		}
+		require.Equal(t, expected, records)
+	})
+}

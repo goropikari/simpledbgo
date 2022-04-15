@@ -238,6 +238,9 @@ func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get bytes: %w", err)
 	}
+	if length == 0 {
+		return []byte{}, nil
+	}
 
 	if !buf.hasSpace(int(length)) {
 		return nil, ErrInvalidOffset
