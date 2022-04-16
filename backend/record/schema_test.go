@@ -159,30 +159,8 @@ func TestSchema_Add(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			sch := record.NewSchema()
-			err := sch.Add(tt.fldname, tt.base)
-			require.NoError(t, err)
+			sch.Add(tt.fldname, tt.base)
 			require.Equal(t, tt.expected, sch)
-		})
-	}
-}
-
-func TestSchema_Add_Error(t *testing.T) {
-	tests := []struct {
-		name    string
-		fldname record.FieldName
-	}{
-		{
-			name:    "fld not found",
-			fldname: record.FieldName(fake.RandString()),
-		},
-	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			sch := record.NewSchema()
-			sch2 := record.NewSchema()
-			err := sch.Add(tt.fldname, sch2)
-			require.Error(t, err)
 		})
 	}
 }
@@ -212,8 +190,7 @@ func TestSchema_AddAllFields(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			sch := record.NewSchema()
-			err := sch.AddAllFields(tt.base)
-			require.NoError(t, err)
+			sch.AddAllFields(tt.base)
 			require.Equal(t, tt.expected, sch)
 		})
 	}

@@ -81,45 +81,34 @@ func (schema *Schema) AddStringField(fldname FieldName, length int) {
 }
 
 // Add adds other's field into the schema.
-func (schema *Schema) Add(fldname FieldName, other *Schema) error {
-	typ, err := other.typ(fldname)
-	if err != nil {
-		return err
-	}
+func (schema *Schema) Add(fldname FieldName, other *Schema) {
+	typ := other.typ(fldname)
 
-	length, err := other.length(fldname)
-	if err != nil {
-		return err
-	}
+	length := other.length(fldname)
 
 	schema.AddField(fldname, typ, length)
 
-	return nil
 }
 
 // AddAllFields adds all fields of other into the schema.
-func (schema *Schema) AddAllFields(other *Schema) error {
+func (schema *Schema) AddAllFields(other *Schema) {
 	for _, fld := range other.fields {
-		if err := schema.Add(fld, other); err != nil {
-			return err
-		}
+		schema.Add(fld, other)
 	}
-
-	return nil
 }
 
-func (schema *Schema) typ(fldname FieldName) (FieldType, error) {
+func (schema *Schema) typ(fldname FieldName) FieldType {
 	if v, found := schema.info[fldname]; found {
-		return v.typ, nil
+		return v.typ
 	}
 
-	return Unknown, ErrFieldNotFound
+	return Unknown
 }
 
-func (schema *Schema) length(fldname FieldName) (int, error) {
+func (schema *Schema) length(fldname FieldName) int {
 	if v, found := schema.info[fldname]; found {
-		return v.length, nil
+		return v.length
 	}
 
-	return 0, ErrFieldNotFound
+	return -1
 }

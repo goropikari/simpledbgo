@@ -14,3 +14,11 @@ func NewFieldInfo(typ FieldType, length int) *FieldInfo {
 		length: length,
 	}
 }
+
+func NewLayoutByElement(schema *Schema, offsets map[FieldName]int64, slotsize int) *Layout {
+	return &Layout{
+		schema:   schema,
+		offsets:  offsets,
+		slotsize: slotsize,
+	}
+}
