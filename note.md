@@ -100,7 +100,7 @@ Go で Java の wait, notify, notifyAll と同じことをしようとしたら�
 2022/4/6
 
 goroutine の timeout は channel と select を使うのが Go ではよくあるので試しに実装してみたがだいぶ処理が複雑になってしまった。
-https://github.com/goropikari/simpledb-go/blame/972526679d15cf5eb5d6d10a78b5192767714d38/backend/buffer/manager.go
+https://github.com/goropikari/simpledbgo/blame/972526679d15cf5eb5d6d10a78b5192767714d38/backend/buffer/manager.go
 
 ```go
 func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
@@ -226,7 +226,7 @@ func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
 }
 ```
 
-https://github.com/goropikari/simpledb-go/blob/b1ba3f41fbc782214829c25b57e23e376f2cf052/backend/buffer/manager.go
+https://github.com/goropikari/simpledbgo/blob/b1ba3f41fbc782214829c25b57e23e376f2cf052/backend/buffer/manager.go
 
 
 上の方法で良いかと思ったが、`Wait()` が timeout しないせいで deadlock を起こす可能性に気づいた。

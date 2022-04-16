@@ -3,8 +3,8 @@ package tx_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledb_go/backend/tx"
-	"github.com/goropikari/simpledb_go/testing/fake"
+	"github.com/goropikari/simpledbgo/backend/tx"
+	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 

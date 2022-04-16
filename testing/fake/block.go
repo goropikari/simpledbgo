@@ -1,6 +1,6 @@
 package fake
 
-import "github.com/goropikari/simpledb_go/backend/domain"
+import "github.com/goropikari/simpledbgo/backend/domain"
 
 func FileName() domain.FileName {
 	return domain.FileName(RandString())

@@ -1,6 +1,6 @@
 package tx
 
-import "github.com/goropikari/simpledb_go/backend/domain"
+import "github.com/goropikari/simpledbgo/backend/domain"
 
 // LockType is a type of lock.
 type LockType int8

@@ -1,4 +1,4 @@
-module github.com/goropikari/simpledb_go
+module github.com/goropikari/simpledbgo
 
 go 1.18
 

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/testing/mock"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/testing/mock"
 )
 
 func TestPage_NewPage(t *testing.T) {

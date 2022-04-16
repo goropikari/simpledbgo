@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	domain "github.com/goropikari/simpledb_go/backend/domain"
+	domain "github.com/goropikari/simpledbgo/backend/domain"
 )
 
 // MockLogManager is a mock of LogManager interface.

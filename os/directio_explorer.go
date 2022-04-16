@@ -3,7 +3,7 @@ package os
 import (
 	"os"
 
-	"github.com/goropikari/simpledb_go/lib/directio"
+	"github.com/goropikari/simpledbgo/lib/directio"
 )
 
 // DirectIOExplorer is a file explorer for supporting direct io.

@@ -1,6 +1,6 @@
 package log
 
-import "github.com/goropikari/simpledb_go/backend/domain"
+import "github.com/goropikari/simpledbgo/backend/domain"
 
 func (mgr *Manager) CurrentBlock() *domain.Block {
 	return mgr.currentBlock

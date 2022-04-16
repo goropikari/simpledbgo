@@ -1,8 +1,8 @@
 package tx
 
 import (
-	"github.com/goropikari/simpledb_go/backend/domain"
-	ls "github.com/goropikari/simpledb_go/lib/list"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	ls "github.com/goropikari/simpledbgo/lib/list"
 )
 
 // BufferList is list of buffer.

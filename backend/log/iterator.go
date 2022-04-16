@@ -1,8 +1,8 @@
 package log
 
 import (
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/meta"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/meta"
 )
 
 // Iterator is iterator of log.

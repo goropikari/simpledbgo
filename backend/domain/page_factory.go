@@ -1,6 +1,6 @@
 package domain
 
-import "github.com/goropikari/simpledb_go/lib/bytes"
+import "github.com/goropikari/simpledbgo/lib/bytes"
 
 // PageFactory is a factory of page.
 type PageFactory struct {

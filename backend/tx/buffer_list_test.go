@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/backend/tx"
-	"github.com/goropikari/simpledb_go/testing/fake"
-	"github.com/goropikari/simpledb_go/testing/mock"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/backend/tx"
+	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,6 +1,6 @@
 package bytes
 
-import "github.com/goropikari/simpledb_go/lib/directio"
+import "github.com/goropikari/simpledbgo/lib/directio"
 
 // DirectByteSliceCreater is a slice creature with direct io.
 type DirectByteSliceCreater struct{}

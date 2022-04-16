@@ -3,8 +3,8 @@ package domain_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/testing/fake"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 

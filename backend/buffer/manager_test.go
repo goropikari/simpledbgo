@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/goropikari/simpledb_go/backend/buffer"
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/lib/bytes"
-	"github.com/goropikari/simpledb_go/testing/fake"
-	"github.com/goropikari/simpledb_go/testing/mock"
+	"github.com/goropikari/simpledbgo/backend/buffer"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 

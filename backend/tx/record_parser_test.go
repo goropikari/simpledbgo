@@ -3,10 +3,10 @@ package tx_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledb_go/backend/tx"
-	"github.com/goropikari/simpledb_go/backend/tx/logrecord"
-	"github.com/goropikari/simpledb_go/lib/bytes"
-	"github.com/goropikari/simpledb_go/meta"
+	"github.com/goropikari/simpledbgo/backend/tx"
+	"github.com/goropikari/simpledbgo/backend/tx/logrecord"
+	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/goropikari/simpledbgo/meta"
 	"github.com/stretchr/testify/require"
 )
 

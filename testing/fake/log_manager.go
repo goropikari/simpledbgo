@@ -4,9 +4,9 @@ import (
 	golog "log"
 	goos "os"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/backend/log"
-	"github.com/goropikari/simpledb_go/lib/bytes"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/backend/log"
+	"github.com/goropikari/simpledbgo/lib/bytes"
 )
 
 type NonDirectLogManagerFactory struct {

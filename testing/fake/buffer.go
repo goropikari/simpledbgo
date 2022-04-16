@@ -1,7 +1,7 @@
 package fake
 
 import (
-	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledbgo/backend/domain"
 )
 
 // Buffer is a fake domain.Buffer

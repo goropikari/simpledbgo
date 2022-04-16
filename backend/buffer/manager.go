@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledbgo/backend/domain"
 )
 
 var (

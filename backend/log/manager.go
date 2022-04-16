@@ -4,8 +4,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/meta"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/meta"
 )
 
 // ManagerConfig is a configuration of log manager.

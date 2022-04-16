@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/lib/directio"
-	"github.com/goropikari/simpledb_go/testing/fake"
+	"github.com/goropikari/simpledbgo/lib/directio"
+	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 

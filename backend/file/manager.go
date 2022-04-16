@@ -6,7 +6,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
+	"github.com/goropikari/simpledbgo/backend/domain"
 )
 
 // ManagerConfig is configuration of file manager.

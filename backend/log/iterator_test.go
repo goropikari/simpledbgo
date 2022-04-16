@@ -5,10 +5,10 @@ import (
 	golog "log"
 	"testing"
 
-	"github.com/goropikari/simpledb_go/backend/domain"
-	"github.com/goropikari/simpledb_go/lib/bytes"
-	"github.com/goropikari/simpledb_go/meta"
-	"github.com/goropikari/simpledb_go/testing/fake"
+	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/goropikari/simpledbgo/meta"
+	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 

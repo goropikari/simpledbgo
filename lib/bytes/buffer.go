@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goropikari/simpledb_go/meta"
+	"github.com/goropikari/simpledbgo/meta"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
