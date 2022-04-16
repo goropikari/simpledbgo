@@ -6,6 +6,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
 // RecordType is type of log record.
 type RecordType = int32
 
