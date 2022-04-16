@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-16 03:03:29</td>
+            <td class="headerValue">2022-04-16 17:00:05</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -450,7 +450,7 @@
 <a name="388"><span class="lineNum">     388 </span>            : </a>
 <a name="389"><span class="lineNum">     389 </span>            : // Size returns block length of the `filename`.</a>
 <a name="390"><span class="lineNum">     390 </span><span class="lineCov">          1 : func (tx *Transaction) Size(filename domain.FileName) (int32, error) {</span></a>
-<a name="391"><span class="lineNum">     391 </span><span class="lineCov">          1 :         dummyBlk := *domain.NewBlock(filename, tx.fileMgr.BlockSize(), domain.BlockNumber(-1))</span></a>
+<a name="391"><span class="lineNum">     391 </span><span class="lineCov">          1 :         dummyBlk := *domain.NewDummyBlock(filename)</span></a>
 <a name="392"><span class="lineNum">     392 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(dummyBlk); err != nil {</span></a>
 <a name="393"><span class="lineNum">     393 </span><span class="lineNoCov">          0 :                 return 0, err</span></a>
 <a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -460,7 +460,7 @@
 <a name="398"><span class="lineNum">     398 </span>            : </a>
 <a name="399"><span class="lineNum">     399 </span>            : // ExtendFile extends the file by a block.</a>
 <a name="400"><span class="lineNum">     400 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (*domain.Block, error) {</span></a>
-<a name="401"><span class="lineNum">     401 </span><span class="lineCov">          1 :         dummyBlk := *domain.NewBlock(filename, tx.fileMgr.BlockSize(), domain.BlockNumber(-1))</span></a>
+<a name="401"><span class="lineNum">     401 </span><span class="lineCov">          1 :         dummyBlk := *domain.NewDummyBlock(filename)</span></a>
 <a name="402"><span class="lineNum">     402 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(dummyBlk); err != nil {</span></a>
 <a name="403"><span class="lineNum">     403 </span><span class="lineNoCov">          0 :                 return nil, err</span></a>
 <a name="404"><span class="lineNum">     404 </span><span class="lineNoCov">          0 :         }</span></a>
