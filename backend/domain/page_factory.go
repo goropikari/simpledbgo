@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/goropikari/simpledbgo/lib/bytes"
+import (
+	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/pkg/errors"
+)
 
 // PageFactory is a factory of page.
 type PageFactory struct {
@@ -20,7 +23,7 @@ func NewPageFactory(bsf ByteSliceFactory, blockSize BlockSize) *PageFactory {
 func (pf *PageFactory) Create() (*Page, error) {
 	b, err := pf.bsf.Create(int(pf.blockSize))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create byte slice")
 	}
 
 	bb := bytes.NewBufferBytes(b)

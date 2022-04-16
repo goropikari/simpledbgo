@@ -1,12 +1,11 @@
 package file
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"sync"
 
 	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/pkg/errors"
 )
 
 // ManagerConfig is configuration of file manager.
@@ -26,7 +25,7 @@ type Manager struct {
 func NewManager(explorer domain.Explorer, bsf domain.ByteSliceFactory, config ManagerConfig) (*Manager, error) {
 	blkSize, err := domain.NewBlockSize(config.BlockSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create BlockSize")
 	}
 
 	return &Manager{
@@ -46,24 +45,24 @@ func (mgr *Manager) CopyBlockToPage(blk *domain.Block, page *domain.Page) error 
 
 	file, err := mgr.OpenFile(blk.FileName())
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to open file")
 	}
 
 	_, err = file.Seek(blk.Offset())
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to seek")
 	}
 
 	// file size が 0 のとき CopyN は EOF を返す。
 	// block size 分読んだことにしたいので EOF は無視する。
 	_, err = io.CopyN(page, file, int64(blk.Size()))
 	if err != nil && !errors.Is(err, io.EOF) {
-		return err
+		return errors.Wrap(err, "failed to copy from file to page")
 	}
 
 	_, err = page.Seek(0, io.SeekStart)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to seek")
 	}
 
 	return nil
@@ -76,19 +75,19 @@ func (mgr *Manager) CopyPageToBlock(page *domain.Page, block *domain.Block) erro
 
 	file, err := mgr.OpenFile(block.FileName())
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to open file")
 	}
 
 	if _, err = file.Seek(block.Offset()); err != nil {
-		return fmt.Errorf("%w", err)
+		return errors.Wrap(err, "failed to seek")
 	}
 
 	if _, err := file.Write(page.GetData()); err != nil {
-		return fmt.Errorf("%w", err)
+		return errors.Wrap(err, "failed to write")
 	}
 
 	if _, err := page.Seek(0, io.SeekStart); err != nil {
-		return fmt.Errorf("%w", err)
+		return errors.Wrap(err, "failed to seek")
 	}
 
 	return nil
@@ -101,39 +100,39 @@ func (mgr *Manager) ExtendFile(filename domain.FileName) (*domain.Block, error) 
 
 	blkLen, err := mgr.BlockLength(filename)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to take block length")
 	}
 
 	numBlk, err := domain.NewBlockNumber(blkLen)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to constnruct BlockNumber")
 	}
 
 	blk := domain.NewBlock(filename, mgr.blockSize, numBlk)
 
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to open file")
 	}
 
 	n, err := file.Size()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to take file size")
 	}
 
 	_, err = file.Seek(n)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to seek")
 	}
 
 	bs, err := mgr.bsf.Create(int(mgr.blockSize))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create byte slice")
 	}
 
 	_, err = file.Write(bs)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to write")
 	}
 
 	return blk, nil
@@ -143,12 +142,12 @@ func (mgr *Manager) ExtendFile(filename domain.FileName) (*domain.Block, error) 
 func (mgr *Manager) BlockLength(filename domain.FileName) (int32, error) {
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "failed to open file")
 	}
 
 	n, err := file.Size()
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "failed to take file size")
 	}
 
 	return int32(n) / int32(mgr.blockSize), nil

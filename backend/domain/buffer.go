@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/pkg/errors"
+
 const (
 	// DummyLSN is dummy lsn.
 	DummyLSN = LSN(-1)
@@ -20,7 +22,7 @@ type Buffer struct {
 func NewBuffer(fileMgr FileManager, logMgr LogManager, pageFactory *PageFactory) (*Buffer, error) {
 	page, err := pageFactory.Create()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create a page.")
 	}
 
 	return &Buffer{
@@ -61,13 +63,13 @@ func (buf *Buffer) TxNumber() TransactionNumber {
 func (buf *Buffer) AssignToBlock(block *Block) error {
 	err := buf.Flush()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to flush the buffer")
 	}
 
 	buf.block = block
 	err = buf.fileMgr.CopyBlockToPage(block, buf.page)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to flush block")
 	}
 
 	buf.pins = 0
@@ -80,12 +82,12 @@ func (buf *Buffer) Flush() error {
 	if buf.txnum >= 0 {
 		err := buf.logMgr.FlushLSN(buf.lsn)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to flush lsn block")
 		}
 
 		err = buf.fileMgr.CopyPageToBlock(buf.page, buf.block)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to copy page to block")
 		}
 
 		buf.txnum = DummyTransactionNumber

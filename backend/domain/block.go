@@ -4,8 +4,13 @@ import (
 	"errors"
 )
 
-// ErrNegativeBlockNumber means given block number is non negative.
-var ErrNegativeBlockNumber = errors.New("block number must be non negative")
+var (
+	// ErrNegativeBlockNumber means given block number is non negative.
+	ErrNegativeBlockNumber = errors.New("block number must be non negative")
+
+	// ErrNonPositiveBlockSize means given block size must be positive.
+	ErrNonPositiveBlockSize = errors.New("block size must be positive")
+)
 
 // BlockNumber is value object of block number.
 type BlockNumber int32
@@ -25,7 +30,7 @@ type BlockSize int32
 // NewBlockSize is a constructor of BlockSize.
 func NewBlockSize(n int32) (BlockSize, error) {
 	if n <= 0 {
-		return 0, errors.New("block size must be positive")
+		return 0, ErrNonPositiveBlockSize
 	}
 
 	return BlockSize(n), nil
@@ -48,6 +53,16 @@ func NewBlock(filename FileName, size BlockSize, number BlockNumber) *Block {
 		size:     size,
 		number:   number,
 		offset:   offset,
+	}
+}
+
+// NewDummyBlock constructs a dummy Block.
+func NewDummyBlock(filename FileName) *Block {
+	return &Block{
+		filename: filename,
+		size:     0,
+		number:   0,
+		offset:   0,
 	}
 }
 

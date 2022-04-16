@@ -388,7 +388,7 @@ func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRe
 
 // Size returns block length of the `filename`.
 func (tx *Transaction) Size(filename domain.FileName) (int32, error) {
-	dummyBlk := *domain.NewBlock(filename, tx.fileMgr.BlockSize(), domain.BlockNumber(-1))
+	dummyBlk := *domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.SLock(dummyBlk); err != nil {
 		return 0, err
 	}
@@ -398,7 +398,7 @@ func (tx *Transaction) Size(filename domain.FileName) (int32, error) {
 
 // ExtendFile extends the file by a block.
 func (tx *Transaction) ExtendFile(filename domain.FileName) (*domain.Block, error) {
-	dummyBlk := *domain.NewBlock(filename, tx.fileMgr.BlockSize(), domain.BlockNumber(-1))
+	dummyBlk := *domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.XLock(dummyBlk); err != nil {
 		return nil, err
 	}
