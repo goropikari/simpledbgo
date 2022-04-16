@@ -87,7 +87,6 @@ func (schema *Schema) Add(fldname FieldName, other *Schema) {
 	length := other.length(fldname)
 
 	schema.AddField(fldname, typ, length)
-
 }
 
 // AddAllFields adds all fields of other into the schema.

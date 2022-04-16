@@ -1,6 +1,11 @@
 package record
 
-import "github.com/goropikari/simpledbgo/meta"
+import (
+	"log"
+
+	"github.com/goropikari/simpledbgo/meta"
+	"github.com/pkg/errors"
+)
 
 // Layout is model of layout.
 type Layout struct {
@@ -21,6 +26,8 @@ func NewLayout(schema *Schema) *Layout {
 			pos += meta.Int32Length
 		case String:
 			pos += meta.Int32Length + int64(schema.length(fld))
+		case Unknown:
+			log.Fatal(errors.New("Invalid field type"))
 		}
 	}
 
