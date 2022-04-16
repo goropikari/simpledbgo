@@ -70,3 +70,35 @@ func TestParseRecord(t *testing.T) {
 		})
 	}
 }
+
+func TestParseRecord_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		data []byte
+	}{
+		{
+			name: "failed GetInt32",
+			data: []byte{0},
+		},
+		{
+			name: "faialed GetBytes",
+			data: []byte{0, 0, 0, 0, 0},
+		},
+		{
+			name: "invalid record type",
+			data: []byte{0, 0, 0, 255, 0, 0, 0, 0},
+		},
+		{
+			name: "invalid record",
+			data: []byte{0, 0, 0, 1, 0, 0, 0, 1, 0},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tx.ParseRecord(tt.data)
+			require.Error(t, err)
+		})
+	}
+}
