@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRecordParse(t *testing.T) {
+func TestParseRecord(t *testing.T) {
 	var tests = []struct {
 		name   string
 		typ    logrecord.RecordType
@@ -64,7 +64,7 @@ func TestRecordParse(t *testing.T) {
 			err = bb.SetBytes(meta.Int32Length, data)
 			require.NoError(t, err)
 
-			rec, err := tx.RecordParse(bb.GetData())
+			rec, err := tx.ParseRecord(bb.GetData())
 			require.NoError(t, err)
 			require.Equal(t, tt.record, rec)
 		})

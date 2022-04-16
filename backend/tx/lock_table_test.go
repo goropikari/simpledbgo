@@ -61,6 +61,7 @@ func TestLockTable_Lock(t *testing.T) {
 
 	t.Run("RWR", func(t *testing.T) {
 		// writer 優先だから read2 は writer の後になる
+		// たまに read のほうが先になるから writer 優先というわけでもないのかもしれない
 		config := tx.NewConfig(100)
 		lt := tx.NewLockTable(config)
 		blk := *domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
@@ -126,7 +127,6 @@ func TestLockTable_Lock(t *testing.T) {
 			time.Sleep(5 * time.Millisecond)
 			err := lt.XLock(blk)
 			require.Error(t, err)
-			lt.XUnlock(blk)
 			wg.Done()
 		}()
 
@@ -134,7 +134,7 @@ func TestLockTable_Lock(t *testing.T) {
 	})
 
 	t.Run("WR timeout", func(t *testing.T) {
-		config := tx.NewConfig(10)
+		config := tx.NewConfig(5)
 		lt := tx.NewLockTable(config)
 		blk := *domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
 
@@ -153,7 +153,6 @@ func TestLockTable_Lock(t *testing.T) {
 			time.Sleep(5 * time.Millisecond)
 			err := lt.SLock(blk)
 			require.Error(t, err)
-			lt.SUnlock(blk)
 			wg.Done()
 		}()
 

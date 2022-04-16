@@ -102,7 +102,7 @@ func (tx *Transaction) rollback() error {
 			return err
 		}
 
-		record, err := RecordParse(data)
+		record, err := ParseRecord(data)
 		if err != nil {
 			return err
 		}
@@ -159,16 +159,17 @@ func (tx *Transaction) recover() error {
 			return err
 		}
 
-		record, err := RecordParse(data)
+		record, err := ParseRecord(data)
 		if err != nil {
 			return err
 		}
 
-		if record.Operator() == logrecord.Checkpoint {
+		op := record.Operator()
+		if op == logrecord.Checkpoint {
 			break
 		}
 
-		if record.Operator() == logrecord.Commit || record.Operator() == logrecord.Rollback {
+		if op == logrecord.Commit || op == logrecord.Rollback {
 			finishedTxns[record.TxNumber()] = true
 		} else if _, found := finishedTxns[record.TxNumber()]; !found {
 			if err := record.Undo(tx); err != nil {
@@ -383,4 +384,34 @@ func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRe
 	}
 
 	return lsn, nil
+}
+
+// Size returns block length of the `filename`.
+func (tx *Transaction) Size(filename domain.FileName) (int32, error) {
+	dummyBlk := *domain.NewBlock(filename, tx.fileMgr.BlockSize(), domain.BlockNumber(-1))
+	if err := tx.concurMgr.SLock(dummyBlk); err != nil {
+		return 0, err
+	}
+
+	return tx.fileMgr.BlockLength(filename)
+}
+
+// ExtendFile extends the file by a block.
+func (tx *Transaction) ExtendFile(filename domain.FileName) (*domain.Block, error) {
+	dummyBlk := *domain.NewBlock(filename, tx.fileMgr.BlockSize(), domain.BlockNumber(-1))
+	if err := tx.concurMgr.XLock(dummyBlk); err != nil {
+		return nil, err
+	}
+
+	return tx.fileMgr.ExtendFile(filename)
+}
+
+// BlockSize returns block size.
+func (tx *Transaction) BlockSize() domain.BlockSize {
+	return tx.fileMgr.BlockSize()
+}
+
+// Available returns the number of available buffers.
+func (tx *Transaction) Available() int {
+	return tx.bufferMgr.Available()
 }

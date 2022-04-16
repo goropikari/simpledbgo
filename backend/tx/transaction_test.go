@@ -39,7 +39,7 @@ func TestTransaction_Start(t *testing.T) {
 		for it.HasNext() {
 			data, err := it.Next()
 			require.NoError(t, err)
-			rec, err := tx.RecordParse(data)
+			rec, err := tx.ParseRecord(data)
 			require.NoError(t, err)
 			records = append(records, rec)
 		}
@@ -83,7 +83,7 @@ func TestTransaction_Commit(t *testing.T) {
 		for it.HasNext() {
 			data, err := it.Next()
 			require.NoError(t, err)
-			rec, err := tx.RecordParse(data)
+			rec, err := tx.ParseRecord(data)
 			require.NoError(t, err)
 			records = append(records, rec)
 		}
@@ -146,7 +146,7 @@ func TestTransaction_GetSetInt32(t *testing.T) {
 		for it.HasNext() {
 			data, err := it.Next()
 			require.NoError(t, err)
-			rec, err := tx.RecordParse(data)
+			rec, err := tx.ParseRecord(data)
 			require.NoError(t, err)
 			records = append(records, rec)
 		}
@@ -224,7 +224,7 @@ func TestTransaction_GetSetString(t *testing.T) {
 		for it.HasNext() {
 			data, err := it.Next()
 			require.NoError(t, err)
-			rec, err := tx.RecordParse(data)
+			rec, err := tx.ParseRecord(data)
 			require.NoError(t, err)
 			records = append(records, rec)
 		}
@@ -325,7 +325,7 @@ func TestTransaction_Rollback(t *testing.T) {
 		for it.HasNext() {
 			data, err := it.Next()
 			require.NoError(t, err)
-			rec, err := tx.RecordParse(data)
+			rec, err := tx.ParseRecord(data)
 			require.NoError(t, err)
 			records = append(records, rec)
 		}
@@ -484,7 +484,7 @@ func TestTransaction_Recover(t *testing.T) {
 		for it.HasNext() {
 			data, err := it.Next()
 			require.NoError(t, err)
-			rec, err := tx.RecordParse(data)
+			rec, err := tx.ParseRecord(data)
 			require.NoError(t, err)
 			records = append(records, rec)
 		}
@@ -554,5 +554,108 @@ func TestTransaction_Recover(t *testing.T) {
 			&logrecord.StartRecord{TxNum: domain.TransactionNumber(1)},
 		}
 		require.Equal(t, expected, records)
+	})
+}
+
+func TestTransaction_Size(t *testing.T) {
+	t.Run("test size", func(t *testing.T) {
+		const (
+			blockSize = 20
+			numBuf    = 10
+		)
+
+		dbPath := fake.RandString()
+		factory := fake.NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
+		fileMgr, logMgr, bufMgr := factory.Create()
+		defer factory.Finish()
+
+		ltConfig := tx.NewConfig(1000)
+		lt := tx.NewLockTable(ltConfig)
+		concurMgr := tx.NewConcurrencyManager(lt)
+
+		gen := tx.NewNumberGenerator()
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+
+		err = logMgr.Flush()
+		require.NoError(t, err)
+
+		logfile := logMgr.LogFileName()
+		size, err := txn.Size(logfile)
+		require.NoError(t, err)
+		require.Equal(t, int32(1), size)
+	})
+}
+
+func TestTransaction_ExtendFIle(t *testing.T) {
+	t.Run("test extend file", func(t *testing.T) {
+		const (
+			blockSize = 20
+			numBuf    = 10
+		)
+
+		dbPath := fake.RandString()
+		factory := fake.NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
+		fileMgr, logMgr, bufMgr := factory.Create()
+		defer factory.Finish()
+
+		ltConfig := tx.NewConfig(1000)
+		lt := tx.NewLockTable(ltConfig)
+		concurMgr := tx.NewConcurrencyManager(lt)
+
+		gen := tx.NewNumberGenerator()
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+
+		err = logMgr.Flush()
+		require.NoError(t, err)
+
+		logfile := logMgr.LogFileName()
+		size, err := txn.Size(logfile)
+		require.NoError(t, err)
+		require.Equal(t, int32(1), size)
+
+		_, err = txn.ExtendFile(logfile)
+		require.NoError(t, err)
+
+		size2, err := txn.Size(logfile)
+		require.NoError(t, err)
+		require.Equal(t, int32(2), size2)
+	})
+}
+
+func TestTransaction_Available(t *testing.T) {
+	t.Run("test available", func(t *testing.T) {
+		const (
+			blockSize = 20
+			numBuf    = 10
+		)
+
+		dbPath := fake.RandString()
+		factory := fake.NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
+		fileMgr, logMgr, bufMgr := factory.Create()
+		defer factory.Finish()
+
+		ltConfig := tx.NewConfig(1000)
+		lt := tx.NewLockTable(ltConfig)
+		concurMgr := tx.NewConcurrencyManager(lt)
+
+		gen := tx.NewNumberGenerator()
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		require.NoError(t, err)
+
+		nbuf := txn.Available()
+		require.Equal(t, numBuf, nbuf)
+
+		blk := *domain.NewBlock(domain.FileName(fake.RandString()), blockSize, domain.BlockNumber(1))
+		err = txn.Pin(blk)
+		require.NoError(t, err)
+
+		nbuf2 := txn.Available()
+		require.Equal(t, numBuf-1, nbuf2)
+
+		txn.Unpin(blk)
+		nbuf3 := txn.Available()
+		require.Equal(t, numBuf, nbuf3)
 	})
 }

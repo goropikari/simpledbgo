@@ -42,6 +42,7 @@ type result struct {
 // SLock aquires shared lock on the blk.
 func (lt *LockTable) SLock(blk domain.Block) error {
 	done := make(chan *result)
+	defer close(done)
 
 	go lt.slock(done, blk)
 
@@ -58,15 +59,12 @@ func (lt *LockTable) SLock(blk domain.Block) error {
 }
 
 func (lt *LockTable) slock(done chan *result, blk domain.Block) {
-	defer close(done)
-
 	now := time.Now()
 	lock, _ := lt.locks.LoadOrStore(blk, &sync.RWMutex{})
 	lock.(*sync.RWMutex).RLock()
 
 	if time.Since(now) > lt.timeoutMillisecond {
 		lock.(*sync.RWMutex).RUnlock()
-		done <- &result{err: ErrTransactionTimeoutExceeded}
 
 		return
 	}
@@ -85,6 +83,7 @@ func (lt *LockTable) SUnlock(blk domain.Block) {
 // XLock aquires exclusive lock on the blk.
 func (lt *LockTable) XLock(blk domain.Block) error {
 	done := make(chan *result)
+	defer close(done)
 
 	go lt.xlock(done, blk)
 
@@ -101,15 +100,12 @@ func (lt *LockTable) XLock(blk domain.Block) error {
 }
 
 func (lt *LockTable) xlock(done chan *result, blk domain.Block) {
-	defer close(done)
-
 	now := time.Now()
 	lock, _ := lt.locks.LoadOrStore(blk, &sync.RWMutex{})
 	lock.(*sync.RWMutex).Lock()
 
 	if time.Since(now) > lt.timeoutMillisecond {
 		lock.(*sync.RWMutex).Unlock()
-		done <- &result{err: ErrTransactionTimeoutExceeded}
 
 		return
 	}

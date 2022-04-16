@@ -8,8 +8,8 @@ import (
 	"github.com/goropikari/simpledb_go/meta"
 )
 
-// RecordParse parses b as log record.
-func RecordParse(b []byte) (logrecord.LogRecorder, error) {
+// ParseRecord parses b as log record.
+func ParseRecord(b []byte) (logrecord.LogRecorder, error) {
 	bb := bytes.NewBufferBytes(b)
 	typ, err := bb.GetInt32(0)
 	if err != nil {
