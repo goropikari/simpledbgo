@@ -8,14 +8,14 @@ import (
 // Iterator is iterator of log.
 type Iterator struct {
 	fileMgr    domain.FileManager
-	block      *domain.Block
+	block      domain.Block
 	page       *domain.Page
 	currentPos int32
 	// boundary   int32
 }
 
 // NewIterator is a constructor of Iterator.
-func NewIterator(fileMgr domain.FileManager, block *domain.Block, page *domain.Page) (*Iterator, error) {
+func NewIterator(fileMgr domain.FileManager, block domain.Block, page *domain.Page) (*Iterator, error) {
 	err := fileMgr.CopyBlockToPage(block, page)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (iter *Iterator) Next() ([]byte, error) {
 	return record, nil
 }
 
-func (iter *Iterator) moveToBlock(block *domain.Block) error {
+func (iter *Iterator) moveToBlock(block domain.Block) error {
 	err := iter.fileMgr.CopyBlockToPage(block, iter.page)
 	if err != nil {
 		return err

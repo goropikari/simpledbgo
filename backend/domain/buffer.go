@@ -12,7 +12,7 @@ type Buffer struct {
 	fileMgr FileManager
 	logMgr  LogManager
 	page    *Page
-	block   *Block
+	block   Block
 	pins    int
 	txnum   TransactionNumber
 	lsn     LSN
@@ -29,7 +29,7 @@ func NewBuffer(fileMgr FileManager, logMgr LogManager, pageFactory *PageFactory)
 		fileMgr: fileMgr,
 		logMgr:  logMgr,
 		page:    page,
-		block:   nil,
+		block:   Block{},
 		pins:    0,
 		txnum:   DummyTransactionNumber,
 		lsn:     DummyLSN,
@@ -37,7 +37,7 @@ func NewBuffer(fileMgr FileManager, logMgr LogManager, pageFactory *PageFactory)
 }
 
 // Block returns buffer's block.
-func (buf *Buffer) Block() *Block {
+func (buf *Buffer) Block() Block {
 	return buf.block
 }
 
@@ -60,7 +60,7 @@ func (buf *Buffer) TxNumber() TransactionNumber {
 }
 
 // AssignToBlock assigns block to the buffer.
-func (buf *Buffer) AssignToBlock(block *Block) error {
+func (buf *Buffer) AssignToBlock(block Block) error {
 	err := buf.Flush()
 	if err != nil {
 		return errors.Wrap(err, "failed to flush the buffer")

@@ -18,7 +18,7 @@ type Manager struct {
 	mu           sync.Mutex
 	fileMgr      domain.FileManager
 	logFileName  domain.FileName
-	currentBlock *domain.Block
+	currentBlock domain.Block
 	logPage      *domain.Page
 	pageFactory  *domain.PageFactory
 	// Reset when server restarts. Increment when record is appended.
@@ -52,31 +52,31 @@ func NewManager(fileMgr domain.FileManager, pageFactory *domain.PageFactory, con
 
 // prepareManager prepares a block and a page for initializing Manager.
 // If given file is empty, extend a file by block size.
-func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fileName domain.FileName) (*domain.Block, *domain.Page, error) {
+func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fileName domain.FileName) (domain.Block, *domain.Page, error) {
 	page, err := factory.Create()
 	if err != nil {
-		return nil, nil, err
+		return domain.NewZeroBlock(), nil, err
 	}
 
 	blklen, err := fileMgr.BlockLength(fileName)
 	if err != nil {
-		return nil, nil, err
+		return domain.NewZeroBlock(), nil, err
 	}
 
 	if blklen == 0 {
 		blk, err := fileMgr.ExtendFile(fileName)
 		if err != nil {
-			return nil, nil, err
+			return domain.NewZeroBlock(), nil, err
 		}
 
 		err = page.SetInt32(0, int32(fileMgr.BlockSize()))
 		if err != nil {
-			return nil, nil, err
+			return domain.NewZeroBlock(), nil, err
 		}
 
 		err = fileMgr.CopyPageToBlock(page, blk)
 		if err != nil {
-			return nil, nil, err
+			return domain.NewZeroBlock(), nil, err
 		}
 
 		return blk, page, nil
@@ -84,14 +84,14 @@ func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fil
 
 	blknum, err := domain.NewBlockNumber(blklen - 1)
 	if err != nil {
-		return nil, nil, err
+		return domain.NewZeroBlock(), nil, err
 	}
 
 	blk := domain.NewBlock(fileName, fileMgr.BlockSize(), blknum)
 
 	err = fileMgr.CopyBlockToPage(blk, page)
 	if err != nil {
-		return nil, nil, err
+		return domain.NewZeroBlock(), nil, err
 	}
 
 	return blk, page, nil
@@ -173,22 +173,22 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 }
 
 // AppendNewBlock appends a block to log file and return the appended block.
-func (mgr *Manager) AppendNewBlock() (*domain.Block, error) {
+func (mgr *Manager) AppendNewBlock() (domain.Block, error) {
 	blk, err := mgr.fileMgr.ExtendFile(mgr.logFileName)
 	if err != nil {
-		return nil, err
+		return domain.NewZeroBlock(), err
 	}
 
 	mgr.logPage.Reset()
 
 	err = mgr.logPage.SetInt32(0, int32(mgr.fileMgr.BlockSize()))
 	if err != nil {
-		return nil, err
+		return domain.NewZeroBlock(), err
 	}
 
 	err = mgr.fileMgr.CopyPageToBlock(mgr.logPage, blk)
 	if err != nil {
-		return nil, err
+		return domain.NewZeroBlock(), err
 	}
 
 	mgr.currentBlock = blk

@@ -14,6 +14,6 @@ func BlockSize() domain.BlockSize {
 	return domain.BlockSize(RandInt32())
 }
 
-func Block() *domain.Block {
+func Block() domain.Block {
 	return domain.NewBlock(FileName(), BlockSize(), BlockNumber())
 }

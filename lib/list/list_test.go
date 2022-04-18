@@ -11,7 +11,7 @@ import (
 
 func TestList(t *testing.T) {
 	t.Run("List", func(t *testing.T) {
-		list := list.NewList[*domain.Block]()
+		list := list.NewList[domain.Block]()
 
 		blk := fake.Block()
 		blk2 := fake.Block()
@@ -19,7 +19,7 @@ func TestList(t *testing.T) {
 		list.Add(blk)
 
 		require.Equal(t, 2, list.Length())
-		require.Equal(t, []*domain.Block{blk, blk}, list.Data())
+		require.Equal(t, []domain.Block{blk, blk}, list.Data())
 
 		ok := list.Contains(blk)
 		require.Equal(t, true, ok)

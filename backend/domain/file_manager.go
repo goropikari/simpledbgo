@@ -4,9 +4,9 @@ package domain
 
 // FileManager is an interface of file manager.
 type FileManager interface {
-	CopyBlockToPage(*Block, *Page) error
-	CopyPageToBlock(*Page, *Block) error
+	CopyBlockToPage(Block, *Page) error
+	CopyPageToBlock(*Page, Block) error
 	BlockLength(FileName) (int32, error)
-	ExtendFile(FileName) (*Block, error)
+	ExtendFile(FileName) (Block, error)
 	BlockSize() BlockSize
 }

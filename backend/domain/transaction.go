@@ -22,7 +22,7 @@ type Transaction interface {
 	GetString(Block, int64) (string, error)
 	SetString(Block, int64, string, bool) error
 	BlockLength(FileName) (int32, error)
-	ExtendFile(FileName) (*Block, error)
+	ExtendFile(FileName) (Block, error)
 	BlockSize() BlockSize
 	// Available() int
 }

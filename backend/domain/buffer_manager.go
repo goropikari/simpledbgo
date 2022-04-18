@@ -7,5 +7,5 @@ type BufferManager interface {
 	Available() int
 	FlushAll(txnum TransactionNumber) error
 	Unpin(buf *Buffer)
-	Pin(*Block) (*Buffer, error)
+	Pin(Block) (*Buffer, error)
 }

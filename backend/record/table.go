@@ -140,7 +140,7 @@ func (ts *Table) Insert() error {
 			}
 		} else {
 			blk := ts.rp.Block()
-			blkNum := (&blk).Number()
+			blkNum := blk.Number()
 			err := ts.moveToBlock(blkNum + 1)
 			if err != nil {
 				return err
@@ -164,7 +164,7 @@ func (ts *Table) Delete() error {
 // moveToRecordID moves to the record id.
 func (ts *Table) moveToRecordID(rid RecordID) error {
 	ts.Close()
-	blk := *domain.NewBlock(ts.filename, ts.txn.BlockSize(), rid.BlockNumber())
+	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), rid.BlockNumber())
 	page, err := NewRecordPage(ts.txn, blk, ts.layout)
 	if err != nil {
 		return err
@@ -179,7 +179,7 @@ func (ts *Table) moveToRecordID(rid RecordID) error {
 func (ts *Table) RecordID() RecordID {
 	blk := ts.rp.Block()
 
-	return NewRecordID((&blk).Number(), ts.currentSlotID)
+	return NewRecordID(blk.Number(), ts.currentSlotID)
 }
 
 // HasField checks the existence of the field name.
@@ -205,7 +205,7 @@ func (ts *Table) HasNextSlot() (bool, error) {
 		}
 
 		blk := ts.rp.Block()
-		if err := ts.moveToBlock((&blk).Number() + 1); err != nil {
+		if err := ts.moveToBlock(blk.Number() + 1); err != nil {
 			return false, err
 		}
 
@@ -242,7 +242,7 @@ func (ts *Table) moveToNewBlock() error {
 		return err
 	}
 
-	page, err := NewRecordPage(ts.txn, *blk, ts.layout)
+	page, err := NewRecordPage(ts.txn, blk, ts.layout)
 	if err != nil {
 		return err
 	}
@@ -267,7 +267,7 @@ func (ts *Table) BeforeFirst() error {
 func (ts *Table) moveToBlock(blkNum domain.BlockNumber) error {
 	ts.Close()
 	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), blkNum)
-	page, err := NewRecordPage(ts.txn, *blk, ts.layout)
+	page, err := NewRecordPage(ts.txn, blk, ts.layout)
 	if err != nil {
 		return err
 	}

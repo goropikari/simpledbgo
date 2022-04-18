@@ -64,10 +64,10 @@ func (mr *MockTransactionMockRecorder) BlockSize() *gomock.Call {
 }
 
 // ExtendFile mocks base method.
-func (m *MockTransaction) ExtendFile(arg0 domain.FileName) (*domain.Block, error) {
+func (m *MockTransaction) ExtendFile(arg0 domain.FileName) (domain.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExtendFile", arg0)
-	ret0, _ := ret[0].(*domain.Block)
+	ret0, _ := ret[0].(domain.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

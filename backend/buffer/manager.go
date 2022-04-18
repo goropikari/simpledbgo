@@ -104,7 +104,7 @@ type result struct {
 }
 
 // Pin pins buffer.
-func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
+func (mgr *Manager) Pin(block domain.Block) (*domain.Buffer, error) {
 	done := make(chan *result)
 
 	go mgr.pin(done, block)
@@ -116,7 +116,7 @@ func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {
 	}
 }
 
-func (mgr *Manager) pin(done chan *result, block *domain.Block) {
+func (mgr *Manager) pin(done chan *result, block domain.Block) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 	defer close(done)
@@ -142,7 +142,7 @@ func (mgr *Manager) pin(done chan *result, block *domain.Block) {
 }
 
 // tryToPin tries to pin the block to a buffer.
-func (mgr *Manager) tryToPin(block *domain.Block, chooseUnpinnedBuffer func([]*domain.Buffer) *domain.Buffer) (*domain.Buffer, error) {
+func (mgr *Manager) tryToPin(block domain.Block, chooseUnpinnedBuffer func([]*domain.Buffer) *domain.Buffer) (*domain.Buffer, error) {
 	buf := mgr.findExistingBuffer(block)
 	if buf == nil {
 		buf = chooseUnpinnedBuffer(mgr.bufferPool)
@@ -165,7 +165,7 @@ func (mgr *Manager) tryToPin(block *domain.Block, chooseUnpinnedBuffer func([]*d
 
 // findExistingBuffer returns the buffer whose block is same as given block.
 // If there is no such buffer, returns nil.
-func (mgr *Manager) findExistingBuffer(block *domain.Block) *domain.Buffer {
+func (mgr *Manager) findExistingBuffer(block domain.Block) *domain.Buffer {
 	for _, buf := range mgr.bufferPool {
 		if block.Equal(buf.Block()) {
 			return buf

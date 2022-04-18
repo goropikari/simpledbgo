@@ -16,7 +16,7 @@ func TestLockTable_Lock(t *testing.T) {
 	t.Run("RRW", func(t *testing.T) {
 		config := tx.NewConfig(1000)
 		lt := tx.NewLockTable(config)
-		blk := *domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
 
 		tryLock := make([]string, 0)
 		actualLock := make([]string, 0)
@@ -65,7 +65,7 @@ func TestLockTable_Lock(t *testing.T) {
 		// ref: https://pkg.go.dev/sync#RWMutex
 		config := tx.NewConfig(100)
 		lt := tx.NewLockTable(config)
-		blk := *domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
 		wg.Add(3)
@@ -104,7 +104,7 @@ func TestLockTable_Lock(t *testing.T) {
 	t.Run("RW timeout", func(t *testing.T) {
 		config := tx.NewConfig(10)
 		lt := tx.NewLockTable(config)
-		blk := *domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
 		wg.Add(2)
@@ -130,7 +130,7 @@ func TestLockTable_Lock(t *testing.T) {
 	t.Run("WR timeout", func(t *testing.T) {
 		config := tx.NewConfig(5)
 		lt := tx.NewLockTable(config)
-		blk := *domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockSize(10), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
 		wg.Add(2)

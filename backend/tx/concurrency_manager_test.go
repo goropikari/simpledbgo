@@ -13,9 +13,9 @@ func TestConcurrencyManager(t *testing.T) {
 		config := tx.NewConfig(100)
 		lt := tx.NewLockTable(config)
 
-		blk1 := *fake.Block()
-		blk2 := *fake.Block()
-		blk3 := *fake.Block()
+		blk1 := fake.Block()
+		blk2 := fake.Block()
+		blk3 := fake.Block()
 
 		mgr := tx.NewConcurrencyManager(lt)
 

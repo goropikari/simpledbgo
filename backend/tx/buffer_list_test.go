@@ -15,7 +15,7 @@ import (
 func TestBufferList_Pin(t *testing.T) {
 	tests := []struct {
 		name string
-		blk  *domain.Block
+		blk  domain.Block
 		buf  *domain.Buffer
 	}{
 		{
@@ -35,10 +35,10 @@ func TestBufferList_Pin(t *testing.T) {
 			bufMgr.EXPECT().Pin(gomock.Any()).Return(tt.buf, nil).AnyTimes()
 
 			bl := tx.NewBufferList(bufMgr)
-			err := bl.Pin(*tt.blk)
+			err := bl.Pin(tt.blk)
 			require.NoError(t, err)
 
-			buf := bl.GetBuffer(*tt.blk)
+			buf := bl.GetBuffer(tt.blk)
 			require.Equal(t, tt.buf, buf)
 		})
 	}
@@ -47,7 +47,7 @@ func TestBufferList_Pin(t *testing.T) {
 func TestBufferList_Pin_Error(t *testing.T) {
 	tests := []struct {
 		name string
-		blk  *domain.Block
+		blk  domain.Block
 		err  error
 	}{
 		{
@@ -67,7 +67,7 @@ func TestBufferList_Pin_Error(t *testing.T) {
 			bufMgr.EXPECT().Pin(gomock.Any()).Return(nil, tt.err).AnyTimes()
 
 			bl := tx.NewBufferList(bufMgr)
-			err := bl.Pin(*tt.blk)
+			err := bl.Pin(tt.blk)
 			require.Error(t, err)
 		})
 	}
@@ -76,7 +76,7 @@ func TestBufferList_Pin_Error(t *testing.T) {
 func TestBufferList_Unpin(t *testing.T) {
 	tests := []struct {
 		name string
-		blk  *domain.Block
+		blk  domain.Block
 		buf  *domain.Buffer
 	}{
 		{
@@ -99,14 +99,14 @@ func TestBufferList_Unpin(t *testing.T) {
 			bl := tx.NewBufferList(bufMgr)
 
 			var err error
-			err = bl.Pin(*tt.blk)
+			err = bl.Pin(tt.blk)
 			require.NoError(t, err)
-			err = bl.Pin(*tt.blk)
+			err = bl.Pin(tt.blk)
 			require.NoError(t, err)
 
-			bl.Unpin(*tt.blk)
+			bl.Unpin(tt.blk)
 			require.Equal(t, 1, bl.PinnedBlocks().Length())
-			bl.Unpin(*tt.blk)
+			bl.Unpin(tt.blk)
 			require.Equal(t, 0, bl.PinnedBlocks().Length())
 		})
 	}
@@ -115,7 +115,7 @@ func TestBufferList_Unpin(t *testing.T) {
 func TestBufferList_UnpinAll(t *testing.T) {
 	tests := []struct {
 		name string
-		blk  *domain.Block
+		blk  domain.Block
 		buf  *domain.Buffer
 	}{
 		{
@@ -138,9 +138,9 @@ func TestBufferList_UnpinAll(t *testing.T) {
 			bl := tx.NewBufferList(bufMgr)
 
 			var err error
-			err = bl.Pin(*tt.blk)
+			err = bl.Pin(tt.blk)
 			require.NoError(t, err)
-			err = bl.Pin(*tt.blk)
+			err = bl.Pin(tt.blk)
 			require.NoError(t, err)
 
 			require.Equal(t, 2, bl.PinnedBlocks().Length())

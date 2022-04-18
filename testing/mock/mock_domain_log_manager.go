@@ -35,10 +35,10 @@ func (m *MockLogManager) EXPECT() *MockLogManagerMockRecorder {
 }
 
 // AppendNewBlock mocks base method.
-func (m *MockLogManager) AppendNewBlock() (*domain.Block, error) {
+func (m *MockLogManager) AppendNewBlock() (domain.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AppendNewBlock")
-	ret0, _ := ret[0].(*domain.Block)
+	ret0, _ := ret[0].(domain.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

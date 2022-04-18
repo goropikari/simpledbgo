@@ -45,10 +45,10 @@ type Block struct {
 }
 
 // NewBlock is a constructor of Block.
-func NewBlock(filename FileName, size BlockSize, number BlockNumber) *Block {
+func NewBlock(filename FileName, size BlockSize, number BlockNumber) Block {
 	offset := int64(size) * int64(number)
 
-	return &Block{
+	return Block{
 		filename: filename,
 		size:     size,
 		number:   number,
@@ -57,8 +57,8 @@ func NewBlock(filename FileName, size BlockSize, number BlockNumber) *Block {
 }
 
 // NewDummyBlock constructs a dummy Block.
-func NewDummyBlock(filename FileName) *Block {
-	return &Block{
+func NewDummyBlock(filename FileName) Block {
+	return Block{
 		filename: filename,
 		size:     0,
 		number:   0,
@@ -66,31 +66,32 @@ func NewDummyBlock(filename FileName) *Block {
 	}
 }
 
-// Equal compares equality of two blocks.
-func (b *Block) Equal(other *Block) bool {
-	if b == nil || other == nil {
-		return false
-	}
+// NewZeroBlock is constructor of zero value Block.
+func NewZeroBlock() Block {
+	return Block{}
+}
 
-	return b.filename == other.filename && b.number == other.number
+// Equal compares equality of two blocks.
+func (b Block) Equal(other Block) bool {
+	return b == other
 }
 
 // FileName returns corresponding file name.
-func (b *Block) FileName() FileName {
+func (b Block) FileName() FileName {
 	return b.filename
 }
 
 // Size returns block size.
-func (b *Block) Size() BlockSize {
+func (b Block) Size() BlockSize {
 	return b.size
 }
 
 // Number returns block number.
-func (b *Block) Number() BlockNumber {
+func (b Block) Number() BlockNumber {
 	return b.number
 }
 
 // Offset returns file's corresponding offset.
-func (b *Block) Offset() int64 {
+func (b Block) Offset() int64 {
 	return b.offset
 }

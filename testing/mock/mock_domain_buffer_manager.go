@@ -63,7 +63,7 @@ func (mr *MockBufferManagerMockRecorder) FlushAll(txnum interface{}) *gomock.Cal
 }
 
 // Pin mocks base method.
-func (m *MockBufferManager) Pin(arg0 *domain.Block) (*domain.Buffer, error) {
+func (m *MockBufferManager) Pin(arg0 domain.Block) (*domain.Buffer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Pin", arg0)
 	ret0, _ := ret[0].(*domain.Buffer)

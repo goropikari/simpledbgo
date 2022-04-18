@@ -5,7 +5,7 @@ import (
 	"github.com/goropikari/simpledbgo/lib/list"
 )
 
-func (list *BufferList) PinnedBlocks() list.List[*domain.Block] {
+func (list *BufferList) PinnedBlocks() list.List[domain.Block] {
 	return list.pinnedBlocks
 }
 

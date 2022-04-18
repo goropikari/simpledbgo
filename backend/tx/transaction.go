@@ -196,7 +196,7 @@ func (tx *Transaction) recover() error {
 
 // UndoSetInt32 is behavior of SetInt32Record.
 func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
-	blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
+	blk := domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
 
 	if err := tx.Pin(blk); err != nil {
 		return err
@@ -213,7 +213,7 @@ func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
 
 // UndoSetString undoes SetStringRecord.
 func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {
-	blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
+	blk := domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)
 
 	if err := tx.Pin(blk); err != nil {
 		return err
@@ -258,7 +258,7 @@ func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, write
 			return err
 		}
 
-		lsn, err = tx.writeSetInt32Log(*buf.Block(), offset, oldval)
+		lsn, err = tx.writeSetInt32Log(buf.Block(), offset, oldval)
 		if err != nil {
 			return err
 		}
@@ -297,7 +297,7 @@ func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, wri
 		if err != nil {
 			return err
 		}
-		lsn, err = tx.writeSetStringLog(*buf.Block(), offset, oldval)
+		lsn, err = tx.writeSetStringLog(buf.Block(), offset, oldval)
 		if err != nil {
 			return err
 		}
@@ -388,7 +388,7 @@ func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRe
 
 // BlockLength returns block length of the `filename`.
 func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
-	dummyBlk := *domain.NewDummyBlock(filename)
+	dummyBlk := domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.SLock(dummyBlk); err != nil {
 		return 0, err
 	}
@@ -397,10 +397,10 @@ func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
 }
 
 // ExtendFile extends the file by a block.
-func (tx *Transaction) ExtendFile(filename domain.FileName) (*domain.Block, error) {
-	dummyBlk := *domain.NewDummyBlock(filename)
+func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {
+	dummyBlk := domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.XLock(dummyBlk); err != nil {
-		return nil, err
+		return domain.NewZeroBlock(), err
 	}
 
 	return tx.fileMgr.ExtendFile(filename)

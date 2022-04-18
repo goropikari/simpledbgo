@@ -2,7 +2,7 @@ package log
 
 import "github.com/goropikari/simpledbgo/backend/domain"
 
-func (mgr *Manager) CurrentBlock() *domain.Block {
+func (mgr *Manager) CurrentBlock() domain.Block {
 	return mgr.currentBlock
 }
 

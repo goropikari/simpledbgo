@@ -64,7 +64,7 @@ func (mr *MockFileManagerMockRecorder) BlockSize() *gomock.Call {
 }
 
 // CopyBlockToPage mocks base method.
-func (m *MockFileManager) CopyBlockToPage(arg0 *domain.Block, arg1 *domain.Page) error {
+func (m *MockFileManager) CopyBlockToPage(arg0 domain.Block, arg1 *domain.Page) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CopyBlockToPage", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -78,7 +78,7 @@ func (mr *MockFileManagerMockRecorder) CopyBlockToPage(arg0, arg1 interface{}) *
 }
 
 // CopyPageToBlock mocks base method.
-func (m *MockFileManager) CopyPageToBlock(arg0 *domain.Page, arg1 *domain.Block) error {
+func (m *MockFileManager) CopyPageToBlock(arg0 *domain.Page, arg1 domain.Block) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CopyPageToBlock", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -92,10 +92,10 @@ func (mr *MockFileManagerMockRecorder) CopyPageToBlock(arg0, arg1 interface{}) *
 }
 
 // ExtendFile mocks base method.
-func (m *MockFileManager) ExtendFile(arg0 domain.FileName) (*domain.Block, error) {
+func (m *MockFileManager) ExtendFile(arg0 domain.FileName) (domain.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExtendFile", arg0)
-	ret0, _ := ret[0].(*domain.Block)
+	ret0, _ := ret[0].(domain.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

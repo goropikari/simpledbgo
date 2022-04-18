@@ -8,7 +8,7 @@ import (
 // BufferList is list of buffer.
 type BufferList struct {
 	buffers      map[domain.Block]*domain.Buffer
-	pinnedBlocks ls.List[*domain.Block]
+	pinnedBlocks ls.List[domain.Block]
 	bufMgr       domain.BufferManager
 }
 
@@ -16,7 +16,7 @@ type BufferList struct {
 func NewBufferList(bufMgr domain.BufferManager) *BufferList {
 	return &BufferList{
 		buffers:      make(map[domain.Block]*domain.Buffer),
-		pinnedBlocks: ls.NewList[*domain.Block](),
+		pinnedBlocks: ls.NewList[domain.Block](),
 		bufMgr:       bufMgr,
 	}
 }
@@ -28,14 +28,14 @@ func (list *BufferList) GetBuffer(blk domain.Block) *domain.Buffer {
 
 // Pin pins a buffer.
 func (list *BufferList) Pin(blk domain.Block) error {
-	buf, err := list.bufMgr.Pin(&blk)
+	buf, err := list.bufMgr.Pin(blk)
 	if err != nil {
 		return err
 	}
 
 	list.buffers[blk] = buf
 
-	list.pinnedBlocks.Add(&blk)
+	list.pinnedBlocks.Add(blk)
 
 	return nil
 }
@@ -46,8 +46,8 @@ func (list *BufferList) Unpin(blk domain.Block) {
 
 	list.bufMgr.Unpin(buf)
 
-	list.pinnedBlocks.Remove(&blk)
-	if !list.pinnedBlocks.Contains(&blk) {
+	list.pinnedBlocks.Remove(blk)
+	if !list.pinnedBlocks.Contains(blk) {
 		delete(list.buffers, blk)
 	}
 }
@@ -55,10 +55,10 @@ func (list *BufferList) Unpin(blk domain.Block) {
 // UnpinAll unpins all of pinned buffer on this BufferList.
 func (list *BufferList) UnpinAll() {
 	for _, blk := range list.pinnedBlocks.Data() {
-		buf := list.buffers[*blk]
+		buf := list.buffers[blk]
 		list.bufMgr.Unpin(buf)
 	}
 
 	list.buffers = make(map[domain.Block]*domain.Buffer)
-	list.pinnedBlocks = ls.NewList[*domain.Block]()
+	list.pinnedBlocks = ls.NewList[domain.Block]()
 }

@@ -7,7 +7,7 @@ type LogManager interface {
 	FlushLSN(LSN) error
 	Flush() error
 	AppendRecord([]byte) (LSN, error)
-	AppendNewBlock() (*Block, error)
+	AppendNewBlock() (Block, error)
 	Iterator() (LogIterator, error)
 	LogFileName() FileName
 }
