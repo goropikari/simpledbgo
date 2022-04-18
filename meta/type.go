@@ -7,3 +7,9 @@ const (
 	// Uint32Length is byte length of uint32.
 	Uint32Length = 4
 )
+
+// Constant is constant type of database.
+type Constant struct {
+	I32val int32
+	Sval   string
+}

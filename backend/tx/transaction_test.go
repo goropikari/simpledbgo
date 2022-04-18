@@ -581,7 +581,7 @@ func TestTransaction_Size(t *testing.T) {
 		require.NoError(t, err)
 
 		logfile := logMgr.LogFileName()
-		size, err := txn.Size(logfile)
+		size, err := txn.BlockLength(logfile)
 		require.NoError(t, err)
 		require.Equal(t, int32(1), size)
 	})
@@ -611,14 +611,14 @@ func TestTransaction_ExtendFIle(t *testing.T) {
 		require.NoError(t, err)
 
 		logfile := logMgr.LogFileName()
-		size, err := txn.Size(logfile)
+		size, err := txn.BlockLength(logfile)
 		require.NoError(t, err)
 		require.Equal(t, int32(1), size)
 
 		_, err = txn.ExtendFile(logfile)
 		require.NoError(t, err)
 
-		size2, err := txn.Size(logfile)
+		size2, err := txn.BlockLength(logfile)
 		require.NoError(t, err)
 		require.Equal(t, int32(2), size2)
 	})

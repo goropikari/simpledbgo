@@ -11,7 +11,7 @@ import (
 type Layout struct {
 	schema   *Schema
 	offsets  map[FieldName]int64
-	slotsize int
+	slotsize int64
 }
 
 // NewLayout constructs Layout.
@@ -34,6 +34,10 @@ func NewLayout(schema *Schema) *Layout {
 	return &Layout{
 		schema:   schema,
 		offsets:  offsets,
-		slotsize: int(pos),
+		slotsize: pos,
 	}
+}
+
+func (layout *Layout) offset(fldname FieldName) int64 {
+	return layout.offsets[fldname]
 }

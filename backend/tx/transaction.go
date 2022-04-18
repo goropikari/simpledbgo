@@ -386,8 +386,8 @@ func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRe
 	return lsn, nil
 }
 
-// Size returns block length of the `filename`.
-func (tx *Transaction) Size(filename domain.FileName) (int32, error) {
+// BlockLength returns block length of the `filename`.
+func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
 	dummyBlk := *domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.SLock(dummyBlk); err != nil {
 		return 0, err

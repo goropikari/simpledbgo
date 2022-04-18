@@ -60,6 +60,13 @@ func NewSchema() *Schema {
 	}
 }
 
+// HasField checks existence of fldname.
+func (schema *Schema) HasField(fldname FieldName) bool {
+	_, found := schema.info[fldname]
+
+	return found
+}
+
 // AddField adds a field in to the schema.
 func (schema *Schema) AddField(fldname FieldName, typ FieldType, length int) {
 	schema.fields = append(schema.fields, fldname)

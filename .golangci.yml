@@ -8,6 +8,7 @@ linters-settings:
 linters:
   disable:
     - cyclop
+    - exhaustivestruct
     - godox
     - goerr113
     - golint
@@ -19,6 +20,7 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
+
   enable-all: true
 issues:
   exclude-use-default: false

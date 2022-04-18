@@ -15,7 +15,7 @@ func NewFieldInfo(typ FieldType, length int) *FieldInfo {
 	}
 }
 
-func NewLayoutByElement(schema *Schema, offsets map[FieldName]int64, slotsize int) *Layout {
+func NewLayoutByElement(schema *Schema, offsets map[FieldName]int64, slotsize int64) *Layout {
 	return &Layout{
 		schema:   schema,
 		offsets:  offsets,
