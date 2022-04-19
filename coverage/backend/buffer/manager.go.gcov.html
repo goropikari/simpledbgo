@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-16 17:05:57</td>
+            <td class="headerValue">2022-04-19 13:26:50</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -166,7 +166,7 @@
 <a name="104"><span class="lineNum">     104 </span>            : }</a>
 <a name="105"><span class="lineNum">     105 </span>            : </a>
 <a name="106"><span class="lineNum">     106 </span>            : // Pin pins buffer.</a>
-<a name="107"><span class="lineNum">     107 </span><span class="lineCov">          1 : func (mgr *Manager) Pin(block *domain.Block) (*domain.Buffer, error) {</span></a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineCov">          1 : func (mgr *Manager) Pin(block domain.Block) (*domain.Buffer, error) {</span></a>
 <a name="108"><span class="lineNum">     108 </span><span class="lineCov">          1 :         done := make(chan *result)</span></a>
 <a name="109"><span class="lineNum">     109 </span><span class="lineCov">          1 : </span></a>
 <a name="110"><span class="lineNum">     110 </span><span class="lineCov">          1 :         go mgr.pin(done, block)</span></a>
@@ -178,7 +178,7 @@
 <a name="116"><span class="lineNum">     116 </span>            :         }</a>
 <a name="117"><span class="lineNum">     117 </span>            : }</a>
 <a name="118"><span class="lineNum">     118 </span>            : </a>
-<a name="119"><span class="lineNum">     119 </span><span class="lineCov">          1 : func (mgr *Manager) pin(done chan *result, block *domain.Block) {</span></a>
+<a name="119"><span class="lineNum">     119 </span><span class="lineCov">          1 : func (mgr *Manager) pin(done chan *result, block domain.Block) {</span></a>
 <a name="120"><span class="lineNum">     120 </span><span class="lineCov">          1 :         mgr.mu.Lock()</span></a>
 <a name="121"><span class="lineNum">     121 </span><span class="lineCov">          1 :         defer mgr.mu.Unlock()</span></a>
 <a name="122"><span class="lineNum">     122 </span><span class="lineCov">          1 :         defer close(done)</span></a>
@@ -204,7 +204,7 @@
 <a name="142"><span class="lineNum">     142 </span>            : }</a>
 <a name="143"><span class="lineNum">     143 </span>            : </a>
 <a name="144"><span class="lineNum">     144 </span>            : // tryToPin tries to pin the block to a buffer.</a>
-<a name="145"><span class="lineNum">     145 </span><span class="lineCov">          1 : func (mgr *Manager) tryToPin(block *domain.Block, chooseUnpinnedBuffer func([]*domain.Buffer) *domain.Buffer) (*domain.Buffer, error) {</span></a>
+<a name="145"><span class="lineNum">     145 </span><span class="lineCov">          1 : func (mgr *Manager) tryToPin(block domain.Block, chooseUnpinnedBuffer func([]*domain.Buffer) *domain.Buffer) (*domain.Buffer, error) {</span></a>
 <a name="146"><span class="lineNum">     146 </span><span class="lineCov">          1 :         buf := mgr.findExistingBuffer(block)</span></a>
 <a name="147"><span class="lineNum">     147 </span><span class="lineCov">          2 :         if buf == nil {</span></a>
 <a name="148"><span class="lineNum">     148 </span><span class="lineCov">          1 :                 buf = chooseUnpinnedBuffer(mgr.bufferPool)</span></a>
@@ -227,7 +227,7 @@
 <a name="165"><span class="lineNum">     165 </span>            : </a>
 <a name="166"><span class="lineNum">     166 </span>            : // findExistingBuffer returns the buffer whose block is same as given block.</a>
 <a name="167"><span class="lineNum">     167 </span>            : // If there is no such buffer, returns nil.</a>
-<a name="168"><span class="lineNum">     168 </span><span class="lineCov">          1 : func (mgr *Manager) findExistingBuffer(block *domain.Block) *domain.Buffer {</span></a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineCov">          1 : func (mgr *Manager) findExistingBuffer(block domain.Block) *domain.Buffer {</span></a>
 <a name="169"><span class="lineNum">     169 </span><span class="lineCov">          2 :         for _, buf := range mgr.bufferPool {</span></a>
 <a name="170"><span class="lineNum">     170 </span><span class="lineCov">          1 :                 if block.Equal(buf.Block()) {</span></a>
 <a name="171"><span class="lineNum">     171 </span><span class="lineNoCov">          0 :                         return buf</span></a>

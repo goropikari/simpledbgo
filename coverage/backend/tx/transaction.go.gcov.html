@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-16 17:05:57</td>
+            <td class="headerValue">2022-04-19 13:26:50</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -258,7 +258,7 @@
 <a name="196"><span class="lineNum">     196 </span>            : </a>
 <a name="197"><span class="lineNum">     197 </span>            : // UndoSetInt32 is behavior of SetInt32Record.</a>
 <a name="198"><span class="lineNum">     198 </span><span class="lineCov">          1 : func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {</span></a>
-<a name="199"><span class="lineNum">     199 </span><span class="lineCov">          1 :         blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)</span></a>
+<a name="199"><span class="lineNum">     199 </span><span class="lineCov">          1 :         blk := domain.NewBlock(rec.FileName, rec.BlockNumber)</span></a>
 <a name="200"><span class="lineNum">     200 </span><span class="lineCov">          1 : </span></a>
 <a name="201"><span class="lineNum">     201 </span><span class="lineCov">          1 :         if err := tx.Pin(blk); err != nil {</span></a>
 <a name="202"><span class="lineNum">     202 </span><span class="lineNoCov">          0 :                 return err</span></a>
@@ -275,7 +275,7 @@
 <a name="213"><span class="lineNum">     213 </span>            : </a>
 <a name="214"><span class="lineNum">     214 </span>            : // UndoSetString undoes SetStringRecord.</a>
 <a name="215"><span class="lineNum">     215 </span><span class="lineCov">          1 : func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {</span></a>
-<a name="216"><span class="lineNum">     216 </span><span class="lineCov">          1 :         blk := *domain.NewBlock(rec.FileName, tx.fileMgr.BlockSize(), rec.BlockNumber)</span></a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineCov">          1 :         blk := domain.NewBlock(rec.FileName, rec.BlockNumber)</span></a>
 <a name="217"><span class="lineNum">     217 </span><span class="lineCov">          1 : </span></a>
 <a name="218"><span class="lineNum">     218 </span><span class="lineCov">          1 :         if err := tx.Pin(blk); err != nil {</span></a>
 <a name="219"><span class="lineNum">     219 </span><span class="lineNoCov">          0 :                 return err</span></a>
@@ -320,7 +320,7 @@
 <a name="258"><span class="lineNum">     258 </span><span class="lineNoCov">          0 :                         return err</span></a>
 <a name="259"><span class="lineNum">     259 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="260"><span class="lineNum">     260 </span>            : </a>
-<a name="261"><span class="lineNum">     261 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetInt32Log(*buf.Block(), offset, oldval)</span></a>
+<a name="261"><span class="lineNum">     261 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetInt32Log(buf.Block(), offset, oldval)</span></a>
 <a name="262"><span class="lineNum">     262 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
 <a name="263"><span class="lineNum">     263 </span><span class="lineNoCov">          0 :                         return err</span></a>
 <a name="264"><span class="lineNum">     264 </span><span class="lineNoCov">          0 :                 }</span></a>
@@ -359,7 +359,7 @@
 <a name="297"><span class="lineNum">     297 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
 <a name="298"><span class="lineNum">     298 </span><span class="lineNoCov">          0 :                         return err</span></a>
 <a name="299"><span class="lineNum">     299 </span><span class="lineNoCov">          0 :                 }</span></a>
-<a name="300"><span class="lineNum">     300 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetStringLog(*buf.Block(), offset, oldval)</span></a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetStringLog(buf.Block(), offset, oldval)</span></a>
 <a name="301"><span class="lineNum">     301 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
 <a name="302"><span class="lineNum">     302 </span><span class="lineNoCov">          0 :                         return err</span></a>
 <a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :                 }</span></a>
@@ -448,9 +448,9 @@
 <a name="386"><span class="lineNum">     386 </span><span class="lineCov">          1 :         return lsn, nil</span></a>
 <a name="387"><span class="lineNum">     387 </span>            : }</a>
 <a name="388"><span class="lineNum">     388 </span>            : </a>
-<a name="389"><span class="lineNum">     389 </span>            : // Size returns block length of the `filename`.</a>
-<a name="390"><span class="lineNum">     390 </span><span class="lineCov">          1 : func (tx *Transaction) Size(filename domain.FileName) (int32, error) {</span></a>
-<a name="391"><span class="lineNum">     391 </span><span class="lineCov">          1 :         dummyBlk := *domain.NewDummyBlock(filename)</span></a>
+<a name="389"><span class="lineNum">     389 </span>            : // BlockLength returns block length of the `filename`.</a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineCov">          1 : func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {</span></a>
+<a name="391"><span class="lineNum">     391 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
 <a name="392"><span class="lineNum">     392 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(dummyBlk); err != nil {</span></a>
 <a name="393"><span class="lineNum">     393 </span><span class="lineNoCov">          0 :                 return 0, err</span></a>
 <a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -459,10 +459,10 @@
 <a name="397"><span class="lineNum">     397 </span>            : }</a>
 <a name="398"><span class="lineNum">     398 </span>            : </a>
 <a name="399"><span class="lineNum">     399 </span>            : // ExtendFile extends the file by a block.</a>
-<a name="400"><span class="lineNum">     400 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (*domain.Block, error) {</span></a>
-<a name="401"><span class="lineNum">     401 </span><span class="lineCov">          1 :         dummyBlk := *domain.NewDummyBlock(filename)</span></a>
+<a name="400"><span class="lineNum">     400 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {</span></a>
+<a name="401"><span class="lineNum">     401 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
 <a name="402"><span class="lineNum">     402 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(dummyBlk); err != nil {</span></a>
-<a name="403"><span class="lineNum">     403 </span><span class="lineNoCov">          0 :                 return nil, err</span></a>
+<a name="403"><span class="lineNum">     403 </span><span class="lineNoCov">          0 :                 return domain.NewZeroBlock(), err</span></a>
 <a name="404"><span class="lineNum">     404 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="405"><span class="lineNum">     405 </span>            : </a>
 <a name="406"><span class="lineNum">     406 </span><span class="lineCov">          1 :         return tx.fileMgr.ExtendFile(filename)</span></a>
