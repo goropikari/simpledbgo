@@ -12,7 +12,7 @@ import (
 type Table struct {
 	txn           domain.Transaction
 	layout        *Layout
-	rp            *RecordPage
+	rp            *Page
 	filename      domain.FileName
 	currentSlotID SlotID
 }
@@ -120,8 +120,9 @@ func (ts *Table) SetVal(fldname FieldName, val meta.Constant) error {
 	return errors.New("failed to SetVal")
 }
 
-// Insert inserts a record to the table.
-func (ts *Table) Insert() error {
+// AdvanceNextInsertSlotID  advances current slot id to next to unused slot id.
+// If there is no unused record, append file block.
+func (ts *Table) AdvanceNextInsertSlotID() error {
 	slotID, err := ts.rp.InsertAfter(ts.currentSlotID)
 	if err != nil {
 		return err
@@ -129,7 +130,7 @@ func (ts *Table) Insert() error {
 	ts.currentSlotID = slotID
 
 	for ts.currentSlotID < 0 {
-		last, err := ts.atLastBlock()
+		last, err := ts.isAtLastBlock()
 		if err != nil {
 			return err
 		}
@@ -156,39 +157,39 @@ func (ts *Table) Insert() error {
 	return nil
 }
 
-// Delete deletes the slot.
+// Delete deletes the current slot logically.
 func (ts *Table) Delete() error {
 	return ts.rp.Delete(ts.currentSlotID)
 }
 
-// moveToRecordID moves to the record id.
-func (ts *Table) moveToRecordID(rid RecordID) error {
-	ts.Close()
-	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), rid.BlockNumber())
-	page, err := NewRecordPage(ts.txn, blk, ts.layout)
-	if err != nil {
-		return err
-	}
-	ts.rp = page
-	ts.currentSlotID = rid.SlotID()
+// // moveToRecordID moves to the record id.
+// func (ts *Table) moveToRecordID(rid RecordID) error {
+// 	ts.Close()
+// 	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), rid.BlockNumber())
+// 	page, err := NewPage(ts.txn, blk, ts.layout)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	ts.rp = page
+// 	ts.currentSlotID = rid.SlotID()
 
-	return nil
-}
+// 	return nil
+// }
 
-// RecordID is a identifier of record.
-func (ts *Table) RecordID() RecordID {
-	blk := ts.rp.Block()
+// // RecordID is a identifier of record.
+// func (ts *Table) RecordID() RecordID {
+// 	blk := ts.rp.Block()
 
-	return NewRecordID(blk.Number(), ts.currentSlotID)
-}
+// 	return NewRecordID(blk.Number(), ts.currentSlotID)
+// }
 
-// HasField checks the existence of the field name.
+// HasField checks the existence of the field.
 func (ts *Table) HasField(fldname FieldName) bool {
 	return ts.layout.schema.HasField(fldname)
 }
 
-// HasNextSlot checks the existence of next slot.
-func (ts *Table) HasNextSlot() (bool, error) {
+// HasNextUsedSlot checks the existence of next used slot.
+func (ts *Table) HasNextUsedSlot() (bool, error) {
 	currentSlotID, err := ts.rp.NextAfter(ts.currentSlotID)
 	if err != nil {
 		return false, err
@@ -196,7 +197,7 @@ func (ts *Table) HasNextSlot() (bool, error) {
 	ts.currentSlotID = currentSlotID
 
 	for ts.currentSlotID < 0 {
-		last, err := ts.atLastBlock()
+		last, err := ts.isAtLastBlock()
 		if err != nil {
 			return false, err
 		}
@@ -219,8 +220,8 @@ func (ts *Table) HasNextSlot() (bool, error) {
 	return true, nil
 }
 
-// atLastBlock checks whether the current block is last block or not.
-func (ts *Table) atLastBlock() (bool, error) {
+// isAtLastBlock checks whether the current block is last block or not.
+func (ts *Table) isAtLastBlock() (bool, error) {
 	blk := ts.rp.Block()
 	size, err := ts.txn.BlockLength(ts.filename)
 	if err != nil {
@@ -242,7 +243,7 @@ func (ts *Table) moveToNewBlock() error {
 		return err
 	}
 
-	page, err := NewRecordPage(ts.txn, blk, ts.layout)
+	page, err := NewPage(ts.txn, blk, ts.layout)
 	if err != nil {
 		return err
 	}
@@ -259,15 +260,15 @@ func (ts *Table) moveToNewBlock() error {
 	return nil
 }
 
-// BeforeFirst move to the first block of the table.
-func (ts *Table) BeforeFirst() error {
+// MoveToFirst move to the first block of the table.
+func (ts *Table) MoveToFirst() error {
 	return ts.moveToBlock(0)
 }
 
 func (ts *Table) moveToBlock(blkNum domain.BlockNumber) error {
 	ts.Close()
 	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), blkNum)
-	page, err := NewRecordPage(ts.txn, blk, ts.layout)
+	page, err := NewPage(ts.txn, blk, ts.layout)
 	if err != nil {
 		return err
 	}

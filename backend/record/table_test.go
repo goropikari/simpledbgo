@@ -39,7 +39,7 @@ func TestTable(t *testing.T) {
 		table, err := record.NewTable(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
-			err := table.Insert()
+			err := table.AdvanceNextInsertSlotID()
 			require.NoError(t, err)
 
 			n := int32(i)
@@ -64,11 +64,11 @@ func TestTable(t *testing.T) {
 		table2, err := record.NewTable(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
-		err = table2.BeforeFirst()
+		err = table2.MoveToFirst()
 		require.NoError(t, err)
 		actual2 := make([]string, 0)
 		for {
-			found, err := table2.HasNextSlot()
+			found, err := table2.HasNextUsedSlot()
 			require.NoError(t, err)
 			if !found {
 				break
@@ -105,11 +105,11 @@ func TestTable(t *testing.T) {
 		table3, err := record.NewTable(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
-		err = table3.BeforeFirst()
+		err = table3.MoveToFirst()
 		require.NoError(t, err)
 		actual3 := make([]string, 0)
 		for {
-			found, err := table3.HasNextSlot()
+			found, err := table3.HasNextUsedSlot()
 			require.NoError(t, err)
 			if !found {
 				break
@@ -161,7 +161,7 @@ func TestTable2(t *testing.T) {
 		table, err := record.NewTable(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
-			err := table.Insert()
+			err := table.AdvanceNextInsertSlotID()
 			require.NoError(t, err)
 
 			n := int32(i)
@@ -186,10 +186,10 @@ func TestTable2(t *testing.T) {
 		table2, err := record.NewTable(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
-		err = table2.BeforeFirst()
+		err = table2.MoveToFirst()
 		require.NoError(t, err)
 		for {
-			found, err := table2.HasNextSlot()
+			found, err := table2.HasNextUsedSlot()
 			require.NoError(t, err)
 			if !found {
 				break
@@ -216,10 +216,10 @@ func TestTable2(t *testing.T) {
 		table3, err := record.NewTable(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
-		err = table3.BeforeFirst()
+		err = table3.MoveToFirst()
 		require.NoError(t, err)
 
-		err = table3.Insert()
+		err = table3.AdvanceNextInsertSlotID()
 		require.NoError(t, err)
 
 		n := int32(100)
@@ -229,11 +229,11 @@ func TestTable2(t *testing.T) {
 		err = table3.SetString("B", fmt.Sprintf("rec%v", n))
 		require.NoError(t, err)
 
-		err = table3.BeforeFirst()
+		err = table3.MoveToFirst()
 		require.NoError(t, err)
 		actual3 := make([]string, 0)
 		for {
-			found, err := table3.HasNextSlot()
+			found, err := table3.HasNextUsedSlot()
 			require.NoError(t, err)
 			if !found {
 				break
