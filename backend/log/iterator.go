@@ -37,13 +37,13 @@ func NewIterator(fileMgr domain.FileManager, block domain.Block, page *domain.Pa
 
 // HasNext checks whether iterator has next items or not.
 func (iter *Iterator) HasNext() bool {
-	return iter.currentPos < int32(iter.block.Size()) || int32(iter.block.Number()) > 0
+	return iter.currentPos < int32(iter.fileMgr.BlockSize()) || int32(iter.block.Number()) > 0
 }
 
 // Next returns a next item.
 func (iter *Iterator) Next() ([]byte, error) {
-	if iter.currentPos == int32(iter.block.Size()) {
-		blk := domain.NewBlock(iter.block.FileName(), iter.block.Size(), iter.block.Number()-1)
+	if iter.currentPos == int32(iter.fileMgr.BlockSize()) {
+		blk := domain.NewBlock(iter.block.FileName(), iter.block.Number()-1)
 		err := iter.moveToBlock(blk)
 		if err != nil {
 			return nil, err

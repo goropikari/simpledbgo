@@ -48,14 +48,14 @@ func (mgr *Manager) CopyBlockToPage(blk domain.Block, page *domain.Page) error {
 		return errors.Wrap(err, "failed to open file")
 	}
 
-	_, err = file.Seek(blk.Offset())
+	_, err = file.Seek(mgr.offset(blk))
 	if err != nil {
 		return errors.Wrap(err, "failed to seek")
 	}
 
 	// file size が 0 のとき CopyN は EOF を返す。
 	// block size 分読んだことにしたいので EOF は無視する。
-	_, err = io.CopyN(page, file, int64(blk.Size()))
+	_, err = io.CopyN(page, file, int64(mgr.blockSize))
 	if err != nil && !errors.Is(err, io.EOF) {
 		return errors.Wrap(err, "failed to copy from file to page")
 	}
@@ -78,7 +78,7 @@ func (mgr *Manager) CopyPageToBlock(page *domain.Page, block domain.Block) error
 		return errors.Wrap(err, "failed to open file")
 	}
 
-	if _, err = file.Seek(block.Offset()); err != nil {
+	if _, err = file.Seek(mgr.offset(block)); err != nil {
 		return errors.Wrap(err, "failed to seek")
 	}
 
@@ -108,7 +108,7 @@ func (mgr *Manager) ExtendFile(filename domain.FileName) (domain.Block, error) {
 		return domain.NewZeroBlock(), errors.Wrap(err, "failed to constnruct BlockNumber")
 	}
 
-	blk := domain.NewBlock(filename, mgr.blockSize, numBlk)
+	blk := domain.NewBlock(filename, numBlk)
 
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
@@ -161,4 +161,8 @@ func (mgr *Manager) BlockSize() domain.BlockSize {
 // OpenFile opens a file.
 func (mgr *Manager) OpenFile(filename domain.FileName) (*domain.File, error) {
 	return mgr.explorer.OpenFile(filename)
+}
+
+func (mgr *Manager) offset(blk domain.Block) int64 {
+	return int64(mgr.blockSize) * int64(blk.Number())
 }

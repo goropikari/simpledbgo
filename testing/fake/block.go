@@ -15,5 +15,5 @@ func BlockSize() domain.BlockSize {
 }
 
 func Block() domain.Block {
-	return domain.NewBlock(FileName(), BlockSize(), BlockNumber())
+	return domain.NewBlock(FileName(), BlockNumber())
 }

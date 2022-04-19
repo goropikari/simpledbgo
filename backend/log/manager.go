@@ -87,7 +87,7 @@ func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fil
 		return domain.NewZeroBlock(), nil, err
 	}
 
-	blk := domain.NewBlock(fileName, fileMgr.BlockSize(), blknum)
+	blk := domain.NewBlock(fileName, blknum)
 
 	err = fileMgr.CopyBlockToPage(blk, page)
 	if err != nil {

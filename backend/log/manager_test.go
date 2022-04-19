@@ -16,11 +16,12 @@ import (
 )
 
 func TestManager_NewManager(t *testing.T) {
+	const size = 20
+
 	t.Run("valid request: initialize empty file", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
 		buf := make([]byte, size)
 		bsf := mock.NewMockByteSliceFactory(ctrl)
@@ -46,7 +47,6 @@ func TestManager_NewManager(t *testing.T) {
 
 	t.Run("valid request: initialize with 2 blocks file", func(t *testing.T) {
 		// make dummy file
-		const size = 20
 		logfile := "logfile_" + fake.RandString()
 		defer goos.Remove(logfile)
 		f, err := goos.OpenFile(logfile, goos.O_CREATE|goos.O_RDWR, goos.ModePerm)
@@ -83,11 +83,12 @@ func TestManager_NewManager(t *testing.T) {
 }
 
 func TestManager_Flush(t *testing.T) {
+	const size = 20
+
 	t.Run("flush", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
 		buf := make([]byte, size)
 		bsf := mock.NewMockByteSliceFactory(ctrl)
@@ -116,6 +117,8 @@ func TestManager_Flush(t *testing.T) {
 }
 
 func TestManager_FlushLSN(t *testing.T) {
+	const size = 20
+
 	var tests = []struct {
 		name   string
 		latest domain.LSN
@@ -142,7 +145,6 @@ func TestManager_FlushLSN(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			const size = 20
 			blockSize, _ := domain.NewBlockSize(size)
 			// bsf := bytes.NewByteSliceCreater()
 			buf := make([]byte, size)
@@ -180,6 +182,7 @@ func TestManager_FlushLSN(t *testing.T) {
 func TestManager_AppendRecord(t *testing.T) {
 	t.Run("append record", func(t *testing.T) {
 		const size = 15
+
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
@@ -195,6 +198,7 @@ func TestManager_AppendRecord(t *testing.T) {
 
 	t.Run("append record error: too long record", func(t *testing.T) {
 		const size = 10
+
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
@@ -206,8 +210,9 @@ func TestManager_AppendRecord(t *testing.T) {
 }
 
 func TestManager_AppendNewBlock(t *testing.T) {
+	const size = 20
+
 	t.Run("prepare from empty file", func(t *testing.T) {
-		const size = 20
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()
@@ -223,7 +228,6 @@ func TestManager_AppendNewBlock(t *testing.T) {
 	})
 
 	t.Run("prepare from exsting file", func(t *testing.T) {
-		const size = 20
 		blockSize, _ := domain.NewBlockSize(size)
 		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
@@ -253,7 +257,7 @@ func TestManager_AppendNewBlock(t *testing.T) {
 
 		blk0, err := logMgr.AppendNewBlock()
 		require.NoError(t, err)
-		expected0 := domain.NewBlock(logFileName, blockSize, domain.BlockNumber(2))
+		expected0 := domain.NewBlock(logFileName, domain.BlockNumber(2))
 		require.Equal(t, expected0, blk0)
 	})
 }

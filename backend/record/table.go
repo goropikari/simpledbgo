@@ -267,7 +267,7 @@ func (ts *Table) MoveToFirst() error {
 
 func (ts *Table) moveToBlock(blkNum domain.BlockNumber) error {
 	ts.Close()
-	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), blkNum)
+	blk := domain.NewBlock(ts.filename, blkNum)
 	page, err := NewPage(ts.txn, blk, ts.layout)
 	if err != nil {
 		return err

@@ -117,11 +117,7 @@ func TestTransaction_GetSetInt32(t *testing.T) {
 		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		blk := domain.NewBlock(
-			domain.FileName("table_"+fake.RandString()),
-			domain.BlockSize(blockSize),
-			domain.BlockNumber(0),
-		)
+		blk := domain.NewBlock(domain.FileName("table_"+fake.RandString()), domain.BlockNumber(0))
 
 		offset := int64(10)
 		val := int32(100)
@@ -194,11 +190,7 @@ func TestTransaction_GetSetString(t *testing.T) {
 		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		blk := domain.NewBlock(
-			domain.FileName("table_"+fake.RandString()),
-			domain.BlockSize(blockSize),
-			domain.BlockNumber(0),
-		)
+		blk := domain.NewBlock(domain.FileName("table_"+fake.RandString()), domain.BlockNumber(0))
 
 		offset := int64(10)
 		val1 := fake.RandString()
@@ -272,11 +264,7 @@ func TestTransaction_Rollback(t *testing.T) {
 		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		blk := domain.NewBlock(
-			domain.FileName("table_"+fake.RandString()),
-			domain.BlockSize(blockSize),
-			domain.BlockNumber(0),
-		)
+		blk := domain.NewBlock(domain.FileName("table_"+fake.RandString()), domain.BlockNumber(0))
 
 		offset := int64(10)
 		val := int32(100)
@@ -399,16 +387,8 @@ func TestTransaction_Recover(t *testing.T) {
 		gen := tx.NewNumberGenerator()
 
 		filename := "table_" + fake.RandString()
-		blk := domain.NewBlock(
-			domain.FileName(filename),
-			domain.BlockSize(blockSize),
-			domain.BlockNumber(0),
-		)
-		blk2 := domain.NewBlock(
-			domain.FileName(filename),
-			domain.BlockSize(blockSize),
-			domain.BlockNumber(1),
-		)
+		blk := domain.NewBlock(domain.FileName(filename), domain.BlockNumber(0))
+		blk2 := domain.NewBlock(domain.FileName(filename), domain.BlockNumber(1))
 
 		offset := int64(10)
 		val := int32(100)
@@ -647,7 +627,7 @@ func TestTransaction_Available(t *testing.T) {
 		nbuf := txn.Available()
 		require.Equal(t, numBuf, nbuf)
 
-		blk := domain.NewBlock(domain.FileName(fake.RandString()), blockSize, domain.BlockNumber(1))
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(1))
 		err = txn.Pin(blk)
 		require.NoError(t, err)
 

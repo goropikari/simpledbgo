@@ -39,20 +39,14 @@ func NewBlockSize(n int32) (BlockSize, error) {
 // Block is a model of block.
 type Block struct {
 	filename FileName
-	size     BlockSize
 	number   BlockNumber
-	offset   int64
 }
 
 // NewBlock is a constructor of Block.
-func NewBlock(filename FileName, size BlockSize, number BlockNumber) Block {
-	offset := int64(size) * int64(number)
-
+func NewBlock(filename FileName, number BlockNumber) Block {
 	return Block{
 		filename: filename,
-		size:     size,
 		number:   number,
-		offset:   offset,
 	}
 }
 
@@ -60,9 +54,7 @@ func NewBlock(filename FileName, size BlockSize, number BlockNumber) Block {
 func NewDummyBlock(filename FileName) Block {
 	return Block{
 		filename: filename,
-		size:     0,
 		number:   0,
-		offset:   0,
 	}
 }
 
@@ -81,17 +73,7 @@ func (b Block) FileName() FileName {
 	return b.filename
 }
 
-// Size returns block size.
-func (b Block) Size() BlockSize {
-	return b.size
-}
-
 // Number returns block number.
 func (b Block) Number() BlockNumber {
 	return b.number
-}
-
-// Offset returns file's corresponding offset.
-func (b Block) Offset() int64 {
-	return b.offset
 }

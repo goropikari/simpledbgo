@@ -69,7 +69,7 @@ func TestManager_CopyBlockToPage(t *testing.T) {
 		f.Write([]byte("hello"))
 		f.Seek(0)
 
-		blk := domain.NewBlock(f.Name(), domain.BlockSize(blocksize), domain.BlockNumber(0))
+		blk := domain.NewBlock(f.Name(), domain.BlockNumber(0))
 		page := domain.NewPage(bb)
 
 		config := file.ManagerConfig{BlockSize: int32(blocksize)}
@@ -83,6 +83,8 @@ func TestManager_CopyBlockToPage(t *testing.T) {
 }
 
 func TestManager_CopyBlockToPage_Error(t *testing.T) {
+	const size = 10
+
 	t.Run("test CopyBlockToPage", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -92,7 +94,7 @@ func TestManager_CopyBlockToPage_Error(t *testing.T) {
 
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 
-		config := file.ManagerConfig{BlockSize: 10}
+		config := file.ManagerConfig{BlockSize: size}
 		mgr, err := file.NewManager(exp, bsf, config)
 		require.NoError(t, err)
 
@@ -129,7 +131,7 @@ func TestManager_CopyPageToBlock(t *testing.T) {
 		f.Write(buf)
 		f.Seek(0)
 
-		blk := domain.NewBlock(f.Name(), domain.BlockSize(blocksize), domain.BlockNumber(0))
+		blk := domain.NewBlock(f.Name(), domain.BlockNumber(0))
 
 		config := file.ManagerConfig{BlockSize: int32(blocksize)}
 		mgr, err := file.NewManager(exp, bsf, config)

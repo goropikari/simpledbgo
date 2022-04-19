@@ -23,8 +23,9 @@ func TestBuffer_NewBuffer(t *testing.T) {
 	fileMgr := mock.NewMockFileManager(ctrl)
 	logMgr := mock.NewMockLogManager(ctrl)
 
+	const size = 10
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 10
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
@@ -34,7 +35,6 @@ func TestBuffer_NewBuffer(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		const size = 10
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 		bsf.EXPECT().Create(gomock.Any()).Return(nil, errors.New("unexpected error"))
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
@@ -51,8 +51,9 @@ func TestBuffer_Block(t *testing.T) {
 	fileMgr := mock.NewMockFileManager(ctrl)
 	logMgr := mock.NewMockLogManager(ctrl)
 
+	const size = 10
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 10
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
@@ -70,8 +71,9 @@ func TestBuffer_SetModifiedTxNumber(t *testing.T) {
 	fileMgr := mock.NewMockFileManager(ctrl)
 	logMgr := mock.NewMockLogManager(ctrl)
 
+	const size = 10
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 10
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
@@ -95,8 +97,9 @@ func TestBuffer_PinUnpin(t *testing.T) {
 	fileMgr := mock.NewMockFileManager(ctrl)
 	logMgr := mock.NewMockLogManager(ctrl)
 
+	const size = 10
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 10
 		bsf := mock.NewMockByteSliceFactory(ctrl)
 		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
@@ -115,9 +118,11 @@ func TestBuffer_PinUnpin(t *testing.T) {
 }
 
 func TestBuffer_AssignToBlock(t *testing.T) {
+	const size = 10
+
 	t.Run("valid request", func(t *testing.T) {
 		dbPath := fake.RandString()
-		blockSize := int32(10)
+		blockSize := int32(size)
 		bsf := bytes.NewByteSliceCreater()
 		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(blockSize))
 
@@ -135,7 +140,7 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 		f.Write([]byte("hello"))
 		f.Close()
 
-		block := domain.NewBlock(domain.FileName(fileName), domain.BlockSize(blockSize), domain.BlockNumber(0))
+		block := domain.NewBlock(domain.FileName(fileName), domain.BlockNumber(0))
 		buf.AssignToBlock(block)
 		expected := make([]byte, blockSize)
 		copy(expected, []byte("hello"))
@@ -144,7 +149,7 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 
 	t.Run("valid request: flush lsn", func(t *testing.T) {
 		dbPath := fake.RandString()
-		blockSize := int32(10)
+		blockSize := int32(size)
 		factory := fake.NewNonDirectFileManagerFactory(dbPath, blockSize)
 		defer factory.Finish()
 		fileMgr := factory.Create()
@@ -158,7 +163,7 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 		require.NoError(t, err)
 
 		fileName := fake.RandString()
-		block := domain.NewBlock(domain.FileName(fileName), domain.BlockSize(blockSize), domain.BlockNumber(0))
+		block := domain.NewBlock(domain.FileName(fileName), domain.BlockNumber(0))
 
 		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
 		require.NoError(t, err)

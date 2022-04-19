@@ -13,8 +13,9 @@ import (
 )
 
 func TestIterator(t *testing.T) {
+	const size = 400
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 400
 		dbPath := fake.RandString()
 		logMgrFactory := fake.NewNonDirectLogManagerFactory(dbPath, size)
 		defer logMgrFactory.Finish()

@@ -14,8 +14,9 @@ import (
 )
 
 func TestBufferMgr_NewManager(t *testing.T) {
+	const size = 5
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 5
 		const numbuf = 3
 
 		ctrl := gomock.NewController(t)
@@ -34,7 +35,6 @@ func TestBufferMgr_NewManager(t *testing.T) {
 	})
 
 	t.Run("valid request", func(t *testing.T) {
-		const size = 5
 		const numbuf = 0
 
 		ctrl := gomock.NewController(t)
@@ -54,8 +54,9 @@ func TestBufferMgr_NewManager(t *testing.T) {
 }
 
 func TestBufferMgr_Available(t *testing.T) {
+	const size = 5
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 5
 		const numbuf = 3
 
 		ctrl := gomock.NewController(t)
@@ -77,8 +78,9 @@ func TestBufferMgr_Available(t *testing.T) {
 }
 
 func TestBufferMgr_Pin(t *testing.T) {
+	const size = 200
+
 	t.Run("valid request: without timeout", func(t *testing.T) {
-		const size = 200
 		const numbuf = 3
 		dbPath := "dbpath_" + fake.RandString()
 
@@ -103,7 +105,7 @@ func TestBufferMgr_Pin(t *testing.T) {
 		}
 
 		go func() {
-			block := domain.NewBlock(domain.FileName(filenames[0]), domain.BlockSize(size), domain.BlockNumber(0))
+			block := domain.NewBlock(domain.FileName(filenames[0]), domain.BlockNumber(0))
 			buf, err := bufMgr.Pin(block)
 			require.NoError(t, err)
 			time.Sleep(time.Millisecond * 15)
@@ -111,7 +113,7 @@ func TestBufferMgr_Pin(t *testing.T) {
 		}()
 
 		go func() {
-			block := domain.NewBlock(domain.FileName(filenames[1]), domain.BlockSize(size), domain.BlockNumber(0))
+			block := domain.NewBlock(domain.FileName(filenames[1]), domain.BlockNumber(0))
 			buf, err := bufMgr.Pin(block)
 			require.NoError(t, err)
 			time.Sleep(time.Millisecond * 20)
@@ -119,7 +121,7 @@ func TestBufferMgr_Pin(t *testing.T) {
 		}()
 
 		go func() {
-			block := domain.NewBlock(domain.FileName(filenames[2]), domain.BlockSize(size), domain.BlockNumber(0))
+			block := domain.NewBlock(domain.FileName(filenames[2]), domain.BlockNumber(0))
 			buf, err := bufMgr.Pin(block)
 			require.NoError(t, err)
 			time.Sleep(time.Millisecond * 20)
@@ -128,13 +130,12 @@ func TestBufferMgr_Pin(t *testing.T) {
 
 		// 先の goroutine よりも後で実行するために sleep
 		time.Sleep(time.Millisecond * 10)
-		block := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockSize(size), domain.BlockNumber(0))
+		block := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockNumber(0))
 		_, err = bufMgr.Pin(block)
 		require.NoError(t, err)
 	})
 
 	t.Run("valid request: with timeout", func(t *testing.T) {
-		const size = 200
 		const numbuf = 3
 		dbPath := "dbpath_" + fake.RandString()
 
@@ -159,19 +160,19 @@ func TestBufferMgr_Pin(t *testing.T) {
 		}
 
 		go func() {
-			block := domain.NewBlock(domain.FileName(filenames[0]), domain.BlockSize(size), domain.BlockNumber(0))
+			block := domain.NewBlock(domain.FileName(filenames[0]), domain.BlockNumber(0))
 			_, err := bufMgr.Pin(block)
 			require.NoError(t, err)
 		}()
 
 		go func() {
-			block := domain.NewBlock(domain.FileName(filenames[1]), domain.BlockSize(size), domain.BlockNumber(0))
+			block := domain.NewBlock(domain.FileName(filenames[1]), domain.BlockNumber(0))
 			_, err := bufMgr.Pin(block)
 			require.NoError(t, err)
 		}()
 
 		go func() {
-			block := domain.NewBlock(domain.FileName(filenames[2]), domain.BlockSize(size), domain.BlockNumber(0))
+			block := domain.NewBlock(domain.FileName(filenames[2]), domain.BlockNumber(0))
 			_, err := bufMgr.Pin(block)
 			require.NoError(t, err)
 		}()
@@ -179,15 +180,16 @@ func TestBufferMgr_Pin(t *testing.T) {
 		// 先の goroutine よりも後で実行するために sleep
 		time.Sleep(time.Millisecond * 10)
 		require.Equal(t, 0, bufMgr.Available())
-		block := domain.NewBlock(domain.FileName(filenames[3]), domain.BlockSize(size), domain.BlockNumber(0))
+		block := domain.NewBlock(domain.FileName(filenames[3]), domain.BlockNumber(0))
 		_, err = bufMgr.Pin(block)
 		require.EqualError(t, err, "timeout exceeded")
 	})
 }
 
 func TestBufferMgr_FlushAll(t *testing.T) {
+	const size = 200
+
 	t.Run("valid request", func(t *testing.T) {
-		const size = 200
 		const numbuf = 3
 		dbPath := "dbpath_" + fake.RandString()
 
@@ -206,12 +208,12 @@ func TestBufferMgr_FlushAll(t *testing.T) {
 		bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, config)
 		require.NoError(t, err)
 
-		block := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockSize(size), domain.BlockNumber(0))
+		block := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockNumber(0))
 		buf, err := bufMgr.Pin(block)
 		require.NoError(t, err)
 		buf.SetModifiedTxNumber(1, 1)
 
-		block2 := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockSize(size), domain.BlockNumber(0))
+		block2 := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockNumber(0))
 		buf2, err := bufMgr.Pin(block2)
 		require.NoError(t, err)
 		buf2.SetModifiedTxNumber(1, 2)
