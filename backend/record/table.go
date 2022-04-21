@@ -12,18 +12,18 @@ import (
 type Table struct {
 	txn           domain.Transaction
 	layout        *Layout
-	rp            *Page
+	page          *Page
 	filename      domain.FileName
 	currentSlotID SlotID
 }
 
 // NewTable constructs a Table.
 func NewTable(txn domain.Transaction, filename domain.FileName, layout *Layout) (*Table, error) {
-	ts := &Table{
+	tbl := &Table{
 		txn:           txn,
 		layout:        layout,
 		filename:      filename,
-		rp:            nil,
+		page:          nil,
 		currentSlotID: -1,
 	}
 
@@ -33,50 +33,50 @@ func NewTable(txn domain.Transaction, filename domain.FileName, layout *Layout) 
 	}
 
 	if blkLen == 0 {
-		err := ts.moveToNewBlock()
+		err := tbl.moveToNewBlock()
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		err := ts.moveToBlock(0)
+		err := tbl.moveToBlock(0)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return ts, nil
+	return tbl, nil
 }
 
 // Close closes the table.
-func (ts *Table) Close() {
-	if ts.rp != nil {
-		ts.txn.Unpin(ts.rp.Block())
+func (tbl *Table) Close() {
+	if tbl.page != nil {
+		tbl.txn.Unpin(tbl.page.Block())
 	}
 }
 
 // GetInt32 gets int32 from the table.
-func (ts *Table) GetInt32(fldname FieldName) (int32, error) {
-	return ts.rp.GetInt32(ts.currentSlotID, fldname)
+func (tbl *Table) GetInt32(fldname FieldName) (int32, error) {
+	return tbl.page.GetInt32(tbl.currentSlotID, fldname)
 }
 
 // GetString gets string from the table.
-func (ts *Table) GetString(fldname FieldName) (string, error) {
-	return ts.rp.GetString(ts.currentSlotID, fldname)
+func (tbl *Table) GetString(fldname FieldName) (string, error) {
+	return tbl.page.GetString(tbl.currentSlotID, fldname)
 }
 
 // GetVal gets value from the table.
-func (ts *Table) GetVal(fldname FieldName) (meta.Constant, error) {
-	typ := ts.layout.schema.typ(fldname)
+func (tbl *Table) GetVal(fldname FieldName) (meta.Constant, error) {
+	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
-	case Integer:
-		val, err := ts.GetInt32(fldname)
+	case Int32:
+		val, err := tbl.GetInt32(fldname)
 		if err != nil {
 			return meta.Constant{}, err
 		}
 
 		return meta.Constant{I32val: val}, nil
 	case String:
-		val, err := ts.GetString(fldname)
+		val, err := tbl.GetString(fldname)
 		if err != nil {
 			return meta.Constant{}, err
 		}
@@ -90,26 +90,26 @@ func (ts *Table) GetVal(fldname FieldName) (meta.Constant, error) {
 }
 
 // SetInt32 sets int32 to the table.
-func (ts *Table) SetInt32(fldname FieldName, val int32) error {
-	return ts.rp.SetInt32(ts.currentSlotID, fldname, val)
+func (tbl *Table) SetInt32(fldname FieldName, val int32) error {
+	return tbl.page.SetInt32(tbl.currentSlotID, fldname, val)
 }
 
 // SetString sets string to the table.
-func (ts *Table) SetString(fldname FieldName, val string) error {
-	return ts.rp.SetString(ts.currentSlotID, fldname, val)
+func (tbl *Table) SetString(fldname FieldName, val string) error {
+	return tbl.page.SetString(tbl.currentSlotID, fldname, val)
 }
 
 // SetVal sets value to the table.
-func (ts *Table) SetVal(fldname FieldName, val meta.Constant) error {
-	typ := ts.layout.schema.typ(fldname)
+func (tbl *Table) SetVal(fldname FieldName, val meta.Constant) error {
+	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
-	case Integer:
-		err := ts.SetInt32(fldname, val.I32val)
+	case Int32:
+		err := tbl.SetInt32(fldname, val.I32val)
 		if err != nil {
 			return err
 		}
 	case String:
-		err := ts.SetString(fldname, val.Sval)
+		err := tbl.SetString(fldname, val.Sval)
 		if err != nil {
 			return err
 		}
@@ -122,82 +122,82 @@ func (ts *Table) SetVal(fldname FieldName, val meta.Constant) error {
 
 // AdvanceNextInsertSlotID  advances current slot id to next to unused slot id.
 // If there is no unused record, append file block.
-func (ts *Table) AdvanceNextInsertSlotID() error {
-	slotID, err := ts.rp.InsertAfter(ts.currentSlotID)
+func (tbl *Table) AdvanceNextInsertSlotID() error {
+	slotID, err := tbl.page.InsertAfter(tbl.currentSlotID)
 	if err != nil {
 		return err
 	}
-	ts.currentSlotID = slotID
+	tbl.currentSlotID = slotID
 
-	for ts.currentSlotID < 0 {
-		last, err := ts.isAtLastBlock()
+	for tbl.currentSlotID < 0 {
+		last, err := tbl.isAtLastBlock()
 		if err != nil {
 			return err
 		}
 		if last {
-			err = ts.moveToNewBlock()
+			err = tbl.moveToNewBlock()
 			if err != nil {
 				return err
 			}
 		} else {
-			blk := ts.rp.Block()
+			blk := tbl.page.Block()
 			blkNum := blk.Number()
-			err := ts.moveToBlock(blkNum + 1)
+			err := tbl.moveToBlock(blkNum + 1)
 			if err != nil {
 				return err
 			}
 		}
-		slotID, err := ts.rp.InsertAfter(ts.currentSlotID)
+		slotID, err := tbl.page.InsertAfter(tbl.currentSlotID)
 		if err != nil {
 			return err
 		}
-		ts.currentSlotID = slotID
+		tbl.currentSlotID = slotID
 	}
 
 	return nil
 }
 
 // Delete deletes the current slot logically.
-func (ts *Table) Delete() error {
-	return ts.rp.Delete(ts.currentSlotID)
+func (tbl *Table) Delete() error {
+	return tbl.page.Delete(tbl.currentSlotID)
 }
 
 // // moveToRecordID moves to the record id.
-// func (ts *Table) moveToRecordID(rid RecordID) error {
-// 	ts.Close()
-// 	blk := domain.NewBlock(ts.filename, ts.txn.BlockSize(), rid.BlockNumber())
-// 	page, err := NewPage(ts.txn, blk, ts.layout)
+// func (tbl *Table) moveToRecordID(rid RecordID) error {
+// 	tbl.Close()
+// 	blk := domain.NewBlock(tbl.filename, tbl.txn.BlockSize(), rid.BlockNumber())
+// 	page, err := NewPage(tbl.txn, blk, tbl.layout)
 // 	if err != nil {
 // 		return err
 // 	}
-// 	ts.rp = page
-// 	ts.currentSlotID = rid.SlotID()
+// 	tbl.page = page
+// 	tbl.currentSlotID = rid.SlotID()
 
 // 	return nil
 // }
 
 // // RecordID is a identifier of record.
-// func (ts *Table) RecordID() RecordID {
-// 	blk := ts.rp.Block()
+// func (tbl *Table) RecordID() RecordID {
+// 	blk := tbl.page.Block()
 
-// 	return NewRecordID(blk.Number(), ts.currentSlotID)
+// 	return NewRecordID(blk.Number(), tbl.currentSlotID)
 // }
 
 // HasField checks the existence of the field.
-func (ts *Table) HasField(fldname FieldName) bool {
-	return ts.layout.schema.HasField(fldname)
+func (tbl *Table) HasField(fldname FieldName) bool {
+	return tbl.layout.schema.HasField(fldname)
 }
 
 // HasNextUsedSlot checks the existence of next used slot.
-func (ts *Table) HasNextUsedSlot() (bool, error) {
-	currentSlotID, err := ts.rp.NextAfter(ts.currentSlotID)
+func (tbl *Table) HasNextUsedSlot() (bool, error) {
+	currentSlotID, err := tbl.page.NextAfter(tbl.currentSlotID)
 	if err != nil {
 		return false, err
 	}
-	ts.currentSlotID = currentSlotID
+	tbl.currentSlotID = currentSlotID
 
-	for ts.currentSlotID < 0 {
-		last, err := ts.isAtLastBlock()
+	for tbl.currentSlotID < 0 {
+		last, err := tbl.isAtLastBlock()
 		if err != nil {
 			return false, err
 		}
@@ -205,25 +205,25 @@ func (ts *Table) HasNextUsedSlot() (bool, error) {
 			return false, nil
 		}
 
-		blk := ts.rp.Block()
-		if err := ts.moveToBlock(blk.Number() + 1); err != nil {
+		blk := tbl.page.Block()
+		if err := tbl.moveToBlock(blk.Number() + 1); err != nil {
 			return false, err
 		}
 
-		slotID, err := ts.rp.NextAfter(ts.currentSlotID)
+		slotID, err := tbl.page.NextAfter(tbl.currentSlotID)
 		if err != nil {
 			return false, err
 		}
-		ts.currentSlotID = slotID
+		tbl.currentSlotID = slotID
 	}
 
 	return true, nil
 }
 
 // isAtLastBlock checks whether the current block is last block or not.
-func (ts *Table) isAtLastBlock() (bool, error) {
-	blk := ts.rp.Block()
-	size, err := ts.txn.BlockLength(ts.filename)
+func (tbl *Table) isAtLastBlock() (bool, error) {
+	blk := tbl.page.Block()
+	size, err := tbl.txn.BlockLength(tbl.filename)
 	if err != nil {
 		return false, err
 	}
@@ -236,45 +236,45 @@ func (ts *Table) isAtLastBlock() (bool, error) {
 	return blk.Number() == blkNum, nil
 }
 
-func (ts *Table) moveToNewBlock() error {
-	ts.Close()
-	blk, err := ts.txn.ExtendFile(ts.filename)
+func (tbl *Table) moveToNewBlock() error {
+	tbl.Close()
+	blk, err := tbl.txn.ExtendFile(tbl.filename)
 	if err != nil {
 		return err
 	}
 
-	page, err := NewPage(ts.txn, blk, ts.layout)
+	page, err := NewPage(tbl.txn, blk, tbl.layout)
 	if err != nil {
 		return err
 	}
 
-	ts.rp = page
+	tbl.page = page
 
-	err = ts.rp.Format()
+	err = tbl.page.Format()
 	if err != nil {
 		return err
 	}
 
-	ts.currentSlotID = -1
+	tbl.currentSlotID = -1
 
 	return nil
 }
 
 // MoveToFirst move to the first block of the table.
-func (ts *Table) MoveToFirst() error {
-	return ts.moveToBlock(0)
+func (tbl *Table) MoveToFirst() error {
+	return tbl.moveToBlock(0)
 }
 
-func (ts *Table) moveToBlock(blkNum domain.BlockNumber) error {
-	ts.Close()
-	blk := domain.NewBlock(ts.filename, blkNum)
-	page, err := NewPage(ts.txn, blk, ts.layout)
+func (tbl *Table) moveToBlock(blkNum domain.BlockNumber) error {
+	tbl.Close()
+	blk := domain.NewBlock(tbl.filename, blkNum)
+	page, err := NewPage(tbl.txn, blk, tbl.layout)
 	if err != nil {
 		return err
 	}
 
-	ts.rp = page
-	ts.currentSlotID = -1
+	tbl.page = page
+	tbl.currentSlotID = -1
 
 	return nil
 }

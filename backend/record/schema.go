@@ -33,8 +33,8 @@ const (
 	// Unknown is unknown field type.
 	Unknown FieldType = iota
 
-	// Integer is integer field type.
-	Integer
+	// Int32 is integer field type.
+	Int32
 
 	// String is string field type.
 	String
@@ -76,9 +76,9 @@ func (schema *Schema) AddField(fldname FieldName, typ FieldType, length int) {
 	}
 }
 
-// AddIntField adds an int field.
-func (schema *Schema) AddIntField(fldname FieldName) {
-	schema.AddField(fldname, Integer, 0)
+// AddInt32Field adds an int field.
+func (schema *Schema) AddInt32Field(fldname FieldName) {
+	schema.AddField(fldname, Int32, 0)
 }
 
 // AddStringField adds an string field with maximum length is length.
@@ -89,9 +89,9 @@ func (schema *Schema) AddStringField(fldname FieldName, length int) {
 
 // Add adds other's field into the schema.
 func (schema *Schema) Add(fldname FieldName, other *Schema) {
-	typ := other.typ(fldname)
+	typ := other.Type(fldname)
 
-	length := other.length(fldname)
+	length := other.Length(fldname)
 
 	schema.AddField(fldname, typ, length)
 }
@@ -103,7 +103,13 @@ func (schema *Schema) AddAllFields(other *Schema) {
 	}
 }
 
-func (schema *Schema) typ(fldname FieldName) FieldType {
+// Fields returns schema fileds.
+func (sch *Schema) Fields() []FieldName {
+	return sch.fields
+}
+
+// Type returns field type.
+func (schema *Schema) Type(fldname FieldName) FieldType {
 	if v, found := schema.info[fldname]; found {
 		return v.typ
 	}
@@ -111,7 +117,8 @@ func (schema *Schema) typ(fldname FieldName) FieldType {
 	return Unknown
 }
 
-func (schema *Schema) length(fldname FieldName) int {
+// Length returns field byte length.
+func (schema *Schema) Length(fldname FieldName) int {
 	if v, found := schema.info[fldname]; found {
 		return v.length
 	}

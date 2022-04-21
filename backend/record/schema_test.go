@@ -13,7 +13,7 @@ func TestSchema_AddField(t *testing.T) {
 	intSch := record.NewSchema()
 	intSch.SetFields([]record.FieldName{fld1})
 	mp1 := make(map[record.FieldName]*record.FieldInfo)
-	mp1[fld1] = record.NewFieldInfo(record.Integer, 0)
+	mp1[fld1] = record.NewFieldInfo(record.Int32, 0)
 	intSch.SetInfo(mp1)
 
 	fld2 := record.FieldName(fake.RandString())
@@ -33,7 +33,7 @@ func TestSchema_AddField(t *testing.T) {
 		{
 			name:     "add int field",
 			fldname:  fld1,
-			typ:      record.Integer,
+			typ:      record.Int32,
 			expected: intSch,
 		},
 		{
@@ -59,7 +59,7 @@ func TestSchema_AddIntField(t *testing.T) {
 	intSch := record.NewSchema()
 	intSch.SetFields([]record.FieldName{fld1})
 	mp1 := make(map[record.FieldName]*record.FieldInfo)
-	mp1[fld1] = record.NewFieldInfo(record.Integer, 0)
+	mp1[fld1] = record.NewFieldInfo(record.Int32, 0)
 	intSch.SetInfo(mp1)
 
 	tests := []struct {
@@ -77,7 +77,7 @@ func TestSchema_AddIntField(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			sch := record.NewSchema()
-			sch.AddIntField(tt.fldname)
+			sch.AddInt32Field(tt.fldname)
 			require.Equal(t, tt.expected, sch)
 		})
 	}
@@ -121,7 +121,7 @@ func TestSchema_Add(t *testing.T) {
 	bsch.SetFields([]record.FieldName{fld1, fld2})
 	mp1 := make(map[record.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.String, 8)
-	mp1[fld2] = record.NewFieldInfo(record.Integer, 0)
+	mp1[fld2] = record.NewFieldInfo(record.Int32, 0)
 	bsch.SetInfo(mp1)
 
 	strSch := record.NewSchema()
@@ -132,7 +132,7 @@ func TestSchema_Add(t *testing.T) {
 
 	intSch := record.NewSchema()
 	mp3 := make(map[record.FieldName]*record.FieldInfo)
-	mp3[fld2] = record.NewFieldInfo(record.Integer, 0)
+	mp3[fld2] = record.NewFieldInfo(record.Int32, 0)
 	intSch.SetFields([]record.FieldName{fld2})
 	intSch.SetInfo(mp3)
 
@@ -172,7 +172,7 @@ func TestSchema_AddAllFields(t *testing.T) {
 	bsch.SetFields([]record.FieldName{fld1, fld2})
 	mp1 := make(map[record.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.String, 8)
-	mp1[fld2] = record.NewFieldInfo(record.Integer, 0)
+	mp1[fld2] = record.NewFieldInfo(record.Int32, 0)
 	bsch.SetInfo(mp1)
 
 	tests := []struct {

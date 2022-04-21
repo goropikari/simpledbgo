@@ -32,7 +32,7 @@ func TestTable(t *testing.T) {
 		require.NoError(t, err)
 
 		sch := record.NewSchema()
-		sch.AddIntField("A")
+		sch.AddInt32Field("A")
 		sch.AddStringField("B", 9)
 		layout := record.NewLayout(sch)
 
@@ -57,7 +57,7 @@ func TestTable(t *testing.T) {
 		require.NoError(t, err)
 
 		sch2 := record.NewSchema()
-		sch2.AddIntField("A")
+		sch2.AddInt32Field("A")
 		sch2.AddStringField("B", 9)
 		layout2 := record.NewLayout(sch2)
 
@@ -98,7 +98,7 @@ func TestTable(t *testing.T) {
 		require.NoError(t, err)
 
 		sch3 := record.NewSchema()
-		sch3.AddIntField("A")
+		sch3.AddInt32Field("A")
 		sch3.AddStringField("B", 9)
 		layout3 := record.NewLayout(sch3)
 
@@ -154,7 +154,7 @@ func TestTable2(t *testing.T) {
 		require.NoError(t, err)
 
 		sch := record.NewSchema()
-		sch.AddIntField("A")
+		sch.AddInt32Field("A")
 		sch.AddStringField("B", 9)
 		layout := record.NewLayout(sch)
 
@@ -179,7 +179,7 @@ func TestTable2(t *testing.T) {
 		require.NoError(t, err)
 
 		sch2 := record.NewSchema()
-		sch2.AddIntField("A")
+		sch2.AddInt32Field("A")
 		sch2.AddStringField("B", 9)
 		layout2 := record.NewLayout(sch2)
 
@@ -209,7 +209,7 @@ func TestTable2(t *testing.T) {
 		require.NoError(t, err)
 
 		sch3 := record.NewSchema()
-		sch3.AddIntField("A")
+		sch3.AddInt32Field("A")
 		sch3.AddStringField("B", 9)
 		layout3 := record.NewLayout(sch3)
 

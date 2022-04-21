@@ -21,11 +21,11 @@ func NewLayout(schema *Schema) *Layout {
 	for _, fld := range schema.fields {
 		offsets[fld] = pos
 
-		switch schema.typ(fld) {
-		case Integer:
+		switch schema.Type(fld) {
+		case Int32:
 			pos += meta.Int32Length
 		case String:
-			pos += meta.Int32Length + int64(schema.length(fld))
+			pos += meta.Int32Length + int64(schema.Length(fld))
 		case Unknown:
 			log.Fatal(errors.New("Invalid field type"))
 		}
@@ -38,6 +38,17 @@ func NewLayout(schema *Schema) *Layout {
 	}
 }
 
-func (layout *Layout) offset(fldname FieldName) int64 {
+// Schema returns schema.
+func (layout *Layout) Schema() *Schema {
+	return layout.schema
+}
+
+// Offset returns field offset.
+func (layout *Layout) Offset(fldname FieldName) int64 {
 	return layout.offsets[fldname]
+}
+
+// SlotSize returns record slot size.
+func (layout *Layout) SlotSize() int64 {
+	return layout.slotsize
 }

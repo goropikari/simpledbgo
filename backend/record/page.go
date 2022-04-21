@@ -42,28 +42,28 @@ func NewPage(txn domain.Transaction, blk domain.Block, layout *Layout) (*Page, e
 
 // GetInt32 gets int32 from the block.
 func (page *Page) GetInt32(slot SlotID, fldname FieldName) (int32, error) {
-	offset := page.offset(slot) + page.layout.offset(fldname)
+	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetInt32(page.blk, offset)
 }
 
 // SetInt32 sets int32 to the block.
 func (page *Page) SetInt32(slot SlotID, fldname FieldName, val int32) error {
-	offset := page.offset(slot) + page.layout.offset(fldname)
+	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetInt32(page.blk, offset, val, true)
 }
 
 // GetString gets string from the block.
 func (page *Page) GetString(slot SlotID, fldname FieldName) (string, error) {
-	offset := page.offset(slot) + page.layout.offset(fldname)
+	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetString(page.blk, offset)
 }
 
 // SetString sets the string from the block.
 func (page *Page) SetString(slot SlotID, fldname FieldName, val string) error {
-	offset := page.offset(slot) + page.layout.offset(fldname)
+	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetString(page.blk, offset, val, true)
 }
@@ -83,10 +83,10 @@ func (page *Page) Format() error {
 
 		sch := page.layout.schema
 		for _, fldname := range sch.fields {
-			typ := sch.typ(fldname)
-			fldpos := page.offset(slot) + page.layout.offset(fldname)
+			typ := sch.Type(fldname)
+			fldpos := page.offset(slot) + page.layout.Offset(fldname)
 			switch typ {
-			case Integer:
+			case Int32:
 				if err := page.txn.SetInt32(page.blk, fldpos, 0, false); err != nil {
 					return err
 				}

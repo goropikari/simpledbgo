@@ -10,7 +10,7 @@ import (
 func TestLayout(t *testing.T) {
 	t.Run("constructs Layout", func(t *testing.T) {
 		schema := record.NewSchema()
-		schema.AddField("hoge", record.Integer, 0)
+		schema.AddField("hoge", record.Int32, 0)
 		schema.AddField("piyo", record.String, 8)
 
 		layout := record.NewLayout(schema)
