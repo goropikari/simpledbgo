@@ -16,24 +16,26 @@ func TestTableManager(t *testing.T) {
 		numBuf    = 3
 	)
 
-	cr := fake.NewTransactionCreater(blockSize, numBuf)
-	defer cr.Finish()
-	txn := cr.NewTxn()
+	t.Run("test TableManager", func(t *testing.T) {
+		cr := fake.NewTransactionCreater(blockSize, numBuf)
+		defer cr.Finish()
+		txn := cr.NewTxn()
 
-	tblMgr, err := metadata.CreateTableCatalog(txn)
-	require.NoError(t, err)
+		tblMgr, err := metadata.CreateTableManager(txn)
+		require.NoError(t, err)
 
-	sch := record.NewSchema()
-	sch.AddInt32Field("A")
-	sch.AddStringField("B", 9)
+		sch := record.NewSchema()
+		sch.AddInt32Field("A")
+		sch.AddStringField("B", 9)
 
-	tblName := domain.FileName(fake.RandString())
-	err = tblMgr.CreateTable(tblName, sch, txn)
-	require.NoError(t, err)
+		tblName := domain.FileName(fake.RandString())
+		err = tblMgr.CreateTable(tblName, sch, txn)
+		require.NoError(t, err)
 
-	layout, err := tblMgr.GetTableLayout(tblName, txn)
-	require.NoError(t, err)
+		layout, err := tblMgr.GetTableLayout(tblName, txn)
+		require.NoError(t, err)
 
-	expected := record.NewLayout(sch)
-	require.Equal(t, expected, layout)
+		expected := record.NewLayout(sch)
+		require.Equal(t, expected, layout)
+	})
 }

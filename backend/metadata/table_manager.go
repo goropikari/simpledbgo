@@ -5,21 +5,6 @@ import (
 	"github.com/goropikari/simpledbgo/backend/record"
 )
 
-const (
-	maxTableNameLength = 64
-	maxFieldNameLength = 16
-
-	tableCatalog = "table_catalog"
-	fieldCatalog = "field_catalog"
-
-	fldTableName = "table_name"
-	fldFieldName = "field_name"
-	fldSlotSize  = "slot_size"
-	fldType      = "type"
-	fldLength    = "length"
-	fldOffset    = "offset"
-)
-
 // TableManager is manager of table.
 type TableManager struct {
 	tblCatalogLayout *record.Layout
@@ -47,8 +32,8 @@ func NewTableManager() *TableManager {
 	}
 }
 
-// CreateTableCatalog creates table catalog.
-func CreateTableCatalog(txn domain.Transaction) (*TableManager, error) {
+// CreateTableManager creates table manager and table catalog.
+func CreateTableManager(txn domain.Transaction) (*TableManager, error) {
 	tblMgr := NewTableManager()
 	if err := tblMgr.CreateTable(tableCatalog, tblMgr.tblCatalogLayout.Schema(), txn); err != nil {
 		return nil, err
