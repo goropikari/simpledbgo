@@ -143,7 +143,10 @@ func (page *Page) searchAfter(slot SlotID, flag SlotCondition) (SlotID, error) {
 }
 
 func (page *Page) isValidSlot(slot SlotID) bool {
-	return page.offset(slot+1) <= int64(page.txn.BlockSize())
+	off := page.offset(slot + 1)
+	x := int64(page.txn.BlockSize())
+
+	return off <= x
 }
 
 func (page *Page) setFlag(slot SlotID, flag SlotCondition) error {

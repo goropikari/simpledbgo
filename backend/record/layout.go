@@ -38,6 +38,15 @@ func NewLayout(schema *Schema) *Layout {
 	}
 }
 
+// NewLayoutWithFields constructs a Layout with fields.
+func NewLayoutWithFields(sch *Schema, offsets map[FieldName]int64, slotsize int64) *Layout {
+	return &Layout{
+		schema:   sch,
+		offsets:  offsets,
+		slotsize: slotsize,
+	}
+}
+
 // Schema returns schema.
 func (layout *Layout) Schema() *Schema {
 	return layout.schema

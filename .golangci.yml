@@ -9,6 +9,7 @@ linters:
   disable:
     - cyclop
     - exhaustivestruct
+    - funlen
     - godox
     - goerr113
     - golint
@@ -16,6 +17,7 @@ linters:
     - ireturn
     - lll
     - maligned
+    - nestif
     - scopelint
     - varnamelen
     - wrapcheck
