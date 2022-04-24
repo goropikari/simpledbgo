@@ -17,9 +17,6 @@ const (
 	Used
 )
 
-// SlotID is identifier of slot.
-type SlotID = int64
-
 // Page is a model of page.
 type Page struct {
 	txn    domain.Transaction
@@ -41,41 +38,41 @@ func NewPage(txn domain.Transaction, blk domain.Block, layout *Layout) (*Page, e
 }
 
 // GetInt32 gets int32 from the block.
-func (page *Page) GetInt32(slot SlotID, fldname FieldName) (int32, error) {
+func (page *Page) GetInt32(slot domain.SlotID, fldname FieldName) (int32, error) {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetInt32(page.blk, offset)
 }
 
 // SetInt32 sets int32 to the block.
-func (page *Page) SetInt32(slot SlotID, fldname FieldName, val int32) error {
+func (page *Page) SetInt32(slot domain.SlotID, fldname FieldName, val int32) error {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetInt32(page.blk, offset, val, true)
 }
 
 // GetString gets string from the block.
-func (page *Page) GetString(slot SlotID, fldname FieldName) (string, error) {
+func (page *Page) GetString(slot domain.SlotID, fldname FieldName) (string, error) {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetString(page.blk, offset)
 }
 
 // SetString sets the string from the block.
-func (page *Page) SetString(slot SlotID, fldname FieldName, val string) error {
+func (page *Page) SetString(slot domain.SlotID, fldname FieldName, val string) error {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetString(page.blk, offset, val, true)
 }
 
 // Delete deletes the slot.
-func (page *Page) Delete(slot SlotID) error {
+func (page *Page) Delete(slot domain.SlotID) error {
 	return page.setFlag(slot, Empty)
 }
 
 // Format formats blk.
 func (page *Page) Format() error {
-	slot := int64(0)
+	slot := domain.SlotID(0)
 	for page.isValidSlot(slot) {
 		if err := page.txn.SetInt32(page.blk, page.offset(slot), Empty, false); err != nil {
 			return err
@@ -105,12 +102,12 @@ func (page *Page) Format() error {
 }
 
 // NextAfter returns the slot id with Used flag after slot.
-func (page *Page) NextAfter(slot SlotID) (SlotID, error) {
+func (page *Page) NextAfter(slot domain.SlotID) (domain.SlotID, error) {
 	return page.searchAfter(slot, Used)
 }
 
 // InsertAfter searches the slot id after slot with Empty flag, set Used flag and returns its id.
-func (page *Page) InsertAfter(slot SlotID) (SlotID, error) {
+func (page *Page) InsertAfter(slot domain.SlotID) (domain.SlotID, error) {
 	newSlot, err := page.searchAfter(slot, Empty)
 	if err != nil {
 		return 0, err
@@ -126,7 +123,7 @@ func (page *Page) InsertAfter(slot SlotID) (SlotID, error) {
 }
 
 // searchAfter searches slot id with flag after slot.
-func (page *Page) searchAfter(slot SlotID, flag SlotCondition) (SlotID, error) {
+func (page *Page) searchAfter(slot domain.SlotID, flag SlotCondition) (domain.SlotID, error) {
 	slot++
 	for page.isValidSlot(slot) {
 		curFlag, err := page.txn.GetInt32(page.blk, page.offset(slot))
@@ -142,19 +139,19 @@ func (page *Page) searchAfter(slot SlotID, flag SlotCondition) (SlotID, error) {
 	return -1, nil
 }
 
-func (page *Page) isValidSlot(slot SlotID) bool {
+func (page *Page) isValidSlot(slot domain.SlotID) bool {
 	off := page.offset(slot + 1)
 	x := int64(page.txn.BlockSize())
 
 	return off <= x
 }
 
-func (page *Page) setFlag(slot SlotID, flag SlotCondition) error {
+func (page *Page) setFlag(slot domain.SlotID, flag SlotCondition) error {
 	return page.txn.SetInt32(page.blk, page.offset(slot), flag, true)
 }
 
-func (page *Page) offset(slot int64) int64 {
-	return slot * page.layout.slotsize
+func (page *Page) offset(slot domain.SlotID) int64 {
+	return int64(slot) * page.layout.slotsize
 }
 
 // Block returns page's block.

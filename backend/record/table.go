@@ -14,7 +14,7 @@ type Table struct {
 	layout        *Layout
 	page          *Page
 	filename      domain.FileName
-	currentSlotID SlotID
+	currentSlotID domain.SlotID
 }
 
 // NewTable constructs a Table.
