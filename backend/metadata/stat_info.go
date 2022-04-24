@@ -1,6 +1,6 @@
 package metadata
 
-import "github.com/goropikari/simpledbgo/backend/record"
+import "github.com/goropikari/simpledbgo/backend/domain"
 
 // StatInfo is a model of statistical infomation.
 type StatInfo struct {
@@ -27,6 +27,6 @@ func (info StatInfo) EstNumRecord() int {
 }
 
 // EstDistinctVals returns estimated the number of distinct values.
-func (info StatInfo) EstDistinctVals(fldname record.FieldName) int {
+func (info StatInfo) EstDistinctVals(fldname domain.FieldName) int {
 	return 1 + (info.numRecs / 3)
 }

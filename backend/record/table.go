@@ -55,17 +55,17 @@ func (tbl *Table) Close() {
 }
 
 // GetInt32 gets int32 from the table.
-func (tbl *Table) GetInt32(fldname FieldName) (int32, error) {
+func (tbl *Table) GetInt32(fldname domain.FieldName) (int32, error) {
 	return tbl.page.GetInt32(tbl.currentSlotID, fldname)
 }
 
 // GetString gets string from the table.
-func (tbl *Table) GetString(fldname FieldName) (string, error) {
+func (tbl *Table) GetString(fldname domain.FieldName) (string, error) {
 	return tbl.page.GetString(tbl.currentSlotID, fldname)
 }
 
 // GetVal gets value from the table.
-func (tbl *Table) GetVal(fldname FieldName) (meta.Constant, error) {
+func (tbl *Table) GetVal(fldname domain.FieldName) (meta.Constant, error) {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
 	case Int32:
@@ -90,17 +90,17 @@ func (tbl *Table) GetVal(fldname FieldName) (meta.Constant, error) {
 }
 
 // SetInt32 sets int32 to the table.
-func (tbl *Table) SetInt32(fldname FieldName, val int32) error {
+func (tbl *Table) SetInt32(fldname domain.FieldName, val int32) error {
 	return tbl.page.SetInt32(tbl.currentSlotID, fldname, val)
 }
 
 // SetString sets string to the table.
-func (tbl *Table) SetString(fldname FieldName, val string) error {
+func (tbl *Table) SetString(fldname domain.FieldName, val string) error {
 	return tbl.page.SetString(tbl.currentSlotID, fldname, val)
 }
 
 // SetVal sets value to the table.
-func (tbl *Table) SetVal(fldname FieldName, val meta.Constant) error {
+func (tbl *Table) SetVal(fldname domain.FieldName, val meta.Constant) error {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
 	case Int32:
@@ -184,7 +184,7 @@ func (tbl *Table) Delete() error {
 // }
 
 // HasField checks the existence of the field.
-func (tbl *Table) HasField(fldname FieldName) bool {
+func (tbl *Table) HasField(fldname domain.FieldName) bool {
 	return tbl.layout.schema.HasField(fldname)
 }
 

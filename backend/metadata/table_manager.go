@@ -14,8 +14,8 @@ type TableManager struct {
 // NewTableManager constructs TableManager.
 func NewTableManager() *TableManager {
 	tblCatalogSchema := record.NewSchema()
-	tblCatalogSchema.AddStringField(record.FieldName(fldTableName), maxTableNameLength)
-	tblCatalogSchema.AddInt32Field(record.FieldName(fldSlotSize))
+	tblCatalogSchema.AddStringField(domain.FieldName(fldTableName), maxTableNameLength)
+	tblCatalogSchema.AddInt32Field(domain.FieldName(fldSlotSize))
 	tblCatalogLayout := record.NewLayout(tblCatalogSchema)
 
 	fldCatalogSchema := record.NewSchema()
@@ -156,9 +156,9 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.FileName, txn domain.Tr
 	return slotsize, nil
 }
 
-func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Transaction) (*record.Schema, map[record.FieldName]int64, error) {
+func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Transaction) (*record.Schema, map[domain.FieldName]int64, error) {
 	sch := record.NewSchema()
-	offsets := make(map[record.FieldName]int64)
+	offsets := make(map[domain.FieldName]int64)
 	fcat, err := record.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
 		return nil, nil, err
@@ -196,7 +196,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Tran
 				return nil, nil, err
 			}
 
-			fldName, err := record.NewFieldName(fldNameStr)
+			fldName, err := domain.NewFieldName(fldNameStr)
 			if err != nil {
 				return nil, nil, err
 			}

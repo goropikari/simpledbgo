@@ -3,29 +3,30 @@ package record_test
 import (
 	"testing"
 
+	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/record"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSchema_AddField(t *testing.T) {
-	fld1 := record.FieldName(fake.RandString())
+	fld1 := domain.FieldName(fake.RandString())
 	intSch := record.NewSchema()
-	intSch.SetFields([]record.FieldName{fld1})
-	mp1 := make(map[record.FieldName]*record.FieldInfo)
+	intSch.SetFields([]domain.FieldName{fld1})
+	mp1 := make(map[domain.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.Int32, 0)
 	intSch.SetInfo(mp1)
 
-	fld2 := record.FieldName(fake.RandString())
+	fld2 := domain.FieldName(fake.RandString())
 	strSch := record.NewSchema()
-	strSch.SetFields([]record.FieldName{fld2})
-	mp2 := make(map[record.FieldName]*record.FieldInfo)
+	strSch.SetFields([]domain.FieldName{fld2})
+	mp2 := make(map[domain.FieldName]*record.FieldInfo)
 	mp2[fld2] = record.NewFieldInfo(record.String, 8)
 	strSch.SetInfo(mp2)
 
 	tests := []struct {
 		name     string
-		fldname  record.FieldName
+		fldname  domain.FieldName
 		typ      record.FieldType
 		length   int
 		expected *record.Schema
@@ -55,16 +56,16 @@ func TestSchema_AddField(t *testing.T) {
 }
 
 func TestSchema_AddIntField(t *testing.T) {
-	fld1 := record.FieldName(fake.RandString())
+	fld1 := domain.FieldName(fake.RandString())
 	intSch := record.NewSchema()
-	intSch.SetFields([]record.FieldName{fld1})
-	mp1 := make(map[record.FieldName]*record.FieldInfo)
+	intSch.SetFields([]domain.FieldName{fld1})
+	mp1 := make(map[domain.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.Int32, 0)
 	intSch.SetInfo(mp1)
 
 	tests := []struct {
 		name     string
-		fldname  record.FieldName
+		fldname  domain.FieldName
 		expected *record.Schema
 	}{
 		{
@@ -84,16 +85,16 @@ func TestSchema_AddIntField(t *testing.T) {
 }
 
 func TestSchema_AddStringField(t *testing.T) {
-	fld1 := record.FieldName(fake.RandString())
+	fld1 := domain.FieldName(fake.RandString())
 	strSch := record.NewSchema()
-	strSch.SetFields([]record.FieldName{fld1})
-	mp1 := make(map[record.FieldName]*record.FieldInfo)
+	strSch.SetFields([]domain.FieldName{fld1})
+	mp1 := make(map[domain.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.String, 8)
 	strSch.SetInfo(mp1)
 
 	tests := []struct {
 		name     string
-		fldname  record.FieldName
+		fldname  domain.FieldName
 		length   int
 		expected *record.Schema
 	}{
@@ -115,30 +116,30 @@ func TestSchema_AddStringField(t *testing.T) {
 }
 
 func TestSchema_Add(t *testing.T) {
-	fld1 := record.FieldName(fake.RandString())
-	fld2 := record.FieldName(fake.RandString())
+	fld1 := domain.FieldName(fake.RandString())
+	fld2 := domain.FieldName(fake.RandString())
 	bsch := record.NewSchema()
-	bsch.SetFields([]record.FieldName{fld1, fld2})
-	mp1 := make(map[record.FieldName]*record.FieldInfo)
+	bsch.SetFields([]domain.FieldName{fld1, fld2})
+	mp1 := make(map[domain.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.String, 8)
 	mp1[fld2] = record.NewFieldInfo(record.Int32, 0)
 	bsch.SetInfo(mp1)
 
 	strSch := record.NewSchema()
-	mp2 := make(map[record.FieldName]*record.FieldInfo)
+	mp2 := make(map[domain.FieldName]*record.FieldInfo)
 	mp2[fld1] = record.NewFieldInfo(record.String, 8)
-	strSch.SetFields([]record.FieldName{fld1})
+	strSch.SetFields([]domain.FieldName{fld1})
 	strSch.SetInfo(mp2)
 
 	intSch := record.NewSchema()
-	mp3 := make(map[record.FieldName]*record.FieldInfo)
+	mp3 := make(map[domain.FieldName]*record.FieldInfo)
 	mp3[fld2] = record.NewFieldInfo(record.Int32, 0)
-	intSch.SetFields([]record.FieldName{fld2})
+	intSch.SetFields([]domain.FieldName{fld2})
 	intSch.SetInfo(mp3)
 
 	tests := []struct {
 		name     string
-		fldname  record.FieldName
+		fldname  domain.FieldName
 		base     *record.Schema
 		expected *record.Schema
 	}{
@@ -166,11 +167,11 @@ func TestSchema_Add(t *testing.T) {
 }
 
 func TestSchema_AddAllFields(t *testing.T) {
-	fld1 := record.FieldName(fake.RandString())
-	fld2 := record.FieldName(fake.RandString())
+	fld1 := domain.FieldName(fake.RandString())
+	fld2 := domain.FieldName(fake.RandString())
 	bsch := record.NewSchema()
-	bsch.SetFields([]record.FieldName{fld1, fld2})
-	mp1 := make(map[record.FieldName]*record.FieldInfo)
+	bsch.SetFields([]domain.FieldName{fld1, fld2})
+	mp1 := make(map[domain.FieldName]*record.FieldInfo)
 	mp1[fld1] = record.NewFieldInfo(record.String, 8)
 	mp1[fld2] = record.NewFieldInfo(record.Int32, 0)
 	bsch.SetInfo(mp1)

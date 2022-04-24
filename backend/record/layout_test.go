@@ -3,6 +3,7 @@ package record_test
 import (
 	"testing"
 
+	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/record"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +16,7 @@ func TestLayout(t *testing.T) {
 
 		layout := record.NewLayout(schema)
 
-		mp := map[record.FieldName]int64{
+		mp := map[domain.FieldName]int64{
 			"hoge": 4,
 			"piyo": 8,
 		}

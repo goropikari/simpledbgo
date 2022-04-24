@@ -38,28 +38,28 @@ func NewPage(txn domain.Transaction, blk domain.Block, layout *Layout) (*Page, e
 }
 
 // GetInt32 gets int32 from the block.
-func (page *Page) GetInt32(slot domain.SlotID, fldname FieldName) (int32, error) {
+func (page *Page) GetInt32(slot domain.SlotID, fldname domain.FieldName) (int32, error) {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetInt32(page.blk, offset)
 }
 
 // SetInt32 sets int32 to the block.
-func (page *Page) SetInt32(slot domain.SlotID, fldname FieldName, val int32) error {
+func (page *Page) SetInt32(slot domain.SlotID, fldname domain.FieldName, val int32) error {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetInt32(page.blk, offset, val, true)
 }
 
 // GetString gets string from the block.
-func (page *Page) GetString(slot domain.SlotID, fldname FieldName) (string, error) {
+func (page *Page) GetString(slot domain.SlotID, fldname domain.FieldName) (string, error) {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetString(page.blk, offset)
 }
 
 // SetString sets the string from the block.
-func (page *Page) SetString(slot domain.SlotID, fldname FieldName, val string) error {
+func (page *Page) SetString(slot domain.SlotID, fldname domain.FieldName, val string) error {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetString(page.blk, offset, val, true)
