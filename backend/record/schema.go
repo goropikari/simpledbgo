@@ -5,10 +5,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	// ErrFieldNotFound is an error that means specified field is not found.
-	ErrFieldNotFound = errors.New("specified field is not found")
-)
+// ErrFieldNotFound is an error that means specified field is not found.
+var ErrFieldNotFound = errors.New("specified field is not found")
 
 // FieldType is a type of field.
 type FieldType uint

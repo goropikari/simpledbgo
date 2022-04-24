@@ -21,8 +21,8 @@ func NewViewManager(tblMgr *TableManager) *ViewManager {
 func CreateViewManager(tblMgr *TableManager, txn domain.Transaction) (*ViewManager, error) {
 	viewMgr := NewViewManager(tblMgr)
 	sch := record.NewSchema()
-	sch.AddStringField(fldViewName, maxTableNameLength)
-	sch.AddStringField(fldViewDef, maxViewDefLength)
+	sch.AddStringField(fldViewName, domain.MaxTableNameLength)
+	sch.AddStringField(fldViewDef, domain.MaxViewDefLength)
 	if err := tblMgr.CreateTable(fldViewCatalog, sch, txn); err != nil {
 		return nil, err
 	}

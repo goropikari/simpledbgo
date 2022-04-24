@@ -9,9 +9,6 @@ type (
 )
 
 const (
-	maxTableNameLength = 64
-	maxFieldNameLength = 16
-
 	tableCatalog = "table_catalog"
 	fieldCatalog = "field_catalog"
 
@@ -24,8 +21,6 @@ const (
 )
 
 const (
-	maxViewDefLength = 100
-
 	fldViewName    = "view_name"
 	fldViewDef     = "view_def"
 	fldViewCatalog = "view_catalog"

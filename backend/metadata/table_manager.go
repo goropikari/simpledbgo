@@ -14,13 +14,13 @@ type TableManager struct {
 // NewTableManager constructs TableManager.
 func NewTableManager() *TableManager {
 	tblCatalogSchema := record.NewSchema()
-	tblCatalogSchema.AddStringField(domain.FieldName(fldTableName), maxTableNameLength)
+	tblCatalogSchema.AddStringField(domain.FieldName(fldTableName), domain.MaxTableNameLength)
 	tblCatalogSchema.AddInt32Field(domain.FieldName(fldSlotSize))
 	tblCatalogLayout := record.NewLayout(tblCatalogSchema)
 
 	fldCatalogSchema := record.NewSchema()
-	fldCatalogSchema.AddStringField(fldTableName, maxTableNameLength)
-	fldCatalogSchema.AddStringField(fldFieldName, maxFieldNameLength)
+	fldCatalogSchema.AddStringField(fldTableName, domain.MaxTableNameLength)
+	fldCatalogSchema.AddStringField(fldFieldName, domain.MaxFieldNameLength)
 	fldCatalogSchema.AddInt32Field(fldType)
 	fldCatalogSchema.AddInt32Field(fldLength)
 	fldCatalogSchema.AddInt32Field(fldOffset)
