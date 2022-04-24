@@ -1,3 +1,5 @@
+SimpleDB に関するコードは SimpleDB 3.4 を元にしている。
+
 # Chapter 3: Disk and File Management
 ## Direct IO
 普通のファイル I/O では disk と memory 間の情報の読み書きでは、間に page cache というものが入る。
@@ -466,3 +468,65 @@ https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock#Priority_policies
 writer 優先ならばその心配はなさそうである。
 write の頻度が少なくて read の頻度が高いならば writer 優先にしても並列度への影響は
 少ないということでなるほどなぁと思った。
+
+
+### 謎の newval
+
+RecoveryMgr の `setInt`, `setString` で引数に newval というのがあるけど、実際の処理を見ると
+全く使っていない。
+`writeToLog` に渡している `oldval` を `newval` にするべきなのかと思ったがそういうわけでもない。
+ここでの `writeToLog` は rollback, recovery 用に出している log であるが、元に戻すときに
+必要な情報は新たに書き込んだ情報でなく、もともと何が書いてあったか？ということなので
+ここはログに古い値を残すことが正しい。そのためここを `oldval` を `newval` に置き換えると
+意味がわからないことになってしまう。
+
+Undo だけでなく Redo もするようになったら `newval` は必要だろうが、少なからず
+SimpleDB は redo はないのでここの `newval` は必要なさそう。
+演習問題を全く見てないのであれだが、もしかしたら演習問題として redo の実装があるのかもしれない。
+それを考慮してなら `newval` があることも納得できる。
+
+```java
+public int setInt(Buffer buff, int offset, int newval) {
+	int oldval = buff.contents().getInt(offset);
+	BlockId blk = buff.block();
+	return SetIntRecord.writeToLog(lm, txnum, blk, offset, oldval);
+}
+
+public int setString(Buffer buff, int offset, String newval) {
+	String oldval = buff.contents().getString(offset);
+	BlockId blk = buff.block();
+	return SetStringRecord.writeToLog(lm, txnum, blk, offset, oldval);
+}
+```
+
+# Chapter 6: Record Management
+
+今まで作ってきたものを組み合わせてレコードを挿入するところなので特段難しいところはない。
+しかし、元実装の変数名が何を表しているのかよくわからなかったので、Go 実装ではそのへんを
+リネームして実装した。
+
+また元実装だと record package を作っていたが、他の package から呼ばれることが多そうだったので
+Go 実装では domain package に置くようにした。
+
+# Chapter 7: Metadata Management
+
+`synchronized` がついている `getStatInfo`/`refreshStatistics` から同様に `synchronized` がついている
+`calcTableStats` を呼んでいるが、lock はインスタンス単位で取られるからこれだと
+`calcTableStats` がいつまでもつかえないのではないかと思った。
+しかし、どうやら nest した synchronized は許されるらしい。
+
+https://code-examples.net/en/q/464063
+
+
+```
+public synchronized StatInfo getStatInfo(String tblname,
+                              Layout layout, Transaction tx)
+private synchronized void refreshStatistics(Transaction tx)
+
+private synchronized StatInfo calcTableStats(String tblname,
+                              Layout layout, Transaction tx)
+```
+
+ただ `calcTableStats` は単体で呼び出されることはなく、常に `getStatInfo` または `refreshStatistics`
+からしか呼ばれないので、わざわざ `synchronized` をつける必要はなさそうである。
+Go で実装するときは `calcTableStats` 内で `mutex.Lock` を取る必要はなさそう。
