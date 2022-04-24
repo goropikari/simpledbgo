@@ -28,3 +28,6 @@ func NewFieldName(name string) (FieldName, error) {
 
 	return FieldName(name), nil
 }
+
+// TableName is value object of table name.
+type TableName string

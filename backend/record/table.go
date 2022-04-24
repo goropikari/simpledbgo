@@ -13,21 +13,21 @@ type Table struct {
 	txn           domain.Transaction
 	layout        *Layout
 	page          *Page
-	filename      domain.FileName
+	tblName       domain.TableName
 	currentSlotID domain.SlotID
 }
 
 // NewTable constructs a Table.
-func NewTable(txn domain.Transaction, filename domain.FileName, layout *Layout) (*Table, error) {
+func NewTable(txn domain.Transaction, tblName domain.TableName, layout *Layout) (*Table, error) {
 	tbl := &Table{
 		txn:           txn,
 		layout:        layout,
-		filename:      filename,
+		tblName:       tblName,
 		page:          nil,
 		currentSlotID: -1,
 	}
 
-	blkLen, err := txn.BlockLength(filename)
+	blkLen, err := txn.BlockLength(domain.FileName(tblName))
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (tbl *Table) Delete() error {
 // // moveToRecordID moves to the record id.
 // func (tbl *Table) moveToRecordID(rid RecordID) error {
 // 	tbl.Close()
-// 	blk := domain.NewBlock(tbl.filename, tbl.txn.BlockSize(), rid.BlockNumber())
+// 	blk := domain.NewBlock(tbl.tblName, tbl.txn.BlockSize(), rid.BlockNumber())
 // 	page, err := NewPage(tbl.txn, blk, tbl.layout)
 // 	if err != nil {
 // 		return err
@@ -223,7 +223,7 @@ func (tbl *Table) HasNextUsedSlot() (bool, error) {
 // isAtLastBlock checks whether the current block is last block or not.
 func (tbl *Table) isAtLastBlock() (bool, error) {
 	blk := tbl.page.Block()
-	size, err := tbl.txn.BlockLength(tbl.filename)
+	size, err := tbl.txn.BlockLength(domain.FileName(tbl.tblName))
 	if err != nil {
 		return false, err
 	}
@@ -238,7 +238,7 @@ func (tbl *Table) isAtLastBlock() (bool, error) {
 
 func (tbl *Table) moveToNewBlock() error {
 	tbl.Close()
-	blk, err := tbl.txn.ExtendFile(tbl.filename)
+	blk, err := tbl.txn.ExtendFile(domain.FileName(tbl.tblName))
 	if err != nil {
 		return err
 	}
@@ -267,7 +267,7 @@ func (tbl *Table) MoveToFirst() error {
 
 func (tbl *Table) moveToBlock(blkNum domain.BlockNumber) error {
 	tbl.Close()
-	blk := domain.NewBlock(tbl.filename, blkNum)
+	blk := domain.NewBlock(domain.FileName(tbl.tblName), blkNum)
 	page, err := NewPage(tbl.txn, blk, tbl.layout)
 	if err != nil {
 		return err
