@@ -175,12 +175,12 @@ func (tbl *Table) Delete() error {
 // 	return nil
 // }
 
-// // RecordID is a identifier of record.
-// func (tbl *Table) RecordID() RecordID {
-// 	blk := tbl.RecordPage.Block()
+// RecordID is a identifier of record.
+func (tbl *Table) RecordID() RecordID {
+	blk := tbl.RecordPage.Block()
 
-// 	return NewRecordID(blk.Number(), tbl.currentSlotID)
-// }
+	return NewRecordID(blk.Number(), tbl.currentSlotID)
+}
 
 // HasField checks the existence of the field.
 func (tbl *Table) HasField(fldname FieldName) bool {

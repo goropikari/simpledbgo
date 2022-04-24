@@ -14,7 +14,7 @@ const (
 type Transaction interface {
 	Pin(Block) error
 	Unpin(Block)
-	// Commit() error
+	Commit() error
 	// Rollback() error
 	// Recover() error
 	GetInt32(Block, int64) (int32, error)

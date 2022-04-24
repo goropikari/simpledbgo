@@ -25,3 +25,7 @@ const (
 	fldViewDef     = "view_def"
 	fldViewCatalog = "view_catalog"
 )
+
+const (
+	updateTimes = 100
+)

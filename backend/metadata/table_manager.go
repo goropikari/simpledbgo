@@ -55,7 +55,7 @@ func CreateTableManager(txn domain.Transaction) (*TableManager, error) {
 // }
 
 // CreateTable create a table.
-func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *domain.Schema, txn domain.Transaction) error {
+func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Schema, txn domain.Transaction) error {
 	layout := domain.NewLayout(sch)
 
 	// register table
@@ -67,7 +67,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *domain.Sch
 		return err
 	}
 
-	if err := tcat.SetString(fldTableName, tblName.String()); err != nil {
+	if err := tcat.SetString(fldTableName, tblName.ToString()); err != nil {
 		return err
 	}
 	if err := tcat.SetInt32(fldSlotSize, int32(layout.SlotSize())); err != nil {
@@ -85,7 +85,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *domain.Sch
 		if err := fcat.AdvanceNextInsertSlotID(); err != nil {
 			return err
 		}
-		if err := fcat.SetString(fldTableName, tblName.String()); err != nil {
+		if err := fcat.SetString(fldTableName, tblName.ToString()); err != nil {
 			return err
 		}
 		if err := fcat.SetString(fldFieldName, string(fld)); err != nil {
@@ -107,7 +107,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *domain.Sch
 }
 
 // GetTableLayout returns the layout of given table name.
-func (tblMgr *TableManager) GetTableLayout(tblName domain.FileName, txn domain.Transaction) (*domain.Layout, error) {
+func (tblMgr *TableManager) GetTableLayout(tblName domain.TableName, txn domain.Transaction) (*domain.Layout, error) {
 	slotsize, err := tblMgr.tableSlotSize(tblName, txn)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (tblMgr *TableManager) GetTableLayout(tblName domain.FileName, txn domain.T
 	return domain.NewLayoutWithFields(sch, offsets, int64(slotsize)), nil
 }
 
-func (tblMgr *TableManager) tableSlotSize(tblName domain.FileName, txn domain.Transaction) (int32, error) {
+func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.Transaction) (int32, error) {
 	slotsize := int32(-1)
 	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
@@ -142,7 +142,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.FileName, txn domain.Tr
 		if err != nil {
 			return -1, err
 		}
-		if v == tblName.String() {
+		if v == tblName.ToString() {
 			slotsize, err = tcat.GetInt32(fldSlotSize)
 			if err != nil {
 				return -1, err
@@ -155,7 +155,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.FileName, txn domain.Tr
 	return slotsize, nil
 }
 
-func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Transaction) (*domain.Schema, map[domain.FieldName]int64, error) {
+func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Transaction) (*domain.Schema, map[domain.FieldName]int64, error) {
 	sch := domain.NewSchema()
 	offsets := make(map[domain.FieldName]int64)
 	fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
@@ -177,7 +177,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Tran
 		if err != nil {
 			return nil, nil, err
 		}
-		if v == tblName.String() {
+		if v == tblName.ToString() {
 			fldNameStr, err := fcat.GetString(fldFieldName)
 			if err != nil {
 				return nil, nil, err

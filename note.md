@@ -510,9 +510,9 @@ Go 実装では domain package に置くようにした。
 
 # Chapter 7: Metadata Management
 
-`synchronized` がついている `getStatInfo`/`refreshStatistics` から同様に `synchronized` がついている
-`calcTableStats` を呼んでいるが、lock はインスタンス単位で取られるからこれだと
-`calcTableStats` がいつまでもつかえないのではないかと思った。
+`synchronized` がついている `getStatInfo` から同様に `synchronized` がついている
+`refreshStatistics`/`calcTableStats` を呼んでいるが、lock はインスタンス単位で取られるからこれだと
+`refreshStatistics`/`calcTableStats` がいつまでもつかえないのではないかと思った。
 しかし、どうやら nest した synchronized は許されるらしい。
 
 https://code-examples.net/en/q/464063
@@ -527,6 +527,6 @@ private synchronized StatInfo calcTableStats(String tblname,
                               Layout layout, Transaction tx)
 ```
 
-ただ `calcTableStats` は単体で呼び出されることはなく、常に `getStatInfo` または `refreshStatistics`
-からしか呼ばれないので、わざわざ `synchronized` をつける必要はなさそうである。
-Go で実装するときは `calcTableStats` 内で `mutex.Lock` を取る必要はなさそう。
+ただ `refreshStatistics`/`calcTableStats` は単体で呼び出されることはなく、常に `getStatInfo` またはコンストラクタからしか呼ばれないので
+わざわざ `synchronized` をつける必要はなさそうである。
+Go で実装するときは `refreshStatistics`/`calcTableStats` 内で `mutex.Lock` を取る必要はなさそう。

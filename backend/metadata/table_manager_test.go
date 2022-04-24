@@ -27,7 +27,7 @@ func TestTableManager(t *testing.T) {
 		sch.AddInt32Field("A")
 		sch.AddStringField("B", 9)
 
-		tblName := domain.FileName(fake.RandString())
+		tblName := domain.TableName(fake.RandString())
 		err = tblMgr.CreateTable(tblName, sch, txn)
 		require.NoError(t, err)
 

@@ -48,3 +48,13 @@ func NewTableName(name string) (TableName, error) {
 
 	return TableName(name), nil
 }
+
+// ToString stringfy name.
+func (name TableName) ToString() string {
+	return string(name)
+}
+
+// ToFileName converts TableName into FileName.
+func (name TableName) ToFileName() FileName {
+	return FileName(name)
+}

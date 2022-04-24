@@ -21,6 +21,7 @@ func NewLayout(schema *Schema) *Layout {
 	for _, fld := range schema.fields {
 		offsets[fld] = pos
 
+		// length in bytes
 		switch schema.Type(fld) {
 		case Int32:
 			pos += meta.Int32Length
