@@ -1,9 +1,8 @@
-package record
+package domain
 
 import (
 	"log"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/meta"
 	"github.com/pkg/errors"
 )
@@ -11,14 +10,14 @@ import (
 // Layout is model of layout.
 type Layout struct {
 	schema   *Schema
-	offsets  map[domain.FieldName]int64
+	offsets  map[FieldName]int64
 	slotsize int64
 }
 
 // NewLayout constructs Layout.
 func NewLayout(schema *Schema) *Layout {
 	pos := int64(meta.Int32Length) // flag for used/unused
-	offsets := make(map[domain.FieldName]int64)
+	offsets := make(map[FieldName]int64)
 	for _, fld := range schema.fields {
 		offsets[fld] = pos
 
@@ -40,7 +39,7 @@ func NewLayout(schema *Schema) *Layout {
 }
 
 // NewLayoutWithFields constructs a Layout with fields.
-func NewLayoutWithFields(sch *Schema, offsets map[domain.FieldName]int64, slotsize int64) *Layout {
+func NewLayoutWithFields(sch *Schema, offsets map[FieldName]int64, slotsize int64) *Layout {
 	return &Layout{
 		schema:   sch,
 		offsets:  offsets,
@@ -54,7 +53,7 @@ func (layout *Layout) Schema() *Schema {
 }
 
 // Offset returns field offset.
-func (layout *Layout) Offset(fldname domain.FieldName) int64 {
+func (layout *Layout) Offset(fldname FieldName) int64 {
 	return layout.offsets[fldname]
 }
 

@@ -1,4 +1,4 @@
-package record
+package domain
 
 // import "github.com/goropikari/simpledbgo/backend/domain"
 

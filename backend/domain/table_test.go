@@ -1,10 +1,10 @@
-package record_test
+package domain_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/backend/record"
+	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/tx"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
@@ -31,12 +31,12 @@ func TestTable(t *testing.T) {
 		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		sch := record.NewSchema()
+		sch := domain.NewSchema()
 		sch.AddInt32Field("A")
 		sch.AddStringField("B", 9)
-		layout := record.NewLayout(sch)
+		layout := domain.NewLayout(sch)
 
-		table, err := record.NewTable(txn, "T.tbl", layout)
+		table, err := domain.NewTable(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
 			err := table.AdvanceNextInsertSlotID()
@@ -56,12 +56,12 @@ func TestTable(t *testing.T) {
 		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		sch2 := record.NewSchema()
+		sch2 := domain.NewSchema()
 		sch2.AddInt32Field("A")
 		sch2.AddStringField("B", 9)
-		layout2 := record.NewLayout(sch2)
+		layout2 := domain.NewLayout(sch2)
 
-		table2, err := record.NewTable(txn2, "T.tbl", layout2)
+		table2, err := domain.NewTable(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
 		err = table2.MoveToFirst()
@@ -97,12 +97,12 @@ func TestTable(t *testing.T) {
 		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		sch3 := record.NewSchema()
+		sch3 := domain.NewSchema()
 		sch3.AddInt32Field("A")
 		sch3.AddStringField("B", 9)
-		layout3 := record.NewLayout(sch3)
+		layout3 := domain.NewLayout(sch3)
 
-		table3, err := record.NewTable(txn3, "T.tbl", layout3)
+		table3, err := domain.NewTable(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
 		err = table3.MoveToFirst()
@@ -153,12 +153,12 @@ func TestTable2(t *testing.T) {
 		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		sch := record.NewSchema()
+		sch := domain.NewSchema()
 		sch.AddInt32Field("A")
 		sch.AddStringField("B", 9)
-		layout := record.NewLayout(sch)
+		layout := domain.NewLayout(sch)
 
-		table, err := record.NewTable(txn, "T.tbl", layout)
+		table, err := domain.NewTable(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
 			err := table.AdvanceNextInsertSlotID()
@@ -178,12 +178,12 @@ func TestTable2(t *testing.T) {
 		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		sch2 := record.NewSchema()
+		sch2 := domain.NewSchema()
 		sch2.AddInt32Field("A")
 		sch2.AddStringField("B", 9)
-		layout2 := record.NewLayout(sch2)
+		layout2 := domain.NewLayout(sch2)
 
-		table2, err := record.NewTable(txn2, "T.tbl", layout2)
+		table2, err := domain.NewTable(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
 		err = table2.MoveToFirst()
@@ -208,12 +208,12 @@ func TestTable2(t *testing.T) {
 		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
 
-		sch3 := record.NewSchema()
+		sch3 := domain.NewSchema()
 		sch3.AddInt32Field("A")
 		sch3.AddStringField("B", 9)
-		layout3 := record.NewLayout(sch3)
+		layout3 := domain.NewLayout(sch3)
 
-		table3, err := record.NewTable(txn3, "T.tbl", layout3)
+		table3, err := domain.NewTable(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
 		err = table3.MoveToFirst()

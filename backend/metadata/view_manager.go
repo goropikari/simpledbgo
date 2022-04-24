@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"github.com/goropikari/simpledbgo/backend/domain"
-	"github.com/goropikari/simpledbgo/backend/record"
 )
 
 // ViewManager is manager of view.
@@ -20,7 +19,7 @@ func NewViewManager(tblMgr *TableManager) *ViewManager {
 // CreateViewManager creates a view manager and view catalog.
 func CreateViewManager(tblMgr *TableManager, txn domain.Transaction) (*ViewManager, error) {
 	viewMgr := NewViewManager(tblMgr)
-	sch := record.NewSchema()
+	sch := domain.NewSchema()
 	sch.AddStringField(fldViewName, domain.MaxTableNameLength)
 	sch.AddStringField(fldViewDef, domain.MaxViewDefLength)
 	if err := tblMgr.CreateTable(fldViewCatalog, sch, txn); err != nil {
@@ -37,7 +36,7 @@ func (viewMgr *ViewManager) CreateView(vName ViewName, vDef ViewDef, txn domain.
 		return err
 	}
 
-	tbl, err := record.NewTable(txn, fldViewCatalog, layout)
+	tbl, err := domain.NewTable(txn, fldViewCatalog, layout)
 	if err != nil {
 		return err
 	}
@@ -62,7 +61,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName ViewName, txn domain.Transaction
 		return "", err
 	}
 
-	tbl, err := record.NewTable(txn, fldViewCatalog, layout)
+	tbl, err := domain.NewTable(txn, fldViewCatalog, layout)
 	if err != nil {
 		return "", err
 	}

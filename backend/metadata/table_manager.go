@@ -2,29 +2,28 @@ package metadata
 
 import (
 	"github.com/goropikari/simpledbgo/backend/domain"
-	"github.com/goropikari/simpledbgo/backend/record"
 )
 
 // TableManager is manager of table.
 type TableManager struct {
-	tblCatalogLayout *record.Layout
-	fldCatalogLayout *record.Layout
+	tblCatalogLayout *domain.Layout
+	fldCatalogLayout *domain.Layout
 }
 
 // NewTableManager constructs TableManager.
 func NewTableManager() *TableManager {
-	tblCatalogSchema := record.NewSchema()
+	tblCatalogSchema := domain.NewSchema()
 	tblCatalogSchema.AddStringField(domain.FieldName(fldTableName), domain.MaxTableNameLength)
 	tblCatalogSchema.AddInt32Field(domain.FieldName(fldSlotSize))
-	tblCatalogLayout := record.NewLayout(tblCatalogSchema)
+	tblCatalogLayout := domain.NewLayout(tblCatalogSchema)
 
-	fldCatalogSchema := record.NewSchema()
+	fldCatalogSchema := domain.NewSchema()
 	fldCatalogSchema.AddStringField(fldTableName, domain.MaxTableNameLength)
 	fldCatalogSchema.AddStringField(fldFieldName, domain.MaxFieldNameLength)
 	fldCatalogSchema.AddInt32Field(fldType)
 	fldCatalogSchema.AddInt32Field(fldLength)
 	fldCatalogSchema.AddInt32Field(fldOffset)
-	fldCatalogLayout := record.NewLayout(fldCatalogSchema)
+	fldCatalogLayout := domain.NewLayout(fldCatalogSchema)
 
 	return &TableManager{
 		tblCatalogLayout: tblCatalogLayout,
@@ -46,21 +45,21 @@ func CreateTableManager(txn domain.Transaction) (*TableManager, error) {
 }
 
 // // TableCatalogLayout returns layout of table catalog.
-// func (tblMgr *TableManager) TableCatalogLayout() *record.Layout {
+// func (tblMgr *TableManager) TableCatalogLayout() *domain.Layout {
 // 	return tblMgr.tblCatalogLayout
 // }
 
 // // FieldCatalogLayout returns layout of field catalog.
-// func (tblMgr *TableManager) FieldCatalogLayout() *record.Layout {
+// func (tblMgr *TableManager) FieldCatalogLayout() *domain.Layout {
 // 	return tblMgr.fldCatalogLayout
 // }
 
 // CreateTable create a table.
-func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *record.Schema, txn domain.Transaction) error {
-	layout := record.NewLayout(sch)
+func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *domain.Schema, txn domain.Transaction) error {
+	layout := domain.NewLayout(sch)
 
 	// register table
-	tcat, err := record.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
+	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
 		return err
 	}
@@ -77,7 +76,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *record.Sch
 	tcat.Close()
 
 	// register fields
-	fcat, err := record.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
+	fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
 		return err
 	}
@@ -108,7 +107,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.FileName, sch *record.Sch
 }
 
 // GetTableLayout returns the layout of given table name.
-func (tblMgr *TableManager) GetTableLayout(tblName domain.FileName, txn domain.Transaction) (*record.Layout, error) {
+func (tblMgr *TableManager) GetTableLayout(tblName domain.FileName, txn domain.Transaction) (*domain.Layout, error) {
 	slotsize, err := tblMgr.tableSlotSize(tblName, txn)
 	if err != nil {
 		return nil, err
@@ -119,12 +118,12 @@ func (tblMgr *TableManager) GetTableLayout(tblName domain.FileName, txn domain.T
 		return nil, err
 	}
 
-	return record.NewLayoutWithFields(sch, offsets, int64(slotsize)), nil
+	return domain.NewLayoutWithFields(sch, offsets, int64(slotsize)), nil
 }
 
 func (tblMgr *TableManager) tableSlotSize(tblName domain.FileName, txn domain.Transaction) (int32, error) {
 	slotsize := int32(-1)
-	tcat, err := record.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
+	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
 		return -1, err
 	}
@@ -156,10 +155,10 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.FileName, txn domain.Tr
 	return slotsize, nil
 }
 
-func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Transaction) (*record.Schema, map[domain.FieldName]int64, error) {
-	sch := record.NewSchema()
+func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Transaction) (*domain.Schema, map[domain.FieldName]int64, error) {
+	sch := domain.NewSchema()
 	offsets := make(map[domain.FieldName]int64)
-	fcat, err := record.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
+	fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -202,7 +201,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.FileName, txn domain.Tran
 			}
 			offsets[fldName] = int64(offset)
 
-			fldType := record.FieldType(typ)
+			fldType := domain.FieldType(typ)
 			sch.AddField(fldName, fldType, int(length))
 		}
 	}

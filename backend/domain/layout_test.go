@@ -1,27 +1,26 @@
-package record_test
+package domain_test
 
 import (
 	"testing"
 
 	"github.com/goropikari/simpledbgo/backend/domain"
-	"github.com/goropikari/simpledbgo/backend/record"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLayout(t *testing.T) {
 	t.Run("constructs Layout", func(t *testing.T) {
-		schema := record.NewSchema()
-		schema.AddField("hoge", record.Int32, 0)
-		schema.AddField("piyo", record.String, 8)
+		schema := domain.NewSchema()
+		schema.AddField("hoge", domain.Int32, 0)
+		schema.AddField("piyo", domain.String, 8)
 
-		layout := record.NewLayout(schema)
+		layout := domain.NewLayout(schema)
 
 		mp := map[domain.FieldName]int64{
 			"hoge": 4,
 			"piyo": 8,
 		}
 
-		expected := record.NewLayoutByElement(schema, mp, 20)
+		expected := domain.NewLayoutByElement(schema, mp, 20)
 
 		require.Equal(t, expected, layout)
 	})

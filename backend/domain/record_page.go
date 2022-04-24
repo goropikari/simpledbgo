@@ -1,9 +1,8 @@
-package record
+package domain
 
 import (
 	"log"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/pkg/errors"
 )
 
@@ -17,20 +16,20 @@ const (
 	Used
 )
 
-// Page is a model of page.
-type Page struct {
-	txn    domain.Transaction
-	blk    domain.Block
+// RecordPage is a model of RecordPage.
+type RecordPage struct {
+	txn    Transaction
+	blk    Block
 	layout *Layout
 }
 
-// NewPage constructs a page.
-func NewPage(txn domain.Transaction, blk domain.Block, layout *Layout) (*Page, error) {
+// NewRecordPage constructs a RecordPage.
+func NewRecordPage(txn Transaction, blk Block, layout *Layout) (*RecordPage, error) {
 	if err := txn.Pin(blk); err != nil {
 		return nil, err
 	}
 
-	return &Page{
+	return &RecordPage{
 		txn:    txn,
 		blk:    blk,
 		layout: layout,
@@ -38,41 +37,41 @@ func NewPage(txn domain.Transaction, blk domain.Block, layout *Layout) (*Page, e
 }
 
 // GetInt32 gets int32 from the block.
-func (page *Page) GetInt32(slot domain.SlotID, fldname domain.FieldName) (int32, error) {
+func (page *RecordPage) GetInt32(slot SlotID, fldname FieldName) (int32, error) {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetInt32(page.blk, offset)
 }
 
 // SetInt32 sets int32 to the block.
-func (page *Page) SetInt32(slot domain.SlotID, fldname domain.FieldName, val int32) error {
+func (page *RecordPage) SetInt32(slot SlotID, fldname FieldName, val int32) error {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetInt32(page.blk, offset, val, true)
 }
 
 // GetString gets string from the block.
-func (page *Page) GetString(slot domain.SlotID, fldname domain.FieldName) (string, error) {
+func (page *RecordPage) GetString(slot SlotID, fldname FieldName) (string, error) {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.GetString(page.blk, offset)
 }
 
 // SetString sets the string from the block.
-func (page *Page) SetString(slot domain.SlotID, fldname domain.FieldName, val string) error {
+func (page *RecordPage) SetString(slot SlotID, fldname FieldName, val string) error {
 	offset := page.offset(slot) + page.layout.Offset(fldname)
 
 	return page.txn.SetString(page.blk, offset, val, true)
 }
 
 // Delete deletes the slot.
-func (page *Page) Delete(slot domain.SlotID) error {
+func (page *RecordPage) Delete(slot SlotID) error {
 	return page.setFlag(slot, Empty)
 }
 
 // Format formats blk.
-func (page *Page) Format() error {
-	slot := domain.SlotID(0)
+func (page *RecordPage) Format() error {
+	slot := SlotID(0)
 	for page.isValidSlot(slot) {
 		if err := page.txn.SetInt32(page.blk, page.offset(slot), Empty, false); err != nil {
 			return err
@@ -102,12 +101,12 @@ func (page *Page) Format() error {
 }
 
 // NextAfter returns the slot id with Used flag after slot.
-func (page *Page) NextAfter(slot domain.SlotID) (domain.SlotID, error) {
+func (page *RecordPage) NextAfter(slot SlotID) (SlotID, error) {
 	return page.searchAfter(slot, Used)
 }
 
 // InsertAfter searches the slot id after slot with Empty flag, set Used flag and returns its id.
-func (page *Page) InsertAfter(slot domain.SlotID) (domain.SlotID, error) {
+func (page *RecordPage) InsertAfter(slot SlotID) (SlotID, error) {
 	newSlot, err := page.searchAfter(slot, Empty)
 	if err != nil {
 		return 0, err
@@ -123,7 +122,7 @@ func (page *Page) InsertAfter(slot domain.SlotID) (domain.SlotID, error) {
 }
 
 // searchAfter searches slot id with flag after slot.
-func (page *Page) searchAfter(slot domain.SlotID, flag SlotCondition) (domain.SlotID, error) {
+func (page *RecordPage) searchAfter(slot SlotID, flag SlotCondition) (SlotID, error) {
 	slot++
 	for page.isValidSlot(slot) {
 		curFlag, err := page.txn.GetInt32(page.blk, page.offset(slot))
@@ -139,22 +138,22 @@ func (page *Page) searchAfter(slot domain.SlotID, flag SlotCondition) (domain.Sl
 	return -1, nil
 }
 
-func (page *Page) isValidSlot(slot domain.SlotID) bool {
+func (page *RecordPage) isValidSlot(slot SlotID) bool {
 	off := page.offset(slot + 1)
 	x := int64(page.txn.BlockSize())
 
 	return off <= x
 }
 
-func (page *Page) setFlag(slot domain.SlotID, flag SlotCondition) error {
+func (page *RecordPage) setFlag(slot SlotID, flag SlotCondition) error {
 	return page.txn.SetInt32(page.blk, page.offset(slot), flag, true)
 }
 
-func (page *Page) offset(slot domain.SlotID) int64 {
+func (page *RecordPage) offset(slot SlotID) int64 {
 	return int64(slot) * page.layout.slotsize
 }
 
-// Block returns page's block.
-func (page *Page) Block() domain.Block {
+// Block returns RecordPage's block.
+func (page *RecordPage) Block() Block {
 	return page.blk
 }

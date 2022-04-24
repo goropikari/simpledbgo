@@ -1,7 +1,6 @@
-package record
+package domain
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/pkg/errors"
 )
 
@@ -30,27 +29,27 @@ type FieldInfo struct {
 
 // Schema is model of table schema.
 type Schema struct {
-	fields []domain.FieldName
-	info   map[domain.FieldName]*FieldInfo
+	fields []FieldName
+	info   map[FieldName]*FieldInfo
 }
 
 // NewSchema constructs a Schema.
 func NewSchema() *Schema {
 	return &Schema{
-		fields: make([]domain.FieldName, 0),
-		info:   make(map[domain.FieldName]*FieldInfo),
+		fields: make([]FieldName, 0),
+		info:   make(map[FieldName]*FieldInfo),
 	}
 }
 
 // HasField checks existence of fldname.
-func (schema *Schema) HasField(fldname domain.FieldName) bool {
+func (schema *Schema) HasField(fldname FieldName) bool {
 	_, found := schema.info[fldname]
 
 	return found
 }
 
 // AddField adds a field in to the schema.
-func (schema *Schema) AddField(fldname domain.FieldName, typ FieldType, length int) {
+func (schema *Schema) AddField(fldname FieldName, typ FieldType, length int) {
 	schema.fields = append(schema.fields, fldname)
 	schema.info[fldname] = &FieldInfo{
 		typ:    typ,
@@ -59,18 +58,18 @@ func (schema *Schema) AddField(fldname domain.FieldName, typ FieldType, length i
 }
 
 // AddInt32Field adds an int field.
-func (schema *Schema) AddInt32Field(fldname domain.FieldName) {
+func (schema *Schema) AddInt32Field(fldname FieldName) {
 	schema.AddField(fldname, Int32, 0)
 }
 
 // AddStringField adds an string field with maximum length is length.
 // length is maximum length of string. It is not actual length of the value.
-func (schema *Schema) AddStringField(fldname domain.FieldName, length int) {
+func (schema *Schema) AddStringField(fldname FieldName, length int) {
 	schema.AddField(fldname, String, length)
 }
 
 // Add adds other's field into the schema.
-func (schema *Schema) Add(fldname domain.FieldName, other *Schema) {
+func (schema *Schema) Add(fldname FieldName, other *Schema) {
 	typ := other.Type(fldname)
 
 	length := other.Length(fldname)
@@ -86,12 +85,12 @@ func (schema *Schema) AddAllFields(other *Schema) {
 }
 
 // Fields returns schema fileds.
-func (sch *Schema) Fields() []domain.FieldName {
+func (sch *Schema) Fields() []FieldName {
 	return sch.fields
 }
 
 // Type returns field type.
-func (schema *Schema) Type(fldname domain.FieldName) FieldType {
+func (schema *Schema) Type(fldname FieldName) FieldType {
 	if v, found := schema.info[fldname]; found {
 		return v.typ
 	}
@@ -100,7 +99,7 @@ func (schema *Schema) Type(fldname domain.FieldName) FieldType {
 }
 
 // Length returns field byte length.
-func (schema *Schema) Length(fldname domain.FieldName) int {
+func (schema *Schema) Length(fldname FieldName) int {
 	if v, found := schema.info[fldname]; found {
 		return v.length
 	}

@@ -74,7 +74,7 @@ func TestFile_Read(t *testing.T) {
 		require.NoError(t, err)
 		file = domain.NewFile(f)
 		buf2 := make([]byte, 6)
-		n, err = file.Read(buf2)
+		_, err = file.Read(buf2)
 		require.NoError(t, err)
 		require.Equal(t, append([]byte("hello"), 0), buf2)
 

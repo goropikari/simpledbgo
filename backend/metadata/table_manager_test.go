@@ -5,7 +5,6 @@ import (
 
 	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/metadata"
-	"github.com/goropikari/simpledbgo/backend/record"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +23,7 @@ func TestTableManager(t *testing.T) {
 		tblMgr, err := metadata.CreateTableManager(txn)
 		require.NoError(t, err)
 
-		sch := record.NewSchema()
+		sch := domain.NewSchema()
 		sch.AddInt32Field("A")
 		sch.AddStringField("B", 9)
 
@@ -35,7 +34,7 @@ func TestTableManager(t *testing.T) {
 		layout, err := tblMgr.GetTableLayout(tblName, txn)
 		require.NoError(t, err)
 
-		expected := record.NewLayout(sch)
+		expected := domain.NewLayout(sch)
 		require.Equal(t, expected, layout)
 	})
 }
