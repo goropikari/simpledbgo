@@ -21,15 +21,24 @@ type Index struct {
 	layout    *domain.Layout
 	searchKey meta.Constant
 	tbl       *domain.Table
+	err       error
 }
 
 // NewIndex constructs an Index.
 func NewIndex(txn domain.Transaction, idxName domain.IndexName, layout *domain.Layout) *Index {
 	return &Index{
-		txn:     txn,
-		idxName: idxName,
-		layout:  layout,
+		txn:       txn,
+		idxName:   idxName,
+		layout:    layout,
+		searchKey: meta.Constant{},
+		tbl:       nil,
+		err:       nil,
 	}
+}
+
+// Err returns iteration error.
+func (idx *Index) Err() error {
+	return idx.err
 }
 
 // BeforeFirst ...
@@ -54,22 +63,26 @@ func (idx *Index) BeforeFirst(searchKey meta.Constant) error {
 }
 
 // HasNext checks whether tbl has a record having the searchKey.
-func (idx *Index) HasNext() (bool, error) {
+func (idx *Index) HasNext() bool {
 	for idx.tbl.HasNextUsedSlot() {
 		v, err := idx.tbl.GetVal(fldDataVal)
 		if err != nil {
-			return false, err
+			idx.err = err
+
+			return false
 		}
 
 		if v.Equal(idx.searchKey) {
-			return true, nil
+			return true
 		}
 	}
 	if err := idx.tbl.Err(); err != nil {
-		return false, err
+		idx.err = err
+
+		return false
 	}
 
-	return false, nil
+	return false
 }
 
 // GetDataRecordID gets record id associated with searchKey from index file.
@@ -97,6 +110,10 @@ func (idx *Index) GetDataRecordID() (domain.RecordID, error) {
 // Insert inserts search key with record id into the index file.
 func (idx *Index) Insert(searchKey meta.Constant, rid domain.RecordID) error {
 	if err := idx.BeforeFirst(searchKey); err != nil {
+		return err
+	}
+
+	if err := idx.tbl.AdvanceNextInsertSlotID(); err != nil {
 		return err
 	}
 

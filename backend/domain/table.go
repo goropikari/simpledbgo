@@ -124,7 +124,7 @@ func (tbl *Table) SetVal(fldname FieldName, val meta.Constant) error {
 		log.Fatal(errors.New("unexpected field type"))
 	}
 
-	return errors.New("failed to SetVal")
+	return nil
 }
 
 // AdvanceNextInsertSlotID  advances current slot id to next to unused slot id.
