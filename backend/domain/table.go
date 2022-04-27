@@ -14,6 +14,7 @@ type Table struct {
 	RecordPage    *RecordPage
 	tblName       TableName
 	currentSlotID SlotID
+	err           error
 }
 
 // NewTable constructs a Table.
@@ -24,6 +25,7 @@ func NewTable(txn Transaction, tblName TableName, layout *Layout) (*Table, error
 		tblName:       tblName,
 		RecordPage:    nil,
 		currentSlotID: -1,
+		err:           nil,
 	}
 
 	blkLen, err := txn.BlockLength(FileName(tblName))
@@ -44,6 +46,11 @@ func NewTable(txn Transaction, tblName TableName, layout *Layout) (*Table, error
 	}
 
 	return tbl, nil
+}
+
+// Err returns iteration err.
+func (tbl *Table) Err() error {
+	return tbl.err
 }
 
 // Close closes the table.
@@ -189,35 +196,43 @@ func (tbl *Table) HasField(fldname FieldName) bool {
 }
 
 // HasNextUsedSlot checks the existence of next used slot.
-func (tbl *Table) HasNextUsedSlot() (bool, error) {
+func (tbl *Table) HasNextUsedSlot() bool {
 	currentSlotID, err := tbl.RecordPage.NextAfter(tbl.currentSlotID)
 	if err != nil {
-		return false, err
+		tbl.err = err
+
+		return false
 	}
 	tbl.currentSlotID = currentSlotID
 
 	for tbl.currentSlotID < 0 {
 		last, err := tbl.isAtLastBlock()
 		if err != nil {
-			return false, err
+			tbl.err = err
+
+			return false
 		}
 		if last {
-			return false, nil
+			return false
 		}
 
 		blk := tbl.RecordPage.Block()
 		if err := tbl.moveToBlock(blk.Number() + 1); err != nil {
-			return false, err
+			tbl.err = err
+
+			return false
 		}
 
 		slotID, err := tbl.RecordPage.NextAfter(tbl.currentSlotID)
 		if err != nil {
-			return false, err
+			tbl.err = err
+
+			return false
 		}
 		tbl.currentSlotID = slotID
 	}
 
-	return true, nil
+	return true
 }
 
 // isAtLastBlock checks whether the current block is last block or not.

@@ -55,15 +55,7 @@ func (idx *Index) BeforeFirst(searchKey meta.Constant) error {
 
 // HasNext checks whether tbl has a record having the searchKey.
 func (idx *Index) HasNext() (bool, error) {
-	for {
-		found, err := idx.tbl.HasNextUsedSlot()
-		if err != nil {
-			return false, err
-		}
-		if !found {
-			break
-		}
-
+	for idx.tbl.HasNextUsedSlot() {
 		v, err := idx.tbl.GetVal(fldDataVal)
 		if err != nil {
 			return false, err
@@ -72,6 +64,9 @@ func (idx *Index) HasNext() (bool, error) {
 		if v.Equal(idx.searchKey) {
 			return true, nil
 		}
+	}
+	if err := idx.tbl.Err(); err != nil {
+		return false, err
 	}
 
 	return false, nil
@@ -124,15 +119,7 @@ func (idx *Index) Delete(searchKey meta.Constant, rid domain.RecordID) error {
 		return err
 	}
 
-	for {
-		found, err := idx.tbl.HasNextUsedSlot()
-		if err != nil {
-			return err
-		}
-		if !found {
-			break
-		}
-
+	for idx.tbl.HasNextUsedSlot() {
 		getRID, err := idx.GetDataRecordID()
 		if err != nil {
 			return err
@@ -145,6 +132,9 @@ func (idx *Index) Delete(searchKey meta.Constant, rid domain.RecordID) error {
 
 			return nil
 		}
+	}
+	if err := idx.tbl.Err(); err != nil {
+		return err
 	}
 
 	return nil

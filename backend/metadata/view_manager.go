@@ -65,17 +65,10 @@ func (viewMgr *ViewManager) GetViewDef(viewName ViewName, txn domain.Transaction
 	if err != nil {
 		return "", err
 	}
+	defer tbl.Close()
 
 	def := ""
-	for {
-		found, err := tbl.HasNextUsedSlot()
-		if err != nil {
-			return "", err
-		}
-		if !found {
-			break
-		}
-
+	for tbl.HasNextUsedSlot() {
 		view, err := tbl.GetString(fldViewName)
 		if err != nil {
 			return "", err
@@ -90,8 +83,9 @@ func (viewMgr *ViewManager) GetViewDef(viewName ViewName, txn domain.Transaction
 			break
 		}
 	}
-
-	tbl.Close()
+	if err := tbl.Err(); err != nil {
+		return "", err
+	}
 
 	return def, nil
 }

@@ -67,13 +67,7 @@ func TestTable(t *testing.T) {
 		err = table2.MoveToFirst()
 		require.NoError(t, err)
 		actual2 := make([]string, 0)
-		for {
-			found, err := table2.HasNextUsedSlot()
-			require.NoError(t, err)
-			if !found {
-				break
-			}
-
+		for table2.HasNextUsedSlot() {
 			a, err := table2.GetInt32("A")
 			require.NoError(t, err)
 			b, err := table2.GetString("B")
@@ -84,6 +78,7 @@ func TestTable(t *testing.T) {
 				require.NoError(t, err)
 			}
 		}
+		require.NoError(t, table2.Err())
 		table2.Close()
 		txn2.Commit()
 
@@ -108,19 +103,14 @@ func TestTable(t *testing.T) {
 		err = table3.MoveToFirst()
 		require.NoError(t, err)
 		actual3 := make([]string, 0)
-		for {
-			found, err := table3.HasNextUsedSlot()
-			require.NoError(t, err)
-			if !found {
-				break
-			}
-
+		for table3.HasNextUsedSlot() {
 			a, err := table3.GetInt32("A")
 			require.NoError(t, err)
 			b, err := table3.GetString("B")
 			require.NoError(t, err)
 			actual3 = append(actual3, fmt.Sprintf("%v %v", a, b))
 		}
+		require.NoError(t, table3.Err())
 		table3.Close()
 		txn3.Commit()
 
@@ -188,19 +178,14 @@ func TestTable2(t *testing.T) {
 
 		err = table2.MoveToFirst()
 		require.NoError(t, err)
-		for {
-			found, err := table2.HasNextUsedSlot()
-			require.NoError(t, err)
-			if !found {
-				break
-			}
-
+		for table2.HasNextUsedSlot() {
 			a, err := table2.GetInt32("A")
 			require.NoError(t, err)
 			if a > 25 {
 				table2.Delete()
 			}
 		}
+		require.NoError(t, table2.Err())
 		table2.Close()
 		txn2.Commit()
 
@@ -232,19 +217,14 @@ func TestTable2(t *testing.T) {
 		err = table3.MoveToFirst()
 		require.NoError(t, err)
 		actual3 := make([]string, 0)
-		for {
-			found, err := table3.HasNextUsedSlot()
-			require.NoError(t, err)
-			if !found {
-				break
-			}
-
+		for table3.HasNextUsedSlot() {
 			a, err := table3.GetInt32("A")
 			require.NoError(t, err)
 			b, err := table3.GetString("B")
 			require.NoError(t, err)
 			actual3 = append(actual3, fmt.Sprintf("%v %v", a, b))
 		}
+		require.NoError(t, table3.Err())
 		table3.Close()
 		txn3.Commit()
 

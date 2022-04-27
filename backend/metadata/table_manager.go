@@ -129,15 +129,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 	}
 	defer tcat.Close()
 
-	for {
-		found, err := tcat.HasNextUsedSlot()
-		if err != nil {
-			return -1, err
-		}
-		if !found {
-			break
-		}
-
+	for tcat.HasNextUsedSlot() {
 		v, err := tcat.GetString(fldTableName)
 		if err != nil {
 			return -1, err
@@ -150,6 +142,9 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 
 			break
 		}
+	}
+	if err := tcat.Err(); err != nil {
+		return -1, err
 	}
 
 	return slotsize, nil
@@ -164,15 +159,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Tra
 	}
 	defer fcat.Close()
 
-	for {
-		found, err := fcat.HasNextUsedSlot()
-		if err != nil {
-			return nil, nil, err
-		}
-		if !found {
-			break
-		}
-
+	for fcat.HasNextUsedSlot() {
 		v, err := fcat.GetString(fldTableName)
 		if err != nil {
 			return nil, nil, err
@@ -204,6 +191,9 @@ func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Tra
 			fldType := domain.FieldType(typ)
 			sch.AddField(fldName, fldType, int(length))
 		}
+	}
+	if err := fcat.Err(); err != nil {
+		return nil, nil, err
 	}
 
 	return sch, offsets, nil

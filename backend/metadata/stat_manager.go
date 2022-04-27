@@ -70,16 +70,9 @@ func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
 	if err != nil {
 		return err
 	}
+	defer tcat.Close()
 
-	for {
-		found, err := tcat.HasNextUsedSlot()
-		if err != nil {
-			return err
-		}
-		if !found {
-			break
-		}
-
+	for tcat.HasNextUsedSlot() {
 		tblNameStr, err := tcat.GetString(fldTableName)
 		if err != nil {
 			return err
@@ -101,7 +94,9 @@ func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
 		}
 		statMgr.tableStats[tblName] = si
 	}
-	tcat.Close()
+	if err := tcat.Err(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -115,17 +110,12 @@ func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *dom
 		return StatInfo{}, err
 	}
 
-	for {
-		found, err := tbl.HasNextUsedSlot()
-		if err != nil {
-			return StatInfo{}, err
-		}
-		if !found {
-			break
-		}
-
+	for tbl.HasNextUsedSlot() {
 		numRecs++
 		numBlocks = int(tbl.RecordID().BlockNumber() + 1)
+	}
+	if err := tbl.Err(); err != nil {
+		return StatInfo{}, tbl.Err()
 	}
 
 	return StatInfo{
