@@ -63,6 +63,20 @@ func (mr *MockTransactionMockRecorder) BlockSize() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockSize", reflect.TypeOf((*MockTransaction)(nil).BlockSize))
 }
 
+// Commit mocks base method.
+func (m *MockTransaction) Commit() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Commit")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Commit indicates an expected call of Commit.
+func (mr *MockTransactionMockRecorder) Commit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockTransaction)(nil).Commit))
+}
+
 // ExtendFile mocks base method.
 func (m *MockTransaction) ExtendFile(arg0 domain.FileName) (domain.Block, error) {
 	m.ctrl.T.Helper()

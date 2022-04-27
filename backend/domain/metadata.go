@@ -19,6 +19,11 @@ var ErrExceedMaxFieldNameLength = errors.Errorf("exceeds maximum field name leng
 // SlotID is identifier of slot.
 type SlotID int32
 
+// NewSlotID constructs a slot id.
+func NewSlotID(id int32) SlotID {
+	return SlotID(id)
+}
+
 // FieldName is value object of field name.
 type FieldName string
 

@@ -73,14 +73,14 @@ func (tbl *Table) GetVal(fldname FieldName) (meta.Constant, error) {
 			return meta.Constant{}, err
 		}
 
-		return meta.Constant{I32val: val}, nil
+		return meta.NewConstant(meta.Int32, val), nil
 	case String:
 		val, err := tbl.GetString(fldname)
 		if err != nil {
 			return meta.Constant{}, err
 		}
 
-		return meta.Constant{Sval: val}, nil
+		return meta.NewConstant(meta.String, val), nil
 	case Unknown:
 		log.Fatal(errors.New("unexpected field type"))
 	}
@@ -103,12 +103,13 @@ func (tbl *Table) SetVal(fldname FieldName, val meta.Constant) error {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
 	case Int32:
-		err := tbl.SetInt32(fldname, val.I32val)
+		// TODO: check val type?
+		err := tbl.SetInt32(fldname, val.ToInt32())
 		if err != nil {
 			return err
 		}
 	case String:
-		err := tbl.SetString(fldname, val.Sval)
+		err := tbl.SetString(fldname, val.ToString())
 		if err != nil {
 			return err
 		}

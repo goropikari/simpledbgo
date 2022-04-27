@@ -510,6 +510,7 @@ Go 実装では domain package に置くようにした。
 
 # Chapter 7: Metadata Management
 
+## 2022/4/24
 `synchronized` がついている `getStatInfo` から同様に `synchronized` がついている
 `refreshStatistics`/`calcTableStats` を呼んでいるが、lock はインスタンス単位で取られるからこれだと
 `refreshStatistics`/`calcTableStats` がいつまでもつかえないのではないかと思った。
@@ -530,3 +531,14 @@ private synchronized StatInfo calcTableStats(String tblname,
 ただ `refreshStatistics`/`calcTableStats` は単体で呼び出されることはなく、常に `getStatInfo` またはコンストラクタからしか呼ばれないので
 わざわざ `synchronized` をつける必要はなさそうである。
 Go で実装するときは `refreshStatistics`/`calcTableStats` 内で `mutex.Lock` を取る必要はなさそう。
+
+## 2022/4/26
+
+`IndexInfo` が Chap.12 で出てくる `HashIndex` に依存しているという思わぬ実装になっていた。
+Java で実装していたら実装を拝借してくるとかができたが、こちらは Go で実装しているのでそうもいかない。
+さいわい、`HashIndex` の実装はシンプルだったのでほぼそのまま実装した。
+コードを読むに index name が prefix につくファイルが最大で `NUM_BUCKET` 個できるようである。
+index ファイルの suffix は `searchKey` の Hash 値を `NUM_BUCKET` で割った余り。
+ `searchKey` というのが index を張ったカラムの値を表している模様。
+同じ `searchKey` だと同じ index ファイルに記録されるから検索早くなるよねということらしい。
+ただ、Hash 値から計算しているからわかる通り、`searchKey` が違うからといって違う index ファイルに記録されるわけではない。
