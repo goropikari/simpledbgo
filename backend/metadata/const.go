@@ -9,8 +9,9 @@ type (
 )
 
 const (
-	tableCatalog = "table_catalog"
-	fieldCatalog = "field_catalog"
+	tableCatalog    = "table_catalog"
+	fieldCatalog    = "field_catalog"
+	fldIndexCatalog = "index_catalog"
 
 	fldTableName = "table_name"
 	fldFieldName = "field_name"
@@ -18,6 +19,8 @@ const (
 	fldType      = "type"
 	fldLength    = "length"
 	fldOffset    = "offset"
+
+	fldIndexName = "indexname"
 )
 
 const (

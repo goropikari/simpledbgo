@@ -9,6 +9,9 @@ const (
 	// MaxTableNameLength is maximum table name length.
 	MaxTableNameLength = 16
 
+	// MaxIndexNameLength is maximum index name length.
+	MaxIndexNameLength = 16
+
 	// MaxViewDefLength is maximum view definition length.
 	MaxViewDefLength = 100
 )
@@ -39,6 +42,11 @@ func NewFieldName(name string) (FieldName, error) {
 	return FieldName(name), nil
 }
 
+// String stringfy name.
+func (name FieldName) String() string {
+	return string(name)
+}
+
 // TableName is value object of table name.
 type TableName string
 
@@ -54,8 +62,8 @@ func NewTableName(name string) (TableName, error) {
 	return TableName(name), nil
 }
 
-// ToString stringfy name.
-func (name TableName) ToString() string {
+// String stringfy name.
+func (name TableName) String() string {
 	return string(name)
 }
 

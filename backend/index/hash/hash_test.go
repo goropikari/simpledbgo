@@ -84,7 +84,7 @@ func TestHashIndex(t *testing.T) {
 		err = txn.Commit()
 		require.NoError(t, err)
 
-		cost := idx.SearchCost(202, fake.RandInt())
+		cost := hash.SearchCost(202, fake.RandInt())
 		require.Equal(t, 2, cost)
 
 		err = idx.Err()

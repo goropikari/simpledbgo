@@ -168,6 +168,6 @@ func (idx *Index) Close() {
 
 // SearchCost calculates search cost.
 // rpb: record per block
-func (idx *Index) SearchCost(numBlks int, rpb int) int {
+func SearchCost(numBlks int, rpb int) int {
 	return numBlks / numBuckets
 }

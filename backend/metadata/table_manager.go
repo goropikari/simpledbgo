@@ -67,7 +67,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Sc
 		return err
 	}
 
-	if err := tcat.SetString(fldTableName, tblName.ToString()); err != nil {
+	if err := tcat.SetString(fldTableName, tblName.String()); err != nil {
 		return err
 	}
 	if err := tcat.SetInt32(fldSlotSize, int32(layout.SlotSize())); err != nil {
@@ -85,7 +85,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Sc
 		if err := fcat.AdvanceNextInsertSlotID(); err != nil {
 			return err
 		}
-		if err := fcat.SetString(fldTableName, tblName.ToString()); err != nil {
+		if err := fcat.SetString(fldTableName, tblName.String()); err != nil {
 			return err
 		}
 		if err := fcat.SetString(fldFieldName, string(fld)); err != nil {
@@ -134,7 +134,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 		if err != nil {
 			return -1, err
 		}
-		if v == tblName.ToString() {
+		if v == tblName.String() {
 			slotsize, err = tcat.GetInt32(fldSlotSize)
 			if err != nil {
 				return -1, err
@@ -164,7 +164,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Tra
 		if err != nil {
 			return nil, nil, err
 		}
-		if v == tblName.ToString() {
+		if v == tblName.String() {
 			fldNameStr, err := fcat.GetString(fldFieldName)
 			if err != nil {
 				return nil, nil, err

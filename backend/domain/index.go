@@ -11,3 +11,8 @@ func NewIndexName(name string) (IndexName, error) {
 
 	return IndexName(name), nil
 }
+
+// String stringfy name.
+func (name IndexName) String() string {
+	return string(name)
+}

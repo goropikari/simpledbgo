@@ -10,10 +10,9 @@ import (
 // Index is an interface of index.
 type Index interface {
 	BeforeFirst(searchKey meta.Constant) error
-	HasNext() (bool, error)
+	HasNext() bool
 	GetDataRecordID() (domain.RecordID, error)
 	Insert(meta.Constant, domain.RecordID) error
 	Delete(meta.Constant, domain.RecordID) error
 	Close()
-	SearchCost(numBlocks int, recordPerBlock int) int
 }
