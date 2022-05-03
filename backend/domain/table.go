@@ -73,21 +73,21 @@ func (tbl *Table) GetString(fldname FieldName) (string, error) {
 func (tbl *Table) GetVal(fldname FieldName) (Constant, error) {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
-	case Int32:
+	case FInt32:
 		val, err := tbl.GetInt32(fldname)
 		if err != nil {
 			return Constant{}, err
 		}
 
 		return NewConstant(VInt32, val), nil
-	case String:
+	case FString:
 		val, err := tbl.GetString(fldname)
 		if err != nil {
 			return Constant{}, err
 		}
 
 		return NewConstant(VString, val), nil
-	case Unknown:
+	case FUnknown:
 		log.Fatal(errors.New("unexpected field type"))
 	}
 
@@ -108,18 +108,18 @@ func (tbl *Table) SetString(fldname FieldName, val string) error {
 func (tbl *Table) SetVal(fldname FieldName, val Constant) error {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
-	case Int32:
+	case FInt32:
 		// TODO: check val type?
 		err := tbl.SetInt32(fldname, val.ToInt32())
 		if err != nil {
 			return err
 		}
-	case String:
+	case FString:
 		err := tbl.SetString(fldname, val.ToString())
 		if err != nil {
 			return err
 		}
-	case Unknown:
+	case FUnknown:
 		log.Fatal(errors.New("unexpected field type"))
 	}
 

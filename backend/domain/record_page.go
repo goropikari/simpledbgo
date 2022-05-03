@@ -82,15 +82,15 @@ func (page *RecordPage) Format() error {
 			typ := sch.Type(fldname)
 			fldpos := page.offset(slot) + page.layout.Offset(fldname)
 			switch typ {
-			case Int32:
+			case FInt32:
 				if err := page.txn.SetInt32(page.blk, fldpos, 0, false); err != nil {
 					return err
 				}
-			case String:
+			case FString:
 				if err := page.txn.SetString(page.blk, fldpos, "", false); err != nil {
 					return err
 				}
-			case Unknown:
+			case FUnknown:
 				log.Fatal(errors.New("unexpected record type"))
 			}
 		}

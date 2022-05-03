@@ -23,11 +23,11 @@ func NewLayout(schema *Schema) *Layout {
 
 		// length in bytes
 		switch schema.Type(fld) {
-		case Int32:
+		case FInt32:
 			pos += meta.Int32Length
-		case String:
+		case FString:
 			pos += meta.Int32Length + int64(schema.Length(fld))
-		case Unknown:
+		case FUnknown:
 			log.Fatal(errors.New("Invalid field type"))
 		}
 	}

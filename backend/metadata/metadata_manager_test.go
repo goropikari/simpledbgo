@@ -38,7 +38,7 @@ func TestMetadataManager(t *testing.T) {
 	for _, fld := range sch2.Fields() {
 		types = append(types, sch.Type(fld))
 	}
-	require.Equal(t, []domain.FieldType{domain.Int32, domain.String}, types)
+	require.Equal(t, []domain.FieldType{domain.FInt32, domain.FString}, types)
 	require.Equal(t, int64(21), layout.SlotSize())
 
 	// Statistics Metadata

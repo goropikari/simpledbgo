@@ -65,7 +65,7 @@ func createIdxLayout(tblSchema *domain.Schema, fldName domain.FieldName) *domain
 	sch := domain.NewSchema()
 	sch.AddInt32Field(fldBlock)
 	sch.AddInt32Field(fldID)
-	if tblSchema.Type(fldName) == domain.Int32 {
+	if tblSchema.Type(fldName) == domain.FInt32 {
 		sch.AddInt32Field(fldDataVal)
 	} else {
 		fldLen := tblSchema.Length(fldName)

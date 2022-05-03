@@ -13,14 +13,14 @@ func TestSchema_AddField(t *testing.T) {
 	intSch := domain.NewSchema()
 	intSch.SetFields([]domain.FieldName{fld1})
 	mp1 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp1[fld1] = domain.NewFieldInfo(domain.Int32, 0)
+	mp1[fld1] = domain.NewFieldInfo(domain.FInt32, 0)
 	intSch.SetInfo(mp1)
 
 	fld2 := domain.FieldName(fake.RandString())
 	strSch := domain.NewSchema()
 	strSch.SetFields([]domain.FieldName{fld2})
 	mp2 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp2[fld2] = domain.NewFieldInfo(domain.String, 8)
+	mp2[fld2] = domain.NewFieldInfo(domain.FString, 8)
 	strSch.SetInfo(mp2)
 
 	tests := []struct {
@@ -33,13 +33,13 @@ func TestSchema_AddField(t *testing.T) {
 		{
 			name:     "add int field",
 			fldname:  fld1,
-			typ:      domain.Int32,
+			typ:      domain.FInt32,
 			expected: intSch,
 		},
 		{
 			name:     "add int field",
 			fldname:  fld2,
-			typ:      domain.String,
+			typ:      domain.FString,
 			length:   8,
 			expected: strSch,
 		},
@@ -59,7 +59,7 @@ func TestSchema_AddIntField(t *testing.T) {
 	intSch := domain.NewSchema()
 	intSch.SetFields([]domain.FieldName{fld1})
 	mp1 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp1[fld1] = domain.NewFieldInfo(domain.Int32, 0)
+	mp1[fld1] = domain.NewFieldInfo(domain.FInt32, 0)
 	intSch.SetInfo(mp1)
 
 	tests := []struct {
@@ -88,7 +88,7 @@ func TestSchema_AddStringField(t *testing.T) {
 	strSch := domain.NewSchema()
 	strSch.SetFields([]domain.FieldName{fld1})
 	mp1 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp1[fld1] = domain.NewFieldInfo(domain.String, 8)
+	mp1[fld1] = domain.NewFieldInfo(domain.FString, 8)
 	strSch.SetInfo(mp1)
 
 	tests := []struct {
@@ -120,19 +120,19 @@ func TestSchema_Add(t *testing.T) {
 	bsch := domain.NewSchema()
 	bsch.SetFields([]domain.FieldName{fld1, fld2})
 	mp1 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp1[fld1] = domain.NewFieldInfo(domain.String, 8)
-	mp1[fld2] = domain.NewFieldInfo(domain.Int32, 0)
+	mp1[fld1] = domain.NewFieldInfo(domain.FString, 8)
+	mp1[fld2] = domain.NewFieldInfo(domain.FInt32, 0)
 	bsch.SetInfo(mp1)
 
 	strSch := domain.NewSchema()
 	mp2 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp2[fld1] = domain.NewFieldInfo(domain.String, 8)
+	mp2[fld1] = domain.NewFieldInfo(domain.FString, 8)
 	strSch.SetFields([]domain.FieldName{fld1})
 	strSch.SetInfo(mp2)
 
 	intSch := domain.NewSchema()
 	mp3 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp3[fld2] = domain.NewFieldInfo(domain.Int32, 0)
+	mp3[fld2] = domain.NewFieldInfo(domain.FInt32, 0)
 	intSch.SetFields([]domain.FieldName{fld2})
 	intSch.SetInfo(mp3)
 
@@ -171,8 +171,8 @@ func TestSchema_AddAllFields(t *testing.T) {
 	bsch := domain.NewSchema()
 	bsch.SetFields([]domain.FieldName{fld1, fld2})
 	mp1 := make(map[domain.FieldName]*domain.FieldInfo)
-	mp1[fld1] = domain.NewFieldInfo(domain.String, 8)
-	mp1[fld2] = domain.NewFieldInfo(domain.Int32, 0)
+	mp1[fld1] = domain.NewFieldInfo(domain.FString, 8)
+	mp1[fld2] = domain.NewFieldInfo(domain.FInt32, 0)
 	bsch.SetInfo(mp1)
 
 	tests := []struct {

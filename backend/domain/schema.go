@@ -7,26 +7,6 @@ import (
 // ErrFieldNotFound is an error that means specified field is not found.
 var ErrFieldNotFound = errors.New("specified field is not found")
 
-// FieldType is a type of field.
-type FieldType uint
-
-const (
-	// Unknown is unknown field type.
-	Unknown FieldType = iota
-
-	// Int32 is integer field type.
-	Int32
-
-	// String is string field type.
-	String
-)
-
-// FieldInfo is a model of field information.
-type FieldInfo struct {
-	typ    FieldType
-	length int
-}
-
 // Schema is model of table schema.
 type Schema struct {
 	fields []FieldName
@@ -59,13 +39,13 @@ func (schema *Schema) AddField(fldname FieldName, typ FieldType, length int) {
 
 // AddInt32Field adds an int field.
 func (schema *Schema) AddInt32Field(fldname FieldName) {
-	schema.AddField(fldname, Int32, 0)
+	schema.AddField(fldname, FInt32, 0)
 }
 
 // AddStringField adds an string field with maximum length is length.
 // length is maximum length of string. It is not actual length of the value.
 func (schema *Schema) AddStringField(fldname FieldName, length int) {
-	schema.AddField(fldname, String, length)
+	schema.AddField(fldname, FString, length)
 }
 
 // Add adds other's field into the schema.
@@ -85,8 +65,8 @@ func (schema *Schema) AddAllFields(other *Schema) {
 }
 
 // Fields returns schema fileds.
-func (sch *Schema) Fields() []FieldName {
-	return sch.fields
+func (schema *Schema) Fields() []FieldName {
+	return schema.fields
 }
 
 // Type returns field type.
@@ -95,7 +75,7 @@ func (schema *Schema) Type(fldname FieldName) FieldType {
 		return v.typ
 	}
 
-	return Unknown
+	return FUnknown
 }
 
 // Length returns field byte length.
