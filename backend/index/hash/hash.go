@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/goropikari/simpledbgo/backend/domain"
-	"github.com/goropikari/simpledbgo/meta"
 )
 
 const (
@@ -19,7 +18,7 @@ type Index struct {
 	txn       domain.Transaction
 	idxName   domain.IndexName
 	layout    *domain.Layout
-	searchKey meta.Constant
+	searchKey domain.Constant
 	tbl       *domain.Table
 	err       error
 }
@@ -30,7 +29,7 @@ func NewIndex(txn domain.Transaction, idxName domain.IndexName, layout *domain.L
 		txn:       txn,
 		idxName:   idxName,
 		layout:    layout,
-		searchKey: meta.Constant{},
+		searchKey: domain.Constant{},
 		tbl:       nil,
 		err:       nil,
 	}
@@ -43,7 +42,7 @@ func (idx *Index) Err() error {
 
 // BeforeFirst ...
 // searchKey を持っている table をセットする.
-func (idx *Index) BeforeFirst(searchKey meta.Constant) error {
+func (idx *Index) BeforeFirst(searchKey domain.Constant) error {
 	idx.Close()
 	idx.searchKey = searchKey
 	bucket := searchKey.HashCode() % numBuckets
@@ -108,7 +107,7 @@ func (idx *Index) GetDataRecordID() (domain.RecordID, error) {
 }
 
 // Insert inserts search key with record id into the index file.
-func (idx *Index) Insert(searchKey meta.Constant, rid domain.RecordID) error {
+func (idx *Index) Insert(searchKey domain.Constant, rid domain.RecordID) error {
 	if err := idx.BeforeFirst(searchKey); err != nil {
 		return err
 	}
@@ -131,7 +130,7 @@ func (idx *Index) Insert(searchKey meta.Constant, rid domain.RecordID) error {
 }
 
 // Delete given record from index file.
-func (idx *Index) Delete(searchKey meta.Constant, rid domain.RecordID) error {
+func (idx *Index) Delete(searchKey domain.Constant, rid domain.RecordID) error {
 	if err := idx.BeforeFirst(searchKey); err != nil {
 		return err
 	}

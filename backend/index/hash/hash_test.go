@@ -5,7 +5,6 @@ import (
 
 	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/index/hash"
-	"github.com/goropikari/simpledbgo/meta"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
@@ -33,8 +32,8 @@ func TestHashIndex(t *testing.T) {
 
 		idx := hash.NewIndex(txn, idxName, layout)
 
-		skey1 := meta.NewConstant(meta.Int32, fake.RandInt32())
-		skey2 := meta.NewConstant(meta.Int32, fake.RandInt32())
+		skey1 := domain.NewConstant(domain.VInt32, fake.RandInt32())
+		skey2 := domain.NewConstant(domain.VInt32, fake.RandInt32())
 
 		blkNum1 := domain.BlockNumber(2)
 		slotID1 := domain.SlotID(10)

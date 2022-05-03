@@ -3,7 +3,6 @@ package domain
 import (
 	"log"
 
-	"github.com/goropikari/simpledbgo/meta"
 	"github.com/pkg/errors"
 )
 
@@ -71,28 +70,28 @@ func (tbl *Table) GetString(fldname FieldName) (string, error) {
 }
 
 // GetVal gets value from the table.
-func (tbl *Table) GetVal(fldname FieldName) (meta.Constant, error) {
+func (tbl *Table) GetVal(fldname FieldName) (Constant, error) {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
 	case Int32:
 		val, err := tbl.GetInt32(fldname)
 		if err != nil {
-			return meta.Constant{}, err
+			return Constant{}, err
 		}
 
-		return meta.NewConstant(meta.Int32, val), nil
+		return NewConstant(VInt32, val), nil
 	case String:
 		val, err := tbl.GetString(fldname)
 		if err != nil {
-			return meta.Constant{}, err
+			return Constant{}, err
 		}
 
-		return meta.NewConstant(meta.String, val), nil
+		return NewConstant(VString, val), nil
 	case Unknown:
 		log.Fatal(errors.New("unexpected field type"))
 	}
 
-	return meta.Constant{}, errors.New("GetVal error")
+	return Constant{}, errors.New("GetVal error")
 }
 
 // SetInt32 sets int32 to the table.
@@ -106,7 +105,7 @@ func (tbl *Table) SetString(fldname FieldName, val string) error {
 }
 
 // SetVal sets value to the table.
-func (tbl *Table) SetVal(fldname FieldName, val meta.Constant) error {
+func (tbl *Table) SetVal(fldname FieldName, val Constant) error {
 	typ := tbl.layout.schema.Type(fldname)
 	switch typ {
 	case Int32:

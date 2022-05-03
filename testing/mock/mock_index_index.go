@@ -9,7 +9,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	domain "github.com/goropikari/simpledbgo/backend/domain"
-	meta "github.com/goropikari/simpledbgo/meta"
 )
 
 // MockIndex is a mock of Index interface.
@@ -36,7 +35,7 @@ func (m *MockIndex) EXPECT() *MockIndexMockRecorder {
 }
 
 // BeforeFirst mocks base method.
-func (m *MockIndex) BeforeFirst(searchKey meta.Constant) error {
+func (m *MockIndex) BeforeFirst(searchKey domain.Constant) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BeforeFirst", searchKey)
 	ret0, _ := ret[0].(error)
@@ -62,7 +61,7 @@ func (mr *MockIndexMockRecorder) Close() *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockIndex) Delete(arg0 meta.Constant, arg1 domain.RecordID) error {
+func (m *MockIndex) Delete(arg0 domain.Constant, arg1 domain.RecordID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -105,7 +104,7 @@ func (mr *MockIndexMockRecorder) HasNext() *gomock.Call {
 }
 
 // Insert mocks base method.
-func (m *MockIndex) Insert(arg0 meta.Constant, arg1 domain.RecordID) error {
+func (m *MockIndex) Insert(arg0 domain.Constant, arg1 domain.RecordID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", arg0, arg1)
 	ret0, _ := ret[0].(error)
