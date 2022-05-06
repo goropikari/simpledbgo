@@ -1,0 +1,87 @@
+package lexer_test
+
+import (
+	"testing"
+
+	"github.com/goropikari/simpledbgo/frontend/domain"
+	"github.com/goropikari/simpledbgo/frontend/lexer"
+	"github.com/stretchr/testify/require"
+)
+
+func TestLexer(t *testing.T) {
+	tests := []struct {
+		name   string
+		query  string
+		tokens []domain.Token
+	}{
+		{
+			name:  "select query",
+			query: "SELECT *, id, name FROM foo_bar WHERE id = 123 and name = 'Mike\\'s dog'",
+			tokens: []domain.Token{
+				domain.NewToken(domain.Keyword, "select"),
+				domain.NewToken(domain.Star, "*"),
+				domain.NewToken(domain.Comma, ","),
+				domain.NewToken(domain.Identifier, "id"),
+				domain.NewToken(domain.Comma, ","),
+				domain.NewToken(domain.Identifier, "name"),
+				domain.NewToken(domain.Keyword, "from"),
+				domain.NewToken(domain.Identifier, "foo_bar"),
+				domain.NewToken(domain.Keyword, "where"),
+				domain.NewToken(domain.Identifier, "id"),
+				domain.NewToken(domain.Equal, "="),
+				domain.NewToken(domain.Int32, int32(123)),
+				domain.NewToken(domain.Keyword, "and"),
+				domain.NewToken(domain.Identifier, "name"),
+				domain.NewToken(domain.Equal, "="),
+				domain.NewToken(domain.String, "Mike's dog"),
+			},
+		},
+		{
+			name:  "select query with combination upper/lower",
+			query: "SeLEcT * from foo",
+			tokens: []domain.Token{
+				domain.NewToken(domain.Keyword, "select"),
+				domain.NewToken(domain.Star, "*"),
+				domain.NewToken(domain.Keyword, "from"),
+				domain.NewToken(domain.Identifier, "foo"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			lexer := lexer.NewLexer(tt.query)
+			tokens, err := lexer.ScanTokens()
+
+			require.NoError(t, err)
+			require.Equal(t, tt.tokens, tokens)
+		})
+	}
+}
+
+func TestLexer_Error(t *testing.T) {
+	tests := []struct {
+		name  string
+		query string
+	}{
+		{
+			name:  "invalid identifier",
+			query: "123abc",
+		},
+		{
+			name:  "invalid character",
+			query: "あ",
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			lexer := lexer.NewLexer(tt.query)
+			_, err := lexer.ScanTokens()
+
+			require.Error(t, err)
+		})
+	}
+}
