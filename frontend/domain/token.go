@@ -7,26 +7,26 @@ const (
 	// UnknowToken is unknown token type.
 	UnknowToken TokenType = iota
 
-	// Keyword is keyword token type.
-	Keyword
+	// TKeyword is keyword token type.
+	TKeyword
 
-	// Int32 is int32 token type.
-	Int32
+	// TInt32 is int32 token type.
+	TInt32
 
-	// String is string token type.
-	String
+	// TString is string token type.
+	TString
 
-	// Identifier is identifier token type.
-	Identifier
+	// TIdentifier is identifier token type.
+	TIdentifier
 
-	// Star is star token type.
-	Star
+	// TStar is star token type.
+	TStar
 
-	// Equal is equal token type.
-	Equal
+	// TEqual is equal token type.
+	TEqual
 
-	// Comma is comma token type.
-	Comma
+	// TComma is comma token type.
+	TComma
 )
 
 // Token is model of token.
@@ -41,4 +41,14 @@ func NewToken(typ TokenType, value any) Token {
 		typ:   typ,
 		value: value,
 	}
+}
+
+// Type returns token type.
+func (tok Token) Type() TokenType {
+	return tok.typ
+}
+
+// Value returns token value.
+func (tok Token) Value() any {
+	return tok.value
 }

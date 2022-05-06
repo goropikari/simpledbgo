@@ -64,11 +64,11 @@ func (lex *Lexer) scan() (domain.Token, error) {
 
 	switch c {
 	case '*':
-		return domain.NewToken(domain.Star, "*"), nil
+		return domain.NewToken(domain.TStar, "*"), nil
 	case '=':
-		return domain.NewToken(domain.Equal, "="), nil
+		return domain.NewToken(domain.TEqual, "="), nil
 	case ',':
-		return domain.NewToken(domain.Comma, ","), nil
+		return domain.NewToken(domain.TComma, ","), nil
 	}
 
 	err = lex.unreadByte()
@@ -90,7 +90,7 @@ func (lex *Lexer) scan() (domain.Token, error) {
 			return domain.Token{}, err
 		}
 
-		return domain.NewToken(domain.Int32, int32(num)), nil
+		return domain.NewToken(domain.TInt32, int32(num)), nil
 	case isAlpha(c):
 		id, err := lex.scanIdentifier()
 		if err != nil {
@@ -98,9 +98,9 @@ func (lex *Lexer) scan() (domain.Token, error) {
 		}
 
 		if lex.isKeyword(id) {
-			return domain.NewToken(domain.Keyword, id), nil
+			return domain.NewToken(domain.TKeyword, id), nil
 		} else {
-			return domain.NewToken(domain.Identifier, id), nil
+			return domain.NewToken(domain.TIdentifier, id), nil
 		}
 	case c == '\'':
 		s, err := lex.scanString()
@@ -108,7 +108,7 @@ func (lex *Lexer) scan() (domain.Token, error) {
 			return domain.Token{}, err
 		}
 
-		return domain.NewToken(domain.String, s), nil
+		return domain.NewToken(domain.TString, s), nil
 	}
 
 	return domain.Token{}, errors.New("error at scan")
