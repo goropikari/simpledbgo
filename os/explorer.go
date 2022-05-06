@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 type opener interface {

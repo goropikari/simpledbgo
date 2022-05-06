@@ -1,6 +1,6 @@
 package metadata
 
-import "github.com/goropikari/simpledbgo/backend/domain"
+import "github.com/goropikari/simpledbgo/domain"
 
 // StatInfo is a model of statistical information.
 type StatInfo struct {

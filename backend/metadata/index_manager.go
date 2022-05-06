@@ -1,7 +1,7 @@
 package metadata
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 // IndexManager is an index manager.

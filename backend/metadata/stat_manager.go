@@ -3,7 +3,7 @@ package metadata
 import (
 	"sync"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 // StatManager is stat manager.

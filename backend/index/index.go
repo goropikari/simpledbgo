@@ -1,6 +1,6 @@
 package index
 
-import "github.com/goropikari/simpledbgo/backend/domain"
+import "github.com/goropikari/simpledbgo/domain"
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 

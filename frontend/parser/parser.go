@@ -3,7 +3,7 @@ package parser
 import (
 	"errors"
 
-	"github.com/goropikari/simpledbgo/frontend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 // ErrParse is a parse error.
@@ -82,8 +82,8 @@ func (parser *Parser) Query() (*domain.QueryData, error) {
 	return domain.NewQueryData(fields, tables, pred), nil
 }
 
-func (parser *Parser) selectList() ([]domain.Field, error) {
-	fields := make([]domain.Field, 0)
+func (parser *Parser) selectList() ([]domain.FieldName, error) {
+	fields := make([]domain.FieldName, 0)
 	fld, err := parser.field()
 	if err != nil {
 		return nil, err
@@ -157,14 +157,14 @@ func (parser *Parser) predicate() (domain.Predicate, error) {
 	return pred, nil
 }
 
-func (parser *Parser) field() (domain.Field, error) {
+func (parser *Parser) field() (domain.FieldName, error) {
 	if parser.match(domain.TStar) {
 		err := parser.eatToken(domain.TStar)
 		if err != nil {
 			return "", err
 		}
 
-		return domain.NewField("*"), nil
+		return domain.NewFieldName("*")
 	}
 
 	id, err := parser.eatIdentifier()
@@ -172,7 +172,7 @@ func (parser *Parser) field() (domain.Field, error) {
 		return "", err
 	}
 
-	return domain.NewField(id), nil
+	return domain.NewFieldName(id)
 }
 
 func (parser *Parser) table() (domain.TableName, error) {
@@ -181,7 +181,7 @@ func (parser *Parser) table() (domain.TableName, error) {
 		return "", err
 	}
 
-	return domain.NewTableName(id), nil
+	return domain.NewTableName(id)
 }
 
 func (parser *Parser) expression() (domain.Expression, error) {
@@ -192,7 +192,12 @@ func (parser *Parser) expression() (domain.Expression, error) {
 			return domain.Expression{}, err
 		}
 
-		return domain.NewFieldExpression(domain.NewField(id)), nil
+		fldName, err := domain.NewFieldName(id)
+		if err != nil {
+			return domain.Expression{}, err
+		}
+
+		return domain.NewFieldNameExpression(fldName), nil
 	case parser.match(domain.TString) || parser.match(domain.TInt32):
 		c, err := parser.constant()
 		if err != nil {

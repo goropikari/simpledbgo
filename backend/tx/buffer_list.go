@@ -1,7 +1,7 @@
 package tx
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	ls "github.com/goropikari/simpledbgo/lib/list"
 )
 

@@ -4,7 +4,7 @@ import (
 	goos "os"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/os"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"

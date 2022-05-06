@@ -3,7 +3,7 @@ package parser_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledbgo/frontend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/frontend/parser"
 	"github.com/stretchr/testify/require"
 )
@@ -12,11 +12,11 @@ func TestParser(t *testing.T) {
 
 	pred := domain.NewPredicate()
 	pred.Add(domain.NewTerm(
-		domain.NewFieldExpression("id"),
+		domain.NewFieldNameExpression("id"),
 		domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(123))),
 	))
 	pred.Add(domain.NewTerm(
-		domain.NewFieldExpression("name"),
+		domain.NewFieldNameExpression("name"),
 		domain.NewConstExpression(domain.NewConstant(domain.VString, "Mike's dog")),
 	))
 
@@ -48,7 +48,7 @@ func TestParser(t *testing.T) {
 				domain.NewToken(domain.TString, "Mike's dog"),
 			},
 			expected: domain.NewQueryData(
-				[]domain.Field{"*", "id", "name"},
+				[]domain.FieldName{"*", "id", "name"},
 				[]domain.TableName{"foo_bar", "fizz_baz"},
 				pred,
 			),

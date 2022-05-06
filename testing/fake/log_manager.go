@@ -4,7 +4,7 @@ import (
 	golog "log"
 	goos "os"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/backend/log"
 	"github.com/goropikari/simpledbgo/lib/bytes"
 )

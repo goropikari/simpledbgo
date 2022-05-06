@@ -3,7 +3,7 @@ package lexer_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledbgo/frontend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/frontend/lexer"
 	"github.com/stretchr/testify/require"
 )

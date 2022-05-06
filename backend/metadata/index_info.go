@@ -1,9 +1,9 @@
 package metadata
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/index"
 	"github.com/goropikari/simpledbgo/backend/index/hash"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 const (

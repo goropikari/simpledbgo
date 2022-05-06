@@ -3,7 +3,7 @@ package tx
 import (
 	"sync"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 // NumberGenerator is generator of tx number.

@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/meta"
 )
 

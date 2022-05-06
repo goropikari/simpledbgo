@@ -1,8 +1,8 @@
 package logrecord
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/tx/logrecord/protobuf"
+	"github.com/goropikari/simpledbgo/domain"
 	"google.golang.org/protobuf/proto"
 )
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/meta"
 )
 

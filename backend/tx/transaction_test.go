@@ -3,7 +3,7 @@ package tx_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/backend/tx"
 	"github.com/goropikari/simpledbgo/backend/tx/logrecord"
 	"github.com/goropikari/simpledbgo/testing/fake"

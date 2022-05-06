@@ -3,7 +3,7 @@ package domain
 // Expression is node of expression.
 type Expression struct {
 	constant Constant
-	field    Field
+	field    FieldName
 }
 
 // NewConstExpression constructs a const expression.
@@ -11,7 +11,7 @@ func NewConstExpression(c Constant) Expression {
 	return Expression{constant: c}
 }
 
-// NewFieldExpression constructs a field expression.
-func NewFieldExpression(fld Field) Expression {
+// NewFieldNameExpression constructs a field expression.
+func NewFieldNameExpression(fld FieldName) Expression {
 	return Expression{field: fld}
 }

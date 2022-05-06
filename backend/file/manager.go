@@ -4,7 +4,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/pkg/errors"
 )
 

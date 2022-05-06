@@ -1,8 +1,8 @@
 package tx
 
 import (
-	"github.com/goropikari/simpledbgo/backend/domain"
 	"github.com/goropikari/simpledbgo/backend/tx/logrecord"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/meta"
 )

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goropikari/simpledbgo/frontend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 var keywords = []string{

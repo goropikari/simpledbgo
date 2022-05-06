@@ -3,7 +3,7 @@ package hash
 import (
 	"fmt"
 
-	"github.com/goropikari/simpledbgo/backend/domain"
+	"github.com/goropikari/simpledbgo/domain"
 )
 
 const (

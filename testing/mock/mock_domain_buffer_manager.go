@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	domain "github.com/goropikari/simpledbgo/backend/domain"
+	domain "github.com/goropikari/simpledbgo/domain"
 )
 
 // MockBufferManager is a mock of BufferManager interface.

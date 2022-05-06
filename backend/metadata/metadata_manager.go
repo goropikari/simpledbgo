@@ -1,6 +1,6 @@
 package metadata
 
-import "github.com/goropikari/simpledbgo/backend/domain"
+import "github.com/goropikari/simpledbgo/domain"
 
 // Manager manages metadata.
 type Manager struct {
