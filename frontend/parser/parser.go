@@ -6,16 +6,17 @@ import (
 	"github.com/goropikari/simpledbgo/frontend/domain"
 )
 
-var (
-	ErrParse = errors.New("parse error")
-)
+// ErrParse is a parse error.
+var ErrParse = errors.New("parse error")
 
+// Parser is a model of parser.
 type Parser struct {
 	tokens []domain.Token
 	pos    int
 	len    int
 }
 
+// NewParser constructs a Parser.
 func NewParser(tokens []domain.Token) *Parser {
 	return &Parser{
 		tokens: tokens,
@@ -43,6 +44,7 @@ func (parser *Parser) term() (domain.Term, error) {
 	return domain.NewTerm(lhs, rhs), nil
 }
 
+// Query connstructs a query parse tree.
 func (parser *Parser) Query() (*domain.QueryData, error) {
 	err := parser.eatKeyword("select")
 	if err != nil {
@@ -254,7 +256,7 @@ func (parser *Parser) eatIdentifier() (string, error) {
 		return "", ErrParse
 	}
 
-	id := parser.tokens[parser.pos].Value().(string)
+	id, _ := parser.tokens[parser.pos].Value().(string)
 	parser.pos++
 
 	return id, nil
@@ -265,7 +267,7 @@ func (parser *Parser) eatInt32() (int32, error) {
 		return 0, ErrParse
 	}
 
-	num := parser.tokens[parser.pos].Value().(int32)
+	num, _ := parser.tokens[parser.pos].Value().(int32)
 	parser.pos++
 
 	return num, nil
@@ -276,7 +278,7 @@ func (parser *Parser) eatString() (string, error) {
 		return "", ErrParse
 	}
 
-	str := parser.tokens[parser.pos].Value().(string)
+	str, _ := parser.tokens[parser.pos].Value().(string)
 	parser.pos++
 
 	return str, nil
