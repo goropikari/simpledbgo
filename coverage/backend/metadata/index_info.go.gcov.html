@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-01 05:44:49</td>
+            <td class="headerValue">2022-05-06 15:02:10</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -63,9 +63,9 @@
 <a name="1"><span class="lineNum">       1 </span>            : package metadata</a>
 <a name="2"><span class="lineNum">       2 </span>            : </a>
 <a name="3"><span class="lineNum">       3 </span>            : import (</a>
-<a name="4"><span class="lineNum">       4 </span>            :         &quot;github.com/goropikari/simpledbgo/backend/domain&quot;</a>
-<a name="5"><span class="lineNum">       5 </span>            :         &quot;github.com/goropikari/simpledbgo/backend/index&quot;</a>
-<a name="6"><span class="lineNum">       6 </span>            :         &quot;github.com/goropikari/simpledbgo/backend/index/hash&quot;</a>
+<a name="4"><span class="lineNum">       4 </span>            :         &quot;github.com/goropikari/simpledbgo/backend/index&quot;</a>
+<a name="5"><span class="lineNum">       5 </span>            :         &quot;github.com/goropikari/simpledbgo/backend/index/hash&quot;</a>
+<a name="6"><span class="lineNum">       6 </span>            :         &quot;github.com/goropikari/simpledbgo/domain&quot;</a>
 <a name="7"><span class="lineNum">       7 </span>            : )</a>
 <a name="8"><span class="lineNum">       8 </span>            : </a>
 <a name="9"><span class="lineNum">       9 </span>            : const (</a>
@@ -127,7 +127,7 @@
 <a name="65"><span class="lineNum">      65 </span><span class="lineCov">          1 :         sch := domain.NewSchema()</span></a>
 <a name="66"><span class="lineNum">      66 </span><span class="lineCov">          1 :         sch.AddInt32Field(fldBlock)</span></a>
 <a name="67"><span class="lineNum">      67 </span><span class="lineCov">          1 :         sch.AddInt32Field(fldID)</span></a>
-<a name="68"><span class="lineNum">      68 </span><span class="lineCov">          2 :         if tblSchema.Type(fldName) == domain.Int32 {</span></a>
+<a name="68"><span class="lineNum">      68 </span><span class="lineCov">          2 :         if tblSchema.Type(fldName) == domain.FInt32 {</span></a>
 <a name="69"><span class="lineNum">      69 </span><span class="lineCov">          1 :                 sch.AddInt32Field(fldDataVal)</span></a>
 <a name="70"><span class="lineNum">      70 </span><span class="lineCov">          2 :         } else {</span></a>
 <a name="71"><span class="lineNum">      71 </span><span class="lineCov">          1 :                 fldLen := tblSchema.Length(fldName)</span></a>
