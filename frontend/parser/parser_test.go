@@ -486,3 +486,170 @@ func TestParser_ExecCmd_Delete_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestParser_ExecCmd_Modify(t *testing.T) {
+	tests := []struct {
+		name     string
+		tokens   []domain.Token
+		expected *domain.ModifyData
+	}{
+		{
+			name: "parse update cmd",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "set"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "mike"),
+			},
+			expected: domain.NewModifyData(
+				domain.TableName("foo"),
+				domain.FieldName("name"),
+				domain.NewConstExpression(
+					domain.NewConstant(
+						domain.VString,
+						"mike",
+					),
+				),
+				nil,
+			),
+		},
+		{
+			name: "parse update cmd with predicate",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "set"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "mike"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "neko"),
+			},
+			expected: domain.NewModifyData(
+				domain.TableName("foo"),
+				domain.FieldName("name"),
+				domain.NewConstExpression(
+					domain.NewConstant(
+						domain.VString,
+						"mike",
+					),
+				),
+				domain.NewPredicate(
+					[]domain.Term{
+						domain.NewTerm(
+							domain.NewFieldNameExpression(domain.FieldName("name")),
+							domain.NewConstExpression(
+								domain.NewConstant(
+									domain.VString,
+									"neko",
+								),
+							),
+						),
+					},
+				),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			cmd, err := p.ExecCmd()
+
+			require.NoError(t, err)
+
+			got, ok := cmd.(*domain.ModifyData)
+			require.True(t, ok)
+
+			require.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestParser_ExecCmd_Modify_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		tokens []domain.Token
+	}{
+		{
+			name: "missing update",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TIdentifier, "foo"),
+			},
+		},
+		{
+			name: "missing table name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TKeyword, "set"),
+			},
+		},
+		{
+			name: "missing set",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TIdentifier, "name"),
+			},
+		},
+		{
+			name: "missing field",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "set"),
+				domain.NewToken(domain.TEqual, "="),
+			},
+		},
+		{
+			name: "missing equal",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "set"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TString, "mike"),
+			},
+		},
+		{
+			name: "missing value",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "set"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+			},
+		},
+		{
+			name: "missing predicate field",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "update"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "set"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "mike"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "name"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			_, err := p.ExecCmd()
+
+			require.Error(t, err)
+		})
+	}
+}

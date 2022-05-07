@@ -243,7 +243,55 @@ func (parser *Parser) deleteCmd() (domain.ExecData, error) {
 }
 
 func (parser *Parser) modifyCmd() (domain.ExecData, error) {
-	return nil, errors.New("not implemented")
+	err := parser.eatKeyword("update")
+	if err != nil {
+		return nil, err
+	}
+
+	tblStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, err
+	}
+
+	tblName, err := domain.NewTableName(tblStr)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatKeyword("set")
+	if err != nil {
+		return nil, err
+	}
+
+	fld, err := parser.field()
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TEqual)
+	if err != nil {
+		return nil, err
+	}
+
+	expr, err := parser.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	var pred *domain.Predicate
+	if parser.matchKeyword("where") {
+		err = parser.eatKeyword("where")
+		if err != nil {
+			return nil, err
+		}
+
+		pred, err = parser.predicate()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return domain.NewModifyData(tblName, fld, expr, pred), nil
 }
 
 func (parser *Parser) createCmd() (domain.ExecData, error) {
