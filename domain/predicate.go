@@ -6,11 +6,8 @@ type Predicate struct {
 }
 
 // NewPredicate constructs a predicate.
-func NewPredicate() Predicate {
-	return Predicate{}
-}
-
-// Add adds a term.
-func (pred *Predicate) Add(term Term) {
-	pred.terms = append(pred.terms, term)
+func NewPredicate(terms []Term) *Predicate {
+	return &Predicate{
+		terms: terms,
+	}
 }

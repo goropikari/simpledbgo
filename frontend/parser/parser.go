@@ -66,7 +66,7 @@ func (parser *Parser) Query() (*domain.QueryData, error) {
 		return nil, err
 	}
 
-	var pred domain.Predicate
+	var pred *domain.Predicate
 	if parser.matchKeyword("where") {
 		err = parser.eatKeyword("where")
 		if err != nil {
@@ -137,17 +137,17 @@ func (parser *Parser) tableList() ([]domain.TableName, error) {
 func (parser *Parser) ExecCmd() (domain.ExecData, error) {
 	switch {
 	case parser.matchKeyword("insert"):
-		return parser.insert()
+		return parser.insertCmd()
 	case parser.matchKeyword("delete"):
-		return parser.delete()
+		return parser.deleteCmd()
 	case parser.matchKeyword("update"):
-		return parser.modify()
+		return parser.modifyCmd()
 	default:
-		return parser.create()
+		return parser.createCmd()
 	}
 }
 
-func (parser *Parser) insert() (domain.ExecData, error) {
+func (parser *Parser) insertCmd() (domain.ExecData, error) {
 	err := parser.eatKeyword("insert")
 	if err != nil {
 		return nil, err
@@ -205,15 +205,48 @@ func (parser *Parser) insert() (domain.ExecData, error) {
 	return domain.NewInsertData(tblName, flds, vals), nil
 }
 
-func (parser *Parser) delete() (domain.ExecData, error) {
+func (parser *Parser) deleteCmd() (domain.ExecData, error) {
+	err := parser.eatKeyword("delete")
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatKeyword("from")
+	if err != nil {
+		return nil, err
+	}
+
+	tblStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, err
+	}
+
+	tblName, err := domain.NewTableName(tblStr)
+	if err != nil {
+		return nil, err
+	}
+
+	var pred *domain.Predicate
+	if parser.matchKeyword("where") {
+		err := parser.eatKeyword("where")
+		if err != nil {
+			return nil, err
+		}
+
+		pred, err = parser.predicate()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return domain.NewDeleteData(tblName, pred), nil
+}
+
+func (parser *Parser) modifyCmd() (domain.ExecData, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (parser *Parser) modify() (domain.ExecData, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (parser *Parser) create() (domain.ExecData, error) {
+func (parser *Parser) createCmd() (domain.ExecData, error) {
 	return nil, errors.New("not implemented")
 }
 
@@ -265,28 +298,29 @@ func (parser *Parser) constList() ([]domain.Constant, error) {
 	return consts, nil
 }
 
-func (parser *Parser) predicate() (domain.Predicate, error) {
-	pred := domain.NewPredicate()
+func (parser *Parser) predicate() (*domain.Predicate, error) {
+	terms := make([]domain.Term, 0)
 	term, err := parser.term()
 	if err != nil {
-		return domain.Predicate{}, err
+		return &domain.Predicate{}, err
 	}
-	pred.Add(term)
+
+	terms = append(terms, term)
 
 	for parser.matchKeyword("and") {
 		err = parser.eatKeyword("and")
 		if err != nil {
-			return domain.Predicate{}, err
+			return &domain.Predicate{}, err
 		}
 
 		term, err := parser.term()
 		if err != nil {
-			return domain.Predicate{}, err
+			return &domain.Predicate{}, err
 		}
-		pred.Add(term)
+		terms = append(terms, term)
 	}
 
-	return pred, nil
+	return domain.NewPredicate(terms), nil
 }
 
 func (parser *Parser) field() (domain.FieldName, error) {

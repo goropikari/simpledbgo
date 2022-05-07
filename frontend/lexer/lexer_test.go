@@ -70,6 +70,28 @@ func TestLexer(t *testing.T) {
 				domain.NewToken(domain.TRParen, ")"),
 			},
 		},
+		{
+			name:  "delete command",
+			query: "DELETE FROM foo",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+			},
+		},
+		{
+			name:  "delete command with predicate",
+			query: "DELETE FROM foo where id = 123",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

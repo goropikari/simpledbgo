@@ -9,17 +9,6 @@ import (
 )
 
 func TestParser_Query(t *testing.T) {
-
-	pred := domain.NewPredicate()
-	pred.Add(domain.NewTerm(
-		domain.NewFieldNameExpression("id"),
-		domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(123))),
-	))
-	pred.Add(domain.NewTerm(
-		domain.NewFieldNameExpression("name"),
-		domain.NewConstExpression(domain.NewConstant(domain.VString, "Mike's dog")),
-	))
-
 	tests := []struct {
 		name     string
 		tokens   []domain.Token
@@ -50,7 +39,16 @@ func TestParser_Query(t *testing.T) {
 			expected: domain.NewQueryData(
 				[]domain.FieldName{"*", "id", "name"},
 				[]domain.TableName{"foo_bar", "fizz_baz"},
-				pred,
+				domain.NewPredicate([]domain.Term{
+					domain.NewTerm(
+						domain.NewFieldNameExpression("id"),
+						domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(123))),
+					),
+					domain.NewTerm(
+						domain.NewFieldNameExpression("name"),
+						domain.NewConstExpression(domain.NewConstant(domain.VString, "Mike's dog")),
+					),
+				}),
 			),
 		},
 	}
@@ -180,7 +178,7 @@ func TestParser_Error(t *testing.T) {
 	}
 }
 
-func TestParser_ExecCmd(t *testing.T) {
+func TestParser_ExecCmd_Insert(t *testing.T) {
 	tests := []struct {
 		name     string
 		tokens   []domain.Token
@@ -232,7 +230,7 @@ func TestParser_ExecCmd(t *testing.T) {
 	}
 }
 
-func TestParser_ExecCmd_Error(t *testing.T) {
+func TestParser_ExecCmd_Insert_Error(t *testing.T) {
 	tests := []struct {
 		name   string
 		tokens []domain.Token
@@ -356,6 +354,123 @@ func TestParser_ExecCmd_Error(t *testing.T) {
 				domain.NewToken(domain.TInt32, int32(123)),
 				domain.NewToken(domain.TComma, ","),
 				domain.NewToken(domain.TString, "mike"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			_, err := p.ExecCmd()
+
+			require.Error(t, err)
+		})
+	}
+}
+
+func TestParser_ExecCmd_Delete(t *testing.T) {
+	tests := []struct {
+		name     string
+		tokens   []domain.Token
+		expected *domain.DeleteData
+	}{
+		{
+			name: "parse delete",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+			},
+			expected: domain.NewDeleteData(domain.TableName("foo"), nil),
+		},
+		{
+			name: "parse delete with predicate",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+			},
+			expected: domain.NewDeleteData(
+				domain.TableName("foo"),
+				domain.NewPredicate([]domain.Term{
+					domain.NewTerm(
+						domain.NewFieldNameExpression("id"),
+						domain.NewConstExpression(
+							domain.NewConstant(domain.VInt32, int32(123)),
+						),
+					),
+				}),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			cmd, err := p.ExecCmd()
+
+			require.NoError(t, err)
+
+			got, ok := cmd.(*domain.DeleteData)
+			require.True(t, ok)
+
+			require.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestParser_ExecCmd_Delete_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		tokens []domain.Token
+	}{
+		{
+			name: "missing delete",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "from"),
+			},
+		},
+		{
+			name: "missing from",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+			},
+		},
+		{
+			name: "missing table name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TKeyword, "where"),
+			},
+		},
+		{
+			name: "missing predicate",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TEqual, "="),
+			},
+		},
+		{
+			name: "missing predicate",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "delete"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TEqual, "="),
 			},
 		},
 	}

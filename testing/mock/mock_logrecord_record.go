@@ -8,8 +8,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	domain "github.com/goropikari/simpledbgo/domain"
 	logrecord "github.com/goropikari/simpledbgo/backend/tx/logrecord"
+	domain "github.com/goropikari/simpledbgo/domain"
 )
 
 // MockTxVisitor is a mock of TxVisitor interface.
