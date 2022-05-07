@@ -46,6 +46,30 @@ func TestLexer(t *testing.T) {
 				domain.NewToken(domain.TIdentifier, "foo"),
 			},
 		},
+		{
+			name:  "insert command",
+			query: "INSERT INTO foo (id,name, address) VALUES (123, 'mike','tokyo')",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "address"),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TKeyword, "values"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TString, "mike"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TString, "tokyo"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

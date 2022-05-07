@@ -133,6 +133,138 @@ func (parser *Parser) tableList() ([]domain.TableName, error) {
 	return tables, nil
 }
 
+// ExecCmd parses execution command.
+func (parser *Parser) ExecCmd() (domain.ExecData, error) {
+	switch {
+	case parser.matchKeyword("insert"):
+		return parser.insert()
+	case parser.matchKeyword("delete"):
+		return parser.delete()
+	case parser.matchKeyword("update"):
+		return parser.modify()
+	default:
+		return parser.create()
+	}
+}
+
+func (parser *Parser) insert() (domain.ExecData, error) {
+	err := parser.eatKeyword("insert")
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatKeyword("into")
+	if err != nil {
+		return nil, err
+	}
+
+	tblNameStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, err
+	}
+	tblName, err := domain.NewTableName(tblNameStr)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TLParen)
+	if err != nil {
+		return nil, err
+	}
+
+	flds, err := parser.fieldList()
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TRParen)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatKeyword("values")
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TLParen)
+	if err != nil {
+		return nil, err
+	}
+
+	vals, err := parser.constList()
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TRParen)
+	if err != nil {
+		return nil, err
+	}
+
+	return domain.NewInsertData(tblName, flds, vals), nil
+}
+
+func (parser *Parser) delete() (domain.ExecData, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (parser *Parser) modify() (domain.ExecData, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (parser *Parser) create() (domain.ExecData, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (parser *Parser) fieldList() ([]domain.FieldName, error) {
+	fields := make([]domain.FieldName, 0)
+	fld, err := parser.field()
+	if err != nil {
+		return nil, err
+	}
+
+	fields = append(fields, fld)
+
+	for parser.match(domain.TComma) {
+		err = parser.eatToken(domain.TComma)
+		if err != nil {
+			return nil, err
+		}
+		fld, err = parser.field()
+		if err != nil {
+			return nil, err
+		}
+		fields = append(fields, fld)
+	}
+
+	return fields, nil
+}
+
+func (parser *Parser) constList() ([]domain.Constant, error) {
+	consts := make([]domain.Constant, 0)
+	cons, err := parser.constant()
+	if err != nil {
+		return nil, err
+	}
+
+	consts = append(consts, cons)
+
+	for parser.match(domain.TComma) {
+		err = parser.eatToken(domain.TComma)
+		if err != nil {
+			return nil, err
+		}
+		cons, err = parser.constant()
+		if err != nil {
+			return nil, err
+		}
+		consts = append(consts, cons)
+	}
+
+	return consts, nil
+}
+
 func (parser *Parser) predicate() (domain.Predicate, error) {
 	pred := domain.NewPredicate()
 	term, err := parser.term()

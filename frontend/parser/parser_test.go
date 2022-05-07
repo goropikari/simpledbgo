@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParser(t *testing.T) {
+func TestParser_Query(t *testing.T) {
 
 	pred := domain.NewPredicate()
 	pred.Add(domain.NewTerm(
@@ -178,5 +178,196 @@ func TestParser_Error(t *testing.T) {
 			require.Error(t, err)
 		})
 	}
+}
 
+func TestParser_ExecCmd(t *testing.T) {
+	tests := []struct {
+		name     string
+		tokens   []domain.Token
+		expected *domain.InsertData
+	}{
+		{
+			name: "parse insert",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TKeyword, "values"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TString, "mike"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+			expected: domain.NewInsertData(
+				domain.TableName("foo"),
+				[]domain.FieldName{"id", "name"},
+				[]domain.Constant{
+					domain.NewConstant(domain.VInt32, int32(123)),
+					domain.NewConstant(domain.VString, "mike"),
+				},
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			cmd, err := p.ExecCmd()
+
+			require.NoError(t, err)
+
+			got, ok := cmd.(*domain.InsertData)
+			require.True(t, ok)
+
+			require.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestParser_ExecCmd_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		tokens []domain.Token
+	}{
+		{
+			name: "missing into",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+			},
+		},
+		{
+			name: "missing table name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TLParen, "("),
+			},
+		},
+		{
+			name: "missing first left paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TIdentifier, "id"),
+			},
+		},
+		{
+			name: "missing field",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TComma, ","),
+			},
+		},
+		{
+			name: "missing comma",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TIdentifier, "name"),
+			},
+		},
+		{
+			name: "missing first right paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "values"),
+			},
+		},
+		{
+			name: "missing values",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TLParen, "("),
+			},
+		},
+		{
+			name: "missing second left paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TKeyword, "values"),
+				domain.NewToken(domain.TInt32, int32(123)),
+			},
+		},
+		{
+			name: "missing value",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TKeyword, "values"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TComma, ","),
+			},
+		},
+		{
+			name: "missing second rigth paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "insert"),
+				domain.NewToken(domain.TKeyword, "into"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TKeyword, "values"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TString, "mike"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			_, err := p.ExecCmd()
+
+			require.Error(t, err)
+		})
+	}
 }

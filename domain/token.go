@@ -27,6 +27,12 @@ const (
 
 	// TComma is comma token type.
 	TComma
+
+	// TLParen is left parentheses token type.
+	TLParen
+
+	// TRParen is right parentheses token type.
+	TRParen
 )
 
 // Token is model of token.

@@ -69,6 +69,10 @@ func (lex *Lexer) scan() (domain.Token, error) {
 		return domain.NewToken(domain.TEqual, "="), nil
 	case ',':
 		return domain.NewToken(domain.TComma, ","), nil
+	case '(':
+		return domain.NewToken(domain.TLParen, "("), nil
+	case ')':
+		return domain.NewToken(domain.TRParen, ")"), nil
 	}
 
 	err = lex.unreadByte()
@@ -127,6 +131,14 @@ func (lex *Lexer) scanInteger() (string, error) {
 		}
 
 		if isWhitespace(c) {
+			break
+		}
+		if c == ',' {
+			err := lex.unreadByte()
+			if err != nil {
+				return "", errors.New("not number")
+			}
+
 			break
 		}
 		if !isNumber(c) {
