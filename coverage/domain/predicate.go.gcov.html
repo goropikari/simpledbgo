@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntry">0</td>
-            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntry">5</td>
             <td class="headerCovTableEntryLo">0.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-06 15:02:10</td>
+            <td class="headerValue">2022-05-07 15:59:20</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -68,14 +68,11 @@
 <a name="6"><span class="lineNum">       6 </span>            : }</a>
 <a name="7"><span class="lineNum">       7 </span>            : </a>
 <a name="8"><span class="lineNum">       8 </span>            : // NewPredicate constructs a predicate.</a>
-<a name="9"><span class="lineNum">       9 </span><span class="lineNoCov">          0 : func NewPredicate() Predicate {</span></a>
-<a name="10"><span class="lineNum">      10 </span><span class="lineNoCov">          0 :         return Predicate{}</span></a>
-<a name="11"><span class="lineNum">      11 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="12"><span class="lineNum">      12 </span>            : </a>
-<a name="13"><span class="lineNum">      13 </span>            : // Add adds a term.</a>
-<a name="14"><span class="lineNum">      14 </span><span class="lineNoCov">          0 : func (pred *Predicate) Add(term Term) {</span></a>
-<a name="15"><span class="lineNum">      15 </span><span class="lineNoCov">          0 :         pred.terms = append(pred.terms, term)</span></a>
-<a name="16"><span class="lineNum">      16 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="9"><span class="lineNum">       9 </span><span class="lineNoCov">          0 : func NewPredicate(terms []Term) *Predicate {</span></a>
+<a name="10"><span class="lineNum">      10 </span><span class="lineNoCov">          0 :         return &amp;Predicate{</span></a>
+<a name="11"><span class="lineNum">      11 </span><span class="lineNoCov">          0 :                 terms: terms,</span></a>
+<a name="12"><span class="lineNum">      12 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="13"><span class="lineNum">      13 </span><span class="lineNoCov">          0 : }</span></a>
 </pre>
       </td>
     </tr>
