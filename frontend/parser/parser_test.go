@@ -907,3 +907,226 @@ func TestParser_ExecCmd_CreateTable_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestParser_ExecCmd_CreateView(t *testing.T) {
+	tests := []struct {
+		name     string
+		tokens   []domain.Token
+		expected *domain.CreateViewData
+	}{
+		{
+			name: "parse create table",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "view"),
+				domain.NewToken(domain.TIdentifier, "view_foo"),
+				domain.NewToken(domain.TKeyword, "as"),
+				domain.NewToken(domain.TKeyword, "select"),
+				domain.NewToken(domain.TStar, "*"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo_bar"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "fizz_baz"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TKeyword, "and"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "Mike's dog"),
+			},
+			expected: domain.NewCreateViewData(
+				domain.ViewName("view_foo"),
+				domain.NewQueryData(
+					[]domain.FieldName{"*", "id", "name"},
+					[]domain.TableName{"foo_bar", "fizz_baz"},
+					domain.NewPredicate([]domain.Term{
+						domain.NewTerm(
+							domain.NewFieldNameExpression("id"),
+							domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(123))),
+						),
+						domain.NewTerm(
+							domain.NewFieldNameExpression("name"),
+							domain.NewConstExpression(domain.NewConstant(domain.VString, "Mike's dog")),
+						),
+					}),
+				),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			cmd, err := p.ExecCmd()
+
+			require.NoError(t, err)
+
+			got, ok := cmd.(*domain.CreateViewData)
+			require.True(t, ok)
+
+			require.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestParser_ExecCmd_CreateView_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		tokens []domain.Token
+	}{
+		{
+			name: "missing create",
+			tokens: []domain.Token{
+				// domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "view"),
+				domain.NewToken(domain.TIdentifier, "view_foo"),
+				domain.NewToken(domain.TKeyword, "as"),
+				domain.NewToken(domain.TKeyword, "select"),
+				domain.NewToken(domain.TStar, "*"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo_bar"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "fizz_baz"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TKeyword, "and"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "Mike's dog"),
+			},
+		},
+		{
+			name: "missing view",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				// domain.NewToken(domain.TKeyword, "view"),
+				domain.NewToken(domain.TIdentifier, "view_foo"),
+				domain.NewToken(domain.TKeyword, "as"),
+				domain.NewToken(domain.TKeyword, "select"),
+				domain.NewToken(domain.TStar, "*"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo_bar"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "fizz_baz"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TKeyword, "and"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "Mike's dog"),
+			},
+		},
+		{
+			name: "missing view name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "view"),
+				// domain.NewToken(domain.TIdentifier, "view_foo"),
+				domain.NewToken(domain.TKeyword, "as"),
+				domain.NewToken(domain.TKeyword, "select"),
+				domain.NewToken(domain.TStar, "*"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo_bar"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "fizz_baz"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TKeyword, "and"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "Mike's dog"),
+			},
+		},
+		{
+			name: "missing as",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "view"),
+				domain.NewToken(domain.TIdentifier, "view_foo"),
+				// domain.NewToken(domain.TKeyword, "as"),
+				domain.NewToken(domain.TKeyword, "select"),
+				domain.NewToken(domain.TStar, "*"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo_bar"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "fizz_baz"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TKeyword, "and"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "Mike's dog"),
+			},
+		},
+		{
+			name: "missing select",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "view"),
+				domain.NewToken(domain.TIdentifier, "view_foo"),
+				domain.NewToken(domain.TKeyword, "as"),
+				// domain.NewToken(domain.TKeyword, "select"),
+				domain.NewToken(domain.TStar, "*"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "from"),
+				domain.NewToken(domain.TIdentifier, "foo_bar"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "fizz_baz"),
+				domain.NewToken(domain.TKeyword, "where"),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TKeyword, "and"),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TEqual, "="),
+				domain.NewToken(domain.TString, "Mike's dog"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			_, err := p.ExecCmd()
+
+			require.Error(t, err)
+		})
+	}
+}

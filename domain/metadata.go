@@ -9,6 +9,9 @@ const (
 	// MaxTableNameLength is maximum table name length.
 	MaxTableNameLength = 16
 
+	// MaxViewNameLength is maximum view name length.
+	MaxViewNameLength = 16
+
 	// MaxIndexNameLength is maximum index name length.
 	MaxIndexNameLength = 16
 
@@ -16,8 +19,13 @@ const (
 	MaxViewDefLength = 100
 )
 
-// ErrExceedMaxFieldNameLength is an error that means exceeding maximum field name length.
-var ErrExceedMaxFieldNameLength = errors.Errorf("exceeds maximum field name length %v", MaxFieldNameLength)
+var (
+	// ErrExceedMaxFieldNameLength is an error that means exceeding maximum field name length.
+	ErrExceedMaxFieldNameLength = errors.Errorf("exceeds maximum field name length %v", MaxFieldNameLength)
+
+	// ErrExceedMaxViewNameLength is an error that means exceeding maximum view name length.
+	ErrExceedMaxViewNameLength = errors.Errorf("exceeds maximum view name length %v", MaxViewNameLength)
+)
 
 // SlotID is identifier of slot.
 type SlotID int32
@@ -90,4 +98,16 @@ func (name TableName) String() string {
 // ToFileName converts TableName into FileName.
 func (name TableName) ToFileName() FileName {
 	return FileName(name)
+}
+
+// ViewName is type of view name.
+type ViewName string
+
+// NewViewName constructs a ViewName.
+func NewViewName(name string) (ViewName, error) {
+	if len(name) > MaxViewNameLength {
+		return "", ErrExceedMaxViewNameLength
+	}
+
+	return ViewName(name), nil
 }

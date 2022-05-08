@@ -419,7 +419,32 @@ func (parser *Parser) fieldType(fld domain.FieldName) (*domain.Schema, error) {
 }
 
 func (parser *Parser) createView() (domain.ExecData, error) {
-	return nil, errors.New("not implemented")
+	err := parser.eatKeyword("view")
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	viewNameStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	viewName, err := domain.NewViewName(viewNameStr)
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	err = parser.eatKeyword("as")
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	qd, err := parser.Query()
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	return domain.NewCreateViewData(viewName, qd), nil
 }
 
 func (parser *Parser) createIndex() (domain.ExecData, error) {
