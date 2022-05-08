@@ -92,6 +92,28 @@ func TestLexer(t *testing.T) {
 				domain.NewToken(domain.TInt32, int32(123)),
 			},
 		},
+		{
+			name: "create table command",
+			query: `CREATE TABLE foo (
+				id int,
+				name varchar(255)
+			)`,
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

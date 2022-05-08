@@ -130,19 +130,16 @@ func (lex *Lexer) scanInteger() (string, error) {
 			return "", err
 		}
 
-		if isWhitespace(c) {
-			break
+		if isAlpha(c) {
+			return "", errors.New("not number")
 		}
-		if c == ',' {
+		if !isNumber(c) {
 			err := lex.unreadByte()
 			if err != nil {
 				return "", errors.New("not number")
 			}
 
 			break
-		}
-		if !isNumber(c) {
-			return "", errors.New("not number")
 		}
 
 		b = append(b, c)

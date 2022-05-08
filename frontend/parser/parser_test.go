@@ -653,3 +653,257 @@ func TestParser_ExecCmd_Modify_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestParser_ExecCmd_CreateTable(t *testing.T) {
+	sch := domain.NewSchema()
+	sch.AddInt32Field("id")
+	sch.AddStringField("name", 255)
+
+	tests := []struct {
+		name     string
+		tokens   []domain.Token
+		expected *domain.CreateTableData
+	}{
+		{
+			name: "parse create table",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+			expected: domain.NewCreateTableData(
+				domain.TableName("foo"),
+				sch,
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			cmd, err := p.ExecCmd()
+
+			require.NoError(t, err)
+
+			got, ok := cmd.(*domain.CreateTableData)
+			require.True(t, ok)
+
+			require.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestParser_ExecCmd_CreateTable_Error(t *testing.T) {
+	sch := domain.NewSchema()
+	sch.AddInt32Field("id")
+	sch.AddStringField("name", 255)
+
+	tests := []struct {
+		name   string
+		tokens []domain.Token
+	}{
+		{
+			name: "missing create",
+			tokens: []domain.Token{
+				// domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing table",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				// domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing table name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				// domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing first left paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				// domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing identifier",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				// domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing type",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				// domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing comma",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				// domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing varchar left paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				// domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing varchar size",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				// domain.NewToken(domain.TInt32, int32(255)),
+				domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing varchar right paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "table"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TKeyword, "int"),
+				domain.NewToken(domain.TComma, ","),
+				domain.NewToken(domain.TIdentifier, "name"),
+				domain.NewToken(domain.TKeyword, "varchar"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TInt32, int32(255)),
+				// domain.NewToken(domain.TRParen, ")"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			_, err := p.ExecCmd()
+
+			require.Error(t, err)
+		})
+	}
+}

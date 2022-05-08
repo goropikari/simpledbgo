@@ -142,8 +142,10 @@ func (parser *Parser) ExecCmd() (domain.ExecData, error) {
 		return parser.deleteCmd()
 	case parser.matchKeyword("update"):
 		return parser.modifyCmd()
-	default:
+	case parser.matchKeyword("create"):
 		return parser.createCmd()
+	default:
+		return nil, ErrParse
 	}
 }
 
@@ -295,6 +297,132 @@ func (parser *Parser) modifyCmd() (domain.ExecData, error) {
 }
 
 func (parser *Parser) createCmd() (domain.ExecData, error) {
+	err := parser.eatKeyword("create")
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	switch {
+	case parser.matchKeyword("table"):
+		return parser.createTable()
+	case parser.matchKeyword("view"):
+		return parser.createView()
+	case parser.matchKeyword("index"):
+		return parser.createIndex()
+	default:
+		return nil, ErrParse
+	}
+}
+
+func (parser *Parser) createTable() (domain.ExecData, error) {
+	err := parser.eatKeyword("table")
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	tblStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, ErrParse
+	}
+	tblName, err := domain.NewTableName(tblStr)
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	err = parser.eatToken(domain.TLParen)
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	sch, err := parser.fieldDefs()
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	err = parser.eatToken(domain.TRParen)
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	return domain.NewCreateTableData(tblName, sch), nil
+}
+
+func (parser *Parser) fieldDefs() (*domain.Schema, error) {
+	sch, err := parser.fieldDef()
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	for parser.match(domain.TComma) {
+		err = parser.eatToken(domain.TComma)
+		if err != nil {
+			return nil, ErrParse
+		}
+
+		sch2, err := parser.fieldDef()
+		if err != nil {
+			return nil, ErrParse
+		}
+
+		sch.AddAllFields(sch2)
+	}
+
+	return sch, nil
+}
+
+func (parser *Parser) fieldDef() (*domain.Schema, error) {
+	fld, err := parser.field()
+	if err != nil {
+		return nil, ErrParse
+	}
+
+	return parser.fieldType(fld)
+}
+
+func (parser *Parser) fieldType(fld domain.FieldName) (*domain.Schema, error) {
+	sch := domain.NewSchema()
+
+	switch {
+	case parser.matchKeyword("int"):
+		err := parser.eatKeyword("int")
+		if err != nil {
+			return nil, err
+		}
+		sch.AddInt32Field(fld)
+	case parser.matchKeyword("varchar"):
+		err := parser.eatKeyword("varchar")
+		if err != nil {
+			return nil, err
+		}
+
+		err = parser.eatToken(domain.TLParen)
+		if err != nil {
+			return nil, err
+		}
+
+		num, err := parser.eatInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		err = parser.eatToken(domain.TRParen)
+		if err != nil {
+			return nil, err
+		}
+
+		sch.AddStringField(fld, int(num))
+	default:
+		return nil, ErrParse
+	}
+
+	return sch, nil
+}
+
+func (parser *Parser) createView() (domain.ExecData, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (parser *Parser) createIndex() (domain.ExecData, error) {
 	return nil, errors.New("not implemented")
 }
 
