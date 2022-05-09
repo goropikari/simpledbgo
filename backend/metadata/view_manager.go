@@ -30,7 +30,7 @@ func CreateViewManager(tblMgr *TableManager, txn domain.Transaction) (*ViewManag
 }
 
 // CreateView defines a view.
-func (viewMgr *ViewManager) CreateView(vName ViewName, vDef ViewDef, txn domain.Transaction) error {
+func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef ViewDef, txn domain.Transaction) error {
 	layout, err := viewMgr.tblMgr.GetTableLayout(fldViewCatalog, txn)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (viewMgr *ViewManager) CreateView(vName ViewName, vDef ViewDef, txn domain.
 	if err := tbl.AdvanceNextInsertSlotID(); err != nil {
 		return err
 	}
-	if err := tbl.SetString(fldViewName, vName); err != nil {
+	if err := tbl.SetString(fldViewName, vName.String()); err != nil {
 		return err
 	}
 	if err := tbl.SetString(fldViewDef, vDef); err != nil {
@@ -55,7 +55,7 @@ func (viewMgr *ViewManager) CreateView(vName ViewName, vDef ViewDef, txn domain.
 }
 
 // GetViewDef gets the definition of view.
-func (viewMgr *ViewManager) GetViewDef(viewName ViewName, txn domain.Transaction) (ViewDef, error) {
+func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Transaction) (ViewDef, error) {
 	layout, err := viewMgr.tblMgr.GetTableLayout(fldViewCatalog, txn)
 	if err != nil {
 		return "", err
@@ -74,7 +74,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName ViewName, txn domain.Transaction
 			return "", err
 		}
 
-		if view == viewName {
+		if view == viewName.String() {
 			def, err = tbl.GetString(fldViewDef)
 			if err != nil {
 				return "", err

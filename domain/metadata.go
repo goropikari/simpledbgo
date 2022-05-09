@@ -111,3 +111,7 @@ func NewViewName(name string) (ViewName, error) {
 
 	return ViewName(name), nil
 }
+
+func (name ViewName) String() string {
+	return string(name)
+}

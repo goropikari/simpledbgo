@@ -73,12 +73,12 @@ func (mgr *Manager) GetTableLayout(tblName domain.TableName, txn domain.Transact
 }
 
 // CreateView creates a view.
-func (mgr *Manager) CreateView(viewName ViewName, viewDef ViewDef, txn domain.Transaction) error {
+func (mgr *Manager) CreateView(viewName domain.ViewName, viewDef ViewDef, txn domain.Transaction) error {
 	return mgr.viewMgr.CreateView(viewName, viewDef, txn)
 }
 
 // GetViewDef returns given view definition.
-func (mgr *Manager) GetViewDef(viewName ViewName, txn domain.Transaction) (ViewDef, error) {
+func (mgr *Manager) GetViewDef(viewName domain.ViewName, txn domain.Transaction) (ViewDef, error) {
 	return mgr.viewMgr.GetViewDef(viewName, txn)
 }
 

@@ -114,6 +114,20 @@ func TestLexer(t *testing.T) {
 				domain.NewToken(domain.TRParen, ")"),
 			},
 		},
+		{
+			name:  "create index command",
+			query: `CREATE INDEX idx_id ON foo (id)`,
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

@@ -299,7 +299,7 @@ func (parser *Parser) modifyCmd() (domain.ExecData, error) {
 func (parser *Parser) createCmd() (domain.ExecData, error) {
 	err := parser.eatKeyword("create")
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	switch {
@@ -317,31 +317,31 @@ func (parser *Parser) createCmd() (domain.ExecData, error) {
 func (parser *Parser) createTable() (domain.ExecData, error) {
 	err := parser.eatKeyword("table")
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	tblStr, err := parser.eatIdentifier()
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 	tblName, err := domain.NewTableName(tblStr)
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	err = parser.eatToken(domain.TLParen)
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	sch, err := parser.fieldDefs()
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	err = parser.eatToken(domain.TRParen)
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	return domain.NewCreateTableData(tblName, sch), nil
@@ -350,18 +350,18 @@ func (parser *Parser) createTable() (domain.ExecData, error) {
 func (parser *Parser) fieldDefs() (*domain.Schema, error) {
 	sch, err := parser.fieldDef()
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	for parser.match(domain.TComma) {
 		err = parser.eatToken(domain.TComma)
 		if err != nil {
-			return nil, ErrParse
+			return nil, err
 		}
 
 		sch2, err := parser.fieldDef()
 		if err != nil {
-			return nil, ErrParse
+			return nil, err
 		}
 
 		sch.AddAllFields(sch2)
@@ -373,7 +373,7 @@ func (parser *Parser) fieldDefs() (*domain.Schema, error) {
 func (parser *Parser) fieldDef() (*domain.Schema, error) {
 	fld, err := parser.field()
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	return parser.fieldType(fld)
@@ -421,34 +421,81 @@ func (parser *Parser) fieldType(fld domain.FieldName) (*domain.Schema, error) {
 func (parser *Parser) createView() (domain.ExecData, error) {
 	err := parser.eatKeyword("view")
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	viewNameStr, err := parser.eatIdentifier()
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	viewName, err := domain.NewViewName(viewNameStr)
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	err = parser.eatKeyword("as")
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	qd, err := parser.Query()
 	if err != nil {
-		return nil, ErrParse
+		return nil, err
 	}
 
 	return domain.NewCreateViewData(viewName, qd), nil
 }
 
 func (parser *Parser) createIndex() (domain.ExecData, error) {
-	return nil, errors.New("not implemented")
+	err := parser.eatKeyword("index")
+	if err != nil {
+		return nil, err
+	}
+
+	idxNameStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, err
+	}
+	idxName, err := domain.NewIndexName(idxNameStr)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatKeyword("on")
+	if err != nil {
+		return nil, err
+	}
+
+	tblNameStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, err
+	}
+	tblName, err := domain.NewTableName(tblNameStr)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TLParen)
+	if err != nil {
+		return nil, err
+	}
+
+	fldNameStr, err := parser.eatIdentifier()
+	if err != nil {
+		return nil, err
+	}
+	fldName, err := domain.NewFieldName(fldNameStr)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.eatToken(domain.TRParen)
+	if err != nil {
+		return nil, err
+	}
+
+	return domain.NewCreateIndexData(idxName, tblName, fldName), nil
 }
 
 func (parser *Parser) fieldList() ([]domain.FieldName, error) {
@@ -582,14 +629,14 @@ func (parser *Parser) constant() (domain.Constant, error) {
 	case parser.match(domain.TString):
 		str, err := parser.eatString()
 		if err != nil {
-			return domain.Constant{}, ErrParse
+			return domain.Constant{}, err
 		}
 
 		return domain.NewConstant(domain.VString, str), nil
 	case parser.match(domain.TInt32):
 		num, err := parser.eatInt32()
 		if err != nil {
-			return domain.Constant{}, ErrParse
+			return domain.Constant{}, err
 		}
 
 		return domain.NewConstant(domain.VInt32, num), nil

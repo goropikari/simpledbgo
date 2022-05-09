@@ -1130,3 +1130,169 @@ func TestParser_ExecCmd_CreateView_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestParser_ExecCmd_CreateIndex(t *testing.T) {
+	tests := []struct {
+		name     string
+		tokens   []domain.Token
+		expected *domain.CreateIndexData
+	}{
+		{
+			name: "parse create index",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+			expected: domain.NewCreateIndexData(
+				domain.IndexName("idx_id"),
+				domain.TableName("foo"),
+				domain.FieldName("id"),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			cmd, err := p.ExecCmd()
+
+			require.NoError(t, err)
+
+			got, ok := cmd.(*domain.CreateIndexData)
+			require.True(t, ok)
+
+			require.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestParser_ExecCmd_CreateIndex_Error(t *testing.T) {
+	tests := []struct {
+		name   string
+		tokens []domain.Token
+	}{
+		{
+			name: "missing create",
+			tokens: []domain.Token{
+				// domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing index",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				// domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing index name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				// domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing on",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				// domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing table name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				// domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing left paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				// domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing field name",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				// domain.NewToken(domain.TIdentifier, "id"),
+				domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+		{
+			name: "missing right paren",
+			tokens: []domain.Token{
+				domain.NewToken(domain.TKeyword, "create"),
+				domain.NewToken(domain.TKeyword, "index"),
+				domain.NewToken(domain.TIdentifier, "idx_id"),
+				domain.NewToken(domain.TKeyword, "on"),
+				domain.NewToken(domain.TIdentifier, "foo"),
+				domain.NewToken(domain.TLParen, "("),
+				domain.NewToken(domain.TIdentifier, "id"),
+				// domain.NewToken(domain.TRParen, ")"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := parser.NewParser(tt.tokens)
+			_, err := p.ExecCmd()
+
+			require.Error(t, err)
+		})
+	}
+}

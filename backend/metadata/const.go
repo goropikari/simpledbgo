@@ -1,9 +1,6 @@
 package metadata
 
 type (
-	// ViewName is type of view name.
-	ViewName = string
-
 	// ViewDef is type of view definition.
 	ViewDef = string
 )
