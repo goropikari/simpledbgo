@@ -3,8 +3,8 @@ package hash_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/backend/index/hash"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
@@ -83,7 +83,10 @@ func TestHashIndex(t *testing.T) {
 		err = txn.Commit()
 		require.NoError(t, err)
 
-		cost := hash.SearchCost(202, fake.RandInt())
+		fac := hash.NewIndexFactory()
+		_, cal := fac.Create()
+
+		cost := cal.Calculate(202, fake.RandInt())
 		require.Equal(t, 2, cost)
 
 		err = idx.Err()

@@ -11,7 +11,7 @@ type Manager struct {
 }
 
 // CreateManager creates metadata manager with initializing tables related to metadata.
-func CreateManager(txn domain.Transaction) (*Manager, error) {
+func CreateManager(factory domain.IndexFactory, txn domain.Transaction) (*Manager, error) {
 	tblMgr, err := CreateTableManager(txn)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func CreateManager(txn domain.Transaction) (*Manager, error) {
 		return nil, err
 	}
 
-	idxMgr, err := CreateIndexManager(tblMgr, statMgr, txn)
+	idxMgr, err := CreateIndexManager(factory, tblMgr, statMgr, txn)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func CreateManager(txn domain.Transaction) (*Manager, error) {
 }
 
 // NewManager constructs metadata manager.
-func NewManager(txn domain.Transaction) (*Manager, error) {
+func NewManager(factory domain.IndexFactory, txn domain.Transaction) (*Manager, error) {
 	tblMgr := NewTableManager()
 	viewMgr := NewViewManager(tblMgr)
 	statMgr, err := NewStatManager(tblMgr, txn)
@@ -49,7 +49,7 @@ func NewManager(txn domain.Transaction) (*Manager, error) {
 		return nil, err
 	}
 
-	idxMgr, err := NewIndexManager(tblMgr, statMgr, txn)
+	idxMgr, err := NewIndexManager(factory, tblMgr, statMgr, txn)
 	if err != nil {
 		return nil, err
 	}
@@ -88,11 +88,11 @@ func (mgr *Manager) CreateIndex(idxName domain.IndexName, tblName domain.TableNa
 }
 
 // GetIndexInfo returns the index information of given table.
-func (mgr *Manager) GetIndexInfo(tblName domain.TableName, txn domain.Transaction) (map[domain.FieldName]*IndexInfo, error) {
+func (mgr *Manager) GetIndexInfo(tblName domain.TableName, txn domain.Transaction) (map[domain.FieldName]*domain.IndexInfo, error) {
 	return mgr.idxMgr.GetIndexInfo(tblName, txn)
 }
 
 // GetStatInfo returns the statistical information of given table.
-func (mgr *Manager) GetStatInfo(tblName domain.TableName, layout *domain.Layout, txn domain.Transaction) (StatInfo, error) {
+func (mgr *Manager) GetStatInfo(tblName domain.TableName, layout *domain.Layout, txn domain.Transaction) (domain.StatInfo, error) {
 	return mgr.statMgr.GetStatInfo(tblName, layout, txn)
 }

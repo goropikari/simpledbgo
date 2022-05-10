@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/goropikari/simpledbgo/backend/index/hash"
 	"github.com/goropikari/simpledbgo/backend/metadata"
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/testing/fake"
@@ -21,7 +22,9 @@ func TestMetadataManager(t *testing.T) {
 
 	txn := cr.NewTxn()
 
-	metaMgr, err := metadata.CreateManager(txn)
+	fac := hash.NewIndexFactory()
+
+	metaMgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 
 	sch := domain.NewSchema()

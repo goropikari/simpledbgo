@@ -1,5 +1,17 @@
 package domain
 
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
+// Index is an interface of index.
+type Index interface {
+	BeforeFirst(searchKey Constant) error
+	HasNext() bool
+	GetDataRecordID() (RecordID, error)
+	Insert(Constant, RecordID) error
+	Delete(Constant, RecordID) error
+	Close()
+}
+
 // IndexName is a value object of index name.
 type IndexName string
 

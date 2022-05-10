@@ -6,27 +6,29 @@ import (
 
 // IndexManager is an index manager.
 type IndexManager struct {
-	layout  *domain.Layout
-	tblMgr  *TableManager
-	statMgr *StatManager
+	layout     *domain.Layout
+	tblMgr     *TableManager
+	statMgr    *StatManager
+	idxFactory domain.IndexFactory
 }
 
 // NewIndexManager constructs an index manager.
-func NewIndexManager(tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
+func NewIndexManager(factory domain.IndexFactory, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
 	cat, err := tblMgr.GetTableLayout(fldIndexCatalog, txn)
 	if err != nil {
 		return nil, err
 	}
 
 	return &IndexManager{
-		layout:  cat,
-		tblMgr:  tblMgr,
-		statMgr: statMgr,
+		layout:     cat,
+		tblMgr:     tblMgr,
+		statMgr:    statMgr,
+		idxFactory: factory,
 	}, nil
 }
 
 // CreateIndexManager creates new index manager.
-func CreateIndexManager(tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
+func CreateIndexManager(factory domain.IndexFactory, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
 	sch := domain.NewSchema()
 	sch.AddStringField(fldIndexName, domain.MaxIndexNameLength)
 	sch.AddStringField(fldTableName, domain.MaxTableNameLength)
@@ -41,9 +43,10 @@ func CreateIndexManager(tblMgr *TableManager, statMgr *StatManager, txn domain.T
 	}
 
 	return &IndexManager{
-		layout:  layout,
-		tblMgr:  tblMgr,
-		statMgr: statMgr,
+		layout:     layout,
+		tblMgr:     tblMgr,
+		statMgr:    statMgr,
+		idxFactory: factory,
 	}, nil
 }
 
@@ -78,8 +81,8 @@ func (idxMgr *IndexManager) CreateIndex(idxName domain.IndexName, tblName domain
 }
 
 // GetIndexInfo returns all index information of given table.
-func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Transaction) (map[domain.FieldName]*IndexInfo, error) {
-	infos := make(map[domain.FieldName]*IndexInfo)
+func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Transaction) (map[domain.FieldName]*domain.IndexInfo, error) {
+	infos := make(map[domain.FieldName]*domain.IndexInfo)
 	tbl, err := domain.NewTable(txn, fldIndexCatalog, idxMgr.layout)
 	if err != nil {
 		return nil, err
@@ -123,7 +126,7 @@ func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Tr
 			return nil, err
 		}
 
-		idxInfo := NewIndexInfo(idxName, fldName, tblLayout.Schema(), txn, tblsi)
+		idxInfo := domain.NewIndexInfo(idxMgr.idxFactory, idxName, fldName, tblLayout.Schema(), txn, tblsi)
 
 		infos[fldName] = idxInfo
 	}

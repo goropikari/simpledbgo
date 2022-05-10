@@ -164,9 +164,3 @@ func (idx *Index) Close() {
 
 	idx.tbl.Close()
 }
-
-// SearchCost calculates search cost.
-// rpb: record per block
-func SearchCost(numBlks int, rpb int) int {
-	return numBlks / numBuckets
-}

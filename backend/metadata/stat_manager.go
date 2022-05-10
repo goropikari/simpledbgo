@@ -10,7 +10,7 @@ import (
 type StatManager struct {
 	mu         *sync.Mutex
 	tblMgr     *TableManager
-	tableStats map[domain.TableName]StatInfo
+	tableStats map[domain.TableName]domain.StatInfo
 	numCalls   int
 }
 
@@ -32,7 +32,7 @@ func NewStatManager(tblMgr *TableManager, txn domain.Transaction) (*StatManager,
 }
 
 // GetStatInfo returns statistics of given table.
-func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain.Layout, txn domain.Transaction) (StatInfo, error) {
+func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain.Layout, txn domain.Transaction) (domain.StatInfo, error) {
 	statMgr.mu.Lock()
 	defer statMgr.mu.Unlock()
 
@@ -40,7 +40,7 @@ func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain
 	if statMgr.numCalls > updateTimes {
 		// refreshStatistics で numCalls は 0 リセットされる
 		if err := statMgr.refreshStatistics(txn); err != nil {
-			return StatInfo{}, err
+			return domain.StatInfo{}, err
 		}
 	}
 
@@ -49,7 +49,7 @@ func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain
 		var err error
 		si, err = statMgr.calcTableStats(tblName, layout, txn)
 		if err != nil {
-			return StatInfo{}, err
+			return domain.StatInfo{}, err
 		}
 		statMgr.tableStats[tblName] = si
 	}
@@ -58,7 +58,7 @@ func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain
 }
 
 func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
-	statMgr.tableStats = make(map[domain.TableName]StatInfo)
+	statMgr.tableStats = make(map[domain.TableName]domain.StatInfo)
 	statMgr.numCalls = 0
 
 	catLayout, err := statMgr.tblMgr.GetTableLayout(tableCatalog, txn)
@@ -101,13 +101,13 @@ func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
 	return nil
 }
 
-func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *domain.Layout, txn domain.Transaction) (StatInfo, error) {
+func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *domain.Layout, txn domain.Transaction) (domain.StatInfo, error) {
 	numRecs := 0
 	numBlocks := 0
 
 	tbl, err := domain.NewTable(txn, tblName, layout)
 	if err != nil {
-		return StatInfo{}, err
+		return domain.StatInfo{}, err
 	}
 
 	for tbl.HasNextUsedSlot() {
@@ -115,11 +115,8 @@ func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *dom
 		numBlocks = int(tbl.RecordID().BlockNumber() + 1)
 	}
 	if err := tbl.Err(); err != nil {
-		return StatInfo{}, tbl.Err()
+		return domain.StatInfo{}, tbl.Err()
 	}
 
-	return StatInfo{
-		numBlocks: numBlocks,
-		numRecs:   numRecs,
-	}, nil
+	return domain.NewStatInfo(numBlocks, numRecs), nil
 }

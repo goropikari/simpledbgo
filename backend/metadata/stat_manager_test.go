@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/backend/metadata"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/meta"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
@@ -60,7 +60,7 @@ func TestStatManager(t *testing.T) {
 
 		si, err := statMgr.GetStatInfo(tblName, tblLayout, txn2)
 		require.NoError(t, err)
-		require.Equal(t, metadata.NewStatInfo(1, n), si)
+		require.Equal(t, domain.NewStatInfo(1, n), si)
 		err = txn2.Commit()
 		require.NoError(t, err)
 
@@ -82,7 +82,7 @@ func TestStatManager(t *testing.T) {
 		txn32 := cr.NewTxn()
 		si3, err := statMgr.GetStatInfo(tblName, tblLayout, txn32)
 		require.NoError(t, err)
-		require.Equal(t, metadata.NewStatInfo(1, n), si3)
+		require.Equal(t, domain.NewStatInfo(1, n), si3)
 		txn32.Commit()
 		require.NoError(t, err)
 
@@ -95,7 +95,7 @@ func TestStatManager(t *testing.T) {
 		}
 		si4, err := statMgr.GetStatInfo(tblName, tblLayout, txn4)
 		require.NoError(t, err)
-		require.Equal(t, metadata.NewStatInfo(2, n+1), si4)
+		require.Equal(t, domain.NewStatInfo(2, n+1), si4)
 		txn4.Commit()
 		require.NoError(t, err)
 	})
@@ -134,7 +134,7 @@ func TestStatManager_Error(t *testing.T) {
 
 		si, err := statMgr.GetStatInfo(tblName, tblLayout, txn2)
 		require.NoError(t, err)
-		require.Equal(t, metadata.NewStatInfo(0, 0), si)
+		require.Equal(t, domain.NewStatInfo(0, 0), si)
 		err = txn2.Commit()
 		require.NoError(t, err)
 
@@ -166,6 +166,6 @@ func TestStatManager_Error(t *testing.T) {
 		txn33 := cr.NewTxn()
 		si2, err := statMgr.GetStatInfo(tblName2, tblLayout2, txn33)
 		require.NoError(t, err)
-		require.Equal(t, metadata.NewStatInfo(1, 1), si2)
+		require.Equal(t, domain.NewStatInfo(1, 1), si2)
 	})
 }
