@@ -24,7 +24,7 @@ func NewIndexGenerator() *IndexGenerator {
 }
 
 // Create creates an Index.
-func (gen *IndexGenerator) Create(txn domain.Transaction, idxName domain.IndexName, layout *domain.Layout) domain.Index {
+func (gen *IndexGenerator) Create(txn domain.Transaction, idxName domain.IndexName, layout *domain.Layout) domain.Indexer {
 	return NewIndex(txn, idxName, layout)
 }
 

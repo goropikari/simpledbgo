@@ -2,8 +2,8 @@ package domain
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 
-// Index is an interface of index.
-type Index interface {
+// Indexer is an interface of index.
+type Indexer interface {
 	BeforeFirst(searchKey Constant) error
 	HasNext() bool
 	GetDataRecordID() (RecordID, error)

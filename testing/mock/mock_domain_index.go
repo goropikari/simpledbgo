@@ -11,31 +11,31 @@ import (
 	domain "github.com/goropikari/simpledbgo/domain"
 )
 
-// MockIndex is a mock of Index interface.
-type MockIndex struct {
+// MockIndexer is a mock of Indexer interface.
+type MockIndexer struct {
 	ctrl     *gomock.Controller
-	recorder *MockIndexMockRecorder
+	recorder *MockIndexerMockRecorder
 }
 
-// MockIndexMockRecorder is the mock recorder for MockIndex.
-type MockIndexMockRecorder struct {
-	mock *MockIndex
+// MockIndexerMockRecorder is the mock recorder for MockIndexer.
+type MockIndexerMockRecorder struct {
+	mock *MockIndexer
 }
 
-// NewMockIndex creates a new mock instance.
-func NewMockIndex(ctrl *gomock.Controller) *MockIndex {
-	mock := &MockIndex{ctrl: ctrl}
-	mock.recorder = &MockIndexMockRecorder{mock}
+// NewMockIndexer creates a new mock instance.
+func NewMockIndexer(ctrl *gomock.Controller) *MockIndexer {
+	mock := &MockIndexer{ctrl: ctrl}
+	mock.recorder = &MockIndexerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockIndex) EXPECT() *MockIndexMockRecorder {
+func (m *MockIndexer) EXPECT() *MockIndexerMockRecorder {
 	return m.recorder
 }
 
 // BeforeFirst mocks base method.
-func (m *MockIndex) BeforeFirst(searchKey domain.Constant) error {
+func (m *MockIndexer) BeforeFirst(searchKey domain.Constant) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BeforeFirst", searchKey)
 	ret0, _ := ret[0].(error)
@@ -43,25 +43,25 @@ func (m *MockIndex) BeforeFirst(searchKey domain.Constant) error {
 }
 
 // BeforeFirst indicates an expected call of BeforeFirst.
-func (mr *MockIndexMockRecorder) BeforeFirst(searchKey interface{}) *gomock.Call {
+func (mr *MockIndexerMockRecorder) BeforeFirst(searchKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeforeFirst", reflect.TypeOf((*MockIndex)(nil).BeforeFirst), searchKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeforeFirst", reflect.TypeOf((*MockIndexer)(nil).BeforeFirst), searchKey)
 }
 
 // Close mocks base method.
-func (m *MockIndex) Close() {
+func (m *MockIndexer) Close() {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Close")
 }
 
 // Close indicates an expected call of Close.
-func (mr *MockIndexMockRecorder) Close() *gomock.Call {
+func (mr *MockIndexerMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockIndex)(nil).Close))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockIndexer)(nil).Close))
 }
 
 // Delete mocks base method.
-func (m *MockIndex) Delete(arg0 domain.Constant, arg1 domain.RecordID) error {
+func (m *MockIndexer) Delete(arg0 domain.Constant, arg1 domain.RecordID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -69,13 +69,13 @@ func (m *MockIndex) Delete(arg0 domain.Constant, arg1 domain.RecordID) error {
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockIndexMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockIndexerMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIndex)(nil).Delete), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIndexer)(nil).Delete), arg0, arg1)
 }
 
 // GetDataRecordID mocks base method.
-func (m *MockIndex) GetDataRecordID() (domain.RecordID, error) {
+func (m *MockIndexer) GetDataRecordID() (domain.RecordID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDataRecordID")
 	ret0, _ := ret[0].(domain.RecordID)
@@ -84,13 +84,13 @@ func (m *MockIndex) GetDataRecordID() (domain.RecordID, error) {
 }
 
 // GetDataRecordID indicates an expected call of GetDataRecordID.
-func (mr *MockIndexMockRecorder) GetDataRecordID() *gomock.Call {
+func (mr *MockIndexerMockRecorder) GetDataRecordID() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDataRecordID", reflect.TypeOf((*MockIndex)(nil).GetDataRecordID))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDataRecordID", reflect.TypeOf((*MockIndexer)(nil).GetDataRecordID))
 }
 
 // HasNext mocks base method.
-func (m *MockIndex) HasNext() bool {
+func (m *MockIndexer) HasNext() bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HasNext")
 	ret0, _ := ret[0].(bool)
@@ -98,13 +98,13 @@ func (m *MockIndex) HasNext() bool {
 }
 
 // HasNext indicates an expected call of HasNext.
-func (mr *MockIndexMockRecorder) HasNext() *gomock.Call {
+func (mr *MockIndexerMockRecorder) HasNext() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasNext", reflect.TypeOf((*MockIndex)(nil).HasNext))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasNext", reflect.TypeOf((*MockIndexer)(nil).HasNext))
 }
 
 // Insert mocks base method.
-func (m *MockIndex) Insert(arg0 domain.Constant, arg1 domain.RecordID) error {
+func (m *MockIndexer) Insert(arg0 domain.Constant, arg1 domain.RecordID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -112,7 +112,7 @@ func (m *MockIndex) Insert(arg0 domain.Constant, arg1 domain.RecordID) error {
 }
 
 // Insert indicates an expected call of Insert.
-func (mr *MockIndexMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockIndexerMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockIndex)(nil).Insert), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockIndexer)(nil).Insert), arg0, arg1)
 }

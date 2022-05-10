@@ -35,10 +35,10 @@ func (m *MockIndexGenerator) EXPECT() *MockIndexGeneratorMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockIndexGenerator) Create(arg0 domain.Transaction, arg1 domain.IndexName, arg2 *domain.Layout) domain.Index {
+func (m *MockIndexGenerator) Create(arg0 domain.Transaction, arg1 domain.IndexName, arg2 *domain.Layout) domain.Indexer {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
-	ret0, _ := ret[0].(domain.Index)
+	ret0, _ := ret[0].(domain.Indexer)
 	return ret0
 }
 

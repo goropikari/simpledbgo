@@ -4,5 +4,5 @@ package domain
 
 // IndexGenerator generates Index.
 type IndexGenerator interface {
-	Create(Transaction, IndexName, *Layout) Index
+	Create(Transaction, IndexName, *Layout) Indexer
 }

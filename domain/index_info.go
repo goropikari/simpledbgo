@@ -35,7 +35,7 @@ func NewIndexInfo(factory IndexFactory, idxName IndexName, fldName FieldName, tb
 }
 
 // Open opens the index.
-func (info *IndexInfo) Open() Index {
+func (info *IndexInfo) Open() Indexer {
 	return info.gen.Create(info.txn, info.idxName, info.layout)
 }
 
