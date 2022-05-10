@@ -1,10 +1,5 @@
 package metadata
 
-type (
-	// ViewDef is type of view definition.
-	ViewDef = string
-)
-
 const (
 	tableCatalog    = "table_catalog"
 	fieldCatalog    = "field_catalog"

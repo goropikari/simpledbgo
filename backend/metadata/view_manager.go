@@ -30,7 +30,7 @@ func CreateViewManager(tblMgr *TableManager, txn domain.Transaction) (*ViewManag
 }
 
 // CreateView defines a view.
-func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef ViewDef, txn domain.Transaction) error {
+func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef domain.ViewDef, txn domain.Transaction) error {
 	layout, err := viewMgr.tblMgr.GetTableLayout(fldViewCatalog, txn)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef ViewDef, txn 
 	if err := tbl.SetString(fldViewName, vName.String()); err != nil {
 		return err
 	}
-	if err := tbl.SetString(fldViewDef, vDef); err != nil {
+	if err := tbl.SetString(fldViewDef, vDef.String()); err != nil {
 		return err
 	}
 	tbl.Close()
@@ -55,7 +55,7 @@ func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef ViewDef, txn 
 }
 
 // GetViewDef gets the definition of view.
-func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Transaction) (ViewDef, error) {
+func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Transaction) (domain.ViewDef, error) {
 	layout, err := viewMgr.tblMgr.GetTableLayout(fldViewCatalog, txn)
 	if err != nil {
 		return "", err
@@ -67,7 +67,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 	}
 	defer tbl.Close()
 
-	def := ""
+	defStr := ""
 	for tbl.HasNextUsedSlot() {
 		view, err := tbl.GetString(fldViewName)
 		if err != nil {
@@ -75,7 +75,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 		}
 
 		if view == viewName.String() {
-			def, err = tbl.GetString(fldViewDef)
+			defStr, err = tbl.GetString(fldViewDef)
 			if err != nil {
 				return "", err
 			}
@@ -87,5 +87,5 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 		return "", err
 	}
 
-	return def, nil
+	return domain.NewViewDef(defStr), nil
 }

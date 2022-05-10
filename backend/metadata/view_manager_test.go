@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/goropikari/simpledbgo/backend/metadata"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
@@ -13,8 +14,8 @@ func TestViewManager(t *testing.T) {
 		blockSize = 4096
 		numBuf    = 3
 		view      = "foo_view"
-		query     = "SELECT B FROM MyTable where A = 1"
 	)
+	query := domain.NewViewDef("SELECT B FROM MyTable where A = 1")
 
 	t.Run("test ViewManager", func(t *testing.T) {
 		cr := fake.NewTransactionCreater(blockSize, numBuf)

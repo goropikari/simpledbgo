@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/backend/metadata"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
@@ -64,7 +64,7 @@ func TestMetadataManager(t *testing.T) {
 	require.Equal(t, 1+50/3, si.EstDistinctVals("B"))
 
 	// view manager
-	viewDef := metadata.ViewDef("SELECT B FROM MyTable WHERE A = 1")
+	viewDef := domain.NewViewDef("SELECT B FROM MyTable WHERE A = 1")
 	err = metaMgr.CreateView("viewA", viewDef, txn)
 	require.NoError(t, err)
 	gotViewDef, err := metaMgr.GetViewDef("viewA", txn)

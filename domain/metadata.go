@@ -112,6 +112,20 @@ func NewViewName(name string) (ViewName, error) {
 	return ViewName(name), nil
 }
 
+// String stringfies ViewName.
 func (name ViewName) String() string {
 	return string(name)
+}
+
+// ViewDef is type of view definition.
+type ViewDef string
+
+// NewViewDef constructs a ViewDef.
+func NewViewDef(def string) ViewDef {
+	return ViewDef(def)
+}
+
+// String stringfies ViewDef.
+func (def ViewDef) String() string {
+	return string(def)
 }
