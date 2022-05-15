@@ -140,6 +140,80 @@ func TestExecutor_select_multi_table(t *testing.T) {
 	})
 }
 
+func TestExecutor_select_multi_table_better(t *testing.T) {
+	const (
+		blockSize = 400
+		numBuf    = 10
+	)
+
+	cr := fake.NewTransactionCreater(blockSize, numBuf)
+	defer cr.Finish()
+
+	txn := cr.NewTxn()
+	fac := hash.NewIndexFactory()
+	mmgr, err := metadata.CreateManager(fac, txn)
+	require.NoError(t, err)
+	err = txn.Commit()
+	require.NoError(t, err)
+
+	t.Run("test Executor", func(t *testing.T) {
+		qp := plan.NewBetterQueryPlanner(mmgr)
+		ue := plan.NewBasicUpdatePlanner(mmgr)
+		pe := plan.NewExecutor(qp, ue)
+
+		txn := cr.NewTxn()
+		cmd1 := "create table T1(A int, B varchar(9))"
+		x, err := pe.ExecuteUpdate(cmd1, txn)
+		require.NoError(t, err)
+		require.Equal(t, 0, x)
+
+		n := 50
+		for i := 0; i < n; i++ {
+			cmd := fmt.Sprintf("insert into T1(A, B) values (%v, 'rec%v')", i, i)
+			pe.ExecuteUpdate(cmd, txn)
+		}
+
+		cmd2 := "create table T2(C int, D varchar(9))"
+		y, err := pe.ExecuteUpdate(cmd2, txn)
+		require.NoError(t, err)
+		require.Equal(t, 0, y)
+
+		for i := 0; i < n; i++ {
+			cmd := fmt.Sprintf("insert into T2(D, C) values ('ddd%v', %v)", i, i)
+			pe.ExecuteUpdate(cmd, txn)
+		}
+
+		qry := " Select D,B from T1, T2 where A=C"
+		p, err := pe.CreateQueryPlan(qry, txn)
+		require.NoError(t, err)
+		s, err := p.Open()
+		require.NoError(t, err)
+
+		actual := make([][]string, 0)
+		for s.HasNext() {
+			b, err := s.GetString("b")
+			require.NoError(t, err)
+			c, err := s.GetString("d")
+			require.NoError(t, err)
+			actual = append(actual, []string{b, c})
+		}
+		require.NoError(t, s.Err())
+
+		err = txn.Commit()
+		require.NoError(t, err)
+
+		expected := make([][]string, 0)
+		for i := 0; i < n; i++ {
+			expected = append(expected, []string{
+				fmt.Sprintf("rec%v", i),
+				fmt.Sprintf("ddd%v", i),
+			})
+		}
+		require.Equal(t, n, len(actual))
+		require.Equal(t, expected, actual)
+	})
+}
+
 func TestExecutor_update_table_without_predicate(t *testing.T) {
 	const (
 		blockSize = 400
