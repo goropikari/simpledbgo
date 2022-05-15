@@ -34,7 +34,7 @@ issues:
     - "mnd: Magic number: 2"
     - "stdmethods:"
   exclude-rules:
-    - path: backend/tx/lock_table.go
+    - path: tx/lock_table.go
       linters:
         - forcetypeassert
         - ifshort

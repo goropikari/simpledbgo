@@ -4,8 +4,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +23,7 @@ func TestFileName(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("stringfy", func(t *testing.T) {
+	t.Run("stringfies", func(t *testing.T) {
 		name, err := domain.NewFileName("hello")
 		require.NoError(t, err)
 		require.Equal(t, "hello", name.String())
@@ -83,5 +86,60 @@ func TestFile_Read(t *testing.T) {
 		require.Equal(t, 0, n)
 
 		file.Close()
+	})
+}
+
+func TestBlock(t *testing.T) {
+	t.Run("test block", func(t *testing.T) {
+		_, err := domain.NewBlockNumber(fake.RandInt32())
+		require.NoError(t, err)
+	})
+
+	t.Run("test block", func(t *testing.T) {
+		_, err := domain.NewBlockNumber(-1)
+		require.Error(t, err)
+	})
+}
+
+func TestBlock_Equal(t *testing.T) {
+	t.Run("test equal", func(t *testing.T) {
+		blk1 := fake.Block()
+		blk2 := fake.Block()
+
+		require.Equal(t, true, blk1.Equal(blk1))
+		require.Equal(t, false, blk1.Equal(blk2))
+	})
+}
+
+func TestPage_NewPage(t *testing.T) {
+	t.Run("test page constructor", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		bb := mock.NewMockByteBuffer(ctrl)
+
+		domain.NewPage(bb)
+	})
+}
+
+func TestPageFactory_Create(t *testing.T) {
+	bsf := bytes.NewDirectByteSliceCreater()
+
+	t.Run("test page factory", func(t *testing.T) {
+		blockSize, err := domain.NewBlockSize(4096)
+		require.NoError(t, err)
+
+		factory := domain.NewPageFactory(bsf, blockSize)
+		_, err = factory.Create()
+		require.NoError(t, err)
+	})
+
+	t.Run("invalid request: test page factory", func(t *testing.T) {
+		blockSize, err := domain.NewBlockSize(100)
+		require.NoError(t, err)
+
+		factory := domain.NewPageFactory(bsf, blockSize)
+		_, err = factory.Create()
+		require.Error(t, err)
 	})
 }

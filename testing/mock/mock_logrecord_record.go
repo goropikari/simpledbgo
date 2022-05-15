@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	logrecord "github.com/goropikari/simpledbgo/backend/tx/logrecord"
+	logrecord "github.com/goropikari/simpledbgo/tx/logrecord"
 	domain "github.com/goropikari/simpledbgo/domain"
 )
 

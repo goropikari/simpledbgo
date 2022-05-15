@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/backend/tx"
+	"github.com/goropikari/simpledbgo/tx"
 )
 
 type TransactionCreater struct {

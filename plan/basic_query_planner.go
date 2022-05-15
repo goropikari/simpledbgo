@@ -2,8 +2,8 @@ package plan
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/frontend/lexer"
-	"github.com/goropikari/simpledbgo/frontend/parser"
+	"github.com/goropikari/simpledbgo/lexer"
+	"github.com/goropikari/simpledbgo/parser"
 )
 
 // BasicQueryPlanner is a basic query planner.

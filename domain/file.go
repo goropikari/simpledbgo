@@ -1,10 +1,28 @@
 package domain
 
 import (
-	"errors"
 	"io"
 	"os"
+
+	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/pkg/errors"
 )
+
+//go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
+
+// Explorer is an interface of file explorer.
+type Explorer interface {
+	OpenFile(FileName) (*File, error)
+}
+
+// ByteSliceFactory is a factory of byte slice.
+type ByteSliceFactory interface {
+	Create(int) ([]byte, error)
+}
+
+/*
+	File
+*/
 
 // ErrInvalidFileName is an error that means invalid file name.
 var ErrInvalidFileName = errors.New("invalid file name")
@@ -21,7 +39,7 @@ func NewFileName(name string) (FileName, error) {
 	return FileName(name), nil
 }
 
-// String stringfy file name.
+// String stringfies file name.
 func (f FileName) String() string {
 	return string(f)
 }
@@ -74,4 +92,124 @@ func (f *File) Name() FileName {
 	filename, _ := NewFileName(name)
 
 	return filename
+}
+
+/*
+	Block
+*/
+var (
+	// ErrNegativeBlockNumber means given block number is non negative.
+	ErrNegativeBlockNumber = errors.New("block number must be non negative")
+
+	// ErrNonPositiveBlockSize means given block size must be positive.
+	ErrNonPositiveBlockSize = errors.New("block size must be positive")
+)
+
+// BlockNumber is value object of block number.
+type BlockNumber int32
+
+// NewBlockNumber is a constructor of BlockNumber.
+func NewBlockNumber(n int32) (BlockNumber, error) {
+	if n < 0 {
+		return 0, ErrNegativeBlockNumber
+	}
+
+	return BlockNumber(n), nil
+}
+
+// BlockSize is value object of block size.
+type BlockSize int32
+
+// NewBlockSize is a constructor of BlockSize.
+func NewBlockSize(n int32) (BlockSize, error) {
+	if n <= 0 {
+		return 0, ErrNonPositiveBlockSize
+	}
+
+	return BlockSize(n), nil
+}
+
+// Block is a model of block.
+type Block struct {
+	filename FileName
+	number   BlockNumber
+}
+
+// NewBlock is a constructor of Block.
+func NewBlock(filename FileName, number BlockNumber) Block {
+	return Block{
+		filename: filename,
+		number:   number,
+	}
+}
+
+// NewDummyBlock constructs a dummy Block.
+func NewDummyBlock(filename FileName) Block {
+	return Block{
+		filename: filename,
+		number:   0,
+	}
+}
+
+// NewZeroBlock is constructor of zero value Block.
+func NewZeroBlock() Block {
+	return Block{}
+}
+
+// Equal compares equality of two blocks.
+func (b Block) Equal(other Block) bool {
+	return b == other
+}
+
+// FileName returns corresponding file name.
+func (b Block) FileName() FileName {
+	return b.filename
+}
+
+// Number returns block number.
+func (b Block) Number() BlockNumber {
+	return b.number
+}
+
+/*
+	Page
+*/
+
+// Page is a model of page.
+type Page struct {
+	ByteBuffer
+}
+
+// NewPage is a constructor of Page.
+func NewPage(bb ByteBuffer) *Page {
+	return &Page{
+		ByteBuffer: bb,
+	}
+}
+
+// PageFactory is a factory of page.
+type PageFactory struct {
+	bsf       ByteSliceFactory
+	blockSize BlockSize
+}
+
+// NewPageFactory is a constructor of PageFactory.
+func NewPageFactory(bsf ByteSliceFactory, blockSize BlockSize) *PageFactory {
+	return &PageFactory{
+		bsf:       bsf,
+		blockSize: blockSize,
+	}
+}
+
+// Create creates a page.
+func (pf *PageFactory) Create() (*Page, error) {
+	b, err := pf.bsf.Create(int(pf.blockSize))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create byte slice")
+	}
+
+	bb := bytes.NewBufferBytes(b)
+	page := NewPage(bb)
+
+	return page, nil
 }

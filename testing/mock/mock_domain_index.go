@@ -116,3 +116,78 @@ func (mr *MockIndexerMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockIndexer)(nil).Insert), arg0, arg1)
 }
+
+// MockIndexFactory is a mock of IndexFactory interface.
+type MockIndexFactory struct {
+	ctrl     *gomock.Controller
+	recorder *MockIndexFactoryMockRecorder
+}
+
+// MockIndexFactoryMockRecorder is the mock recorder for MockIndexFactory.
+type MockIndexFactoryMockRecorder struct {
+	mock *MockIndexFactory
+}
+
+// NewMockIndexFactory creates a new mock instance.
+func NewMockIndexFactory(ctrl *gomock.Controller) *MockIndexFactory {
+	mock := &MockIndexFactory{ctrl: ctrl}
+	mock.recorder = &MockIndexFactoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIndexFactory) EXPECT() *MockIndexFactoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockIndexFactory) Create() (domain.IndexGenerator, domain.SearchCostCalculator) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create")
+	ret0, _ := ret[0].(domain.IndexGenerator)
+	ret1, _ := ret[1].(domain.SearchCostCalculator)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockIndexFactoryMockRecorder) Create() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIndexFactory)(nil).Create))
+}
+
+// MockIndexGenerator is a mock of IndexGenerator interface.
+type MockIndexGenerator struct {
+	ctrl     *gomock.Controller
+	recorder *MockIndexGeneratorMockRecorder
+}
+
+// MockIndexGeneratorMockRecorder is the mock recorder for MockIndexGenerator.
+type MockIndexGeneratorMockRecorder struct {
+	mock *MockIndexGenerator
+}
+
+// NewMockIndexGenerator creates a new mock instance.
+func NewMockIndexGenerator(ctrl *gomock.Controller) *MockIndexGenerator {
+	mock := &MockIndexGenerator{ctrl: ctrl}
+	mock.recorder = &MockIndexGeneratorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIndexGenerator) EXPECT() *MockIndexGeneratorMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockIndexGenerator) Create(arg0 domain.Transaction, arg1 domain.IndexName, arg2 *domain.Layout) domain.Indexer {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
+	ret0, _ := ret[0].(domain.Indexer)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockIndexGeneratorMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIndexGenerator)(nil).Create), arg0, arg1, arg2)
+}

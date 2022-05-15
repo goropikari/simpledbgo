@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goropikari/simpledbgo/meta"
+	"github.com/goropikari/simpledbgo/common"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
@@ -107,7 +107,7 @@ func (buf *Buffer) GetInt32(offset int64) (int32, error) {
 		return 0, fmt.Errorf("failed to GetInt32: %w", err)
 	}
 
-	if !buf.hasSpace(meta.Int32Length) {
+	if !buf.hasSpace(common.Int32Length) {
 		return 0, ErrInvalidOffset
 	}
 
@@ -128,7 +128,7 @@ func (buf *Buffer) SetInt32(offset int64, x int32) error {
 		return fmt.Errorf("failed to SetInt32: %w", err)
 	}
 
-	if !buf.hasSpace(meta.Int32Length) {
+	if !buf.hasSpace(common.Int32Length) {
 		return ErrInvalidOffset
 	}
 
@@ -145,7 +145,7 @@ func (buf *Buffer) GetUint32(offset int64) (uint32, error) {
 		return 0, fmt.Errorf("failed to GetUint32: %w", err)
 	}
 
-	if !buf.hasSpace(meta.Uint32Length) {
+	if !buf.hasSpace(common.Uint32Length) {
 		return 0, ErrInvalidOffset
 	}
 
@@ -167,7 +167,7 @@ func (buf *Buffer) SetUint32(offset int64, x uint32) error {
 		return fmt.Errorf("failed to SetUint32: %w", err)
 	}
 
-	if !buf.hasSpace(meta.Uint32Length) {
+	if !buf.hasSpace(common.Uint32Length) {
 		return ErrInvalidOffset
 	}
 
@@ -213,7 +213,7 @@ func (buf *Buffer) SetString(offset int64, str string) error {
 		return fmt.Errorf("failed to set string: %w", err)
 	}
 
-	if !buf.hasSpace(meta.Uint32Length + len(str)) {
+	if !buf.hasSpace(common.Uint32Length + len(str)) {
 		return ErrInvalidOffset
 	}
 
@@ -265,7 +265,7 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 		return fmt.Errorf("failed to set bytes: %w", err)
 	}
 
-	if !buf.hasSpace(meta.Uint32Length + len(p)) {
+	if !buf.hasSpace(common.Uint32Length + len(p)) {
 		return ErrInvalidOffset
 	}
 

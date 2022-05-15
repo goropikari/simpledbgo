@@ -30,6 +30,11 @@ var (
 // LSN is log sequence number.
 type LSN int32
 
+const (
+	// DummyLSN is dummy lsn.
+	DummyLSN = LSN(-1)
+)
+
 // SlotID is identifier of slot.
 type SlotID int32
 
@@ -53,7 +58,7 @@ func NewFieldName(name string) (FieldName, error) {
 	return FieldName(name), nil
 }
 
-// String stringfy name.
+// String stringfies name.
 func (name FieldName) String() string {
 	return string(name)
 }
@@ -98,7 +103,7 @@ func NewTableName(name string) (TableName, error) {
 	return TableName(name), nil
 }
 
-// String stringfy name.
+// String stringfies name.
 func (name TableName) String() string {
 	return string(name)
 }

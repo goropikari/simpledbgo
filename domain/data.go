@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// ExecData is parse tree of execute command.
+type ExecData interface{}
+
 // QueryData is node of query.
 type QueryData struct {
 	fields []FieldName
@@ -36,7 +39,7 @@ func (data *QueryData) Predicate() *Predicate {
 	return data.pred
 }
 
-// String stringfy data.
+// String stringfies data.
 func (data *QueryData) String() string {
 	fields := make([]string, 0, len(data.fields))
 	for _, f := range data.fields {

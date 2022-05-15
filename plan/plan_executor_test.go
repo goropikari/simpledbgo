@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/backend/index/hash"
-	"github.com/goropikari/simpledbgo/backend/metadata"
+	"github.com/goropikari/simpledbgo/index/hash"
+	"github.com/goropikari/simpledbgo/metadata"
 	"github.com/goropikari/simpledbgo/plan"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
