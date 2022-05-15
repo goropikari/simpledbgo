@@ -48,7 +48,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			name:  "insert command",
-			query: "INSERT INTO foo (id,name, address) VALUES (123, 'mike','tokyo')",
+			query: "INSERT INTO foo (id,name, address) VALUES (-123, 'mike','tokyo')",
 			tokens: []domain.Token{
 				domain.NewToken(domain.TKeyword, "insert"),
 				domain.NewToken(domain.TKeyword, "into"),
@@ -62,7 +62,7 @@ func TestLexer(t *testing.T) {
 				domain.NewToken(domain.TRParen, ")"),
 				domain.NewToken(domain.TKeyword, "values"),
 				domain.NewToken(domain.TLParen, "("),
-				domain.NewToken(domain.TInt32, int32(123)),
+				domain.NewToken(domain.TInt32, int32(-123)),
 				domain.NewToken(domain.TComma, ","),
 				domain.NewToken(domain.TString, "mike"),
 				domain.NewToken(domain.TComma, ","),

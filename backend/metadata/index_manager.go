@@ -89,7 +89,7 @@ func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Tr
 	}
 	defer tbl.Close()
 
-	for tbl.HasNextUsedSlot() {
+	for tbl.HasNext() {
 		storedTblName, err := tbl.GetString(fldTableName)
 		if err != nil {
 			return nil, err

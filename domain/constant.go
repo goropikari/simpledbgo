@@ -32,21 +32,26 @@ func NewConstant(typ ValueType, val any) Constant {
 	return Constant{typ: typ, val: val}
 }
 
+// IsZero checks whether c is zero value or not.
+func (c Constant) IsZero() bool {
+	return c == Constant{}
+}
+
 // ToInt32 returns a value as int32.
 func (c Constant) ToInt32() int32 {
 	v, ok := c.val.(int32)
 	if !ok {
-		log.Fatal(errors.New("Cant't convert Constant to int32"))
+		log.Fatal(errors.New("ToInt32 cant't convert Constant to int32"))
 	}
 
 	return v
 }
 
-// ToString returns a value as string.
-func (c Constant) ToString() string {
+// AsString returns a value as string.
+func (c Constant) AsString() string {
 	v, ok := c.val.(string)
 	if !ok {
-		log.Fatal(errors.New("Cant't convert Constant to string"))
+		log.Fatal(errors.New("AsString cant't convert Constant to string"))
 	}
 
 	return v

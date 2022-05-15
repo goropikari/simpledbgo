@@ -6,4 +6,7 @@ const (
 
 	// Uint32Length is byte length of uint32.
 	Uint32Length = 4
+
+	// MaxInt is maximum integer.
+	MaxInt = 1 << 30
 )

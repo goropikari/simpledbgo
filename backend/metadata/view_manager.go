@@ -68,7 +68,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 	defer tbl.Close()
 
 	defStr := ""
-	for tbl.HasNextUsedSlot() {
+	for tbl.HasNext() {
 		view, err := tbl.GetString(fldViewName)
 		if err != nil {
 			return "", err

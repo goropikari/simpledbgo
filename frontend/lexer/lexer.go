@@ -81,7 +81,7 @@ func (lex *Lexer) scan() (domain.Token, error) {
 	}
 
 	switch {
-	case isNumber(c):
+	case isNumber(c) || c == '-':
 		numStr, err := lex.scanInteger()
 		if err != nil {
 			return domain.Token{}, err
@@ -120,6 +120,16 @@ func (lex *Lexer) scan() (domain.Token, error) {
 
 func (lex *Lexer) scanInteger() (string, error) {
 	b := make([]byte, 0)
+	c, _ := lex.readByte()
+	if c == '-' {
+		b = append(b, c)
+	} else {
+		err := lex.unreadByte()
+		if err != nil {
+			return "", err
+		}
+	}
+
 	for {
 		c, err := lex.readByte()
 		if err != nil {
@@ -215,24 +225,6 @@ Ret:
 func (lex *Lexer) isKeyword(s string) bool {
 	return lex.keywords[s]
 }
-
-// func (lex *Lexer) Top() (byte, error) {
-// 	c, err := lex.readByte()
-// 	if err != nil {
-// 		if err == io.EOF {
-// 			return c, err
-// 		}
-//
-// 		return 0, err
-// 	}
-//
-// 	err = lex.unreadByte()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-//
-// 	return c, nil
-// }
 
 func (lex *Lexer) skipWhitespace() error {
 	for {

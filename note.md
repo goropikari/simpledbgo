@@ -542,3 +542,11 @@ index ファイルの suffix は `searchKey` の Hash 値を `NUM_BUCKET` で割
  `searchKey` というのが index を張ったカラムの値を表している模様。
 同じ `searchKey` だと同じ index ファイルに記録されるから検索早くなるよねということらしい。
 ただ、Hash 値から計算しているからわかる通り、`searchKey` が違うからといって違う index ファイルに記録されるわけではない。
+
+# Chapter 8: Query Processing, Chapter 9: Parsing, Chapter 10: Planning
+
+Chap 8 の `Term#reductionFactor(Plan p)` の Plan は Chap 10 で出てくるものなので
+Chap 8 の時点では実装しないで Chap 8 ~ 10 の3章を読んでから実装するようにした。
+Chap 10 まで読んでわかったが、`Plan` は `interface` だし、
+Chapter 10 で作る `BasicQueryPlanner`, `BetterQueryPlanner` だと `reductionFactor` は
+実装していなくても問題なかったので、3章一気読みしてから実装でなく Chapter 8 から順に実装していっても特段の問題はなかったようである。

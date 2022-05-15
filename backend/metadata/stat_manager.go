@@ -72,7 +72,7 @@ func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
 	}
 	defer tcat.Close()
 
-	for tcat.HasNextUsedSlot() {
+	for tcat.HasNext() {
 		tblNameStr, err := tcat.GetString(fldTableName)
 		if err != nil {
 			return err
@@ -110,7 +110,7 @@ func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *dom
 		return domain.StatInfo{}, err
 	}
 
-	for tbl.HasNextUsedSlot() {
+	for tbl.HasNext() {
 		numRecs++
 		numBlocks = int(tbl.RecordID().BlockNumber() + 1)
 	}

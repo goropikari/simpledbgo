@@ -129,7 +129,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 	}
 	defer tcat.Close()
 
-	for tcat.HasNextUsedSlot() {
+	for tcat.HasNext() {
 		v, err := tcat.GetString(fldTableName)
 		if err != nil {
 			return -1, err
@@ -159,7 +159,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Tra
 	}
 	defer fcat.Close()
 
-	for fcat.HasNextUsedSlot() {
+	for fcat.HasNext() {
 		v, err := fcat.GetString(fldTableName)
 		if err != nil {
 			return nil, nil, err

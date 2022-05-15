@@ -62,3 +62,8 @@ func (layout *Layout) Offset(fldname FieldName) int64 {
 func (layout *Layout) SlotSize() int64 {
 	return layout.slotsize
 }
+
+// Length returns byte size of given field name.
+func (layout *Layout) Length(fldName FieldName) int {
+	return layout.schema.Length(fldName)
+}

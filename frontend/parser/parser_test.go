@@ -383,7 +383,7 @@ func TestParser_ExecCmd_Delete(t *testing.T) {
 				domain.NewToken(domain.TKeyword, "from"),
 				domain.NewToken(domain.TIdentifier, "foo"),
 			},
-			expected: domain.NewDeleteData(domain.TableName("foo"), nil),
+			expected: domain.NewDeleteData(domain.TableName("foo"), &domain.Predicate{}),
 		},
 		{
 			name: "parse delete with predicate",
@@ -512,7 +512,7 @@ func TestParser_ExecCmd_Modify(t *testing.T) {
 						"mike",
 					),
 				),
-				nil,
+				&domain.Predicate{},
 			),
 		},
 		{

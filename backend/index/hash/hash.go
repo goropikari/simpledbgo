@@ -63,7 +63,7 @@ func (idx *Index) BeforeFirst(searchKey domain.Constant) error {
 
 // HasNext checks whether tbl has a record having the searchKey.
 func (idx *Index) HasNext() bool {
-	for idx.tbl.HasNextUsedSlot() {
+	for idx.tbl.HasNext() {
 		v, err := idx.tbl.GetVal(fldDataVal)
 		if err != nil {
 			idx.err = err
@@ -135,7 +135,7 @@ func (idx *Index) Delete(searchKey domain.Constant, rid domain.RecordID) error {
 		return err
 	}
 
-	for idx.tbl.HasNextUsedSlot() {
+	for idx.tbl.HasNext() {
 		getRID, err := idx.GetDataRecordID()
 		if err != nil {
 			return err

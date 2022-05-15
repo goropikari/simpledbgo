@@ -27,6 +27,9 @@ var (
 	ErrExceedMaxViewNameLength = errors.Errorf("exceeds maximum view name length %v", MaxViewNameLength)
 )
 
+// LSN is log sequence number.
+type LSN int32
+
 // SlotID is identifier of slot.
 type SlotID int32
 
@@ -53,6 +56,11 @@ func NewFieldName(name string) (FieldName, error) {
 // String stringfy name.
 func (name FieldName) String() string {
 	return string(name)
+}
+
+// IsZero checks whether name is zero value or not.
+func (name FieldName) IsZero() bool {
+	return name == ""
 }
 
 // FieldType is a type of field.
@@ -95,9 +103,14 @@ func (name TableName) String() string {
 	return string(name)
 }
 
-// ToFileName converts TableName into FileName.
+// ToFileName converts type from TableName into FileName.
 func (name TableName) ToFileName() FileName {
 	return FileName(name)
+}
+
+// ToViewName converts type from ViewName into ViewName.
+func (name TableName) ToViewName() ViewName {
+	return ViewName(name)
 }
 
 // ViewName is type of view name.
@@ -128,4 +141,9 @@ func NewViewDef(def string) ViewDef {
 // String stringfies ViewDef.
 func (def ViewDef) String() string {
 	return string(def)
+}
+
+// IsZero checks def is zero value or not.
+func (def ViewDef) IsZero() bool {
+	return def == ""
 }

@@ -66,7 +66,7 @@ func (parser *Parser) Query() (*domain.QueryData, error) {
 		return nil, err
 	}
 
-	var pred *domain.Predicate
+	pred := &domain.Predicate{}
 	if parser.matchKeyword("where") {
 		err = parser.eatKeyword("where")
 		if err != nil {
@@ -228,7 +228,7 @@ func (parser *Parser) deleteCmd() (domain.ExecData, error) {
 		return nil, err
 	}
 
-	var pred *domain.Predicate
+	pred := &domain.Predicate{}
 	if parser.matchKeyword("where") {
 		err := parser.eatKeyword("where")
 		if err != nil {
@@ -280,7 +280,7 @@ func (parser *Parser) modifyCmd() (domain.ExecData, error) {
 		return nil, err
 	}
 
-	var pred *domain.Predicate
+	pred := &domain.Predicate{}
 	if parser.matchKeyword("where") {
 		err = parser.eatKeyword("where")
 		if err != nil {
