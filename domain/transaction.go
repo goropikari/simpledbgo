@@ -17,10 +17,10 @@ type Transaction interface {
 	Commit() error
 	Rollback() error
 	Recover() error
-	GetInt32(Block, int64) (int32, error)
-	SetInt32(Block, int64, int32, bool) error
-	GetString(Block, int64) (string, error)
-	SetString(Block, int64, string, bool) error
+	GetInt32(blk Block, offset int64) (val int32, err error)
+	SetInt32(blk Block, offset int64, val int32, writeLog bool) error
+	GetString(blk Block, offset int64) (val string, err error)
+	SetString(blk Block, offset int64, val string, writeLog bool) error
 	BlockLength(FileName) (int32, error)
 	ExtendFile(FileName) (Block, error)
 	BlockSize() BlockSize

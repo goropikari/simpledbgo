@@ -194,7 +194,7 @@ func (tx *Transaction) recover() error {
 	return nil
 }
 
-// UndoSetInt32 is behavior of SetInt32Record.
+// UndoSetInt32 undoes SetInt32 operation.
 func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
 	blk := domain.NewBlock(rec.FileName, rec.BlockNumber)
 
@@ -211,7 +211,7 @@ func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
 	return nil
 }
 
-// UndoSetString undoes SetStringRecord.
+// UndoSetString undoes SetString.
 func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {
 	blk := domain.NewBlock(rec.FileName, rec.BlockNumber)
 
