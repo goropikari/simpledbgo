@@ -3,8 +3,8 @@ package tx_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledbgo/tx"
 	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/tx"
 	"github.com/stretchr/testify/require"
 )
 

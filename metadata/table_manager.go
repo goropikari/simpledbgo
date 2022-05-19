@@ -59,7 +59,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Sc
 	layout := domain.NewLayout(sch)
 
 	// register table
-	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
+	tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Sc
 	tcat.Close()
 
 	// register fields
-	fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
+	fcat, err := domain.NewTableScan(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (tblMgr *TableManager) GetTableLayout(tblName domain.TableName, txn domain.
 
 // Exists checks the existence of table.
 func (tblMgr *TableManager) Exists(tblName domain.TableName, txn domain.Transaction) bool {
-	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
+	tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
 		return false
 	}
@@ -148,7 +148,7 @@ func (tblMgr *TableManager) Exists(tblName domain.TableName, txn domain.Transact
 func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.Transaction) (int32, error) {
 	const NonExistSlotSize = -1
 
-	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
+	tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
 		return NonExistSlotSize, err
 	}
@@ -179,7 +179,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Transaction) (*domain.Schema, map[domain.FieldName]int64, error) {
 	sch := domain.NewSchema()
 	offsets := make(map[domain.FieldName]int64)
-	fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)
+	fcat, err := domain.NewTableScan(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
 		return nil, nil, err
 	}

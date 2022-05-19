@@ -19,7 +19,7 @@ type Index struct {
 	idxName   domain.IndexName
 	layout    *domain.Layout
 	searchKey domain.Constant
-	tbl       *domain.Table
+	tbl       *domain.TableScan
 	err       error
 }
 
@@ -52,7 +52,7 @@ func (idx *Index) BeforeFirst(searchKey domain.Constant) error {
 		return err
 	}
 
-	tbl, err := domain.NewTable(idx.txn, tblName, idx.layout)
+	tbl, err := domain.NewTableScan(idx.txn, tblName, idx.layout)
 	if err != nil {
 		return err
 	}

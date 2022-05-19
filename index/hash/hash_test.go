@@ -3,8 +3,8 @@ package hash_test
 import (
 	"testing"
 
-	"github.com/goropikari/simpledbgo/index/hash"
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/index/hash"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )

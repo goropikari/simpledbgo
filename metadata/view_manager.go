@@ -36,7 +36,7 @@ func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef domain.ViewDe
 		return err
 	}
 
-	tbl, err := domain.NewTable(txn, fldViewCatalog, layout)
+	tbl, err := domain.NewTableScan(txn, fldViewCatalog, layout)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 		return "", err
 	}
 
-	tbl, err := domain.NewTable(txn, fldViewCatalog, layout)
+	tbl, err := domain.NewTableScan(txn, fldViewCatalog, layout)
 	if err != nil {
 		return "", err
 	}

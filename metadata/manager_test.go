@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/index/hash"
 	"github.com/goropikari/simpledbgo/metadata"
-	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
@@ -45,7 +45,7 @@ func TestMetadataManager(t *testing.T) {
 	require.Equal(t, int64(21), layout.SlotSize())
 
 	// Statistics Metadata
-	tbl, err := domain.NewTable(txn, "MyTable", layout)
+	tbl, err := domain.NewTableScan(txn, "MyTable", layout)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		err = tbl.AdvanceNextInsertSlotID()

@@ -5,8 +5,8 @@ import (
 	goos "os"
 
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/goropikari/simpledbgo/log"
 )
 
 type NonDirectLogManagerFactory struct {

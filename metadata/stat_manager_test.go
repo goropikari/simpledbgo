@@ -35,7 +35,7 @@ func TestStatManager(t *testing.T) {
 		tblLayout, err := tblMgr.GetTableLayout(tblName, txn)
 		require.NoError(t, err)
 
-		tbl, err := domain.NewTable(txn, tblName, tblLayout)
+		tbl, err := domain.NewTableScan(txn, tblName, tblLayout)
 		require.NoError(t, err)
 
 		n := int((blockSize - common.Int32Length) / tblLayout.SlotSize())
@@ -66,7 +66,7 @@ func TestStatManager(t *testing.T) {
 
 		// block size 2
 		txn31 := cr.NewTxn()
-		tbl3, err := domain.NewTable(txn31, tblName, tblLayout)
+		tbl3, err := domain.NewTableScan(txn31, tblName, tblLayout)
 		require.NoError(t, err)
 
 		i := n + 1
@@ -152,7 +152,7 @@ func TestStatManager_Error(t *testing.T) {
 		txn32 := cr.NewTxn()
 		tblLayout2, err := tblMgr.GetTableLayout(tblName2, txn32)
 		require.NoError(t, err)
-		tbl3, err := domain.NewTable(txn32, tblName2, tblLayout2)
+		tbl3, err := domain.NewTableScan(txn32, tblName2, tblLayout2)
 		require.NoError(t, err)
 		err = tbl3.AdvanceNextInsertSlotID()
 		require.NoError(t, err)

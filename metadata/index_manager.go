@@ -52,7 +52,7 @@ func CreateIndexManager(factory domain.IndexFactory, tblMgr *TableManager, statM
 
 // CreateIndex creates an index.
 func (idxMgr *IndexManager) CreateIndex(idxName domain.IndexName, tblName domain.TableName, fldName domain.FieldName, txn domain.Transaction) error {
-	tbl, err := domain.NewTable(txn, fldIndexCatalog, idxMgr.layout)
+	tbl, err := domain.NewTableScan(txn, fldIndexCatalog, idxMgr.layout)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (idxMgr *IndexManager) CreateIndex(idxName domain.IndexName, tblName domain
 // GetIndexInfo returns all index information of given table.
 func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Transaction) (map[domain.FieldName]*domain.IndexInfo, error) {
 	infos := make(map[domain.FieldName]*domain.IndexInfo)
-	tbl, err := domain.NewTable(txn, fldIndexCatalog, idxMgr.layout)
+	tbl, err := domain.NewTableScan(txn, fldIndexCatalog, idxMgr.layout)
 	if err != nil {
 		return nil, err
 	}

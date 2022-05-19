@@ -32,7 +32,7 @@ func NewTablePlan(txn domain.Transaction, tblName domain.TableName, md domain.Me
 
 // Open opens scanner.
 func (plan *TablePlan) Open() (domain.Scanner, error) {
-	return domain.NewTable(plan.txn, plan.tblName, plan.layout)
+	return domain.NewTableScan(plan.txn, plan.tblName, plan.layout)
 }
 
 // EstNumBlocks estimates the number of block access.

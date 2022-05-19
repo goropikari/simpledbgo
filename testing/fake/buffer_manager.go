@@ -6,8 +6,8 @@ import (
 
 	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/goropikari/simpledbgo/log"
 )
 
 type NonDirectBufferManagerFactory struct {

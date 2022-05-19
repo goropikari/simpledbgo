@@ -5,9 +5,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/tx/logrecord"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/goropikari/simpledbgo/testing/mock"
+	"github.com/goropikari/simpledbgo/tx/logrecord"
 	"github.com/stretchr/testify/require"
 )
 

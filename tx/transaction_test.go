@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/goropikari/simpledbgo/tx"
 	"github.com/goropikari/simpledbgo/tx/logrecord"
-	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )
 

@@ -66,7 +66,7 @@ func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
 		return err
 	}
 
-	tcat, err := domain.NewTable(txn, tableCatalog, catLayout)
+	tcat, err := domain.NewTableScan(txn, tableCatalog, catLayout)
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *dom
 	numRecs := 0
 	numBlocks := 0
 
-	tbl, err := domain.NewTable(txn, tblName, layout)
+	tbl, err := domain.NewTableScan(txn, tblName, layout)
 	if err != nil {
 		return domain.StatInfo{}, err
 	}

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/tx"
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/tx"
 	"github.com/stretchr/testify/require"
 )
 
-func TestTable(t *testing.T) {
+func TestTableScan(t *testing.T) {
 	const (
 		blockSize = 100
 		numBuf    = 2
@@ -38,7 +38,7 @@ func TestTable(t *testing.T) {
 		sch.AddStringField("B", 9)
 		layout := domain.NewLayout(sch)
 
-		table, err := domain.NewTable(txn, "T.tbl", layout)
+		table, err := domain.NewTableScan(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
 			err := table.AdvanceNextInsertSlotID()
@@ -64,7 +64,7 @@ func TestTable(t *testing.T) {
 		sch2.AddStringField("B", 9)
 		layout2 := domain.NewLayout(sch2)
 
-		table2, err := domain.NewTable(txn2, "T.tbl", layout2)
+		table2, err := domain.NewTableScan(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
 		err = table2.MoveToFirst()
@@ -101,7 +101,7 @@ func TestTable(t *testing.T) {
 		sch3.AddStringField("B", 9)
 		layout3 := domain.NewLayout(sch3)
 
-		table3, err := domain.NewTable(txn3, "T.tbl", layout3)
+		table3, err := domain.NewTableScan(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
 		err = table3.MoveToFirst()
@@ -126,7 +126,7 @@ func TestTable(t *testing.T) {
 	})
 }
 
-func TestTable2(t *testing.T) {
+func TestTableScan2(t *testing.T) {
 	const (
 		blockSize = 100
 		numBuf    = 2
@@ -154,7 +154,7 @@ func TestTable2(t *testing.T) {
 		sch.AddStringField("B", 9)
 		layout := domain.NewLayout(sch)
 
-		table, err := domain.NewTable(txn, "T.tbl", layout)
+		table, err := domain.NewTableScan(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
 			err := table.AdvanceNextInsertSlotID()
@@ -180,7 +180,7 @@ func TestTable2(t *testing.T) {
 		sch2.AddStringField("B", 9)
 		layout2 := domain.NewLayout(sch2)
 
-		table2, err := domain.NewTable(txn2, "T.tbl", layout2)
+		table2, err := domain.NewTableScan(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
 		err = table2.MoveToFirst()
@@ -207,7 +207,7 @@ func TestTable2(t *testing.T) {
 		sch3.AddStringField("B", 9)
 		layout3 := domain.NewLayout(sch3)
 
-		table3, err := domain.NewTable(txn3, "T.tbl", layout3)
+		table3, err := domain.NewTableScan(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
 		err = table3.MoveToFirst()
@@ -271,14 +271,14 @@ func TestProductScan(t *testing.T) {
 		sch1.AddInt32Field("A")
 		sch1.AddStringField("B", 9)
 		layout1 := domain.NewLayout(sch1)
-		table1, err := domain.NewTable(txn, "T1.tbl", layout1)
+		table1, err := domain.NewTableScan(txn, "T1.tbl", layout1)
 		require.NoError(t, err)
 
 		sch2 := domain.NewSchema()
 		sch2.AddInt32Field("C")
 		sch2.AddStringField("D", 9)
 		layout2 := domain.NewLayout(sch2)
-		table2, err := domain.NewTable(txn, "T2.tbl", layout2)
+		table2, err := domain.NewTableScan(txn, "T2.tbl", layout2)
 		require.NoError(t, err)
 
 		n := int32(3)
@@ -361,14 +361,14 @@ func TestSelectScan(t *testing.T) {
 		sch1.AddInt32Field("A")
 		sch1.AddStringField("B", 9)
 		layout1 := domain.NewLayout(sch1)
-		table1, err := domain.NewTable(txn, "T1.tbl", layout1)
+		table1, err := domain.NewTableScan(txn, "T1.tbl", layout1)
 		require.NoError(t, err)
 
 		sch2 := domain.NewSchema()
 		sch2.AddInt32Field("C")
 		sch2.AddStringField("D", 9)
 		layout2 := domain.NewLayout(sch2)
-		table2, err := domain.NewTable(txn, "T2.tbl", layout2)
+		table2, err := domain.NewTableScan(txn, "T2.tbl", layout2)
 		require.NoError(t, err)
 
 		n := int32(3)
@@ -459,7 +459,7 @@ func TestSelectScan_update_column(t *testing.T) {
 		sch.AddStringField("B", 9)
 		layout := domain.NewLayout(sch)
 
-		table, err := domain.NewTable(txn, "T.tbl", layout)
+		table, err := domain.NewTableScan(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
 			err := table.AdvanceNextInsertSlotID()
@@ -547,7 +547,7 @@ func TestSelectScan_delete_record(t *testing.T) {
 		sch.AddStringField("B", 9)
 		layout := domain.NewLayout(sch)
 
-		table, err := domain.NewTable(txn, "T.tbl", layout)
+		table, err := domain.NewTableScan(txn, "T.tbl", layout)
 		require.NoError(t, err)
 		for i := 1; i <= 50; i++ {
 			err := table.AdvanceNextInsertSlotID()
@@ -631,14 +631,14 @@ func TestProjectScan(t *testing.T) {
 		sch1.AddInt32Field("A")
 		sch1.AddStringField("B", 9)
 		layout1 := domain.NewLayout(sch1)
-		table1, err := domain.NewTable(txn, "T1.tbl", layout1)
+		table1, err := domain.NewTableScan(txn, "T1.tbl", layout1)
 		require.NoError(t, err)
 
 		sch2 := domain.NewSchema()
 		sch2.AddInt32Field("C")
 		sch2.AddStringField("D", 9)
 		layout2 := domain.NewLayout(sch2)
-		table2, err := domain.NewTable(txn, "T2.tbl", layout2)
+		table2, err := domain.NewTableScan(txn, "T2.tbl", layout2)
 		require.NoError(t, err)
 
 		n := int32(3)
