@@ -37,8 +37,8 @@ func (c Constant) IsZero() bool {
 	return c == Constant{}
 }
 
-// ToInt32 returns a value as int32.
-func (c Constant) ToInt32() int32 {
+// AsInt32 returns a value as int32.
+func (c Constant) AsInt32() int32 {
 	v, ok := c.val.(int32)
 	if !ok {
 		log.Fatal(errors.New("ToInt32 cant't convert Constant to int32"))

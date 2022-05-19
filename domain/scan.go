@@ -144,7 +144,7 @@ func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
 	switch typ {
 	case FInt32:
 		// TODO: check val type?
-		err := tbl.SetInt32(fldName, val.ToInt32())
+		err := tbl.SetInt32(fldName, val.AsInt32())
 		if err != nil {
 			return err
 		}
