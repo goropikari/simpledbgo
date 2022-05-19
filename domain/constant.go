@@ -57,6 +57,11 @@ func (c Constant) AsString() string {
 	return v
 }
 
+// String stringfies constant.
+func (c Constant) String() string {
+	return fmt.Sprintf("%v", c.val)
+}
+
 // AsVal returns constant as any.
 func (c Constant) AsVal() any {
 	return c.val

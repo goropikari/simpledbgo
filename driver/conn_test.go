@@ -95,4 +95,19 @@ func TestConn(t *testing.T) {
 	}
 	require.Equal(t, []int{0, 1, 2}, acnum3)
 	require.Equal(t, []string{"rec0", "rec1", "rec2"}, acstr3)
+
+	_, err = db.Exec("create view T1_view as select B from T1 where A = 1")
+	require.NoError(t, err)
+
+	rows5, err := db.QueryContext(context.Background(), "select B from T1_view")
+	require.NoError(t, err)
+	acstr5 := make([]string, 0)
+	for rows5.Next() {
+		var b string
+		err = rows5.Scan(&b)
+		require.NoError(t, err)
+
+		acstr5 = append(acstr5, b)
+	}
+	require.Equal(t, []string{"rec1"}, acstr5)
 }

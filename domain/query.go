@@ -53,7 +53,7 @@ func (expr Expression) String() string {
 		return expr.field.String()
 	}
 
-	return expr.value.AsString()
+	return expr.value.String()
 }
 
 // Term is a node of term.
