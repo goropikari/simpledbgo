@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-19 14:28:31</td>
+            <td class="headerValue">2022-05-19 16:02:19</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -121,7 +121,7 @@
 <a name="59"><span class="lineNum">      59 </span><span class="lineCov">          1 :         layout := domain.NewLayout(sch)</span></a>
 <a name="60"><span class="lineNum">      60 </span><span class="lineCov">          1 : </span></a>
 <a name="61"><span class="lineNum">      61 </span><span class="lineCov">          1 :         // register table</span></a>
-<a name="62"><span class="lineNum">      62 </span><span class="lineCov">          1 :         tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)</span></a>
+<a name="62"><span class="lineNum">      62 </span><span class="lineCov">          1 :         tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)</span></a>
 <a name="63"><span class="lineNum">      63 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="64"><span class="lineNum">      64 </span><span class="lineNoCov">          0 :                 return err</span></a>
 <a name="65"><span class="lineNum">      65 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -138,7 +138,7 @@
 <a name="76"><span class="lineNum">      76 </span><span class="lineCov">          1 :         tcat.Close()</span></a>
 <a name="77"><span class="lineNum">      77 </span><span class="lineCov">          1 : </span></a>
 <a name="78"><span class="lineNum">      78 </span><span class="lineCov">          1 :         // register fields</span></a>
-<a name="79"><span class="lineNum">      79 </span><span class="lineCov">          1 :         fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)</span></a>
+<a name="79"><span class="lineNum">      79 </span><span class="lineCov">          1 :         fcat, err := domain.NewTableScan(txn, fieldCatalog, tblMgr.fldCatalogLayout)</span></a>
 <a name="80"><span class="lineNum">      80 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="81"><span class="lineNum">      81 </span><span class="lineNoCov">          0 :                 return err</span></a>
 <a name="82"><span class="lineNum">      82 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -185,7 +185,7 @@
 <a name="123"><span class="lineNum">     123 </span>            : </a>
 <a name="124"><span class="lineNum">     124 </span>            : // Exists checks the existence of table.</a>
 <a name="125"><span class="lineNum">     125 </span><span class="lineCov">          1 : func (tblMgr *TableManager) Exists(tblName domain.TableName, txn domain.Transaction) bool {</span></a>
-<a name="126"><span class="lineNum">     126 </span><span class="lineCov">          1 :         tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)</span></a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineCov">          1 :         tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)</span></a>
 <a name="127"><span class="lineNum">     127 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="128"><span class="lineNum">     128 </span><span class="lineNoCov">          0 :                 return false</span></a>
 <a name="129"><span class="lineNum">     129 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -210,7 +210,7 @@
 <a name="148"><span class="lineNum">     148 </span><span class="lineCov">          1 : func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.Transaction) (int32, error) {</span></a>
 <a name="149"><span class="lineNum">     149 </span><span class="lineCov">          1 :         const NonExistSlotSize = -1</span></a>
 <a name="150"><span class="lineNum">     150 </span><span class="lineCov">          1 : </span></a>
-<a name="151"><span class="lineNum">     151 </span><span class="lineCov">          1 :         tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)</span></a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineCov">          1 :         tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)</span></a>
 <a name="152"><span class="lineNum">     152 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 :                 return NonExistSlotSize, err</span></a>
 <a name="154"><span class="lineNum">     154 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -241,7 +241,7 @@
 <a name="179"><span class="lineNum">     179 </span><span class="lineCov">          1 : func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Transaction) (*domain.Schema, map[domain.FieldName]int64, error) {</span></a>
 <a name="180"><span class="lineNum">     180 </span><span class="lineCov">          1 :         sch := domain.NewSchema()</span></a>
 <a name="181"><span class="lineNum">     181 </span><span class="lineCov">          1 :         offsets := make(map[domain.FieldName]int64)</span></a>
-<a name="182"><span class="lineNum">     182 </span><span class="lineCov">          1 :         fcat, err := domain.NewTable(txn, fieldCatalog, tblMgr.fldCatalogLayout)</span></a>
+<a name="182"><span class="lineNum">     182 </span><span class="lineCov">          1 :         fcat, err := domain.NewTableScan(txn, fieldCatalog, tblMgr.fldCatalogLayout)</span></a>
 <a name="183"><span class="lineNum">     183 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="184"><span class="lineNum">     184 </span><span class="lineNoCov">          0 :                 return nil, nil, err</span></a>
 <a name="185"><span class="lineNum">     185 </span><span class="lineNoCov">          0 :         }</span></a>

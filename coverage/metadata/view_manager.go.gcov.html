@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-19 14:28:31</td>
+            <td class="headerValue">2022-05-19 16:02:19</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -98,7 +98,7 @@
 <a name="36"><span class="lineNum">      36 </span><span class="lineNoCov">          0 :                 return err</span></a>
 <a name="37"><span class="lineNum">      37 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="38"><span class="lineNum">      38 </span>            : </a>
-<a name="39"><span class="lineNum">      39 </span><span class="lineCov">          1 :         tbl, err := domain.NewTable(txn, fldViewCatalog, layout)</span></a>
+<a name="39"><span class="lineNum">      39 </span><span class="lineCov">          1 :         tbl, err := domain.NewTableScan(txn, fldViewCatalog, layout)</span></a>
 <a name="40"><span class="lineNum">      40 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="41"><span class="lineNum">      41 </span><span class="lineNoCov">          0 :                 return err</span></a>
 <a name="42"><span class="lineNum">      42 </span><span class="lineNoCov">          0 :         }</span></a>
@@ -123,7 +123,7 @@
 <a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, err</span></a>
 <a name="62"><span class="lineNum">      62 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="63"><span class="lineNum">      63 </span>            : </a>
-<a name="64"><span class="lineNum">      64 </span><span class="lineCov">          1 :         tbl, err := domain.NewTable(txn, fldViewCatalog, layout)</span></a>
+<a name="64"><span class="lineNum">      64 </span><span class="lineCov">          1 :         tbl, err := domain.NewTableScan(txn, fldViewCatalog, layout)</span></a>
 <a name="65"><span class="lineNum">      65 </span><span class="lineCov">          1 :         if err != nil {</span></a>
 <a name="66"><span class="lineNum">      66 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, err</span></a>
 <a name="67"><span class="lineNum">      67 </span><span class="lineNoCov">          0 :         }</span></a>

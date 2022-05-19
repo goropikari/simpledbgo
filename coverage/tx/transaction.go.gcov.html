@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-19 14:28:31</td>
+            <td class="headerValue">2022-05-19 16:02:19</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -256,7 +256,7 @@
 <a name="194"><span class="lineNum">     194 </span><span class="lineCov">          1 :         return nil</span></a>
 <a name="195"><span class="lineNum">     195 </span>            : }</a>
 <a name="196"><span class="lineNum">     196 </span>            : </a>
-<a name="197"><span class="lineNum">     197 </span>            : // UndoSetInt32 is behavior of SetInt32Record.</a>
+<a name="197"><span class="lineNum">     197 </span>            : // UndoSetInt32 undoes SetInt32 operation.</a>
 <a name="198"><span class="lineNum">     198 </span><span class="lineCov">          1 : func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {</span></a>
 <a name="199"><span class="lineNum">     199 </span><span class="lineCov">          1 :         blk := domain.NewBlock(rec.FileName, rec.BlockNumber)</span></a>
 <a name="200"><span class="lineNum">     200 </span><span class="lineCov">          1 : </span></a>
@@ -273,7 +273,7 @@
 <a name="211"><span class="lineNum">     211 </span><span class="lineCov">          1 :         return nil</span></a>
 <a name="212"><span class="lineNum">     212 </span>            : }</a>
 <a name="213"><span class="lineNum">     213 </span>            : </a>
-<a name="214"><span class="lineNum">     214 </span>            : // UndoSetString undoes SetStringRecord.</a>
+<a name="214"><span class="lineNum">     214 </span>            : // UndoSetString undoes SetString.</a>
 <a name="215"><span class="lineNum">     215 </span><span class="lineCov">          1 : func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {</span></a>
 <a name="216"><span class="lineNum">     216 </span><span class="lineCov">          1 :         blk := domain.NewBlock(rec.FileName, rec.BlockNumber)</span></a>
 <a name="217"><span class="lineNum">     217 </span><span class="lineCov">          1 : </span></a>
