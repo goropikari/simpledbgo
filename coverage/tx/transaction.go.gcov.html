@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-15 05:50:44</td>
+            <td class="headerValue">2022-05-19 14:28:31</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -74,13 +74,13 @@
 <a name="12"><span class="lineNum">      12 </span>            :         fileMgr    domain.FileManager</a>
 <a name="13"><span class="lineNum">      13 </span>            :         logMgr     domain.LogManager</a>
 <a name="14"><span class="lineNum">      14 </span>            :         bufferMgr  domain.BufferManager</a>
-<a name="15"><span class="lineNum">      15 </span>            :         concurMgr  *ConcurrencyManager</a>
+<a name="15"><span class="lineNum">      15 </span>            :         concurMgr  domain.ConcurrencyManager</a>
 <a name="16"><span class="lineNum">      16 </span>            :         bufferList *BufferList</a>
 <a name="17"><span class="lineNum">      17 </span>            :         number     domain.TransactionNumber</a>
 <a name="18"><span class="lineNum">      18 </span>            : }</a>
 <a name="19"><span class="lineNum">      19 </span>            : </a>
 <a name="20"><span class="lineNum">      20 </span>            : // NewTransaction constructs Transaction.</a>
-<a name="21"><span class="lineNum">      21 </span><span class="lineCov">          1 : func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferManager, concurMgr *ConcurrencyManager, gen *NumberGenerator) (*Transaction, error) {</span></a>
+<a name="21"><span class="lineNum">      21 </span><span class="lineCov">          1 : func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {</span></a>
 <a name="22"><span class="lineNum">      22 </span><span class="lineCov">          1 :         txn := &amp;Transaction{</span></a>
 <a name="23"><span class="lineNum">      23 </span><span class="lineCov">          1 :                 fileMgr:    fileMgr,</span></a>
 <a name="24"><span class="lineNum">      24 </span><span class="lineCov">          1 :                 logMgr:     logMgr,</span></a>
