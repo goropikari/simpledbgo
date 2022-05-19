@@ -57,6 +57,11 @@ func (c Constant) AsString() string {
 	return v
 }
 
+// AsVal returns constant as any.
+func (c Constant) AsVal() any {
+	return c.val
+}
+
 // HashCode return hash value of c.
 func (c Constant) HashCode() int {
 	mod := 998244353

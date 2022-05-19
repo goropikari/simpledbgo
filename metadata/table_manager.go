@@ -121,30 +121,56 @@ func (tblMgr *TableManager) GetTableLayout(tblName domain.TableName, txn domain.
 	return domain.NewLayoutWithFields(sch, offsets, int64(slotsize)), nil
 }
 
-func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.Transaction) (int32, error) {
-	slotsize := int32(-1)
+// Exists checks the existence of table.
+func (tblMgr *TableManager) Exists(tblName domain.TableName, txn domain.Transaction) bool {
 	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
-		return -1, err
+		return false
 	}
 	defer tcat.Close()
 
 	for tcat.HasNext() {
 		v, err := tcat.GetString(fldTableName)
 		if err != nil {
-			return -1, err
+			return false
+		}
+		if v == tblName.String() {
+			return true
+		}
+	}
+	if err := tcat.Err(); err != nil {
+		return false
+	}
+
+	return false
+}
+
+func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.Transaction) (int32, error) {
+	const NonExistSlotSize = -1
+
+	tcat, err := domain.NewTable(txn, tableCatalog, tblMgr.tblCatalogLayout)
+	if err != nil {
+		return NonExistSlotSize, err
+	}
+	defer tcat.Close()
+
+	slotsize := int32(NonExistSlotSize)
+	for tcat.HasNext() {
+		v, err := tcat.GetString(fldTableName)
+		if err != nil {
+			return NonExistSlotSize, err
 		}
 		if v == tblName.String() {
 			slotsize, err = tcat.GetInt32(fldSlotSize)
 			if err != nil {
-				return -1, err
+				return NonExistSlotSize, err
 			}
 
 			break
 		}
 	}
 	if err := tcat.Err(); err != nil {
-		return -1, err
+		return NonExistSlotSize, err
 	}
 
 	return slotsize, nil

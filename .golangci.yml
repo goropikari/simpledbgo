@@ -11,6 +11,7 @@ linters:
     - exhaustivestruct
     - funlen
     - gochecknoglobals
+    - gochecknoinits
     - godox
     - goerr113
     - golint

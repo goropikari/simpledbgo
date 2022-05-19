@@ -15,8 +15,8 @@ type Transaction interface {
 	Pin(Block) error
 	Unpin(Block)
 	Commit() error
-	// Rollback() error
-	// Recover() error
+	Rollback() error
+	Recover() error
 	GetInt32(Block, int64) (int32, error)
 	SetInt32(Block, int64, int32, bool) error
 	GetString(Block, int64) (string, error)
@@ -25,4 +25,8 @@ type Transaction interface {
 	ExtendFile(FileName) (Block, error)
 	BlockSize() BlockSize
 	// Available() int
+}
+
+type TxNumberGenerator interface {
+	Generate() TransactionNumber
 }

@@ -17,8 +17,8 @@ type Config struct {
 }
 
 // NewConfig constructs Config for LockTable.
-func NewConfig(timeout int) Config {
-	return Config{lockTimeoutMillisecond: timeout}
+func NewConfig(timeoutMilliSec int) Config {
+	return Config{lockTimeoutMillisecond: timeoutMilliSec}
 }
 
 // LockTable manages locked Block which used by transaction.

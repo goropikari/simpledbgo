@@ -45,3 +45,10 @@ type BufferManager interface {
 	Unpin(buf *Buffer)
 	Pin(Block) (*Buffer, error)
 }
+
+// ConcurrencyManager is an interface of concurrency manager.
+type ConcurrencyManager interface {
+	SLock(Block) error
+	XLock(Block) error
+	Release()
+}

@@ -1,6 +1,10 @@
 package metadata
 
-import "github.com/goropikari/simpledbgo/domain"
+import (
+	"fmt"
+
+	"github.com/goropikari/simpledbgo/domain"
+)
 
 // Manager manages metadata.
 type Manager struct {
@@ -64,6 +68,10 @@ func NewManager(factory domain.IndexFactory, txn domain.Transaction) (*Manager, 
 
 // CreateTable creates a table.
 func (mgr *Manager) CreateTable(tblName domain.TableName, sch *domain.Schema, txn domain.Transaction) error {
+	if mgr.tblMgr.Exists(tblName, txn) {
+		return fmt.Errorf("table %v already exists", tblName)
+	}
+
 	return mgr.tblMgr.CreateTable(tblName, sch, txn)
 }
 
