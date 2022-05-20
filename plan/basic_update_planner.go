@@ -6,6 +6,11 @@ import (
 	"github.com/goropikari/simpledbgo/domain"
 )
 
+var (
+	// ErrNotUpdatable is error that indicates the scan is not updatable.
+	ErrNotUpdatable = errors.New("not updatable")
+)
+
 // BasicUpdatePlanner is a BasicUpdatePlanner.
 type BasicUpdatePlanner struct {
 	metadataMgr domain.MetadataManager
@@ -31,7 +36,7 @@ func (p *BasicUpdatePlanner) ExecuteInsert(data *domain.InsertData, txn domain.T
 
 	us, ok := s.(domain.UpdateScanner)
 	if !ok {
-		return 0, errors.New("not updatable")
+		return 0, ErrNotUpdatable
 	}
 
 	if err = us.AdvanceNextInsertSlotID(); err != nil {
@@ -66,7 +71,7 @@ func (p *BasicUpdatePlanner) ExecuteDelete(data *domain.DeleteData, txn domain.T
 
 	us, ok := s.(domain.UpdateScanner)
 	if !ok {
-		return 0, errors.New("not updatable")
+		return 0, ErrNotUpdatable
 	}
 
 	cnt := 0
@@ -100,7 +105,7 @@ func (p *BasicUpdatePlanner) ExecuteModify(data *domain.ModifyData, txn domain.T
 
 	us, ok := s.(domain.UpdateScanner)
 	if !ok {
-		return 0, errors.New("not updatable")
+		return 0, ErrNotUpdatable
 	}
 
 	cnt := 0
