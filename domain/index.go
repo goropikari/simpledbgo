@@ -8,6 +8,11 @@ const (
 	fldDataVal = "dataval"
 )
 
+// SearchCostCalculator calculate search cost.
+type SearchCostCalculator interface {
+	Calculate(numBlk int, rpb int) int
+}
+
 // Indexer is an interface of index.
 type Indexer interface {
 	BeforeFirst(searchKey Constant) error
