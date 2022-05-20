@@ -67,7 +67,7 @@ func NewTableScan(txn Transaction, tblName TableName, layout *Layout) (*TableSca
 			return nil, err
 		}
 	} else {
-		err := tbl.moveToBlock(0)
+		err := tbl.MoveToFirst()
 		if err != nil {
 			return nil, err
 		}
