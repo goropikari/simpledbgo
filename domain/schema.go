@@ -42,13 +42,13 @@ func (schema *Schema) AddField(fldname FieldName, typ FieldType, length int) {
 
 // AddInt32Field adds an int field.
 func (schema *Schema) AddInt32Field(fldname FieldName) {
-	schema.AddField(fldname, FInt32, 0)
+	schema.AddField(fldname, Int32FieldType, 0)
 }
 
 // AddStringField adds an string field with maximum length is length.
 // length is maximum length of string. It is not actual length of the value.
 func (schema *Schema) AddStringField(fldname FieldName, length int) {
-	schema.AddField(fldname, FString, length)
+	schema.AddField(fldname, StringFieldType, length)
 }
 
 // Add adds other's field into the schema.
@@ -78,7 +78,7 @@ func (schema *Schema) Type(fldname FieldName) FieldType {
 		return v.typ
 	}
 
-	return FUnknown
+	return UnknownFieldType
 }
 
 // Length returns field byte length.
@@ -106,11 +106,11 @@ func NewLayout(schema *Schema) *Layout {
 
 		// length in bytes
 		switch schema.Type(fld) {
-		case FInt32:
+		case Int32FieldType:
 			pos += common.Int32Length
-		case FString:
+		case StringFieldType:
 			pos += common.Int32Length + int64(schema.Length(fld))
-		case FUnknown:
+		case UnknownFieldType:
 			log.Fatal(errors.New("Invalid field type"))
 		}
 	}

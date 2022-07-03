@@ -72,14 +72,14 @@ func (name FieldName) IsZero() bool {
 type FieldType uint
 
 const (
-	// FUnknown is unknown field type.
-	FUnknown FieldType = iota
+	// UnknownFieldType is unknown field type.
+	UnknownFieldType FieldType = iota
 
-	// FInt32 is integer field type.
-	FInt32
+	// Int32FieldType is integer field type.
+	Int32FieldType
 
-	// FString is string field type.
-	FString
+	// StringFieldType is string field type.
+	StringFieldType
 )
 
 // FieldInfo is a model of field information.

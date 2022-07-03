@@ -102,21 +102,21 @@ func (tbl *TableScan) GetString(fldName FieldName) (string, error) {
 func (tbl *TableScan) GetVal(fldName FieldName) (Constant, error) {
 	typ := tbl.layout.schema.Type(fldName)
 	switch typ {
-	case FInt32:
+	case Int32FieldType:
 		val, err := tbl.GetInt32(fldName)
 		if err != nil {
 			return Constant{}, err
 		}
 
-		return NewConstant(FInt32, val), nil
-	case FString:
+		return NewConstant(Int32FieldType, val), nil
+	case StringFieldType:
 		val, err := tbl.GetString(fldName)
 		if err != nil {
 			return Constant{}, err
 		}
 
-		return NewConstant(FString, val), nil
-	case FUnknown:
+		return NewConstant(StringFieldType, val), nil
+	case UnknownFieldType:
 		log.Fatal(errors.New("unexpected field type"))
 	}
 
@@ -142,18 +142,18 @@ func (tbl *TableScan) SetString(fldName FieldName, val string) error {
 func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
 	typ := tbl.layout.schema.Type(fldName)
 	switch typ {
-	case FInt32:
+	case Int32FieldType:
 		// TODO: check val type?
 		err := tbl.SetInt32(fldName, val.AsInt32())
 		if err != nil {
 			return err
 		}
-	case FString:
+	case StringFieldType:
 		err := tbl.SetString(fldName, val.AsString())
 		if err != nil {
 			return err
 		}
-	case FUnknown:
+	case UnknownFieldType:
 		log.Fatal(errors.New("unexpected field type"))
 	}
 
