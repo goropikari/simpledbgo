@@ -6,10 +6,8 @@ import (
 	"github.com/goropikari/simpledbgo/domain"
 )
 
-var (
-	// ErrNotUpdatable is error that indicates the scan is not updatable.
-	ErrNotUpdatable = errors.New("not updatable")
-)
+// ErrNotUpdatable is error that indicates the scan is not updatable.
+var ErrNotUpdatable = errors.New("not updatable")
 
 // BasicUpdatePlanner is a BasicUpdatePlanner.
 type BasicUpdatePlanner struct {
