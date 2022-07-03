@@ -7,28 +7,14 @@ import (
 	"log"
 )
 
-// ValueType is a type of value.
-type ValueType uint
-
-const (
-	// VUndefined means undef type.
-	VUndefined ValueType = iota
-
-	// VInt32 means int32 type.
-	VInt32
-
-	// VString means string type.
-	VString
-)
-
 // Constant is constant type of database.
 type Constant struct {
-	typ ValueType
+	typ FieldType
 	val any
 }
 
 // NewConstant construts a Constant.
-func NewConstant(typ ValueType, val any) Constant {
+func NewConstant(typ FieldType, val any) Constant {
 	return Constant{typ: typ, val: val}
 }
 

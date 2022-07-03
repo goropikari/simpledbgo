@@ -108,14 +108,14 @@ func (tbl *TableScan) GetVal(fldName FieldName) (Constant, error) {
 			return Constant{}, err
 		}
 
-		return NewConstant(VInt32, val), nil
+		return NewConstant(FInt32, val), nil
 	case FString:
 		val, err := tbl.GetString(fldName)
 		if err != nil {
 			return Constant{}, err
 		}
 
-		return NewConstant(VString, val), nil
+		return NewConstant(FString, val), nil
 	case FUnknown:
 		log.Fatal(errors.New("unexpected field type"))
 	}

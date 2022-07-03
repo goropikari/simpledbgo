@@ -5,7 +5,7 @@ package domain
 const (
 	fldBlock   = "block"
 	fldID      = "id"
-	fldDataVal = "dataval"
+	FldDataVal = "dataval"
 )
 
 // SearchCostCalculator calculate search cost.
@@ -110,10 +110,10 @@ func createIdxLayout(tblSchema *Schema, fldName FieldName) *Layout {
 	sch.AddInt32Field(fldBlock)
 	sch.AddInt32Field(fldID)
 	if tblSchema.Type(fldName) == FInt32 {
-		sch.AddInt32Field(fldDataVal)
+		sch.AddInt32Field(FldDataVal)
 	} else {
 		fldLen := tblSchema.Length(fldName)
-		sch.AddStringField(fldDataVal, fldLen)
+		sch.AddStringField(FldDataVal, fldLen)
 	}
 
 	return NewLayout(sch)

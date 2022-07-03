@@ -13,7 +13,7 @@ const (
 	fldID      = "id"
 )
 
-// Index is a model of index.
+// Index is a model of hash index.
 type Index struct {
 	txn       domain.Transaction
 	idxName   domain.IndexName
@@ -106,7 +106,7 @@ func (idx *Index) GetDataRecordID() (domain.RecordID, error) {
 	return domain.NewRecordID(blkNum, slotID), nil
 }
 
-// Insert inserts search key with record id into the index file.
+// Insert inserts search key and record id into the index file.
 func (idx *Index) Insert(searchKey domain.Constant, rid domain.RecordID) error {
 	if err := idx.BeforeFirst(searchKey); err != nil {
 		return err

@@ -633,14 +633,14 @@ func (parser *Parser) constant() (domain.Constant, error) {
 			return domain.Constant{}, err
 		}
 
-		return domain.NewConstant(domain.VString, str), nil
+		return domain.NewConstant(domain.FString, str), nil
 	case parser.match(lexer.TInt32):
 		num, err := parser.eatInt32()
 		if err != nil {
 			return domain.Constant{}, err
 		}
 
-		return domain.NewConstant(domain.VInt32, num), nil
+		return domain.NewConstant(domain.FInt32, num), nil
 	default:
 		return domain.Constant{}, ErrParse
 	}

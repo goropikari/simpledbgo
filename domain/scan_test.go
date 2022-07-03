@@ -399,12 +399,12 @@ func TestSelectScan(t *testing.T) {
 		require.NoError(t, err)
 		pred := domain.NewPredicate([]domain.Term{
 			domain.NewTerm(
-				domain.NewConstExpression(domain.NewConstant(domain.VString, "rec2")),
+				domain.NewConstExpression(domain.NewConstant(domain.FString, "rec2")),
 				domain.NewFieldNameExpression("B"),
 			),
 			domain.NewTerm(
 				domain.NewFieldNameExpression("C"),
-				domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(100))),
+				domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(100))),
 			),
 		})
 		table := domain.NewSelectScan(productTable, pred)
@@ -481,7 +481,7 @@ func TestSelectScan_update_column(t *testing.T) {
 
 		pred := domain.NewPredicate([]domain.Term{
 			domain.NewTerm(
-				domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(0))),
+				domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(0))),
 				domain.NewFieldNameExpression("A"),
 			),
 		})
@@ -490,7 +490,7 @@ func TestSelectScan_update_column(t *testing.T) {
 		err = utbl.MoveToFirst()
 		require.NoError(t, err)
 		for utbl.HasNext() {
-			utbl.SetVal("A", domain.NewConstant(domain.VInt32, int32(10000)))
+			utbl.SetVal("A", domain.NewConstant(domain.FInt32, int32(10000)))
 		}
 
 		err = table.MoveToFirst()
@@ -569,7 +569,7 @@ func TestSelectScan_delete_record(t *testing.T) {
 
 		pred := domain.NewPredicate([]domain.Term{
 			domain.NewTerm(
-				domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(0))),
+				domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(0))),
 				domain.NewFieldNameExpression("A"),
 			),
 		})
@@ -669,12 +669,12 @@ func TestProjectScan(t *testing.T) {
 		require.NoError(t, err)
 		pred := domain.NewPredicate([]domain.Term{
 			domain.NewTerm(
-				domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(2))),
+				domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(2))),
 				domain.NewFieldNameExpression("A"),
 			),
 			domain.NewTerm(
 				domain.NewFieldNameExpression("C"),
-				domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(100))),
+				domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(100))),
 			),
 		})
 		selectTable := domain.NewSelectScan(productTable, pred)

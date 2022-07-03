@@ -43,11 +43,11 @@ func TestParser_Query(t *testing.T) {
 				domain.NewPredicate([]domain.Term{
 					domain.NewTerm(
 						domain.NewFieldNameExpression("id"),
-						domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(123))),
+						domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(123))),
 					),
 					domain.NewTerm(
 						domain.NewFieldNameExpression("name"),
-						domain.NewConstExpression(domain.NewConstant(domain.VString, "Mike's dog")),
+						domain.NewConstExpression(domain.NewConstant(domain.FString, "Mike's dog")),
 					),
 				}),
 			),
@@ -207,8 +207,8 @@ func TestParser_ExecCmd_Insert(t *testing.T) {
 				domain.TableName("foo"),
 				[]domain.FieldName{"id", "name"},
 				[]domain.Constant{
-					domain.NewConstant(domain.VInt32, int32(123)),
-					domain.NewConstant(domain.VString, "mike"),
+					domain.NewConstant(domain.FInt32, int32(123)),
+					domain.NewConstant(domain.FString, "mike"),
 				},
 			),
 		},
@@ -403,7 +403,7 @@ func TestParser_ExecCmd_Delete(t *testing.T) {
 					domain.NewTerm(
 						domain.NewFieldNameExpression("id"),
 						domain.NewConstExpression(
-							domain.NewConstant(domain.VInt32, int32(123)),
+							domain.NewConstant(domain.FInt32, int32(123)),
 						),
 					),
 				}),
@@ -509,7 +509,7 @@ func TestParser_ExecCmd_Modify(t *testing.T) {
 				domain.FieldName("name"),
 				domain.NewConstExpression(
 					domain.NewConstant(
-						domain.VString,
+						domain.FString,
 						"mike",
 					),
 				),
@@ -535,7 +535,7 @@ func TestParser_ExecCmd_Modify(t *testing.T) {
 				domain.FieldName("name"),
 				domain.NewConstExpression(
 					domain.NewConstant(
-						domain.VString,
+						domain.FString,
 						"mike",
 					),
 				),
@@ -545,7 +545,7 @@ func TestParser_ExecCmd_Modify(t *testing.T) {
 							domain.NewFieldNameExpression(domain.FieldName("name")),
 							domain.NewConstExpression(
 								domain.NewConstant(
-									domain.VString,
+									domain.FString,
 									"neko",
 								),
 							),
@@ -949,11 +949,11 @@ func TestParser_ExecCmd_CreateView(t *testing.T) {
 					domain.NewPredicate([]domain.Term{
 						domain.NewTerm(
 							domain.NewFieldNameExpression("id"),
-							domain.NewConstExpression(domain.NewConstant(domain.VInt32, int32(123))),
+							domain.NewConstExpression(domain.NewConstant(domain.FInt32, int32(123))),
 						),
 						domain.NewTerm(
 							domain.NewFieldNameExpression("name"),
-							domain.NewConstExpression(domain.NewConstant(domain.VString, "Mike's dog")),
+							domain.NewConstExpression(domain.NewConstant(domain.FString, "Mike's dog")),
 						),
 					}),
 				),

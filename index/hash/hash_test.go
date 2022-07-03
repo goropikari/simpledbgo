@@ -32,8 +32,8 @@ func TestHashIndex(t *testing.T) {
 
 		idx := hash.NewIndex(txn, idxName, layout)
 
-		skey1 := domain.NewConstant(domain.VInt32, fake.RandInt32())
-		skey2 := domain.NewConstant(domain.VInt32, fake.RandInt32())
+		skey1 := domain.NewConstant(domain.FInt32, fake.RandInt32())
+		skey2 := domain.NewConstant(domain.FInt32, fake.RandInt32())
 
 		blkNum1 := domain.BlockNumber(2)
 		slotID1 := domain.SlotID(10)
