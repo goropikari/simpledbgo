@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-19 16:02:19</td>
+            <td class="headerValue">2022-07-07 11:57:09</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -104,13 +104,13 @@
 <a name="42"><span class="lineNum">      42 </span>            : </a>
 <a name="43"><span class="lineNum">      43 </span>            : // AddInt32Field adds an int field.</a>
 <a name="44"><span class="lineNum">      44 </span><span class="lineCov">          1 : func (schema *Schema) AddInt32Field(fldname FieldName) {</span></a>
-<a name="45"><span class="lineNum">      45 </span><span class="lineCov">          1 :         schema.AddField(fldname, FInt32, 0)</span></a>
+<a name="45"><span class="lineNum">      45 </span><span class="lineCov">          1 :         schema.AddField(fldname, Int32FieldType, 0)</span></a>
 <a name="46"><span class="lineNum">      46 </span><span class="lineCov">          1 : }</span></a>
 <a name="47"><span class="lineNum">      47 </span>            : </a>
 <a name="48"><span class="lineNum">      48 </span>            : // AddStringField adds an string field with maximum length is length.</a>
 <a name="49"><span class="lineNum">      49 </span>            : // length is maximum length of string. It is not actual length of the value.</a>
 <a name="50"><span class="lineNum">      50 </span><span class="lineCov">          1 : func (schema *Schema) AddStringField(fldname FieldName, length int) {</span></a>
-<a name="51"><span class="lineNum">      51 </span><span class="lineCov">          1 :         schema.AddField(fldname, FString, length)</span></a>
+<a name="51"><span class="lineNum">      51 </span><span class="lineCov">          1 :         schema.AddField(fldname, StringFieldType, length)</span></a>
 <a name="52"><span class="lineNum">      52 </span><span class="lineCov">          1 : }</span></a>
 <a name="53"><span class="lineNum">      53 </span>            : </a>
 <a name="54"><span class="lineNum">      54 </span>            : // Add adds other's field into the schema.</a>
@@ -140,7 +140,7 @@
 <a name="78"><span class="lineNum">      78 </span><span class="lineCov">          1 :                 return v.typ</span></a>
 <a name="79"><span class="lineNum">      79 </span><span class="lineCov">          1 :         }</span></a>
 <a name="80"><span class="lineNum">      80 </span>            : </a>
-<a name="81"><span class="lineNum">      81 </span><span class="lineNoCov">          0 :         return FUnknown</span></a>
+<a name="81"><span class="lineNum">      81 </span><span class="lineNoCov">          0 :         return UnknownFieldType</span></a>
 <a name="82"><span class="lineNum">      82 </span>            : }</a>
 <a name="83"><span class="lineNum">      83 </span>            : </a>
 <a name="84"><span class="lineNum">      84 </span>            : // Length returns field byte length.</a>
@@ -168,11 +168,11 @@
 <a name="106"><span class="lineNum">     106 </span><span class="lineCov">          1 : </span></a>
 <a name="107"><span class="lineNum">     107 </span><span class="lineCov">          1 :                 // length in bytes</span></a>
 <a name="108"><span class="lineNum">     108 </span><span class="lineCov">          1 :                 switch schema.Type(fld) {</span></a>
-<a name="109"><span class="lineNum">     109 </span><span class="lineCov">          1 :                 case FInt32:</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineCov">          1 :                 case Int32FieldType:</span></a>
 <a name="110"><span class="lineNum">     110 </span><span class="lineCov">          1 :                         pos += common.Int32Length</span></a>
-<a name="111"><span class="lineNum">     111 </span><span class="lineCov">          1 :                 case FString:</span></a>
+<a name="111"><span class="lineNum">     111 </span><span class="lineCov">          1 :                 case StringFieldType:</span></a>
 <a name="112"><span class="lineNum">     112 </span><span class="lineCov">          1 :                         pos += common.Int32Length + int64(schema.Length(fld))</span></a>
-<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :                 case FUnknown:</span></a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :                 case UnknownFieldType:</span></a>
 <a name="114"><span class="lineNum">     114 </span><span class="lineNoCov">          0 :                         log.Fatal(errors.New(&quot;Invalid field type&quot;))</span></a>
 <a name="115"><span class="lineNum">     115 </span>            :                 }</a>
 <a name="116"><span class="lineNum">     116 </span>            :         }</a>
