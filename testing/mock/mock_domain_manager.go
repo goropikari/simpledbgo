@@ -393,31 +393,31 @@ func (mr *MockMetadataManagerMockRecorder) GetViewDef(viewName, txn interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetViewDef", reflect.TypeOf((*MockMetadataManager)(nil).GetViewDef), viewName, txn)
 }
 
-// MockBufferManager is a mock of BufferManager interface.
-type MockBufferManager struct {
+// MockBufferPoolManager is a mock of BufferPoolManager interface.
+type MockBufferPoolManager struct {
 	ctrl     *gomock.Controller
-	recorder *MockBufferManagerMockRecorder
+	recorder *MockBufferPoolManagerMockRecorder
 }
 
-// MockBufferManagerMockRecorder is the mock recorder for MockBufferManager.
-type MockBufferManagerMockRecorder struct {
-	mock *MockBufferManager
+// MockBufferPoolManagerMockRecorder is the mock recorder for MockBufferPoolManager.
+type MockBufferPoolManagerMockRecorder struct {
+	mock *MockBufferPoolManager
 }
 
-// NewMockBufferManager creates a new mock instance.
-func NewMockBufferManager(ctrl *gomock.Controller) *MockBufferManager {
-	mock := &MockBufferManager{ctrl: ctrl}
-	mock.recorder = &MockBufferManagerMockRecorder{mock}
+// NewMockBufferPoolManager creates a new mock instance.
+func NewMockBufferPoolManager(ctrl *gomock.Controller) *MockBufferPoolManager {
+	mock := &MockBufferPoolManager{ctrl: ctrl}
+	mock.recorder = &MockBufferPoolManagerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockBufferManager) EXPECT() *MockBufferManagerMockRecorder {
+func (m *MockBufferPoolManager) EXPECT() *MockBufferPoolManagerMockRecorder {
 	return m.recorder
 }
 
 // Available mocks base method.
-func (m *MockBufferManager) Available() int {
+func (m *MockBufferPoolManager) Available() int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Available")
 	ret0, _ := ret[0].(int)
@@ -425,13 +425,13 @@ func (m *MockBufferManager) Available() int {
 }
 
 // Available indicates an expected call of Available.
-func (mr *MockBufferManagerMockRecorder) Available() *gomock.Call {
+func (mr *MockBufferPoolManagerMockRecorder) Available() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Available", reflect.TypeOf((*MockBufferManager)(nil).Available))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Available", reflect.TypeOf((*MockBufferPoolManager)(nil).Available))
 }
 
 // FlushAll mocks base method.
-func (m *MockBufferManager) FlushAll(txnum domain.TransactionNumber) error {
+func (m *MockBufferPoolManager) FlushAll(txnum domain.TransactionNumber) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FlushAll", txnum)
 	ret0, _ := ret[0].(error)
@@ -439,13 +439,13 @@ func (m *MockBufferManager) FlushAll(txnum domain.TransactionNumber) error {
 }
 
 // FlushAll indicates an expected call of FlushAll.
-func (mr *MockBufferManagerMockRecorder) FlushAll(txnum interface{}) *gomock.Call {
+func (mr *MockBufferPoolManagerMockRecorder) FlushAll(txnum interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FlushAll", reflect.TypeOf((*MockBufferManager)(nil).FlushAll), txnum)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FlushAll", reflect.TypeOf((*MockBufferPoolManager)(nil).FlushAll), txnum)
 }
 
 // Pin mocks base method.
-func (m *MockBufferManager) Pin(arg0 domain.Block) (*domain.Buffer, error) {
+func (m *MockBufferPoolManager) Pin(arg0 domain.Block) (*domain.Buffer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Pin", arg0)
 	ret0, _ := ret[0].(*domain.Buffer)
@@ -454,21 +454,21 @@ func (m *MockBufferManager) Pin(arg0 domain.Block) (*domain.Buffer, error) {
 }
 
 // Pin indicates an expected call of Pin.
-func (mr *MockBufferManagerMockRecorder) Pin(arg0 interface{}) *gomock.Call {
+func (mr *MockBufferPoolManagerMockRecorder) Pin(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pin", reflect.TypeOf((*MockBufferManager)(nil).Pin), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pin", reflect.TypeOf((*MockBufferPoolManager)(nil).Pin), arg0)
 }
 
 // Unpin mocks base method.
-func (m *MockBufferManager) Unpin(buf *domain.Buffer) {
+func (m *MockBufferPoolManager) Unpin(buf *domain.Buffer) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Unpin", buf)
 }
 
 // Unpin indicates an expected call of Unpin.
-func (mr *MockBufferManagerMockRecorder) Unpin(buf interface{}) *gomock.Call {
+func (mr *MockBufferPoolManagerMockRecorder) Unpin(buf interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unpin", reflect.TypeOf((*MockBufferManager)(nil).Unpin), buf)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unpin", reflect.TypeOf((*MockBufferPoolManager)(nil).Unpin), buf)
 }
 
 // MockConcurrencyManager is a mock of ConcurrencyManager interface.

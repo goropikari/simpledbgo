@@ -31,7 +31,7 @@ func TestBufferList_Pin(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			bufMgr := mock.NewMockBufferManager(ctrl)
+			bufMgr := mock.NewMockBufferPoolManager(ctrl)
 			bufMgr.EXPECT().Pin(gomock.Any()).Return(tt.buf, nil).AnyTimes()
 
 			bl := tx.NewBufferList(bufMgr)
@@ -63,7 +63,7 @@ func TestBufferList_Pin_Error(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			bufMgr := mock.NewMockBufferManager(ctrl)
+			bufMgr := mock.NewMockBufferPoolManager(ctrl)
 			bufMgr.EXPECT().Pin(gomock.Any()).Return(nil, tt.err).AnyTimes()
 
 			bl := tx.NewBufferList(bufMgr)
@@ -92,7 +92,7 @@ func TestBufferList_Unpin(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			bufMgr := mock.NewMockBufferManager(ctrl)
+			bufMgr := mock.NewMockBufferPoolManager(ctrl)
 			bufMgr.EXPECT().Pin(gomock.Any()).Return(tt.buf, nil).AnyTimes()
 			bufMgr.EXPECT().Unpin(gomock.Any()).AnyTimes()
 
@@ -131,7 +131,7 @@ func TestBufferList_UnpinAll(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			bufMgr := mock.NewMockBufferManager(ctrl)
+			bufMgr := mock.NewMockBufferPoolManager(ctrl)
 			bufMgr.EXPECT().Pin(gomock.Any()).Return(tt.buf, nil).AnyTimes()
 			bufMgr.EXPECT().Unpin(gomock.Any()).AnyTimes()
 

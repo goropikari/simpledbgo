@@ -20,7 +20,7 @@ import (
 type DB struct {
 	fmgr domain.FileManager
 	lmgr domain.LogManager
-	bmgr domain.BufferManager
+	bmgr domain.BufferPoolManager
 	cmgr domain.ConcurrencyManager
 	gen  domain.TxNumberGenerator
 	pe   *plan.Executor
@@ -154,7 +154,7 @@ func (db *DB) Exec(txn domain.Transaction, cmd string) (int, error) {
 	return db.pe.ExecuteUpdate(cmd, txn)
 }
 
-func newTx(fmgr domain.FileManager, lmgr domain.LogManager, bmgr domain.BufferManager, cmgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (domain.Transaction, error) {
+func newTx(fmgr domain.FileManager, lmgr domain.LogManager, bmgr domain.BufferPoolManager, cmgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (domain.Transaction, error) {
 	txn, err := tx.NewTransaction(fmgr, lmgr, bmgr, cmgr, gen)
 	if err != nil {
 		return nil, err

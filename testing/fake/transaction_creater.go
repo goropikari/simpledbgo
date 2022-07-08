@@ -11,7 +11,7 @@ type TransactionCreater struct {
 	factory   *NonDirectBufferManagerFactory
 	FileMgr   domain.FileManager
 	LogMgr    domain.LogManager
-	BufMgr    domain.BufferManager
+	BufMgr    domain.BufferPoolManager
 	ConcurMgr *tx.ConcurrencyManager
 	Gen       *tx.NumberGenerator
 }

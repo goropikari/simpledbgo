@@ -39,7 +39,7 @@ type MetadataManager interface {
 }
 
 // BufferManager is an interface of buffer manager.
-type BufferManager interface {
+type BufferPoolManager interface {
 	Available() int
 	FlushAll(txnum TransactionNumber) error
 	Unpin(buf *Buffer)

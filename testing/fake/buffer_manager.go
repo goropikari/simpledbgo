@@ -14,7 +14,7 @@ type NonDirectBufferManagerFactory struct {
 	dbPath    string
 	fileMgr   domain.FileManager
 	logMgr    domain.LogManager
-	bufferMgr domain.BufferManager
+	bufferMgr domain.BufferPoolManager
 }
 
 func NewNonDirectBufferManagerFactory(dbPath string, blockSize int32, numBuf int) *NonDirectBufferManagerFactory {
@@ -53,7 +53,7 @@ func NewNonDirectBufferManagerFactory(dbPath string, blockSize int32, numBuf int
 	}
 }
 
-func (factory *NonDirectBufferManagerFactory) Create() (domain.FileManager, domain.LogManager, domain.BufferManager) {
+func (factory *NonDirectBufferManagerFactory) Create() (domain.FileManager, domain.LogManager, domain.BufferPoolManager) {
 	return factory.fileMgr, factory.logMgr, factory.bufferMgr
 }
 

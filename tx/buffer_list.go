@@ -9,11 +9,11 @@ import (
 type BufferList struct {
 	buffers      map[domain.Block]*domain.Buffer
 	pinnedBlocks ls.List[domain.Block]
-	bufMgr       domain.BufferManager
+	bufMgr       domain.BufferPoolManager
 }
 
 // NewBufferList constructs a BufferList.
-func NewBufferList(bufMgr domain.BufferManager) *BufferList {
+func NewBufferList(bufMgr domain.BufferPoolManager) *BufferList {
 	return &BufferList{
 		buffers:      make(map[domain.Block]*domain.Buffer),
 		pinnedBlocks: ls.NewList[domain.Block](),

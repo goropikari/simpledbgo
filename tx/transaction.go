@@ -11,14 +11,14 @@ import (
 type Transaction struct {
 	fileMgr    domain.FileManager
 	logMgr     domain.LogManager
-	bufferMgr  domain.BufferManager
+	bufferMgr  domain.BufferPoolManager
 	concurMgr  domain.ConcurrencyManager
 	bufferList *BufferList
 	number     domain.TransactionNumber
 }
 
 // NewTransaction constructs Transaction.
-func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {
+func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {
 	txn := &Transaction{
 		fileMgr:    fileMgr,
 		logMgr:     logMgr,
