@@ -31,7 +31,7 @@ var (
 type Buffer struct {
 	capacity int64
 	data     []byte
-	offset   int64
+	pos      int64
 }
 
 // NewBuffer is a constructor of Buffer.
@@ -44,7 +44,7 @@ func NewBufferBytes(data []byte) *Buffer {
 	return &Buffer{
 		capacity: int64(len(data)),
 		data:     data,
-		offset:   0,
+		pos:      0,
 	}
 }
 
@@ -54,25 +54,25 @@ func (buf *Buffer) Size() int64 {
 
 // Read reads bytes from Reader.
 func (buf *Buffer) Read(p []byte) (n int, err error) {
-	if buf.offset >= buf.capacity {
+	if buf.pos >= buf.capacity {
 		return 0, io.EOF
 	}
 
-	cnt := copy(p, buf.data[buf.offset:])
+	cnt := copy(p, buf.data[buf.pos:])
 
-	buf.offset += int64(cnt)
+	buf.pos += int64(cnt)
 
 	return cnt, nil
 }
 
 // Write writes given bytes to writer.
 func (buf *Buffer) Write(p []byte) (n int, err error) {
-	if buf.offset+int64(len(p)) > buf.capacity {
+	if buf.pos+int64(len(p)) > buf.capacity {
 		return 0, ErrNotEnoughSpace
 	}
 
-	cnt := copy(buf.data[buf.offset:], p)
-	buf.offset += int64(cnt)
+	cnt := copy(buf.data[buf.pos:], p)
+	buf.pos += int64(cnt)
 
 	return cnt, nil
 }
@@ -87,7 +87,7 @@ func (buf *Buffer) Seek(offset int64, whence int) (int64, error) {
 		return 0, ErrOutOfRange
 	}
 
-	buf.offset = offset
+	buf.pos = offset
 
 	return offset, nil
 }
@@ -99,7 +99,7 @@ func (buf *Buffer) GetData() []byte {
 
 // Reset resets buffer.
 func (buf *Buffer) Reset() {
-	buf.offset = 0
+	buf.pos = 0
 	for i := 0; i < int(buf.capacity); i++ {
 		buf.data[i] = 0
 	}
@@ -285,5 +285,5 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 }
 
 func (buf *Buffer) hasSpace(x int) bool {
-	return int64(x)+buf.offset <= buf.capacity
+	return int64(x)+buf.pos <= buf.capacity
 }
