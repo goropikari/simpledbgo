@@ -18,6 +18,13 @@ type ManagerConfig struct {
 	LogFileName string
 }
 
+// Page structure
+//                                 boundary                                page
+// 0                               position                                size
+// ↓                                 ↓                                      ↓
+// --------------------------------------------------------------------------
+// | boundary position (int32) | ... | record n | ... | record 2 | record 1 |
+// --------------------------------------------------------------------------
 type Page struct {
 	dp *domain.Page
 }
@@ -42,12 +49,24 @@ func (p *Page) getDomainPage() *domain.Page {
 	return p.dp
 }
 
+func (p *Page) Size() int64 {
+	return p.dp.Size()
+}
+
 func (p *Page) getBoundaryOffset() (int32, error) {
 	return p.dp.GetInt32(boundaryPositionOffset)
 }
 
 func (p *Page) setBoundaryOffset(recordPos int32) error {
 	return p.dp.SetInt32(boundaryPositionOffset, recordPos)
+}
+
+func (p *Page) getRecord(recordPos int32) ([]byte, error) {
+	return p.dp.GetBytes(int64(recordPos))
+}
+
+func (p *Page) neededByteLength(record []byte) int64 {
+	return p.dp.NeededByteLength(record)
 }
 
 func (p *Page) canAppend(record []byte) (bool, error) {
@@ -265,7 +284,7 @@ func (mgr *Manager) Iterator() (domain.LogIterator, error) {
 		return nil, err
 	}
 
-	return NewIterator(mgr.fileMgr, mgr.currentBlock, page)
+	return NewIterator(mgr.fileMgr, mgr.currentBlock, NewPage(page))
 }
 
 // LogFileName returns log file name.

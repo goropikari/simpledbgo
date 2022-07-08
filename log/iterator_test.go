@@ -48,15 +48,21 @@ func createRecord(logMgr domain.LogManager, start, end int) {
 	}
 }
 
+// record structure
+// -----------------------------------------------------------------
+// | record length (uint32) | byte expr of string (len(s)) | int32 |
+// -----------------------------------------------------------------
 func createLogRecord(s string, n int32) []byte {
-	needed := len(s) + common.Int32Length*2
+	stringOffset := int64(0)
+	intOffset := bytes.NeededByteLength(s)
+	needed := int(intOffset + bytes.NeededByteLength(n))
 	bb := bytes.NewBuffer(needed)
 
-	err := bb.SetString(0, s)
+	err := bb.SetString(stringOffset, s)
 	if err != nil {
 		golog.Fatal(err)
 	}
-	err = bb.SetInt32(int64(needed-common.Int32Length), n)
+	err = bb.SetInt32(intOffset, n)
 	if err != nil {
 		golog.Fatal(err)
 	}

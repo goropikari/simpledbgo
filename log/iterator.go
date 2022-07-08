@@ -1,7 +1,6 @@
 package log
 
 import (
-	"github.com/goropikari/simpledbgo/common"
 	"github.com/goropikari/simpledbgo/domain"
 )
 
@@ -9,19 +8,19 @@ import (
 type Iterator struct {
 	fileMgr    domain.FileManager
 	block      domain.Block
-	page       *domain.Page
+	page       *Page
 	currentPos int32
-	// boundary   int32
+	err        error
 }
 
 // NewIterator is a constructor of Iterator.
-func NewIterator(fileMgr domain.FileManager, block domain.Block, page *domain.Page) (*Iterator, error) {
-	err := fileMgr.CopyBlockToPage(block, page)
+func NewIterator(fileMgr domain.FileManager, block domain.Block, page *Page) (*Iterator, error) {
+	err := fileMgr.CopyBlockToPage(block, page.getDomainPage())
 	if err != nil {
 		return nil, err
 	}
 
-	currentPos, err := page.GetInt32(0)
+	currentPos, err := page.getBoundaryOffset()
 	if err != nil {
 		return nil, err
 	}
@@ -31,13 +30,13 @@ func NewIterator(fileMgr domain.FileManager, block domain.Block, page *domain.Pa
 		block:      block,
 		page:       page,
 		currentPos: currentPos,
-		// boundary:   0,
+		err:        nil,
 	}, nil
 }
 
 // HasNext checks whether iterator has next items or not.
 func (iter *Iterator) HasNext() bool {
-	return iter.currentPos < int32(iter.fileMgr.BlockSize()) || int32(iter.block.Number()) > 0
+	return iter.currentPos < int32(iter.page.Size()) || iter.block.Number() > 0
 }
 
 // Next returns a next item.
@@ -51,23 +50,23 @@ func (iter *Iterator) Next() ([]byte, error) {
 		iter.block = blk
 	}
 
-	record, err := iter.page.GetBytes(int64(iter.currentPos))
+	record, err := iter.page.getRecord(iter.currentPos)
 	if err != nil {
 		return nil, err
 	}
 
-	iter.currentPos += common.Int32Length + int32(len(record))
+	iter.currentPos += int32(iter.page.neededByteLength(record))
 
 	return record, nil
 }
 
 func (iter *Iterator) moveToBlock(block domain.Block) error {
-	err := iter.fileMgr.CopyBlockToPage(block, iter.page)
+	err := iter.fileMgr.CopyBlockToPage(block, iter.page.getDomainPage())
 	if err != nil {
 		return err
 	}
 
-	boundary, err := iter.page.GetInt32(0)
+	boundary, err := iter.page.getBoundaryOffset()
 	if err != nil {
 		return err
 	}

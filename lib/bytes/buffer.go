@@ -291,6 +291,10 @@ func (buf *Buffer) hasSpace(x any) bool {
 }
 
 func (buf *Buffer) NeededByteLength(x any) int64 {
+	return NeededByteLength(x)
+}
+
+func NeededByteLength(x any) int64 {
 	switch v := x.(type) {
 	case int32, uint32:
 		return common.Int32Length
