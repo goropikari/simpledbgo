@@ -60,7 +60,7 @@ func TestBuffer_Block(t *testing.T) {
 
 		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
 		require.NoError(t, err)
-		require.Equal(t, domain.NewZeroBlock(), buf.Block())
+		require.Equal(t, domain.Block{}, buf.Block())
 	})
 }
 

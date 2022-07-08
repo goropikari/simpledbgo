@@ -63,11 +63,6 @@ func (name FieldName) String() string {
 	return string(name)
 }
 
-// IsZero checks whether name is zero value or not.
-func (name FieldName) IsZero() bool {
-	return name == ""
-}
-
 // FieldType is a type of field.
 type FieldType uint
 
@@ -146,9 +141,4 @@ func NewViewDef(def string) ViewDef {
 // String stringfies ViewDef.
 func (def ViewDef) String() string {
 	return string(def)
-}
-
-// IsZero checks def is zero value or not.
-func (def ViewDef) IsZero() bool {
-	return def == ""
 }

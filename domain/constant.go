@@ -18,11 +18,6 @@ func NewConstant(typ FieldType, val any) Constant {
 	return Constant{typ: typ, val: val}
 }
 
-// IsZero checks whether c is zero value or not.
-func (c Constant) IsZero() bool {
-	return c == Constant{}
-}
-
 // AsInt32 returns a value as int32.
 func (c Constant) AsInt32() int32 {
 	v, ok := c.val.(int32)

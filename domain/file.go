@@ -151,11 +151,6 @@ func NewDummyBlock(filename FileName) Block {
 	}
 }
 
-// NewZeroBlock is constructor of zero value Block.
-func NewZeroBlock() Block {
-	return Block{}
-}
-
 // Equal compares equality of two blocks.
 func (b Block) Equal(other Block) bool {
 	return b == other

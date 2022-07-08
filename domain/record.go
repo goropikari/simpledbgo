@@ -172,11 +172,6 @@ func NewRecordID(blkNum BlockNumber, slotID SlotID) RecordID {
 	}
 }
 
-// NewZeroRecordID returns zero value of record id.
-func NewZeroRecordID() RecordID {
-	return RecordID{}
-}
-
 // BlockNumber returns block number.
 func (rid RecordID) BlockNumber() BlockNumber {
 	return rid.blkNum

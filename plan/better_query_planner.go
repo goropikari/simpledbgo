@@ -28,7 +28,7 @@ func (planner *BetterQueryPlanner) CreatePlan(data *domain.QueryData, txn domain
 			return nil, err
 		}
 
-		if viewDef.IsZero() {
+		if viewDef == "" {
 			plan, err := NewTablePlan(txn, tblName, planner.metadataMgr)
 			if err != nil {
 				return nil, err

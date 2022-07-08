@@ -400,7 +400,7 @@ func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
 func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {
 	dummyBlk := domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.XLock(dummyBlk); err != nil {
-		return domain.NewZeroBlock(), err
+		return domain.Block{}, err
 	}
 
 	return tx.fileMgr.ExtendFile(filename)

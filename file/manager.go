@@ -100,39 +100,39 @@ func (mgr *Manager) ExtendFile(filename domain.FileName) (domain.Block, error) {
 
 	blkLen, err := mgr.BlockLength(filename)
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to take block length")
+		return domain.Block{}, errors.Wrap(err, "failed to take block length")
 	}
 
 	numBlk, err := domain.NewBlockNumber(blkLen)
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to constnruct BlockNumber")
+		return domain.Block{}, errors.Wrap(err, "failed to constnruct BlockNumber")
 	}
 
 	blk := domain.NewBlock(filename, numBlk)
 
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to open file")
+		return domain.Block{}, errors.Wrap(err, "failed to open file")
 	}
 
 	n, err := file.Size()
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to take file size")
+		return domain.Block{}, errors.Wrap(err, "failed to take file size")
 	}
 
 	_, err = file.Seek(n)
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to seek")
+		return domain.Block{}, errors.Wrap(err, "failed to seek")
 	}
 
 	bs, err := mgr.bsf.Create(int(mgr.blockSize))
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to create byte slice")
+		return domain.Block{}, errors.Wrap(err, "failed to create byte slice")
 	}
 
 	_, err = file.Write(bs)
 	if err != nil {
-		return domain.NewZeroBlock(), errors.Wrap(err, "failed to write")
+		return domain.Block{}, errors.Wrap(err, "failed to write")
 	}
 
 	return blk, nil

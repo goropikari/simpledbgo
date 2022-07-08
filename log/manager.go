@@ -132,28 +132,28 @@ func (mgr *Manager) getDomainPage() *domain.Page {
 func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fileName domain.FileName) (domain.Block, *domain.Page, error) {
 	page, err := factory.Create()
 	if err != nil {
-		return domain.NewZeroBlock(), nil, err
+		return domain.Block{}, nil, err
 	}
 
 	blklen, err := fileMgr.BlockLength(fileName)
 	if err != nil {
-		return domain.NewZeroBlock(), nil, err
+		return domain.Block{}, nil, err
 	}
 
 	if blklen == 0 {
 		blk, err := fileMgr.ExtendFile(fileName)
 		if err != nil {
-			return domain.NewZeroBlock(), nil, err
+			return domain.Block{}, nil, err
 		}
 
 		err = page.SetInt32(boundaryPositionOffset, int32(fileMgr.BlockSize()))
 		if err != nil {
-			return domain.NewZeroBlock(), nil, err
+			return domain.Block{}, nil, err
 		}
 
 		err = fileMgr.CopyPageToBlock(page, blk)
 		if err != nil {
-			return domain.NewZeroBlock(), nil, err
+			return domain.Block{}, nil, err
 		}
 
 		return blk, page, nil
@@ -161,14 +161,14 @@ func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fil
 
 	blknum, err := domain.NewBlockNumber(blklen - 1)
 	if err != nil {
-		return domain.NewZeroBlock(), nil, err
+		return domain.Block{}, nil, err
 	}
 
 	blk := domain.NewBlock(fileName, blknum)
 
 	err = fileMgr.CopyBlockToPage(blk, page)
 	if err != nil {
-		return domain.NewZeroBlock(), nil, err
+		return domain.Block{}, nil, err
 	}
 
 	return blk, page, nil
@@ -233,19 +233,19 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 func (mgr *Manager) AppendNewBlock() (domain.Block, error) {
 	blk, err := mgr.fileMgr.ExtendFile(mgr.logFileName)
 	if err != nil {
-		return domain.NewZeroBlock(), err
+		return domain.Block{}, err
 	}
 
 	mgr.logPage.Reset()
 
 	err = mgr.logPage.SetInt32(boundaryPositionOffset, int32(mgr.fileMgr.BlockSize()))
 	if err != nil {
-		return domain.NewZeroBlock(), err
+		return domain.Block{}, err
 	}
 
 	err = mgr.fileMgr.CopyPageToBlock(mgr.getDomainPage(), blk)
 	if err != nil {
-		return domain.NewZeroBlock(), err
+		return domain.Block{}, err
 	}
 
 	mgr.currentBlock = blk

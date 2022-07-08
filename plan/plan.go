@@ -149,13 +149,13 @@ func (p *SelectPlan) EstNumRecord() int {
 
 // EstDistinctVals estimates the number of distinct value at given fldName.
 func (p *SelectPlan) EstDistinctVals(fldName domain.FieldName) int {
-	if !p.pred.EquatesWithConstant(fldName).IsZero() {
+	if (p.pred.EquatesWithConstant(fldName) != domain.Constant{}) {
 		return 1
 	}
 
 	fldName2 := p.pred.EquatesWithField(fldName)
 
-	if fldName2.IsZero() {
+	if fldName2 == "" {
 		return p.plan.EstDistinctVals(fldName)
 	}
 

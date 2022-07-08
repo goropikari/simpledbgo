@@ -88,17 +88,17 @@ func (idx *Index) HasNext() bool {
 func (idx *Index) GetDataRecordID() (domain.RecordID, error) {
 	num, err := idx.tbl.GetInt32(fldBlock)
 	if err != nil {
-		return domain.NewZeroRecordID(), err
+		return domain.RecordID{}, err
 	}
 
 	blkNum, err := domain.NewBlockNumber(num)
 	if err != nil {
-		return domain.NewZeroRecordID(), err
+		return domain.RecordID{}, err
 	}
 
 	id, err := idx.tbl.GetInt32(fldID)
 	if err != nil {
-		return domain.NewZeroRecordID(), err
+		return domain.RecordID{}, err
 	}
 
 	slotID := domain.NewSlotID(id)

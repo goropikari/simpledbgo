@@ -25,7 +25,7 @@ func NewFieldNameExpression(fld FieldName) Expression {
 
 // Evaluate evaluates scanner.
 func (expr Expression) Evaluate(s Scanner) (Constant, error) {
-	if expr.value.IsZero() {
+	if (expr.value == Constant{}) {
 		return s.GetVal(expr.field)
 	}
 
@@ -34,7 +34,7 @@ func (expr Expression) Evaluate(s Scanner) (Constant, error) {
 
 // IsFieldName checks whether expr is field name or not.
 func (expr Expression) IsFieldName() bool {
-	return !expr.field.IsZero()
+	return expr.field != ""
 }
 
 // AsFieldName returns expr as FieldName.
@@ -49,7 +49,7 @@ func (expr Expression) AsConstant() Constant {
 
 // String stringfies expr.
 func (expr Expression) String() string {
-	if expr.value.IsZero() {
+	if (expr.value == Constant{}) {
 		return expr.field.String()
 	}
 
@@ -175,7 +175,10 @@ func (pred *Predicate) ReductionFactor(p Planner) int {
 func (pred *Predicate) EquatesWithConstant(fldName FieldName) Constant {
 	for _, term := range pred.terms {
 		c := term.EquatesWithConstant(fldName)
-		if !c.IsZero() {
+		// if !c.IsZero() {
+		// 	return c
+		// }
+		if (c != Constant{}) {
 			return c
 		}
 	}
@@ -186,7 +189,7 @@ func (pred *Predicate) EquatesWithConstant(fldName FieldName) Constant {
 // EquatesWithField ...
 func (pred *Predicate) EquatesWithField(fldName FieldName) FieldName {
 	for _, term := range pred.terms {
-		if s := term.EquatesWithField(fldName); !s.IsZero() {
+		if s := term.EquatesWithField(fldName); s != "" {
 			return s
 		}
 	}
