@@ -78,6 +78,7 @@ const (
 )
 
 // FieldInfo is a model of field information.
+// length は、その field が max 何 bytes 保存できるかの情報。VARCHAR(255) なら length は 255.
 type FieldInfo struct {
 	typ    FieldType
 	length int
