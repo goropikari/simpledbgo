@@ -8,6 +8,10 @@ import (
 	"github.com/goropikari/simpledbgo/domain"
 )
 
+const (
+	boundaryPositionOffset = 0
+)
+
 // ManagerConfig is a configuration of log manager.
 type ManagerConfig struct {
 	LogFileName string
@@ -69,7 +73,7 @@ func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fil
 			return domain.NewZeroBlock(), nil, err
 		}
 
-		err = page.SetInt32(0, int32(fileMgr.BlockSize()))
+		err = page.SetInt32(boundaryPositionOffset, int32(fileMgr.BlockSize()))
 		if err != nil {
 			return domain.NewZeroBlock(), nil, err
 		}
@@ -123,7 +127,7 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 
-	boundary, err := mgr.logPage.GetInt32(0)
+	boundary, err := mgr.logPage.GetInt32(boundaryPositionOffset)
 	if err != nil {
 		return 0, err
 	}
@@ -150,7 +154,7 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 			return 0, err
 		}
 
-		boundary, err = mgr.logPage.GetInt32(0)
+		boundary, err = mgr.logPage.GetInt32(boundaryPositionOffset)
 		if err != nil {
 			return 0, err
 		}
@@ -162,7 +166,7 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 		return 0, err
 	}
 
-	err = mgr.logPage.SetInt32(0, recordPos)
+	err = mgr.logPage.SetInt32(boundaryPositionOffset, recordPos)
 	if err != nil {
 		return 0, err
 	}
@@ -181,7 +185,7 @@ func (mgr *Manager) AppendNewBlock() (domain.Block, error) {
 
 	mgr.logPage.Reset()
 
-	err = mgr.logPage.SetInt32(0, int32(mgr.fileMgr.BlockSize()))
+	err = mgr.logPage.SetInt32(boundaryPositionOffset, int32(mgr.fileMgr.BlockSize()))
 	if err != nil {
 		return domain.NewZeroBlock(), err
 	}
