@@ -230,7 +230,7 @@ func (tbl *TableScan) HasField(fldName FieldName) bool {
 
 // HasNext checks the existence of next record.
 func (tbl *TableScan) HasNext() bool {
-	currentSlotID, err := tbl.recordPage.NextAfter(tbl.currentSlotID)
+	currentSlotID, err := tbl.recordPage.NextUsedSlot(tbl.currentSlotID)
 	if err != nil {
 		tbl.err = err
 
@@ -256,7 +256,7 @@ func (tbl *TableScan) HasNext() bool {
 			return false
 		}
 
-		slotID, err := tbl.recordPage.NextAfter(tbl.currentSlotID)
+		slotID, err := tbl.recordPage.NextUsedSlot(tbl.currentSlotID)
 		if err != nil {
 			tbl.err = err
 

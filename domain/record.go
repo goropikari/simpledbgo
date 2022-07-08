@@ -226,7 +226,7 @@ func (page *RecordPage) SetString(slotID SlotID, fldname FieldName, val string) 
 
 // Delete deletes the slot.
 func (page *RecordPage) Delete(slotID SlotID) error {
-	return page.setFlag(slotID, Empty)
+	return page.setSlotCondition(slotID, Empty)
 }
 
 // Format formats blk.
@@ -260,9 +260,9 @@ func (page *RecordPage) Format() error {
 	return nil
 }
 
-// NextAfter returns the slot id with Used flag after slot.
+// NextUsedSlot returns the slot id with Used flag after slot.
 // 引数に与えた SlotID よりもあとにある used slot の ID を返却する。
-func (page *RecordPage) NextAfter(slotID SlotID) (SlotID, error) {
+func (page *RecordPage) NextUsedSlot(slotID SlotID) (SlotID, error) {
 	return page.searchAfter(slotID, Used)
 }
 
@@ -275,7 +275,7 @@ func (page *RecordPage) InsertAfter(slotID SlotID) (SlotID, error) {
 		return 0, err
 	}
 	if newSlot >= 0 {
-		err := page.setFlag(newSlot, Used)
+		err := page.setSlotCondition(newSlot, Used)
 		if err != nil {
 			return 0, err
 		}
@@ -284,15 +284,15 @@ func (page *RecordPage) InsertAfter(slotID SlotID) (SlotID, error) {
 	return newSlot, nil
 }
 
-// searchAfter searches slot id with flag after slot.
+// searchAfter searches slot id with given flag after slot.
 func (page *RecordPage) searchAfter(slotID SlotID, flag SlotCondition) (SlotID, error) {
 	slotID++
 	for page.isValidSlot(slotID) {
-		curFlag, err := page.txn.GetInt32(page.blk, page.offset(slotID))
+		currFlag, err := page.GetSlotCondition(slotID)
 		if err != nil {
 			return 0, err
 		}
-		if flag == curFlag {
+		if flag == currFlag {
 			return slotID, nil
 		}
 		slotID++
@@ -308,8 +308,12 @@ func (page *RecordPage) isValidSlot(slotID SlotID) bool {
 	return off <= x
 }
 
-func (page *RecordPage) setFlag(slotID SlotID, flag SlotCondition) error {
+func (page *RecordPage) setSlotCondition(slotID SlotID, flag SlotCondition) error {
 	return page.txn.SetInt32(page.blk, page.offset(slotID), flag, true)
+}
+
+func (page *RecordPage) GetSlotCondition(slotID SlotID) (SlotCondition, error) {
+	return page.txn.GetInt32(page.blk, page.offset(slotID))
 }
 
 func (page *RecordPage) offset(slotID SlotID) int64 {
