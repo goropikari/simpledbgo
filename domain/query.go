@@ -37,6 +37,10 @@ func (expr Expression) IsFieldName() bool {
 	return expr.field != ""
 }
 
+func (expr Expression) IsConstant() bool {
+	return expr.value != Constant{}
+}
+
 // AsFieldName returns expr as FieldName.
 func (expr Expression) AsFieldName() FieldName {
 	return expr.field
@@ -57,6 +61,7 @@ func (expr Expression) String() string {
 }
 
 // Term is a node of term.
+// lhs = rhs を表す。その他の2項演算には対応していない。
 type Term struct {
 	lhs Expression
 	rhs Expression
@@ -108,29 +113,30 @@ func (term Term) ReductionFactor(p Planner) int {
 }
 
 // EquatesWithConstant ...
-// F=c の形式かチェックする。ここで F は field, c は Constant。
-func (term Term) EquatesWithConstant(fldName FieldName) Constant {
+// F=c or c=F の形式かチェックする。ここで F は field name, c は Constant。
+// この形式の場合は Constant を返却する。
+func (term Term) EquatesWithConstant(fldName FieldName) (c Constant, ok bool) {
 	lhs, rhs := term.lhs, term.rhs
-	if lhs.IsFieldName() && lhs.AsFieldName() == fldName && !rhs.IsFieldName() {
-		return rhs.AsConstant()
-	} else if rhs.IsFieldName() && rhs.AsFieldName() == fldName && !lhs.IsFieldName() {
-		return lhs.AsConstant()
+	if lhs.IsFieldName() && lhs.AsFieldName() == fldName && rhs.IsConstant() {
+		return rhs.AsConstant(), true
+	} else if rhs.IsFieldName() && rhs.AsFieldName() == fldName && lhs.IsConstant() {
+		return lhs.AsConstant(), true
 	}
 
-	return Constant{}
+	return Constant{}, false
 }
 
 // EquatesWithField ...
-// F1=F2 の形式かチェック.
-func (term Term) EquatesWithField(fldName FieldName) FieldName {
+// F1=F2 の形式かチェック. ここで F1, F2 は FieldName.
+func (term Term) EquatesWithField(fldName FieldName) (FieldName, bool) {
 	lhs, rhs := term.lhs, term.rhs
 	if lhs.IsFieldName() && lhs.AsFieldName() == fldName && rhs.IsFieldName() {
-		return rhs.AsFieldName()
+		return rhs.AsFieldName(), true
 	} else if rhs.IsFieldName() && rhs.AsFieldName() == fldName && lhs.IsFieldName() {
-		return lhs.AsFieldName()
+		return lhs.AsFieldName(), true
 	}
 
-	return ""
+	return "", false
 }
 
 // String stringfies the term.
@@ -174,11 +180,7 @@ func (pred *Predicate) ReductionFactor(p Planner) int {
 // EquatesWithConstant ...
 func (pred *Predicate) EquatesWithConstant(fldName FieldName) Constant {
 	for _, term := range pred.terms {
-		c := term.EquatesWithConstant(fldName)
-		// if !c.IsZero() {
-		// 	return c
-		// }
-		if (c != Constant{}) {
+		if c, ok := term.EquatesWithConstant(fldName); ok {
 			return c
 		}
 	}
@@ -189,7 +191,7 @@ func (pred *Predicate) EquatesWithConstant(fldName FieldName) Constant {
 // EquatesWithField ...
 func (pred *Predicate) EquatesWithField(fldName FieldName) FieldName {
 	for _, term := range pred.terms {
-		if s := term.EquatesWithField(fldName); s != "" {
+		if s, ok := term.EquatesWithField(fldName); ok {
 			return s
 		}
 	}
