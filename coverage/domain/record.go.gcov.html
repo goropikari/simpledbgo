@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntry">80</td>
-            <td class="headerCovTableEntry">114</td>
-            <td class="headerCovTableEntryLo">70.2 %</td>
+            <td class="headerCovTableEntry">111</td>
+            <td class="headerCovTableEntryLo">72.1 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-07 11:57:09</td>
+            <td class="headerValue">2022-07-08 11:07:10</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -234,25 +234,20 @@
 <a name="172"><span class="lineNum">     172 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 : }</span></a>
 <a name="174"><span class="lineNum">     174 </span>            : </a>
-<a name="175"><span class="lineNum">     175 </span>            : // NewZeroRecordID returns zero value of record id.</a>
-<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 : func NewZeroRecordID() RecordID {</span></a>
-<a name="177"><span class="lineNum">     177 </span><span class="lineNoCov">          0 :         return RecordID{}</span></a>
+<a name="175"><span class="lineNum">     175 </span>            : // BlockNumber returns block number.</a>
+<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 : func (rid RecordID) BlockNumber() BlockNumber {</span></a>
+<a name="177"><span class="lineNum">     177 </span><span class="lineNoCov">          0 :         return rid.blkNum</span></a>
 <a name="178"><span class="lineNum">     178 </span><span class="lineNoCov">          0 : }</span></a>
 <a name="179"><span class="lineNum">     179 </span>            : </a>
-<a name="180"><span class="lineNum">     180 </span>            : // BlockNumber returns block number.</a>
-<a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 : func (rid RecordID) BlockNumber() BlockNumber {</span></a>
-<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :         return rid.blkNum</span></a>
+<a name="180"><span class="lineNum">     180 </span>            : // SlotID returns slot id.</a>
+<a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 : func (rid RecordID) SlotID() SlotID {</span></a>
+<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :         return rid.slotID</span></a>
 <a name="183"><span class="lineNum">     183 </span><span class="lineNoCov">          0 : }</span></a>
 <a name="184"><span class="lineNum">     184 </span>            : </a>
-<a name="185"><span class="lineNum">     185 </span>            : // SlotID returns slot id.</a>
-<a name="186"><span class="lineNum">     186 </span><span class="lineNoCov">          0 : func (rid RecordID) SlotID() SlotID {</span></a>
-<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :         return rid.slotID</span></a>
+<a name="185"><span class="lineNum">     185 </span>            : // Equal checks equality of rid and other.</a>
+<a name="186"><span class="lineNum">     186 </span><span class="lineNoCov">          0 : func (rid RecordID) Equal(other RecordID) bool {</span></a>
+<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :         return rid.blkNum == other.blkNum &amp;&amp; rid.slotID == other.slotID</span></a>
 <a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="189"><span class="lineNum">     189 </span>            : </a>
-<a name="190"><span class="lineNum">     190 </span>            : // Equal checks equality of rid and other.</a>
-<a name="191"><span class="lineNum">     191 </span><span class="lineNoCov">          0 : func (rid RecordID) Equal(other RecordID) bool {</span></a>
-<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :         return rid.blkNum == other.blkNum &amp;&amp; rid.slotID == other.slotID</span></a>
-<a name="193"><span class="lineNum">     193 </span><span class="lineNoCov">          0 : }</span></a>
 </pre>
       </td>
     </tr>

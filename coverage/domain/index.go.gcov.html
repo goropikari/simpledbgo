@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-07 11:57:09</td>
+            <td class="headerValue">2022-07-08 11:07:10</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -65,8 +65,8 @@
 <a name="3"><span class="lineNum">       3 </span>            : //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock</a>
 <a name="4"><span class="lineNum">       4 </span>            : </a>
 <a name="5"><span class="lineNum">       5 </span>            : const (</a>
-<a name="6"><span class="lineNum">       6 </span>            :         FldBlock   = &quot;block&quot;</a>
-<a name="7"><span class="lineNum">       7 </span>            :         FldID      = &quot;id&quot;</a>
+<a name="6"><span class="lineNum">       6 </span>            :         fldBlock   = &quot;block&quot;</a>
+<a name="7"><span class="lineNum">       7 </span>            :         fldID      = &quot;id&quot;</a>
 <a name="8"><span class="lineNum">       8 </span>            :         FldDataVal = &quot;dataval&quot;</a>
 <a name="9"><span class="lineNum">       9 </span>            : )</a>
 <a name="10"><span class="lineNum">      10 </span>            : </a>
@@ -169,8 +169,8 @@
 <a name="107"><span class="lineNum">     107 </span>            : </a>
 <a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 : func createIdxLayout(tblSchema *Schema, fldName FieldName) *Layout {</span></a>
 <a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :         sch := NewSchema()</span></a>
-<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :         sch.AddInt32Field(FldBlock)</span></a>
-<a name="111"><span class="lineNum">     111 </span><span class="lineNoCov">          0 :         sch.AddInt32Field(FldID)</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :         sch.AddInt32Field(fldBlock)</span></a>
+<a name="111"><span class="lineNum">     111 </span><span class="lineNoCov">          0 :         sch.AddInt32Field(fldID)</span></a>
 <a name="112"><span class="lineNum">     112 </span><span class="lineNoCov">          0 :         if tblSchema.Type(fldName) == Int32FieldType {</span></a>
 <a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :                 sch.AddInt32Field(FldDataVal)</span></a>
 <a name="114"><span class="lineNum">     114 </span><span class="lineNoCov">          0 :         } else {</span></a>
