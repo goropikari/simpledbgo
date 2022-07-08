@@ -176,6 +176,20 @@ func (mr *MockByteBufferMockRecorder) SetString(offset, val interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetString", reflect.TypeOf((*MockByteBuffer)(nil).SetString), offset, val)
 }
 
+// Size mocks base method.
+func (m *MockByteBuffer) Size() int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Size")
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// Size indicates an expected call of Size.
+func (mr *MockByteBufferMockRecorder) Size() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Size", reflect.TypeOf((*MockByteBuffer)(nil).Size))
+}
+
 // Write mocks base method.
 func (m *MockByteBuffer) Write(p []byte) (int, error) {
 	m.ctrl.T.Helper()

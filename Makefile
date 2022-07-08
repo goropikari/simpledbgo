@@ -30,6 +30,7 @@ lint:
 	./bin/golangci-lint run --fix ./...
 
 mockgen:
+	rm -rf testing/mock
 	for f in $(MOCK_FILE); do ROOT_DIR=$(ROOT_DIR) go generate $$f; done
 
 .PHONY: coverage

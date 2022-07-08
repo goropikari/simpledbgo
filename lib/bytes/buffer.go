@@ -48,6 +48,10 @@ func NewBufferBytes(data []byte) *Buffer {
 	}
 }
 
+func (buf *Buffer) Size() int64 {
+	return buf.capacity
+}
+
 // Read reads bytes from Reader.
 func (buf *Buffer) Read(p []byte) (n int, err error) {
 	if buf.offset >= buf.capacity {
