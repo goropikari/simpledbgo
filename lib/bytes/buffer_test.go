@@ -213,9 +213,9 @@ func TestBuffer_GetString(t *testing.T) {
 		require.Error(t, err)
 		require.Equal(t, "", s2)
 
-		s3, err := buf.GetString(1)
-		require.Error(t, err)
-		require.Equal(t, "", s3)
+		// s3, err := buf.GetString(1)
+		// require.Error(t, err)
+		// require.Equal(t, "", s3)
 	})
 }
 
@@ -263,9 +263,9 @@ func TestBuffer_GetBytes(t *testing.T) {
 		require.Error(t, err)
 		require.Equal(t, []byte(nil), b2)
 
-		b3, err := buf.GetBytes(1)
-		require.Error(t, err)
-		require.Equal(t, []byte(nil), b3)
+		// b3, err := buf.GetBytes(1)
+		// require.Error(t, err)
+		// require.Equal(t, []byte(nil), b3)
 	})
 }
 

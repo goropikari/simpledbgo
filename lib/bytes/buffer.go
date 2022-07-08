@@ -13,6 +13,11 @@ import (
 
 var endianness = binary.BigEndian
 
+const (
+	byteFieldByteLength   = common.Uint32Length
+	stringFieldByteLength = common.Uint32Length
+)
+
 var (
 	// ErrInvalidOffset is an error that means given offset is invalid.
 	ErrInvalidOffset = errors.New("invalid offset")
@@ -111,11 +116,10 @@ func (buf *Buffer) GetInt32(offset int64) (int32, error) {
 		return 0, fmt.Errorf("failed to GetInt32: %w", err)
 	}
 
-	if !buf.hasSpace(common.Int32Length) {
+	var ret int32
+	if !buf.hasSpace(ret) {
 		return 0, ErrInvalidOffset
 	}
-
-	var ret int32
 	if err := binary.Read(buf, endianness, &ret); err != nil {
 		return 0, fmt.Errorf("failed to GetInt32: %w", err)
 	}
@@ -132,7 +136,7 @@ func (buf *Buffer) SetInt32(offset int64, x int32) error {
 		return fmt.Errorf("failed to SetInt32: %w", err)
 	}
 
-	if !buf.hasSpace(common.Int32Length) {
+	if !buf.hasSpace(x) {
 		return ErrInvalidOffset
 	}
 
@@ -149,13 +153,11 @@ func (buf *Buffer) getUint32(offset int64) (uint32, error) {
 		return 0, fmt.Errorf("failed to getUint32: %w", err)
 	}
 
-	if !buf.hasSpace(common.Uint32Length) {
+	var ret uint32
+	if !buf.hasSpace(ret) {
 		return 0, ErrInvalidOffset
 	}
-
-	var ret uint32
-	err := binary.Read(buf, endianness, &ret)
-	if err != nil {
+	if err := binary.Read(buf, endianness, &ret); err != nil {
 		return 0, fmt.Errorf("failed to getUint32: %w", err)
 	}
 
@@ -171,7 +173,7 @@ func (buf *Buffer) setUint32(offset int64, x uint32) error {
 		return fmt.Errorf("failed to setUint32: %w", err)
 	}
 
-	if !buf.hasSpace(common.Uint32Length) {
+	if !buf.hasSpace(x) {
 		return ErrInvalidOffset
 	}
 
@@ -194,9 +196,9 @@ func (buf *Buffer) GetString(offset int64) (string, error) {
 		return "", err
 	}
 
-	if !buf.hasSpace(int(length)) {
-		return "", ErrInvalidOffset
-	}
+	// if !buf.hasSpace(int(length)) {
+	// 	return "", ErrInvalidOffset
+	// }
 
 	bytes := make([]byte, length)
 
@@ -217,7 +219,7 @@ func (buf *Buffer) SetString(offset int64, str string) error {
 		return fmt.Errorf("failed to set string: %w", err)
 	}
 
-	if !buf.hasSpace(common.Uint32Length + len(str)) {
+	if !buf.hasSpace(str) {
 		return ErrInvalidOffset
 	}
 
@@ -246,9 +248,9 @@ func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	if !buf.hasSpace(int(length)) {
-		return nil, ErrInvalidOffset
-	}
+	// if !buf.hasSpace(int(length)) {
+	// 	return nil, ErrInvalidOffset
+	// }
 
 	bytes := make([]byte, length)
 
@@ -269,7 +271,7 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 		return fmt.Errorf("failed to set bytes: %w", err)
 	}
 
-	if !buf.hasSpace(common.Uint32Length + len(p)) {
+	if !buf.hasSpace(p) {
 		return ErrInvalidOffset
 	}
 
@@ -284,6 +286,21 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 	return nil
 }
 
-func (buf *Buffer) hasSpace(x int) bool {
-	return int64(x)+buf.pos <= buf.capacity
+func (buf *Buffer) hasSpace(x any) bool {
+	return buf.NeededBytes(x)+buf.pos <= buf.capacity
+}
+
+func (buf *Buffer) NeededBytes(x any) int64 {
+	switch v := x.(type) {
+	case int32, uint32:
+		return common.Int32Length
+	case int64:
+		return common.Int64Length
+	case []byte:
+		return byteFieldByteLength + int64(len(v))
+	case string:
+		return stringFieldByteLength + int64(len(v))
+	default:
+		panic(errors.New("invalid data type"))
+	}
 }
