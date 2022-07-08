@@ -8,15 +8,20 @@ import (
 	"github.com/goropikari/simpledbgo/tx/logrecord"
 )
 
+const (
+	recordLengthOffset = 0
+	recordOffset       = common.Int32Length
+)
+
 // ParseRecord parses b as log record.
 func ParseRecord(b []byte) (logrecord.LogRecorder, error) {
 	bb := bytes.NewBufferBytes(b)
-	typ, err := bb.GetInt32(0)
+	typ, err := bb.GetInt32(recordLengthOffset)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := bb.GetBytes(common.Int32Length)
+	data, err := bb.GetBytes(recordOffset)
 	if err != nil {
 		return nil, err
 	}

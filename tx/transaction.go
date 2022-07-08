@@ -363,13 +363,17 @@ func (tx *Transaction) writeRollbackLog() (domain.LSN, error) {
 	return tx.writeLog(logrecord.Rollback, record)
 }
 
+// log record structure
+// ----------------------------------------------------------------------
+// | log record type (int32) | record length (uint32) | record (varlen) |
+// ----------------------------------------------------------------------.
 func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {
 	data, err := record.Marshal()
 	if err != nil {
 		return domain.DummyLSN, err
 	}
 
-	buf := bytes.NewBuffer(common.Int32Length*2 + len(data))
+	buf := bytes.NewBuffer(common.Int32Length + common.Uint32Length + len(data))
 	if err := buf.SetInt32(0, typ); err != nil {
 		return domain.DummyLSN, err
 	}
