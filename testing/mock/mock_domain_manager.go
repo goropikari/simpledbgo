@@ -470,3 +470,66 @@ func (mr *MockBufferManagerMockRecorder) Unpin(buf interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unpin", reflect.TypeOf((*MockBufferManager)(nil).Unpin), buf)
 }
+
+// MockConcurrencyManager is a mock of ConcurrencyManager interface.
+type MockConcurrencyManager struct {
+	ctrl     *gomock.Controller
+	recorder *MockConcurrencyManagerMockRecorder
+}
+
+// MockConcurrencyManagerMockRecorder is the mock recorder for MockConcurrencyManager.
+type MockConcurrencyManagerMockRecorder struct {
+	mock *MockConcurrencyManager
+}
+
+// NewMockConcurrencyManager creates a new mock instance.
+func NewMockConcurrencyManager(ctrl *gomock.Controller) *MockConcurrencyManager {
+	mock := &MockConcurrencyManager{ctrl: ctrl}
+	mock.recorder = &MockConcurrencyManagerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockConcurrencyManager) EXPECT() *MockConcurrencyManagerMockRecorder {
+	return m.recorder
+}
+
+// Release mocks base method.
+func (m *MockConcurrencyManager) Release() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Release")
+}
+
+// Release indicates an expected call of Release.
+func (mr *MockConcurrencyManagerMockRecorder) Release() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Release", reflect.TypeOf((*MockConcurrencyManager)(nil).Release))
+}
+
+// SLock mocks base method.
+func (m *MockConcurrencyManager) SLock(arg0 domain.Block) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SLock", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SLock indicates an expected call of SLock.
+func (mr *MockConcurrencyManagerMockRecorder) SLock(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SLock", reflect.TypeOf((*MockConcurrencyManager)(nil).SLock), arg0)
+}
+
+// XLock mocks base method.
+func (m *MockConcurrencyManager) XLock(arg0 domain.Block) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "XLock", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// XLock indicates an expected call of XLock.
+func (mr *MockConcurrencyManagerMockRecorder) XLock(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "XLock", reflect.TypeOf((*MockConcurrencyManager)(nil).XLock), arg0)
+}

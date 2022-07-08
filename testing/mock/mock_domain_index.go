@@ -11,6 +11,43 @@ import (
 	domain "github.com/goropikari/simpledbgo/domain"
 )
 
+// MockSearchCostCalculator is a mock of SearchCostCalculator interface.
+type MockSearchCostCalculator struct {
+	ctrl     *gomock.Controller
+	recorder *MockSearchCostCalculatorMockRecorder
+}
+
+// MockSearchCostCalculatorMockRecorder is the mock recorder for MockSearchCostCalculator.
+type MockSearchCostCalculatorMockRecorder struct {
+	mock *MockSearchCostCalculator
+}
+
+// NewMockSearchCostCalculator creates a new mock instance.
+func NewMockSearchCostCalculator(ctrl *gomock.Controller) *MockSearchCostCalculator {
+	mock := &MockSearchCostCalculator{ctrl: ctrl}
+	mock.recorder = &MockSearchCostCalculatorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSearchCostCalculator) EXPECT() *MockSearchCostCalculatorMockRecorder {
+	return m.recorder
+}
+
+// Calculate mocks base method.
+func (m *MockSearchCostCalculator) Calculate(numBlk, rpb int) int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Calculate", numBlk, rpb)
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// Calculate indicates an expected call of Calculate.
+func (mr *MockSearchCostCalculatorMockRecorder) Calculate(numBlk, rpb interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Calculate", reflect.TypeOf((*MockSearchCostCalculator)(nil).Calculate), numBlk, rpb)
+}
+
 // MockIndexer is a mock of Indexer interface.
 type MockIndexer struct {
 	ctrl     *gomock.Controller

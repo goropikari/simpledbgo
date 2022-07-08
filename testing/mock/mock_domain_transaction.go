@@ -93,33 +93,33 @@ func (mr *MockTransactionMockRecorder) ExtendFile(arg0 interface{}) *gomock.Call
 }
 
 // GetInt32 mocks base method.
-func (m *MockTransaction) GetInt32(arg0 domain.Block, arg1 int64) (int32, error) {
+func (m *MockTransaction) GetInt32(blk domain.Block, offset int64) (int32, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetInt32", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetInt32", blk, offset)
 	ret0, _ := ret[0].(int32)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetInt32 indicates an expected call of GetInt32.
-func (mr *MockTransactionMockRecorder) GetInt32(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockTransactionMockRecorder) GetInt32(blk, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInt32", reflect.TypeOf((*MockTransaction)(nil).GetInt32), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInt32", reflect.TypeOf((*MockTransaction)(nil).GetInt32), blk, offset)
 }
 
 // GetString mocks base method.
-func (m *MockTransaction) GetString(arg0 domain.Block, arg1 int64) (string, error) {
+func (m *MockTransaction) GetString(blk domain.Block, offset int64) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetString", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetString", blk, offset)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetString indicates an expected call of GetString.
-func (mr *MockTransactionMockRecorder) GetString(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockTransactionMockRecorder) GetString(blk, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetString", reflect.TypeOf((*MockTransaction)(nil).GetString), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetString", reflect.TypeOf((*MockTransaction)(nil).GetString), blk, offset)
 }
 
 // Pin mocks base method.
@@ -136,32 +136,60 @@ func (mr *MockTransactionMockRecorder) Pin(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pin", reflect.TypeOf((*MockTransaction)(nil).Pin), arg0)
 }
 
-// SetInt32 mocks base method.
-func (m *MockTransaction) SetInt32(arg0 domain.Block, arg1 int64, arg2 int32, arg3 bool) error {
+// Recover mocks base method.
+func (m *MockTransaction) Recover() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetInt32", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "Recover")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Recover indicates an expected call of Recover.
+func (mr *MockTransactionMockRecorder) Recover() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Recover", reflect.TypeOf((*MockTransaction)(nil).Recover))
+}
+
+// Rollback mocks base method.
+func (m *MockTransaction) Rollback() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rollback")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rollback indicates an expected call of Rollback.
+func (mr *MockTransactionMockRecorder) Rollback() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockTransaction)(nil).Rollback))
+}
+
+// SetInt32 mocks base method.
+func (m *MockTransaction) SetInt32(blk domain.Block, offset int64, val int32, writeLog bool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetInt32", blk, offset, val, writeLog)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetInt32 indicates an expected call of SetInt32.
-func (mr *MockTransactionMockRecorder) SetInt32(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockTransactionMockRecorder) SetInt32(blk, offset, val, writeLog interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInt32", reflect.TypeOf((*MockTransaction)(nil).SetInt32), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInt32", reflect.TypeOf((*MockTransaction)(nil).SetInt32), blk, offset, val, writeLog)
 }
 
 // SetString mocks base method.
-func (m *MockTransaction) SetString(arg0 domain.Block, arg1 int64, arg2 string, arg3 bool) error {
+func (m *MockTransaction) SetString(blk domain.Block, offset int64, val string, writeLog bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetString", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "SetString", blk, offset, val, writeLog)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetString indicates an expected call of SetString.
-func (mr *MockTransactionMockRecorder) SetString(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockTransactionMockRecorder) SetString(blk, offset, val, writeLog interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetString", reflect.TypeOf((*MockTransaction)(nil).SetString), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetString", reflect.TypeOf((*MockTransaction)(nil).SetString), blk, offset, val, writeLog)
 }
 
 // Unpin mocks base method.
@@ -174,4 +202,41 @@ func (m *MockTransaction) Unpin(arg0 domain.Block) {
 func (mr *MockTransactionMockRecorder) Unpin(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unpin", reflect.TypeOf((*MockTransaction)(nil).Unpin), arg0)
+}
+
+// MockTxNumberGenerator is a mock of TxNumberGenerator interface.
+type MockTxNumberGenerator struct {
+	ctrl     *gomock.Controller
+	recorder *MockTxNumberGeneratorMockRecorder
+}
+
+// MockTxNumberGeneratorMockRecorder is the mock recorder for MockTxNumberGenerator.
+type MockTxNumberGeneratorMockRecorder struct {
+	mock *MockTxNumberGenerator
+}
+
+// NewMockTxNumberGenerator creates a new mock instance.
+func NewMockTxNumberGenerator(ctrl *gomock.Controller) *MockTxNumberGenerator {
+	mock := &MockTxNumberGenerator{ctrl: ctrl}
+	mock.recorder = &MockTxNumberGeneratorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTxNumberGenerator) EXPECT() *MockTxNumberGeneratorMockRecorder {
+	return m.recorder
+}
+
+// Generate mocks base method.
+func (m *MockTxNumberGenerator) Generate() domain.TransactionNumber {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Generate")
+	ret0, _ := ret[0].(domain.TransactionNumber)
+	return ret0
+}
+
+// Generate indicates an expected call of Generate.
+func (mr *MockTxNumberGeneratorMockRecorder) Generate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockTxNumberGenerator)(nil).Generate))
 }
