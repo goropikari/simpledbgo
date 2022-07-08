@@ -287,10 +287,10 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 }
 
 func (buf *Buffer) hasSpace(x any) bool {
-	return buf.NeededBytes(x)+buf.pos <= buf.capacity
+	return buf.NeededByteLength(x)+buf.pos <= buf.capacity
 }
 
-func (buf *Buffer) NeededBytes(x any) int64 {
+func (buf *Buffer) NeededByteLength(x any) int64 {
 	switch v := x.(type) {
 	case int32, uint32:
 		return common.Int32Length

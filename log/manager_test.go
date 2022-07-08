@@ -73,9 +73,7 @@ func TestManager_NewManager(t *testing.T) {
 		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
 
 		// initialize log manager
-
 		logConfig := log.ManagerConfig{LogFileName: logfile}
-
 		logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
 		require.NoError(t, err)
 		require.Equal(t, domain.BlockNumber(1), logMgr.CurrentBlock().Number())

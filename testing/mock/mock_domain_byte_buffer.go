@@ -92,6 +92,20 @@ func (mr *MockByteBufferMockRecorder) GetString(offset interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetString", reflect.TypeOf((*MockByteBuffer)(nil).GetString), offset)
 }
 
+// NeededByteLength mocks base method.
+func (m *MockByteBuffer) NeededByteLength(x any) int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NeededByteLength", x)
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// NeededByteLength indicates an expected call of NeededByteLength.
+func (mr *MockByteBufferMockRecorder) NeededByteLength(x interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NeededByteLength", reflect.TypeOf((*MockByteBuffer)(nil).NeededByteLength), x)
+}
+
 // Read mocks base method.
 func (m *MockByteBuffer) Read(p []byte) (int, error) {
 	m.ctrl.T.Helper()

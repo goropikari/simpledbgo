@@ -11,7 +11,6 @@ import (
 const (
 	boundaryPositionOffset     = 0
 	boundaryPositionByteLength = common.Int32Length
-	byteStoredByteLength       = common.Int32Length
 )
 
 // ManagerConfig is a configuration of log manager.
@@ -20,60 +19,66 @@ type ManagerConfig struct {
 }
 
 type Page struct {
-	*domain.Page
+	dp *domain.Page
 }
 
 func NewPage(page *domain.Page) *Page {
 	return &Page{
-		Page: page,
+		dp: page,
 	}
 }
 
-func (p *Page) GetDomainPage() *domain.Page {
-	return p.Page
+func (p *Page) reset() error {
+	p.dp.Reset()
+
+	if err := p.dp.SetInt32(boundaryPositionOffset, int32(p.dp.Size())); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (p *Page) GetBoundaryOffset() (int32, error) {
-	return p.GetInt32(boundaryPositionOffset)
+func (p *Page) getDomainPage() *domain.Page {
+	return p.dp
+}
+
+func (p *Page) getBoundaryOffset() (int32, error) {
+	return p.dp.GetInt32(boundaryPositionOffset)
 }
 
 func (p *Page) setBoundaryOffset(recordPos int32) error {
-	return p.SetInt32(boundaryPositionOffset, recordPos)
-}
-
-func (p *Page) neededByteLength(recLen int) int32 {
-	return int32(byteStoredByteLength + recLen)
+	return p.dp.SetInt32(boundaryPositionOffset, recordPos)
 }
 
 func (p *Page) canAppend(record []byte) (bool, error) {
-	boundary, err := p.GetBoundaryOffset()
+	boundary, err := p.getBoundaryOffset()
 	if err != nil {
 		return false, err
 	}
-	bytesNeeded := p.neededByteLength(len(record))
+	bytesNeeded := p.dp.NeededByteLength(record)
 
-	return boundary-bytesNeeded >= boundaryPositionByteLength, nil
+	return int64(boundary)-bytesNeeded >= boundaryPositionByteLength, nil
 }
 
 func (p *Page) append(record []byte) error {
-	boundary, err := p.GetBoundaryOffset()
+	boundary, err := p.getBoundaryOffset()
 	if err != nil {
 		return err
 	}
 
-	bytesNeeded := p.neededByteLength(len(record))
+	bytesNeeded := p.dp.NeededByteLength(record)
 
 	// 1 record だけで page サイズを超える場合
-	if int64(bytesNeeded+boundaryPositionByteLength) > p.Size() {
+	if bytesNeeded+boundaryPositionByteLength > p.dp.Size() {
 		return errors.New("too long record")
 	}
 
-	recordPos := boundary - bytesNeeded
+	recordPos := boundary - int32(bytesNeeded)
 	if recordPos < boundaryPositionByteLength {
 		return errors.New("there is no enough space")
 	}
 
-	err = p.SetBytes(int64(recordPos), record)
+	err = p.dp.SetBytes(int64(recordPos), record)
 	if err != nil {
 		return err
 	}
@@ -124,7 +129,7 @@ func NewManager(fileMgr domain.FileManager, pageFactory *domain.PageFactory, con
 }
 
 func (mgr *Manager) getDomainPage() *domain.Page {
-	return mgr.logPage.GetDomainPage()
+	return mgr.logPage.getDomainPage()
 }
 
 // prepareManager prepares a block and a page for initializing Manager.
@@ -236,10 +241,7 @@ func (mgr *Manager) AppendNewBlock() (domain.Block, error) {
 		return domain.Block{}, err
 	}
 
-	mgr.logPage.Reset()
-
-	err = mgr.logPage.SetInt32(boundaryPositionOffset, int32(mgr.fileMgr.BlockSize()))
-	if err != nil {
+	if err := mgr.logPage.reset(); err != nil {
 		return domain.Block{}, err
 	}
 

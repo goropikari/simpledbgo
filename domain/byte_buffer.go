@@ -14,6 +14,7 @@ type ByteBuffer interface {
 	SetString(offset int64, val string) error
 	GetBytes(offset int64) ([]byte, error)
 	SetBytes(offset int64, val []byte) error
+	NeededByteLength(x any) int64
 	Size() int64
 	Reset()
 }

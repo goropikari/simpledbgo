@@ -19,7 +19,7 @@ tools:
 	rm -f protoc.zip
 
 .PHONY: test
-test:
+test: mockgen protoc
 	go test -shuffle=on ./...
 
 ci-test:
@@ -50,4 +50,4 @@ godoc:
 
 .PHONY: protoc
 protoc:
-	bin/protoc -I=. --go_out=./backend/tx/logrecord ./backend/tx/logrecord/protofile/*.proto
+	bin/protoc -I=. --go_out=./tx/logrecord ./tx/logrecord/protofile/*.proto
