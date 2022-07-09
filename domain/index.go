@@ -3,8 +3,8 @@ package domain
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 
 const (
-	fldBlock   = "block"
-	fldID      = "id"
+	FldBlock   = "block"
+	FldID      = "id"
 	FldDataVal = "dataval"
 )
 
@@ -107,8 +107,8 @@ func (info *IndexInfo) EstDistinctVals(fldName FieldName) int {
 
 func createIdxLayout(tblSchema *Schema, fldName FieldName) *Layout {
 	sch := NewSchema()
-	sch.AddInt32Field(fldBlock)
-	sch.AddInt32Field(fldID)
+	sch.AddInt32Field(FldBlock)
+	sch.AddInt32Field(FldID)
 	if tblSchema.Type(fldName) == Int32FieldType {
 		sch.AddInt32Field(FldDataVal)
 	} else {
