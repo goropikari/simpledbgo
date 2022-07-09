@@ -15,7 +15,7 @@ type Manager struct {
 }
 
 // CreateManager creates metadata manager with initializing tables related to metadata.
-func CreateManager(factory domain.IndexFactory, txn domain.Transaction) (*Manager, error) {
+func CreateManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
 	tblMgr, err := CreateTableManager(txn)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func CreateManager(factory domain.IndexFactory, txn domain.Transaction) (*Manage
 }
 
 // NewManager constructs metadata manager.
-func NewManager(factory domain.IndexFactory, txn domain.Transaction) (*Manager, error) {
+func NewManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
 	tblMgr := NewTableManager()
 	viewMgr := NewViewManager(tblMgr)
 	statMgr, err := NewStatManager(tblMgr, txn)

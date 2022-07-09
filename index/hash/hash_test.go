@@ -83,7 +83,7 @@ func TestHashIndex(t *testing.T) {
 		err = txn.Commit()
 		require.NoError(t, err)
 
-		fac := hash.NewIndexFactory()
+		fac := hash.NewIndexDriver()
 		_, cal := fac.Create()
 
 		cost := cal.Calculate(202, fake.RandInt())

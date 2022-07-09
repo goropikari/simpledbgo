@@ -2,7 +2,20 @@ package hash
 
 import "github.com/goropikari/simpledbgo/domain"
 
-// IndexFactory is factory of IndexGenerator and SearchCostCalculator.
+// IndexDriver is factory of IndexFactory and SearchCostCalculator.
+type IndexDriver struct{}
+
+// NewIndexDriver constructs an IndexDriver.
+func NewIndexDriver() *IndexDriver {
+	return &IndexDriver{}
+}
+
+// Create creates IndexFactory and SearchCostCalculator.
+func (fac *IndexDriver) Create() (domain.IndexFactory, domain.SearchCostCalculator) {
+	return NewIndexFactory(), NewSearchCostCalculator()
+}
+
+// IndexFactory is generator of index.
 type IndexFactory struct{}
 
 // NewIndexFactory constructs an IndexFactory.
@@ -10,21 +23,8 @@ func NewIndexFactory() *IndexFactory {
 	return &IndexFactory{}
 }
 
-// Create creates IndexGenerator and SearchCostCalculator.
-func (fac *IndexFactory) Create() (domain.IndexGenerator, domain.SearchCostCalculator) {
-	return NewIndexGenerator(), NewSearchCostCalculator()
-}
-
-// IndexGenerator is generator of index.
-type IndexGenerator struct{}
-
-// NewIndexGenerator constructs an IndexGenerator.
-func NewIndexGenerator() *IndexGenerator {
-	return &IndexGenerator{}
-}
-
 // Create creates an Index.
-func (gen *IndexGenerator) Create(txn domain.Transaction, idxName domain.IndexName, layout *domain.Layout) domain.Indexer {
+func (gen *IndexFactory) Create(txn domain.Transaction, idxName domain.IndexName, layout *domain.Layout) domain.Indexer {
 	return NewIndex(txn, idxName, layout)
 }
 

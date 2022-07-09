@@ -22,7 +22,7 @@ func TestMetadataManager(t *testing.T) {
 
 	txn := cr.NewTxn()
 
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 
 	metaMgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)

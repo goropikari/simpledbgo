@@ -9,11 +9,11 @@ type IndexManager struct {
 	layout     *domain.Layout
 	tblMgr     *TableManager
 	statMgr    *StatManager
-	idxFactory domain.IndexFactory
+	idxFactory domain.IndexDriver
 }
 
 // NewIndexManager constructs an index manager.
-func NewIndexManager(factory domain.IndexFactory, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
+func NewIndexManager(factory domain.IndexDriver, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
 	cat, err := tblMgr.GetTableLayout(fldIndexCatalog, txn)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func NewIndexManager(factory domain.IndexFactory, tblMgr *TableManager, statMgr 
 }
 
 // CreateIndexManager creates new index manager.
-func CreateIndexManager(factory domain.IndexFactory, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
+func CreateIndexManager(factory domain.IndexDriver, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
 	sch := domain.NewSchema()
 	sch.AddStringField(fldIndexName, domain.MaxIndexNameLength)
 	sch.AddStringField(fldTableName, domain.MaxTableNameLength)

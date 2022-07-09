@@ -108,7 +108,7 @@ func NewDB() *DB {
 		golog.Fatal(err)
 	}
 
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	var mmgr domain.MetadataManager
 	if isNewDatabase {
 		mmgr, err = metadata.CreateManager(fac, txn)

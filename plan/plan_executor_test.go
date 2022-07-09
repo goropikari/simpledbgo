@@ -21,7 +21,7 @@ func TestExecutor_select_table(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -76,7 +76,7 @@ func TestExecutor_select_multi_table(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -150,7 +150,7 @@ func TestExecutor_select_multi_table_better(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -224,7 +224,7 @@ func TestExecutor_update_table_without_predicate(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -298,7 +298,7 @@ func TestExecutor_update_table_with_predicate(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -372,7 +372,7 @@ func TestExecutor_update_table_Error(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -415,7 +415,7 @@ func TestExecutor_delete_record(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
@@ -485,7 +485,7 @@ func TestExecutor_create_view(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexFactory()
+	fac := hash.NewIndexDriver()
 	mmgr, err := metadata.CreateManager(fac, txn)
 	require.NoError(t, err)
 	err = txn.Commit()

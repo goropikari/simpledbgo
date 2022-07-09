@@ -23,13 +23,13 @@ type Indexer interface {
 	Close()
 }
 
-// IndexFactory creates IndexGenerator and SearchCostCalculator.
-type IndexFactory interface {
-	Create() (IndexGenerator, SearchCostCalculator)
+// IndexDriver creates IndexFactory and SearchCostCalculator.
+type IndexDriver interface {
+	Create() (IndexFactory, SearchCostCalculator)
 }
 
-// IndexGenerator generates Index.
-type IndexGenerator interface {
+// IndexFactory generates Index.
+type IndexFactory interface {
 	Create(Transaction, IndexName, *Layout) Indexer
 }
 
@@ -52,7 +52,7 @@ func (name IndexName) String() string {
 
 // IndexInfo is a model of information of index.
 type IndexInfo struct {
-	gen       IndexGenerator
+	gen       IndexFactory
 	cal       SearchCostCalculator
 	idxName   IndexName
 	fldName   FieldName
@@ -63,7 +63,7 @@ type IndexInfo struct {
 }
 
 // NewIndexInfo constructs an IndexInfo.
-func NewIndexInfo(factory IndexFactory, idxName IndexName, fldName FieldName, tblSchema *Schema, txn Transaction, si StatInfo) *IndexInfo {
+func NewIndexInfo(factory IndexDriver, idxName IndexName, fldName FieldName, tblSchema *Schema, txn Transaction, si StatInfo) *IndexInfo {
 	gen, cal := factory.Create()
 
 	return &IndexInfo{
