@@ -108,15 +108,15 @@ func NewDB() *DB {
 		golog.Fatal(err)
 	}
 
-	fac := hash.NewIndexDriver()
+	idxDriver := domain.NewIndexDriver(hash.NewIndexFactory(), hash.NewSearchCostCalculator())
 	var mmgr domain.MetadataManager
 	if isNewDatabase {
-		mmgr, err = metadata.CreateManager(fac, txn)
+		mmgr, err = metadata.CreateManager(idxDriver, txn)
 		if err != nil {
 			golog.Fatal(err)
 		}
 	} else {
-		mmgr, err = metadata.NewManager(fac, txn)
+		mmgr, err = metadata.NewManager(idxDriver, txn)
 		if err != nil {
 			golog.Fatal(err)
 		}

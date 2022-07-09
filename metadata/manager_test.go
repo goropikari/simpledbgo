@@ -21,10 +21,9 @@ func TestMetadataManager(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
+	driver := domain.NewIndexDriver(hash.NewIndexFactory(), hash.NewSearchCostCalculator())
 
-	fac := hash.NewIndexDriver()
-
-	metaMgr, err := metadata.CreateManager(fac, txn)
+	metaMgr, err := metadata.CreateManager(driver, txn)
 	require.NoError(t, err)
 
 	sch := domain.NewSchema()

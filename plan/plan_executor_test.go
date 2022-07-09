@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goropikari/simpledbgo/index/hash"
+	"github.com/golang/mock/gomock"
+	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/metadata"
 	"github.com/goropikari/simpledbgo/plan"
 	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,8 +23,9 @@ func TestExecutor_select_table(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -76,8 +79,9 @@ func TestExecutor_select_multi_table(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -150,8 +154,9 @@ func TestExecutor_select_multi_table_better(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -224,8 +229,9 @@ func TestExecutor_update_table_without_predicate(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -298,8 +304,9 @@ func TestExecutor_update_table_with_predicate(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -372,8 +379,9 @@ func TestExecutor_update_table_Error(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -415,8 +423,9 @@ func TestExecutor_delete_record(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)
@@ -485,8 +494,10 @@ func TestExecutor_create_view(t *testing.T) {
 	defer cr.Finish()
 
 	txn := cr.NewTxn()
-	fac := hash.NewIndexDriver()
-	mmgr, err := metadata.CreateManager(fac, txn)
+
+	ctrl := gomock.NewController(t)
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
+	mmgr, err := metadata.CreateManager(idxDriver, txn)
 	require.NoError(t, err)
 	err = txn.Commit()
 	require.NoError(t, err)

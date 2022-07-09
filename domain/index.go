@@ -23,9 +23,24 @@ type Indexer interface {
 	Close()
 }
 
-// IndexDriver creates IndexFactory and SearchCostCalculator.
-type IndexDriver interface {
-	Create() (IndexFactory, SearchCostCalculator)
+type IndexDriver struct {
+	fty IndexFactory
+	cal SearchCostCalculator
+}
+
+func NewIndexDriver(fty IndexFactory, cal SearchCostCalculator) IndexDriver {
+	return IndexDriver{
+		fty: fty,
+		cal: cal,
+	}
+}
+
+func (d IndexDriver) Create(txn Transaction, name IndexName, layout *Layout) Indexer {
+	return d.fty.Create(txn, name, layout)
+}
+
+func (d IndexDriver) Calculate(numBlk, rpb int) int {
+	return d.cal.Calculate(numBlk, rpb)
 }
 
 // IndexFactory generates Index.
@@ -52,8 +67,7 @@ func (name IndexName) String() string {
 
 // IndexInfo is a model of information of index.
 type IndexInfo struct {
-	gen       IndexFactory
-	cal       SearchCostCalculator
+	driver    IndexDriver
 	idxName   IndexName
 	fldName   FieldName
 	txn       Transaction
@@ -63,12 +77,10 @@ type IndexInfo struct {
 }
 
 // NewIndexInfo constructs an IndexInfo.
-func NewIndexInfo(factory IndexDriver, idxName IndexName, fldName FieldName, tblSchema *Schema, txn Transaction, si StatInfo) *IndexInfo {
-	gen, cal := factory.Create()
+func NewIndexInfo(driver IndexDriver, idxName IndexName, fldName FieldName, tblSchema *Schema, txn Transaction, si StatInfo) *IndexInfo {
 
 	return &IndexInfo{
-		gen:       gen,
-		cal:       cal,
+		driver:    driver,
 		idxName:   idxName,
 		fldName:   fldName,
 		txn:       txn,
@@ -80,7 +92,7 @@ func NewIndexInfo(factory IndexDriver, idxName IndexName, fldName FieldName, tbl
 
 // Open opens the index.
 func (info *IndexInfo) Open() Indexer {
-	return info.gen.Create(info.txn, info.idxName, info.layout)
+	return info.driver.Create(info.txn, info.idxName, info.layout)
 }
 
 // EstBlockAccessed estimates the number of accessing blocks.
@@ -88,7 +100,7 @@ func (info *IndexInfo) EstBlockAccessed() int {
 	rpb := int(info.txn.BlockSize()) / int(info.layout.SlotSize())
 	numBlks := info.statInfo.EstNumRecord() / rpb
 
-	return info.cal.Calculate(numBlks, rpb)
+	return info.driver.Calculate(numBlks, rpb)
 }
 
 // EstNumRecord estimates the number of records.

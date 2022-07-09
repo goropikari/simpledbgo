@@ -2,19 +2,6 @@ package hash
 
 import "github.com/goropikari/simpledbgo/domain"
 
-// IndexDriver is factory of IndexFactory and SearchCostCalculator.
-type IndexDriver struct{}
-
-// NewIndexDriver constructs an IndexDriver.
-func NewIndexDriver() *IndexDriver {
-	return &IndexDriver{}
-}
-
-// Create creates IndexFactory and SearchCostCalculator.
-func (fac *IndexDriver) Create() (domain.IndexFactory, domain.SearchCostCalculator) {
-	return NewIndexFactory(), NewSearchCostCalculator()
-}
-
 // IndexFactory is generator of index.
 type IndexFactory struct{}
 

@@ -15,7 +15,7 @@ type Manager struct {
 }
 
 // CreateManager creates metadata manager with initializing tables related to metadata.
-func CreateManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
+func CreateManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
 	tblMgr, err := CreateTableManager(txn)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func CreateManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager
 		return nil, err
 	}
 
-	idxMgr, err := CreateIndexManager(factory, tblMgr, statMgr, txn)
+	idxMgr, err := CreateIndexManager(driver, tblMgr, statMgr, txn)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func CreateManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager
 }
 
 // NewManager constructs metadata manager.
-func NewManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
+func NewManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
 	tblMgr := NewTableManager()
 	viewMgr := NewViewManager(tblMgr)
 	statMgr, err := NewStatManager(tblMgr, txn)
@@ -53,7 +53,7 @@ func NewManager(factory domain.IndexDriver, txn domain.Transaction) (*Manager, e
 		return nil, err
 	}
 
-	idxMgr, err := NewIndexManager(factory, tblMgr, statMgr, txn)
+	idxMgr, err := NewIndexManager(driver, tblMgr, statMgr, txn)
 	if err != nil {
 		return nil, err
 	}
