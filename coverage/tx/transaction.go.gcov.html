@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-08 11:07:10</td>
+            <td class="headerValue">2022-07-13 15:21:42</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -73,14 +73,14 @@
 <a name="11"><span class="lineNum">      11 </span>            : type Transaction struct {</a>
 <a name="12"><span class="lineNum">      12 </span>            :         fileMgr    domain.FileManager</a>
 <a name="13"><span class="lineNum">      13 </span>            :         logMgr     domain.LogManager</a>
-<a name="14"><span class="lineNum">      14 </span>            :         bufferMgr  domain.BufferManager</a>
+<a name="14"><span class="lineNum">      14 </span>            :         bufferMgr  domain.BufferPoolManager</a>
 <a name="15"><span class="lineNum">      15 </span>            :         concurMgr  domain.ConcurrencyManager</a>
 <a name="16"><span class="lineNum">      16 </span>            :         bufferList *BufferList</a>
 <a name="17"><span class="lineNum">      17 </span>            :         number     domain.TransactionNumber</a>
 <a name="18"><span class="lineNum">      18 </span>            : }</a>
 <a name="19"><span class="lineNum">      19 </span>            : </a>
 <a name="20"><span class="lineNum">      20 </span>            : // NewTransaction constructs Transaction.</a>
-<a name="21"><span class="lineNum">      21 </span><span class="lineCov">          1 : func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {</span></a>
+<a name="21"><span class="lineNum">      21 </span><span class="lineCov">          1 : func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {</span></a>
 <a name="22"><span class="lineNum">      22 </span><span class="lineCov">          1 :         txn := &amp;Transaction{</span></a>
 <a name="23"><span class="lineNum">      23 </span><span class="lineCov">          1 :                 fileMgr:    fileMgr,</span></a>
 <a name="24"><span class="lineNum">      24 </span><span class="lineCov">          1 :                 logMgr:     logMgr,</span></a>
@@ -425,58 +425,62 @@
 <a name="363"><span class="lineNum">     363 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Rollback, record)</span></a>
 <a name="364"><span class="lineNum">     364 </span><span class="lineCov">          1 : }</span></a>
 <a name="365"><span class="lineNum">     365 </span>            : </a>
-<a name="366"><span class="lineNum">     366 </span><span class="lineCov">          1 : func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {</span></a>
-<a name="367"><span class="lineNum">     367 </span><span class="lineCov">          1 :         data, err := record.Marshal()</span></a>
-<a name="368"><span class="lineNum">     368 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="369"><span class="lineNum">     369 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
-<a name="370"><span class="lineNum">     370 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="371"><span class="lineNum">     371 </span>            : </a>
-<a name="372"><span class="lineNum">     372 </span><span class="lineCov">          1 :         buf := bytes.NewBuffer(common.Int32Length*2 + len(data))</span></a>
-<a name="373"><span class="lineNum">     373 </span><span class="lineCov">          1 :         if err := buf.SetInt32(0, typ); err != nil {</span></a>
-<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
-<a name="375"><span class="lineNum">     375 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="376"><span class="lineNum">     376 </span>            : </a>
-<a name="377"><span class="lineNum">     377 </span><span class="lineCov">          1 :         if err := buf.SetBytes(common.Int32Length, data); err != nil {</span></a>
+<a name="366"><span class="lineNum">     366 </span>            : // log record structure</a>
+<a name="367"><span class="lineNum">     367 </span>            : // ----------------------------------------------------------------------</a>
+<a name="368"><span class="lineNum">     368 </span>            : // | log record type (int32) | record length (uint32) | record (varlen) |</a>
+<a name="369"><span class="lineNum">     369 </span>            : // ----------------------------------------------------------------------.</a>
+<a name="370"><span class="lineNum">     370 </span><span class="lineCov">          1 : func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {</span></a>
+<a name="371"><span class="lineNum">     371 </span><span class="lineCov">          1 :         data, err := record.Marshal()</span></a>
+<a name="372"><span class="lineNum">     372 </span><span class="lineCov">          1 :         if err != nil {</span></a>
+<a name="373"><span class="lineNum">     373 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
+<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="375"><span class="lineNum">     375 </span>            : </a>
+<a name="376"><span class="lineNum">     376 </span><span class="lineCov">          1 :         buf := bytes.NewBuffer(common.Int32Length + common.Uint32Length + len(data))</span></a>
+<a name="377"><span class="lineNum">     377 </span><span class="lineCov">          1 :         if err := buf.SetInt32(0, typ); err != nil {</span></a>
 <a name="378"><span class="lineNum">     378 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
 <a name="379"><span class="lineNum">     379 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="380"><span class="lineNum">     380 </span>            : </a>
-<a name="381"><span class="lineNum">     381 </span><span class="lineCov">          1 :         lsn, err := tx.logMgr.AppendRecord(buf.GetData())</span></a>
-<a name="382"><span class="lineNum">     382 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
-<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="385"><span class="lineNum">     385 </span>            : </a>
-<a name="386"><span class="lineNum">     386 </span><span class="lineCov">          1 :         return lsn, nil</span></a>
-<a name="387"><span class="lineNum">     387 </span>            : }</a>
-<a name="388"><span class="lineNum">     388 </span>            : </a>
-<a name="389"><span class="lineNum">     389 </span>            : // BlockLength returns block length of the `filename`.</a>
-<a name="390"><span class="lineNum">     390 </span><span class="lineCov">          1 : func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {</span></a>
-<a name="391"><span class="lineNum">     391 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
-<a name="392"><span class="lineNum">     392 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(dummyBlk); err != nil {</span></a>
-<a name="393"><span class="lineNum">     393 </span><span class="lineNoCov">          0 :                 return 0, err</span></a>
-<a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="395"><span class="lineNum">     395 </span>            : </a>
-<a name="396"><span class="lineNum">     396 </span><span class="lineCov">          1 :         return tx.fileMgr.BlockLength(filename)</span></a>
-<a name="397"><span class="lineNum">     397 </span>            : }</a>
-<a name="398"><span class="lineNum">     398 </span>            : </a>
-<a name="399"><span class="lineNum">     399 </span>            : // ExtendFile extends the file by a block.</a>
-<a name="400"><span class="lineNum">     400 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {</span></a>
-<a name="401"><span class="lineNum">     401 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
-<a name="402"><span class="lineNum">     402 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(dummyBlk); err != nil {</span></a>
-<a name="403"><span class="lineNum">     403 </span><span class="lineNoCov">          0 :                 return domain.Block{}, err</span></a>
-<a name="404"><span class="lineNum">     404 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="405"><span class="lineNum">     405 </span>            : </a>
-<a name="406"><span class="lineNum">     406 </span><span class="lineCov">          1 :         return tx.fileMgr.ExtendFile(filename)</span></a>
-<a name="407"><span class="lineNum">     407 </span>            : }</a>
-<a name="408"><span class="lineNum">     408 </span>            : </a>
-<a name="409"><span class="lineNum">     409 </span>            : // BlockSize returns block size.</a>
-<a name="410"><span class="lineNum">     410 </span><span class="lineNoCov">          0 : func (tx *Transaction) BlockSize() domain.BlockSize {</span></a>
-<a name="411"><span class="lineNum">     411 </span><span class="lineNoCov">          0 :         return tx.fileMgr.BlockSize()</span></a>
-<a name="412"><span class="lineNum">     412 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="413"><span class="lineNum">     413 </span>            : </a>
-<a name="414"><span class="lineNum">     414 </span>            : // Available returns the number of available buffers.</a>
-<a name="415"><span class="lineNum">     415 </span><span class="lineCov">          1 : func (tx *Transaction) Available() int {</span></a>
-<a name="416"><span class="lineNum">     416 </span><span class="lineCov">          1 :         return tx.bufferMgr.Available()</span></a>
-<a name="417"><span class="lineNum">     417 </span><span class="lineCov">          1 : }</span></a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineCov">          1 :         if err := buf.SetBytes(common.Int32Length, data); err != nil {</span></a>
+<a name="382"><span class="lineNum">     382 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
+<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="384"><span class="lineNum">     384 </span>            : </a>
+<a name="385"><span class="lineNum">     385 </span><span class="lineCov">          1 :         lsn, err := tx.logMgr.AppendRecord(buf.GetData())</span></a>
+<a name="386"><span class="lineNum">     386 </span><span class="lineCov">          1 :         if err != nil {</span></a>
+<a name="387"><span class="lineNum">     387 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, err</span></a>
+<a name="388"><span class="lineNum">     388 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="389"><span class="lineNum">     389 </span>            : </a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineCov">          1 :         return lsn, nil</span></a>
+<a name="391"><span class="lineNum">     391 </span>            : }</a>
+<a name="392"><span class="lineNum">     392 </span>            : </a>
+<a name="393"><span class="lineNum">     393 </span>            : // BlockLength returns block length of the `filename`.</a>
+<a name="394"><span class="lineNum">     394 </span><span class="lineCov">          1 : func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {</span></a>
+<a name="395"><span class="lineNum">     395 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
+<a name="396"><span class="lineNum">     396 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(dummyBlk); err != nil {</span></a>
+<a name="397"><span class="lineNum">     397 </span><span class="lineNoCov">          0 :                 return 0, err</span></a>
+<a name="398"><span class="lineNum">     398 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="399"><span class="lineNum">     399 </span>            : </a>
+<a name="400"><span class="lineNum">     400 </span><span class="lineCov">          1 :         return tx.fileMgr.BlockLength(filename)</span></a>
+<a name="401"><span class="lineNum">     401 </span>            : }</a>
+<a name="402"><span class="lineNum">     402 </span>            : </a>
+<a name="403"><span class="lineNum">     403 </span>            : // ExtendFile extends the file by a block.</a>
+<a name="404"><span class="lineNum">     404 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {</span></a>
+<a name="405"><span class="lineNum">     405 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
+<a name="406"><span class="lineNum">     406 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(dummyBlk); err != nil {</span></a>
+<a name="407"><span class="lineNum">     407 </span><span class="lineNoCov">          0 :                 return domain.Block{}, err</span></a>
+<a name="408"><span class="lineNum">     408 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="409"><span class="lineNum">     409 </span>            : </a>
+<a name="410"><span class="lineNum">     410 </span><span class="lineCov">          1 :         return tx.fileMgr.ExtendFile(filename)</span></a>
+<a name="411"><span class="lineNum">     411 </span>            : }</a>
+<a name="412"><span class="lineNum">     412 </span>            : </a>
+<a name="413"><span class="lineNum">     413 </span>            : // BlockSize returns block size.</a>
+<a name="414"><span class="lineNum">     414 </span><span class="lineNoCov">          0 : func (tx *Transaction) BlockSize() domain.BlockSize {</span></a>
+<a name="415"><span class="lineNum">     415 </span><span class="lineNoCov">          0 :         return tx.fileMgr.BlockSize()</span></a>
+<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="417"><span class="lineNum">     417 </span>            : </a>
+<a name="418"><span class="lineNum">     418 </span>            : // Available returns the number of available buffers.</a>
+<a name="419"><span class="lineNum">     419 </span><span class="lineCov">          1 : func (tx *Transaction) Available() int {</span></a>
+<a name="420"><span class="lineNum">     420 </span><span class="lineCov">          1 :         return tx.bufferMgr.Available()</span></a>
+<a name="421"><span class="lineNum">     421 </span><span class="lineCov">          1 : }</span></a>
 </pre>
       </td>
     </tr>
