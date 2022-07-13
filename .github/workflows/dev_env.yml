@@ -2,7 +2,7 @@ name: DevEnv
 
 on:
   schedule:
-    - cron:  '0 0 */3 * *'
+    - cron:  '0 0 * * 1'
 
 jobs:
   build:
@@ -14,4 +14,4 @@ jobs:
       run: docker build -f .devcontainer/Dockerfile -t simpledb .devcontainer/
 
     - name: docker run
-      run: docker run --rm -v $(pwd):/app -w /app simpledb make test
+      run: docker run --rm -v $(pwd):/app -w /app simpledb make tools test

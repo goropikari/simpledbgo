@@ -22,6 +22,7 @@ tools:
 test: mockgen protoc
 	go test -shuffle=on ./...
 
+.PHONY: ci-test
 ci-test:
 	go test -v -cover -shuffle=on ./... 2>&1 | go-junit-report > report.xml
 
