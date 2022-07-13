@@ -7,6 +7,7 @@ COPY requirements.txt .
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
+    openjdk-17-jdk \
     python3 python3-pip \
     bash-completion \
     lcov \
