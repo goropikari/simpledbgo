@@ -6,8 +6,6 @@ import (
 
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/file"
-	"github.com/goropikari/simpledbgo/lib/bytes"
-	"github.com/goropikari/simpledbgo/os"
 )
 
 type NonDirectFileManagerFactory struct {
@@ -16,12 +14,13 @@ type NonDirectFileManagerFactory struct {
 }
 
 func NewNonDirectFileManagerFactory(dbPath string, blockSize int32) *NonDirectFileManagerFactory {
-	bsf := bytes.NewByteSliceCreater()
-
 	// initialize file manager
-	explorer := os.NewNonDirectIOExplorer(dbPath)
-	fileConfig := file.ManagerConfig{BlockSize: blockSize}
-	fileMgr, err := file.NewManager(explorer, bsf, fileConfig)
+	fileConfig := file.ManagerConfig{
+		DBPath:    dbPath,
+		BlockSize: blockSize,
+		DirectIO:  false,
+	}
+	fileMgr, err := file.NewManager(fileConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

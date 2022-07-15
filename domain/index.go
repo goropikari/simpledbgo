@@ -131,6 +131,8 @@ func createIdxLayout(tblSchema *Schema, fldName FieldName) *Layout {
 	case StringFieldType:
 		fldLen := tblSchema.Length(fldName)
 		sch.AddStringField(FldDataVal, fldLen)
+	case UnknownFieldType:
+		panic(ErrNotSupportedFieldType)
 	default:
 		panic(ErrNotSupportedFieldType)
 	}

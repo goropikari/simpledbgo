@@ -9,6 +9,7 @@ linters:
   disable:
     - cyclop
     - exhaustivestruct
+    - forcetypeassert
     - funlen
     - gochecknoglobals
     - gochecknoinits

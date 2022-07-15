@@ -71,6 +71,7 @@ func (name FieldName) String() string {
 type FieldType uint
 
 const (
+	// TODO: remove UnknownFieldType
 	// UnknownFieldType is unknown field type.
 	UnknownFieldType FieldType = iota
 

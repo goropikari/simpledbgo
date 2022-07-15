@@ -2,8 +2,6 @@ package server
 
 import (
 	golog "log"
-	goos "os"
-	"path"
 
 	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
@@ -12,7 +10,6 @@ import (
 	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/metadata"
-	"github.com/goropikari/simpledbgo/os"
 	"github.com/goropikari/simpledbgo/plan"
 	"github.com/goropikari/simpledbgo/tx"
 )
@@ -26,62 +23,39 @@ type DB struct {
 	pe   *plan.Executor
 }
 
-type config struct {
-	dbPath          string
-	blockSize       int32
-	numBuf          int
-	timeoutMilliSec int
+type Config struct {
+	DBPath          string
+	BlockSize       int32
+	NumBuf          int
+	TimeoutMilliSec int
 }
 
-func newConfig() config {
-	dbPath := goos.Getenv("SIMPLEDB_PATH")
+func NewConfig() Config {
+	c := Config{
+		BlockSize:       4096,
+		NumBuf:          20,
+		TimeoutMilliSec: 10000,
+	}
 
-	return config{
-		dbPath: dbPath,
-	}
-}
-
-func (c *config) setDefault() {
-	if path := goos.Getenv("SIMPLEDB_PATH"); path != "" {
-		c.dbPath = path
-	}
-	if c.dbPath == "" {
-		c.dbPath = path.Join(goos.Getenv("HOME"), "simpledb")
-	}
-	if c.blockSize == 0 {
-		c.blockSize = 4096
-	}
-	if c.numBuf == 0 {
-		c.numBuf = 20
-	}
-	if c.timeoutMilliSec == 0 {
-		c.timeoutMilliSec = 10000
-	}
+	return c
 }
 
 func NewDB() *DB {
-	cfg := config{}
-	cfg.setDefault()
-
-	blkSize, err := domain.NewBlockSize(cfg.blockSize)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	bsc := bytes.NewDirectByteSliceCreater()
-	pageFactory := domain.NewPageFactory(bsc, blkSize)
-
-	_, err = goos.Stat(cfg.dbPath)
-	isNewDatabase := err != nil
+	cfg := NewConfig()
 
 	// initialize file manager
-	explorer := os.NewDirectIOExplorer(cfg.dbPath)
-	fileConfig := file.ManagerConfig{BlockSize: cfg.blockSize}
-	fileMgr, err := file.NewManager(explorer, bsc, fileConfig)
+	fileConfig := file.NewManagerConfig()
+	fileMgr, err := file.NewManager(fileConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}
 
+	blkSize, err := domain.NewBlockSize(cfg.BlockSize)
+	if err != nil {
+		golog.Fatal(err)
+	}
+	bsc := bytes.NewDirectByteSliceCreater()
+	pageFactory := domain.NewPageFactory(bsc, blkSize)
 	logConfig := log.ManagerConfig{LogFileName: "logfile"}
 	logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
 	if err != nil {
@@ -89,15 +63,15 @@ func NewDB() *DB {
 	}
 
 	bufConfig := buffer.Config{
-		NumberBuffer:       cfg.numBuf,
-		TimeoutMillisecond: cfg.timeoutMilliSec,
+		NumberBuffer:       cfg.NumBuf,
+		TimeoutMillisecond: cfg.TimeoutMilliSec,
 	}
 	bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, bufConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}
 
-	ltConfig := tx.NewConfig(cfg.timeoutMilliSec)
+	ltConfig := tx.NewConfig(cfg.TimeoutMilliSec)
 	lt := tx.NewLockTable(ltConfig)
 	concurMgr := tx.NewConcurrencyManager(lt)
 
@@ -108,6 +82,9 @@ func NewDB() *DB {
 		golog.Fatal(err)
 	}
 
+	// _, err = goos.Stat(cfg.dbPath)
+	// isNewDatabase := err != nil
+	isNewDatabase := true
 	idxDriver := domain.NewIndexDriver(hash.NewIndexFactory(), hash.NewSearchCostCalculator())
 	var mmgr domain.MetadataManager
 	if isNewDatabase {

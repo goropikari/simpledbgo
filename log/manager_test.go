@@ -9,7 +9,6 @@ import (
 	"github.com/goropikari/simpledbgo/file"
 	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/log"
-	"github.com/goropikari/simpledbgo/os"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
@@ -30,15 +29,17 @@ func TestManager_NewManager(t *testing.T) {
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNonDirectIOExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
+		dbPath := "log_" + fake.RandString()
+		fileConfig := file.ManagerConfig{
+			DBPath:    dbPath,
+			BlockSize: size,
+			DirectIO:  false,
+		}
+		fileMgr, _ := file.NewManager(fileConfig)
+		defer goos.RemoveAll(dbPath)
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
-		defer goos.Remove(logfile)
-
 		logConfig := log.ManagerConfig{LogFileName: logfile}
 
 		_, err := log.NewManager(fileMgr, pageFactory, logConfig)
@@ -47,9 +48,11 @@ func TestManager_NewManager(t *testing.T) {
 
 	t.Run("valid request: initialize with 2 blocks file", func(t *testing.T) {
 		// make dummy file
+		dbPath := "log_" + fake.RandString()
 		logfile := "logfile_" + fake.RandString()
-		defer goos.Remove(logfile)
-		f, err := goos.OpenFile(logfile, goos.O_CREATE|goos.O_RDWR, goos.ModePerm)
+		goos.MkdirAll(dbPath, goos.ModePerm)
+		defer goos.RemoveAll(dbPath)
+		f, err := goos.OpenFile(dbPath+"/"+logfile, goos.O_CREATE|goos.O_RDWR, goos.ModePerm)
 		require.NoError(t, err)
 		_, err = f.Write(make([]byte, size*2))
 		require.NoError(t, err)
@@ -67,10 +70,12 @@ func TestManager_NewManager(t *testing.T) {
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNonDirectIOExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
+		fileConfig := file.ManagerConfig{
+			DBPath:    dbPath,
+			BlockSize: size,
+			DirectIO:  false,
+		}
+		fileMgr, _ := file.NewManager(fileConfig)
 
 		// initialize log manager
 		logConfig := log.ManagerConfig{LogFileName: logfile}
@@ -95,14 +100,17 @@ func TestManager_Flush(t *testing.T) {
 		pageFactory := domain.NewPageFactory(bsf, blockSize)
 
 		// initialize file manager
-		dbPath := "."
-		explorer := os.NewNonDirectIOExplorer(dbPath)
-		fileConfig := file.ManagerConfig{BlockSize: size}
-		fileMgr, _ := file.NewManager(explorer, bsf, fileConfig)
+		dbPath := "log_" + fake.RandString()
+		fileConfig := file.ManagerConfig{
+			DBPath:    dbPath,
+			BlockSize: size,
+			DirectIO:  false,
+		}
+		fileMgr, _ := file.NewManager(fileConfig)
 
 		// initialize log manager
 		logfile := "logfile_" + fake.RandString()
-		defer goos.Remove(logfile)
+		defer goos.RemoveAll(dbPath)
 
 		logConfig := log.ManagerConfig{LogFileName: logfile}
 

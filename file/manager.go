@@ -2,15 +2,39 @@ package file
 
 import (
 	"io"
+	stdos "os"
+	"path"
 	"sync"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/lib/bytes"
+	"github.com/goropikari/simpledbgo/os"
 	"github.com/pkg/errors"
+)
+
+const (
+	defaultBlockSize = 4096
 )
 
 // ManagerConfig is configuration of file manager.
 type ManagerConfig struct {
+	DBPath    string
 	BlockSize int32
+	DirectIO  bool
+}
+
+func NewManagerConfig() ManagerConfig {
+	c := ManagerConfig{
+		DBPath:    path.Join(stdos.Getenv("HOME"), "simpledb"),
+		BlockSize: defaultBlockSize,
+		DirectIO:  true,
+	}
+
+	if path := stdos.Getenv("SIMPLEDB_PATH"); path != "" {
+		c.DBPath = path
+	}
+
+	return c
 }
 
 // Manager is a model of file manager.
@@ -22,7 +46,17 @@ type Manager struct {
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(explorer domain.Explorer, bsf domain.ByteSliceFactory, config ManagerConfig) (*Manager, error) {
+func NewManager(config ManagerConfig) (*Manager, error) {
+	var explorer domain.Explorer
+	var bsf domain.ByteSliceFactory
+	if config.DirectIO {
+		explorer = os.NewDirectIOExplorer(config.DBPath) // make server directory
+		bsf = bytes.NewDirectByteSliceCreater()
+	} else {
+		explorer = os.NewNonDirectIOExplorer(config.DBPath) // make server directory
+		bsf = bytes.NewByteSliceCreater()
+	}
+
 	blkSize, err := domain.NewBlockSize(config.BlockSize)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create BlockSize")
