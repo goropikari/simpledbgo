@@ -13,8 +13,8 @@ import (
 
 func TestLockTable_Lock(t *testing.T) {
 	t.Run("RRW", func(t *testing.T) {
-		config := tx.NewConfig(1000)
-		lt := tx.NewLockTable(config)
+		timeout := 1000
+		lt := tx.NewLockTable(timeout)
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		tryLock := make([]string, 0)
@@ -62,8 +62,8 @@ func TestLockTable_Lock(t *testing.T) {
 		// RWMutex は RLock 取った後に Lock を取ると、最初の RLock が release されるまで
 		// 他の RLock も取ることはできない
 		// ref: https://pkg.go.dev/sync#RWMutex
-		config := tx.NewConfig(100)
-		lt := tx.NewLockTable(config)
+		timeout := 100
+		lt := tx.NewLockTable(timeout)
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
@@ -101,8 +101,8 @@ func TestLockTable_Lock(t *testing.T) {
 	})
 
 	t.Run("RW timeout", func(t *testing.T) {
-		config := tx.NewConfig(10)
-		lt := tx.NewLockTable(config)
+		timeout := 10
+		lt := tx.NewLockTable(timeout)
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
@@ -127,8 +127,8 @@ func TestLockTable_Lock(t *testing.T) {
 	})
 
 	t.Run("WR timeout", func(t *testing.T) {
-		config := tx.NewConfig(5)
-		lt := tx.NewLockTable(config)
+		timeout := 5
+		lt := tx.NewLockTable(timeout)
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}

@@ -21,9 +21,8 @@ func TestTableScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 
@@ -137,9 +136,8 @@ func TestTableScan2(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 
@@ -257,9 +255,8 @@ func TestProductScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 
@@ -347,9 +344,8 @@ func TestSelectScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 
@@ -444,9 +440,8 @@ func TestSelectScan_update_column(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 
@@ -532,9 +527,8 @@ func TestSelectScan_delete_record(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 
@@ -617,9 +611,8 @@ func TestProjectScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 	gen := tx.NewNumberGenerator()
 

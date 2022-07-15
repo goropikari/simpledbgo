@@ -10,14 +10,12 @@ import (
 
 func TestConcurrencyManager(t *testing.T) {
 	t.Run("lock", func(t *testing.T) {
-		config := tx.NewConfig(100)
-		lt := tx.NewLockTable(config)
-
 		blk1 := fake.Block()
 		blk2 := fake.Block()
 		blk3 := fake.Block()
 
-		mgr := tx.NewConcurrencyManager(lt)
+		cfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 100}
+		mgr := tx.NewConcurrencyManager(cfg)
 
 		err := mgr.SLock(blk1)
 		require.NoError(t, err)

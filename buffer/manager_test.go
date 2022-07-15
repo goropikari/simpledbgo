@@ -7,15 +7,12 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBufferMgr_NewManager(t *testing.T) {
-	const size = 5
-
 	t.Run("valid request", func(t *testing.T) {
 		const numbuf = 3
 
@@ -23,14 +20,11 @@ func TestBufferMgr_NewManager(t *testing.T) {
 		defer ctrl.Finish()
 
 		fileMgr := mock.NewMockFileManager(ctrl)
+		fileMgr.EXPECT().CreatePage().Return(&domain.Page{}, nil).AnyTimes()
 		logMgr := mock.NewMockLogManager(ctrl)
 
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil).AnyTimes()
-		factory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
 		config := buffer.Config{NumberBuffer: numbuf}
-		_, err := buffer.NewManager(fileMgr, logMgr, factory, config)
+		_, err := buffer.NewManager(fileMgr, logMgr, config)
 		require.NoError(t, err)
 	})
 
@@ -43,19 +37,13 @@ func TestBufferMgr_NewManager(t *testing.T) {
 		fileMgr := mock.NewMockFileManager(ctrl)
 		logMgr := mock.NewMockLogManager(ctrl)
 
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil).AnyTimes()
-		factory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
 		config := buffer.Config{NumberBuffer: numbuf}
-		_, err := buffer.NewManager(fileMgr, logMgr, factory, config)
+		_, err := buffer.NewManager(fileMgr, logMgr, config)
 		require.Error(t, err)
 	})
 }
 
 func TestBufferMgr_Available(t *testing.T) {
-	const size = 5
-
 	t.Run("valid request", func(t *testing.T) {
 		const numbuf = 3
 
@@ -63,14 +51,11 @@ func TestBufferMgr_Available(t *testing.T) {
 		defer ctrl.Finish()
 
 		fileMgr := mock.NewMockFileManager(ctrl)
+		fileMgr.EXPECT().CreatePage().Return(&domain.Page{}, nil).AnyTimes()
 		logMgr := mock.NewMockLogManager(ctrl)
 
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil).AnyTimes()
-		factory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
 		config := buffer.Config{NumberBuffer: numbuf}
-		bufMgr, err := buffer.NewManager(fileMgr, logMgr, factory, config)
+		bufMgr, err := buffer.NewManager(fileMgr, logMgr, config)
 		require.NoError(t, err)
 
 		require.Equal(t, numbuf, bufMgr.Available())
@@ -89,14 +74,11 @@ func TestBufferMgr_Pin(t *testing.T) {
 
 		fileMgr, logMgr := factory.Create()
 
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
 		config := buffer.Config{
 			NumberBuffer:       numbuf,
 			TimeoutMillisecond: 500,
 		}
-		bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, config)
+		bufMgr, err := buffer.NewManager(fileMgr, logMgr, config)
 		require.NoError(t, err)
 
 		filenames := make([]string, 0)
@@ -144,14 +126,11 @@ func TestBufferMgr_Pin(t *testing.T) {
 
 		fileMgr, logMgr := factory.Create()
 
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
 		config := buffer.Config{
 			NumberBuffer:       numbuf,
 			TimeoutMillisecond: 20,
 		}
-		bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, config)
+		bufMgr, err := buffer.NewManager(fileMgr, logMgr, config)
 		require.NoError(t, err)
 
 		filenames := make([]string, 0)
@@ -198,14 +177,11 @@ func TestBufferMgr_FlushAll(t *testing.T) {
 
 		fileMgr, logMgr := factory.Create()
 
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
 		config := buffer.Config{
 			NumberBuffer:       numbuf,
 			TimeoutMillisecond: 50,
 		}
-		bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, config)
+		bufMgr, err := buffer.NewManager(fileMgr, logMgr, config)
 		require.NoError(t, err)
 
 		block := domain.NewBlock(domain.FileName("file_"+fake.RandString()), domain.BlockNumber(0))

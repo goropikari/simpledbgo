@@ -11,16 +11,6 @@ import (
 // ErrTransactionTimeoutExceeded is an error that means exceeding timeout.
 var ErrTransactionTimeoutExceeded = errors.New("transaction timeout exceeded")
 
-// Config is configuration of LockTable.
-type Config struct {
-	lockTimeoutMillisecond int
-}
-
-// NewConfig constructs Config for LockTable.
-func NewConfig(timeoutMilliSec int) Config {
-	return Config{lockTimeoutMillisecond: timeoutMilliSec}
-}
-
 // LockTable manages locked Block which used by transaction.
 type LockTable struct {
 	locks              *sync.Map
@@ -28,10 +18,10 @@ type LockTable struct {
 }
 
 // NewLockTable constructs LockTable.
-func NewLockTable(config Config) *LockTable {
+func NewLockTable(lockTimeout int) *LockTable {
 	return &LockTable{
 		locks:              &sync.Map{},
-		timeoutMillisecond: time.Duration(int64(config.lockTimeoutMillisecond)) * time.Millisecond,
+		timeoutMillisecond: time.Duration(int64(lockTimeout)) * time.Millisecond,
 	}
 }
 

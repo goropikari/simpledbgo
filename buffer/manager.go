@@ -32,7 +32,7 @@ type Manager struct {
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(fileMgr domain.FileManager, logMgr domain.LogManager, pageFactory *domain.PageFactory, config Config) (*Manager, error) {
+func NewManager(fileMgr domain.FileManager, logMgr domain.LogManager, config Config) (*Manager, error) {
 	numBuffer := config.NumberBuffer
 	if numBuffer <= 0 {
 		return nil, ErrInvalidNumberOfBuffer
@@ -41,7 +41,7 @@ func NewManager(fileMgr domain.FileManager, logMgr domain.LogManager, pageFactor
 	bufferPool := make([]*domain.Buffer, numBuffer)
 
 	for i := 0; i < numBuffer; i++ {
-		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		if err != nil {
 			return nil, err
 		}

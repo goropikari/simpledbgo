@@ -18,8 +18,8 @@ type Buffer struct {
 }
 
 // NewBuffer creates a buffer.
-func NewBuffer(fileMgr FileManager, logMgr LogManager, pageFactory *PageFactory) (*Buffer, error) {
-	page, err := pageFactory.Create()
+func NewBuffer(fileMgr FileManager, logMgr LogManager) (*Buffer, error) {
+	page, err := fileMgr.CreatePage()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a page.")
 	}

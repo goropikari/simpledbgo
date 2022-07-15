@@ -6,7 +6,6 @@ import (
 
 	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/log"
 )
 
@@ -18,14 +17,6 @@ type NonDirectBufferManagerFactory struct {
 }
 
 func NewNonDirectBufferManagerFactory(dbPath string, blockSize int32, numBuf int) *NonDirectBufferManagerFactory {
-	blkSize, err := domain.NewBlockSize(blockSize)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	bsf := bytes.NewByteSliceCreater()
-	pageFactory := domain.NewPageFactory(bsf, blkSize)
-
 	fileMgrFactory := NewNonDirectFileManagerFactory(dbPath, blockSize)
 	fileMgr := fileMgrFactory.Create()
 
@@ -40,7 +31,7 @@ func NewNonDirectBufferManagerFactory(dbPath string, blockSize int32, numBuf int
 		TimeoutMillisecond: 10000,
 	}
 
-	bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, bufConfig)
+	bufMgr, err := buffer.NewManager(fileMgr, logMgr, bufConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}

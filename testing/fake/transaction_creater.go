@@ -21,9 +21,8 @@ func NewTransactionCreater(blockSize int32, numBuf int) *TransactionCreater {
 	factory := NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
 	fileMgr, logMgr, bufMgr := factory.Create()
 
-	ltConfig := tx.NewConfig(1000)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	cfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+	concurMgr := tx.NewConcurrencyManager(cfg)
 
 	gen := tx.NewNumberGenerator()
 

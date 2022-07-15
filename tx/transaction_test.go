@@ -22,9 +22,8 @@ func TestTransaction_Start(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		_, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
@@ -62,9 +61,8 @@ func TestTransaction_Commit(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		gen.Generate()
@@ -109,9 +107,8 @@ func TestTransaction_GetSetInt32(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
@@ -182,9 +179,8 @@ func TestTransaction_GetSetString(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
@@ -256,9 +252,8 @@ func TestTransaction_Rollback(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
@@ -380,9 +375,8 @@ func TestTransaction_Recover(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 
@@ -549,9 +543,8 @@ func TestTransaction_Size(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
@@ -579,9 +572,8 @@ func TestTransaction_ExtendFIle(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
@@ -616,9 +608,8 @@ func TestTransaction_Available(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		ltConfig := tx.NewConfig(1000)
-		lt := tx.NewLockTable(ltConfig)
-		concurMgr := tx.NewConcurrencyManager(lt)
+		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
+		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
 
 		gen := tx.NewNumberGenerator()
 		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)

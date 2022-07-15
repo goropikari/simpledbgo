@@ -1,7 +1,6 @@
 package domain_test
 
 import (
-	"errors"
 	"io"
 	goos "os"
 	"path/filepath"
@@ -9,10 +8,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/goropikari/simpledbgo/testing/mock"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,26 +19,19 @@ func TestBuffer_NewBuffer(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileMgr := mock.NewMockFileManager(ctrl)
-	logMgr := mock.NewMockLogManager(ctrl)
-
-	const size = 10
-
 	t.Run("valid request", func(t *testing.T) {
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
-		_, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		fileMgr := mock.NewMockFileManager(ctrl)
+		fileMgr.EXPECT().CreatePage().Return(&domain.Page{}, nil).AnyTimes()
+		logMgr := mock.NewMockLogManager(ctrl)
+		_, err := domain.NewBuffer(fileMgr, logMgr)
 		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(nil, errors.New("unexpected error"))
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
-		_, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		fileMgr := mock.NewMockFileManager(ctrl)
+		fileMgr.EXPECT().CreatePage().Return(nil, errors.New("error")).AnyTimes()
+		logMgr := mock.NewMockLogManager(ctrl)
+		_, err := domain.NewBuffer(fileMgr, logMgr)
 		require.Error(t, err)
 	})
 }
@@ -49,16 +41,11 @@ func TestBuffer_Block(t *testing.T) {
 	defer ctrl.Finish()
 
 	fileMgr := mock.NewMockFileManager(ctrl)
+	fileMgr.EXPECT().CreatePage().Return(&domain.Page{}, nil).AnyTimes()
 	logMgr := mock.NewMockLogManager(ctrl)
 
-	const size = 10
-
 	t.Run("valid request", func(t *testing.T) {
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
-		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		require.NoError(t, err)
 		require.Equal(t, domain.Block{}, buf.Block())
 	})
@@ -69,16 +56,11 @@ func TestBuffer_SetModifiedTxNumber(t *testing.T) {
 	defer ctrl.Finish()
 
 	fileMgr := mock.NewMockFileManager(ctrl)
+	fileMgr.EXPECT().CreatePage().Return(&domain.Page{}, nil).AnyTimes()
 	logMgr := mock.NewMockLogManager(ctrl)
 
-	const size = 10
-
 	t.Run("valid request", func(t *testing.T) {
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
-		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		require.NoError(t, err)
 
 		txnum := domain.TransactionNumber(fake.RandInt32())
@@ -95,16 +77,11 @@ func TestBuffer_PinUnpin(t *testing.T) {
 	defer ctrl.Finish()
 
 	fileMgr := mock.NewMockFileManager(ctrl)
+	fileMgr.EXPECT().CreatePage().Return(&domain.Page{}, nil).AnyTimes()
 	logMgr := mock.NewMockLogManager(ctrl)
 
-	const size = 10
-
 	t.Run("valid request", func(t *testing.T) {
-		bsf := mock.NewMockByteSliceFactory(ctrl)
-		bsf.EXPECT().Create(gomock.Any()).Return(make([]byte, size), nil)
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(size))
-
-		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		require.NoError(t, err)
 
 		require.Equal(t, false, buf.IsPinned())
@@ -123,14 +100,12 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 	t.Run("valid request", func(t *testing.T) {
 		dbPath := fake.RandString()
 		blockSize := int32(size)
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(blockSize))
 
 		factory := fake.NewNonDirectLogManagerFactory(dbPath, blockSize)
 		defer factory.Finish()
 		fileMgr, logMgr := factory.Create()
 
-		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		require.NoError(t, err)
 
 		fileName := fake.RandString()
@@ -162,9 +137,7 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 		fileName := fake.RandString()
 		block := domain.NewBlock(domain.FileName(fileName), domain.BlockNumber(0))
 
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(blockSize))
-		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
+		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		require.NoError(t, err)
 
 		f, _ := goos.OpenFile(filepath.Join(dbPath, fileName), goos.O_RDWR|goos.O_CREATE, goos.ModePerm)

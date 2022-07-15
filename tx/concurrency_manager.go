@@ -7,11 +7,22 @@ type LockType int8
 
 const (
 	// Shared means shared lock.
-	Shared LockType = iota
+	Shared LockType = iota + 1
 
 	// Exclusive means exclusive lock.
 	Exclusive
 )
+
+type ConcurrencyManagerConfig struct {
+	LockTimeoutMillisecond int
+}
+
+// NewConcurrencyManagerConfig constructs a ConcurrencyManagerConfig.
+func NewConcurrencyManagerConfig() ConcurrencyManagerConfig {
+	timeout := 10000
+
+	return ConcurrencyManagerConfig{LockTimeoutMillisecond: timeout}
+}
 
 // ConcurrencyManager is a manager of concurrency.
 type ConcurrencyManager struct {
@@ -20,7 +31,9 @@ type ConcurrencyManager struct {
 }
 
 // NewConcurrencyManager constructs a ConcurrencyManager.
-func NewConcurrencyManager(lt *LockTable) *ConcurrencyManager {
+func NewConcurrencyManager(cfg ConcurrencyManagerConfig) *ConcurrencyManager {
+	lt := NewLockTable(cfg.LockTimeoutMillisecond)
+
 	return &ConcurrencyManager{
 		lt:    lt,
 		locks: make(map[domain.Block]LockType),

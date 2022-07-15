@@ -7,7 +7,6 @@ import (
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/file"
 	"github.com/goropikari/simpledbgo/index/hash"
-	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/metadata"
 	"github.com/goropikari/simpledbgo/plan"
@@ -50,11 +49,6 @@ func NewDB() *DB {
 		golog.Fatal(err)
 	}
 
-	blkSize, err := domain.NewBlockSize(cfg.BlockSize)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
 	logConfig := log.ManagerConfig{LogFileName: "logfile"}
 	logMgr, err := log.NewManager(fileMgr, logConfig)
 	if err != nil {
@@ -65,16 +59,13 @@ func NewDB() *DB {
 		NumberBuffer:       cfg.NumBuf,
 		TimeoutMillisecond: cfg.TimeoutMilliSec,
 	}
-	bsc := bytes.NewDirectByteSliceCreater()
-	pageFactory := domain.NewPageFactory(bsc, blkSize)
-	bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, bufConfig)
+	bufMgr, err := buffer.NewManager(fileMgr, logMgr, bufConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}
 
-	ltConfig := tx.NewConfig(cfg.TimeoutMilliSec)
-	lt := tx.NewLockTable(ltConfig)
-	concurMgr := tx.NewConcurrencyManager(lt)
+	concurrMgrCfg := tx.NewConcurrencyManagerConfig()
+	concurMgr := tx.NewConcurrencyManager(concurrMgrCfg)
 
 	gen := tx.NewNumberGenerator()
 
