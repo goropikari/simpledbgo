@@ -3,7 +3,7 @@
 
 // The build tag makes sure the stub is not built in the final build.
 
-package server
+package database
 
 import (
 	"github.com/google/wire"

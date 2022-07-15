@@ -1,4 +1,4 @@
-package driver_test
+package embedded_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/goropikari/simpledbgo/driver"
+	_ "github.com/goropikari/simpledbgo/driver/embedded"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/stretchr/testify/require"
 )

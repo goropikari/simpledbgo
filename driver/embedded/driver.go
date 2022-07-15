@@ -1,4 +1,4 @@
-package driver
+package embedded
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/goropikari/simpledbgo/database"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/server"
 )
 
 // Driver is sql driver.
@@ -18,7 +18,7 @@ type Driver struct{}
 // Open opens database.
 func (d *Driver) Open(name string) (driver.Conn, error) {
 	// fmt.Println("*Driver.Open: " + name)
-	db, err := server.InitializeDB()
+	db, err := database.InitializeDB()
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (d *Driver) Open(name string) (driver.Conn, error) {
 
 // Conn is connection of simple database.
 type Conn struct {
-	db    *server.DB
+	db    *database.DB
 	inTxn bool
 	txn   domain.Transaction
 }

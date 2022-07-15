@@ -1,4 +1,4 @@
-package server
+package database
 
 import (
 	"github.com/goropikari/simpledbgo/domain"

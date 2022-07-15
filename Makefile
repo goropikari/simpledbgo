@@ -41,7 +41,7 @@ protoc:
 
 .PHONY: wire
 wire:
-	bin/wire ./server
+	bin/wire ./database
 
 .PHONY: coverage
 coverage:
