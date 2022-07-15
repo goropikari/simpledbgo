@@ -4,6 +4,32 @@
 
 This is Go implementation of [SimpleDB](http://cs.bc.edu/~sciore/simpledb/) by [Database Design and Implementation](https://link.springer.com/book/10.1007/978-3-030-33836-7).
 
+## Progress
+
+| Book Chapter | Feature                                    | Implemented        |
+|--------------|--------------------------------------------|--------------------|
+| 3            | File Manager                               | :heavy_check_mark: |
+| 4            | Log Manager                                | :heavy_check_mark: |
+| 4            | Buffer Manager                             | :heavy_check_mark: |
+| 5            | Recovery Manager                           | :heavy_check_mark: |
+| 5            | Concurrency Manager                        | :heavy_check_mark: |
+| 5            | Transaction                                | :heavy_check_mark: |
+| 6            | Record Pages                               | :heavy_check_mark: |
+| 6            | Table Scans                                | :heavy_check_mark: |
+| 7            | Metadata Manager                           | :heavy_check_mark: |
+| 8            | Select Scans, Project Scans, Product Scans | :heavy_check_mark: |
+| 9            | Parser                                     | :heavy_check_mark: |
+| 10           | Planner                                    | :heavy_check_mark: |
+| 11           | Embedded JDBC Interface                    | :heavy_check_mark: |
+| 11           | Remote JDBC Interface                      | :x:                |
+| 12           | Static Hash Indexes                        | :heavy_check_mark: |
+| 12           | Btree Indexes                              | :x:                |
+| 13           | Materialization and Sorting                | :x:                |
+| 14           | MultiBuffer Sorting/Product                | :x:                |
+| 15           | Query Optimization                         | :x:                |
+
+Instead of JDBC interface, I implemented a Go SQL driver.
+
 
 ## Appendix
 ### Original SimpleDB setup
