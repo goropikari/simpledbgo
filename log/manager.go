@@ -117,20 +117,19 @@ type Manager struct {
 	logFileName  domain.FileName
 	currentBlock domain.Block
 	logPage      *Page
-	pageFactory  *domain.PageFactory
 	// Reset when server restarts. Increment when record is appended.
 	latestLSN    domain.LSN
 	lastSavedLSN domain.LSN
 }
 
 // NewManager is a constructor of Manager.
-func NewManager(fileMgr domain.FileManager, pageFactory *domain.PageFactory, config ManagerConfig) (*Manager, error) {
+func NewManager(fileMgr domain.FileManager, config ManagerConfig) (*Manager, error) {
 	logFileName, err := domain.NewFileName(config.LogFileName)
 	if err != nil {
 		return nil, err
 	}
 
-	block, page, err := prepareManager(fileMgr, pageFactory, logFileName)
+	block, page, err := prepareManager(fileMgr, logFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +138,6 @@ func NewManager(fileMgr domain.FileManager, pageFactory *domain.PageFactory, con
 		mu:           sync.Mutex{},
 		fileMgr:      fileMgr,
 		logFileName:  logFileName,
-		pageFactory:  pageFactory,
 		currentBlock: block,
 		logPage:      NewPage(page),
 		latestLSN:    0,
@@ -153,8 +151,8 @@ func (mgr *Manager) getDomainPage() *domain.Page {
 
 // prepareManager prepares a block and a page for initializing Manager.
 // If given file is empty, extend a file by block size.
-func prepareManager(fileMgr domain.FileManager, factory *domain.PageFactory, fileName domain.FileName) (domain.Block, *domain.Page, error) {
-	page, err := factory.Create()
+func prepareManager(fileMgr domain.FileManager, fileName domain.FileName) (domain.Block, *domain.Page, error) {
+	page, err := fileMgr.CreatePage()
 	if err != nil {
 		return domain.Block{}, nil, err
 	}
@@ -279,7 +277,7 @@ func (mgr *Manager) Iterator() (domain.LogIterator, error) {
 	if err := mgr.Flush(); err != nil {
 		return nil, err
 	}
-	page, err := mgr.pageFactory.Create()
+	page, err := mgr.fileMgr.CreatePage()
 	if err != nil {
 		return nil, err
 	}

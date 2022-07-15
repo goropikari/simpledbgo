@@ -54,10 +54,9 @@ func NewDB() *DB {
 	if err != nil {
 		golog.Fatal(err)
 	}
-	bsc := bytes.NewDirectByteSliceCreater()
-	pageFactory := domain.NewPageFactory(bsc, blkSize)
+
 	logConfig := log.ManagerConfig{LogFileName: "logfile"}
-	logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
+	logMgr, err := log.NewManager(fileMgr, logConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -66,6 +65,8 @@ func NewDB() *DB {
 		NumberBuffer:       cfg.NumBuf,
 		TimeoutMillisecond: cfg.TimeoutMilliSec,
 	}
+	bsc := bytes.NewDirectByteSliceCreater()
+	pageFactory := domain.NewPageFactory(bsc, blkSize)
 	bufMgr, err := buffer.NewManager(fileMgr, logMgr, pageFactory, bufConfig)
 	if err != nil {
 		golog.Fatal(err)

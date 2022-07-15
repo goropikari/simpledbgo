@@ -200,3 +200,8 @@ func (mgr *Manager) OpenFile(filename domain.FileName) (*domain.File, error) {
 func (mgr *Manager) offset(blk domain.Block) int64 {
 	return int64(mgr.blockSize) * int64(blk.Number())
 }
+
+func (mgr *Manager) CreatePage() (*domain.Page, error) {
+	pageFactory := domain.NewPageFactory(mgr.bsf, mgr.blockSize)
+	return pageFactory.Create()
+}

@@ -91,6 +91,21 @@ func (mr *MockFileManagerMockRecorder) CopyPageToBlock(arg0, arg1 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CopyPageToBlock", reflect.TypeOf((*MockFileManager)(nil).CopyPageToBlock), arg0, arg1)
 }
 
+// CreatePage mocks base method.
+func (m *MockFileManager) CreatePage() (*domain.Page, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePage")
+	ret0, _ := ret[0].(*domain.Page)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreatePage indicates an expected call of CreatePage.
+func (mr *MockFileManagerMockRecorder) CreatePage() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePage", reflect.TypeOf((*MockFileManager)(nil).CreatePage))
+}
+
 // ExtendFile mocks base method.
 func (m *MockFileManager) ExtendFile(arg0 domain.FileName) (domain.Block, error) {
 	m.ctrl.T.Helper()

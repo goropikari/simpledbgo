@@ -9,6 +9,7 @@ type FileManager interface {
 	BlockLength(FileName) (int32, error)
 	ExtendFile(FileName) (Block, error)
 	BlockSize() BlockSize
+	CreatePage() (*Page, error)
 }
 
 // LogManager is an interface of log manager.

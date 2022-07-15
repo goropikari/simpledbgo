@@ -30,7 +30,7 @@ func NewNonDirectBufferManagerFactory(dbPath string, blockSize int32, numBuf int
 	fileMgr := fileMgrFactory.Create()
 
 	logConfig := log.ManagerConfig{LogFileName: "logfile_" + RandString()}
-	logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
+	logMgr, err := log.NewManager(fileMgr, logConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}

@@ -5,7 +5,6 @@ import (
 	goos "os"
 
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/log"
 )
 
@@ -16,19 +15,11 @@ type NonDirectLogManagerFactory struct {
 }
 
 func NewNonDirectLogManagerFactory(dbPath string, blockSize int32) *NonDirectLogManagerFactory {
-	blkSize, err := domain.NewBlockSize(blockSize)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	bsf := bytes.NewByteSliceCreater()
-	pageFactory := domain.NewPageFactory(bsf, blkSize)
-
 	fileMgrFactory := NewNonDirectFileManagerFactory(dbPath, blockSize)
 	fileMgr := fileMgrFactory.Create()
 
 	logConfig := log.ManagerConfig{LogFileName: "logfile_" + RandString()}
-	logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
+	logMgr, err := log.NewManager(fileMgr, logConfig)
 	if err != nil {
 		golog.Fatal(err)
 	}

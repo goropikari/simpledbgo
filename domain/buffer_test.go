@@ -154,17 +154,16 @@ func TestBuffer_AssignToBlock(t *testing.T) {
 		defer factory.Finish()
 		fileMgr := factory.Create()
 
-		bsf := bytes.NewByteSliceCreater()
-		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(blockSize))
-
 		logFileName := fake.RandString()
 		logConfig := log.ManagerConfig{LogFileName: logFileName}
-		logMgr, err := log.NewManager(fileMgr, pageFactory, logConfig)
+		logMgr, err := log.NewManager(fileMgr, logConfig)
 		require.NoError(t, err)
 
 		fileName := fake.RandString()
 		block := domain.NewBlock(domain.FileName(fileName), domain.BlockNumber(0))
 
+		bsf := bytes.NewByteSliceCreater()
+		pageFactory := domain.NewPageFactory(bsf, domain.BlockSize(blockSize))
 		buf, err := domain.NewBuffer(fileMgr, logMgr, pageFactory)
 		require.NoError(t, err)
 
