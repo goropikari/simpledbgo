@@ -1,26 +1,10 @@
 package server
 
 import (
-	golog "log"
-
-	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/file"
-	"github.com/goropikari/simpledbgo/index/hash"
-	"github.com/goropikari/simpledbgo/log"
-	"github.com/goropikari/simpledbgo/metadata"
 	"github.com/goropikari/simpledbgo/plan"
 	"github.com/goropikari/simpledbgo/tx"
 )
-
-type DB struct {
-	fmgr domain.FileManager
-	lmgr domain.LogManager
-	bmgr domain.BufferPoolManager
-	cmgr domain.ConcurrencyManager
-	gen  domain.TxNumberGenerator
-	pe   *plan.Executor
-}
 
 type Config struct {
 	DBPath          string
@@ -39,50 +23,28 @@ func NewConfig() Config {
 	return c
 }
 
-func NewDB() *DB {
-	cfg := NewConfig()
+type DB struct {
+	fmgr domain.FileManager
+	lmgr domain.LogManager
+	bmgr domain.BufferPoolManager
+	cmgr domain.ConcurrencyManager
+	gen  domain.TxNumberGenerator
+	pe   *plan.Executor
+}
 
-	// initialize file manager
-	fileConfig := file.NewManagerConfig()
-	fileMgr, err := file.NewManager(fileConfig)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	logConfig := log.ManagerConfig{LogFileName: "logfile"}
-	logMgr, err := log.NewManager(fileMgr, logConfig)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	bufConfig := buffer.Config{
-		NumberBuffer:       cfg.NumBuf,
-		TimeoutMillisecond: cfg.TimeoutMilliSec,
-	}
-	bufMgr, err := buffer.NewManager(fileMgr, logMgr, bufConfig)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	concurrMgrCfg := tx.NewConcurrencyManagerConfig()
-	concurMgr := tx.NewConcurrencyManager(concurrMgrCfg)
-
-	gen := tx.NewNumberGenerator()
-	idxDriver := domain.NewIndexDriver(hash.NewIndexFactory(), hash.NewSearchCostCalculator())
-	mmgr, err := metadata.NewManager(idxDriver, fileMgr, logMgr, bufMgr, concurMgr, gen)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	qp := plan.NewBasicQueryPlanner(mmgr)
-	ue := plan.NewBasicUpdatePlanner(mmgr)
-	pe := plan.NewExecutor(qp, ue)
-
+func NewDB(
+	fmgr domain.FileManager,
+	lmgr domain.LogManager,
+	bmgr domain.BufferPoolManager,
+	cmgr domain.ConcurrencyManager,
+	gen domain.TxNumberGenerator,
+	pe *plan.Executor,
+) *DB {
 	return &DB{
-		fmgr: fileMgr,
-		lmgr: logMgr,
-		bmgr: bufMgr,
-		cmgr: concurMgr,
+		fmgr: fmgr,
+		lmgr: lmgr,
+		bmgr: bmgr,
+		cmgr: cmgr,
 		gen:  gen,
 		pe:   pe,
 	}

@@ -18,6 +18,10 @@ type ManagerConfig struct {
 	LogFileName string
 }
 
+func NewManagerConfig() ManagerConfig {
+	return ManagerConfig{LogFileName: "logfile"}
+}
+
 // Page structure
 //                                 boundary                                page
 // 0                               position                                size

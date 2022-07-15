@@ -18,7 +18,10 @@ type Driver struct{}
 // Open opens database.
 func (d *Driver) Open(name string) (driver.Conn, error) {
 	// fmt.Println("*Driver.Open: " + name)
-	db := server.NewDB()
+	db, err := server.InitializeDB()
+	if err != nil {
+		return nil, err
+	}
 
 	return &Conn{db: db, inTxn: false}, nil
 }

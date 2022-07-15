@@ -22,6 +22,15 @@ type Config struct {
 	TimeoutMillisecond int
 }
 
+func NewConfig() Config {
+	timeout := 10000
+
+	return Config{
+		NumberBuffer:       20,
+		TimeoutMillisecond: timeout,
+	}
+}
+
 // Manager is model of buffer manager.
 type Manager struct {
 	mu                 *sync.Mutex
