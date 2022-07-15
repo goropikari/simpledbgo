@@ -68,30 +68,8 @@ func NewDB() *DB {
 	concurMgr := tx.NewConcurrencyManager(concurrMgrCfg)
 
 	gen := tx.NewNumberGenerator()
-
-	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
-	if err != nil {
-		golog.Fatal(err)
-	}
-
-	// _, err = goos.Stat(cfg.dbPath)
-	// isNewDatabase := err != nil
-	isNewDatabase := true
 	idxDriver := domain.NewIndexDriver(hash.NewIndexFactory(), hash.NewSearchCostCalculator())
-	var mmgr domain.MetadataManager
-	if isNewDatabase {
-		mmgr, err = metadata.CreateManager(idxDriver, txn)
-		if err != nil {
-			golog.Fatal(err)
-		}
-	} else {
-		mmgr, err = metadata.NewManager(idxDriver, txn)
-		if err != nil {
-			golog.Fatal(err)
-		}
-	}
-
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, fileMgr, logMgr, bufMgr, concurMgr, gen)
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -111,7 +89,12 @@ func NewDB() *DB {
 }
 
 func (db *DB) NewTx() (domain.Transaction, error) {
-	return newTx(db.fmgr, db.lmgr, db.bmgr, db.cmgr, db.gen)
+	txn, err := tx.NewTransaction(db.fmgr, db.lmgr, db.bmgr, db.cmgr, db.gen)
+	if err != nil {
+		return nil, err
+	}
+
+	return txn, nil
 }
 
 func (db *DB) Query(txn domain.Transaction, query string) (domain.Planner, error) {
@@ -121,13 +104,4 @@ func (db *DB) Query(txn domain.Transaction, query string) (domain.Planner, error
 func (db *DB) Exec(txn domain.Transaction, cmd string) (int, error) {
 
 	return db.pe.ExecuteUpdate(cmd, txn)
-}
-
-func newTx(fmgr domain.FileManager, lmgr domain.LogManager, bmgr domain.BufferPoolManager, cmgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (domain.Transaction, error) {
-	txn, err := tx.NewTransaction(fmgr, lmgr, bmgr, cmgr, gen)
-	if err != nil {
-		return nil, err
-	}
-
-	return txn, nil
 }

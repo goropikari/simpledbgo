@@ -10,6 +10,7 @@ type FileManager interface {
 	ExtendFile(FileName) (Block, error)
 	BlockSize() BlockSize
 	CreatePage() (*Page, error)
+	IsInit() bool
 }
 
 // LogManager is an interface of log manager.

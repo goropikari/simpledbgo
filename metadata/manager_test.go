@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledbgo/domain"
-	"github.com/goropikari/simpledbgo/index/hash"
 	"github.com/goropikari/simpledbgo/metadata"
 	"github.com/goropikari/simpledbgo/testing/fake"
+	"github.com/goropikari/simpledbgo/testing/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,10 +21,11 @@ func TestMetadataManager(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
-	driver := domain.NewIndexDriver(hash.NewIndexFactory(), hash.NewSearchCostCalculator())
-
-	metaMgr, err := metadata.CreateManager(driver, txn)
+	ctrl := gomock.NewController(t)
+	cal := mock.NewMockSearchCostCalculator(ctrl)
+	cal.EXPECT().Calculate(gomock.Any(), gomock.Any()).Return(0).AnyTimes()
+	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), cal)
+	metaMgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	sch := domain.NewSchema()
@@ -31,6 +33,7 @@ func TestMetadataManager(t *testing.T) {
 	sch.AddStringField("B", 9)
 
 	// table metadata
+	txn := cr.NewTxn()
 	metaMgr.CreateTable("MyTable", sch, txn)
 	layout, err := metaMgr.GetTableLayout("MyTable", txn)
 	require.NoError(t, err)

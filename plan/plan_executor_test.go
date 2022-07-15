@@ -22,12 +22,9 @@ func TestExecutor_select_table(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {
@@ -78,12 +75,9 @@ func TestExecutor_select_multi_table(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {
@@ -153,12 +147,9 @@ func TestExecutor_select_multi_table_better(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {
@@ -228,12 +219,9 @@ func TestExecutor_update_table_without_predicate(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {
@@ -303,12 +291,9 @@ func TestExecutor_update_table_with_predicate(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {
@@ -378,12 +363,9 @@ func TestExecutor_update_table_Error(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("exceed varchar size", func(t *testing.T) {
@@ -422,12 +404,9 @@ func TestExecutor_delete_record(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {
@@ -493,13 +472,9 @@ func TestExecutor_create_view(t *testing.T) {
 	cr := fake.NewTransactionCreater(blockSize, numBuf)
 	defer cr.Finish()
 
-	txn := cr.NewTxn()
-
 	ctrl := gomock.NewController(t)
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), mock.NewMockSearchCostCalculator(ctrl))
-	mmgr, err := metadata.CreateManager(idxDriver, txn)
-	require.NoError(t, err)
-	err = txn.Commit()
+	mmgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
 	require.NoError(t, err)
 
 	t.Run("test Executor", func(t *testing.T) {

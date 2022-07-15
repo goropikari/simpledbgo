@@ -9,7 +9,6 @@ linters:
   disable:
     - cyclop
     - exhaustivestruct
-    - forcetypeassert
     - funlen
     - gochecknoglobals
     - gochecknoinits
@@ -41,6 +40,12 @@ issues:
       linters:
         - forcetypeassert
         - ifshort
+    - path: domain/constant.go
+      linters:
+        - forcetypeassert
+    - path: wire.go
+      linters:
+        - nlreturn
 run:
   skip-files:
     - _test.go

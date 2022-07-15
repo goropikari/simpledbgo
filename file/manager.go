@@ -2,6 +2,7 @@ package file
 
 import (
 	"io"
+	"log"
 	stdos "os"
 	"path"
 	"sync"
@@ -43,6 +44,7 @@ type Manager struct {
 	explorer  domain.Explorer
 	bsf       domain.ByteSliceFactory
 	blockSize domain.BlockSize
+	dbpath    string
 }
 
 // NewManager is a constructor of Manager.
@@ -67,6 +69,7 @@ func NewManager(config ManagerConfig) (*Manager, error) {
 		explorer:  explorer,
 		bsf:       bsf,
 		blockSize: blkSize,
+		dbpath:    config.DBPath,
 	}, nil
 }
 
@@ -206,4 +209,23 @@ func (mgr *Manager) CreatePage() (*domain.Page, error) {
 	pageFactory := domain.NewPageFactory(mgr.bsf, mgr.blockSize)
 
 	return pageFactory.Create()
+}
+
+// IsInit checks whether database is initialized or not.
+func (mgr *Manager) IsInit() bool {
+	path := mgr.dbpath + "/" + "init"
+	_, err := stdos.Stat(path)
+	if isNewDatabase := err != nil; isNewDatabase {
+		initFile, err := stdos.Create(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := initFile.Close(); err != nil {
+			log.Fatal(err)
+		}
+
+		return true
+	}
+
+	return false
 }

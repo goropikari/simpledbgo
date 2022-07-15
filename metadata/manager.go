@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/tx"
 )
 
 // Manager manages metadata.
@@ -14,8 +15,22 @@ type Manager struct {
 	idxMgr  *IndexManager
 }
 
-// CreateManager creates metadata manager with initializing tables related to metadata.
-func CreateManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
+// NewManager constructs a metadata manager.
+func NewManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
+	if fileMgr.IsInit() {
+		return createManager(driver, fileMgr, logMgr, bufMgr, concurMgr, gen)
+	}
+
+	return newManager(driver, fileMgr, logMgr, bufMgr, concurMgr, gen)
+}
+
+// createManager creates metadata manager with initializing tables related to metadata.
+func createManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
+	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+	if err != nil {
+		return nil, err
+	}
+
 	tblMgr, err := CreateTableManager(txn)
 	if err != nil {
 		return nil, err
@@ -36,6 +51,11 @@ func CreateManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager,
 		return nil, err
 	}
 
+	err = txn.Commit()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Manager{
 		tblMgr:  tblMgr,
 		viewMgr: viewMgr,
@@ -44,8 +64,13 @@ func CreateManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager,
 	}, nil
 }
 
-// NewManager constructs metadata manager.
-func NewManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager, error) {
+// newManager constructs metadata manager.
+func newManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
+	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+	if err != nil {
+		return nil, err
+	}
+
 	tblMgr := NewTableManager()
 	viewMgr := NewViewManager(tblMgr)
 	statMgr, err := NewStatManager(tblMgr, txn)
@@ -54,6 +79,11 @@ func NewManager(driver domain.IndexDriver, txn domain.Transaction) (*Manager, er
 	}
 
 	idxMgr, err := NewIndexManager(driver, tblMgr, statMgr, txn)
+	if err != nil {
+		return nil, err
+	}
+
+	err = txn.Commit()
 	if err != nil {
 		return nil, err
 	}

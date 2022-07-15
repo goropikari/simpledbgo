@@ -121,6 +121,20 @@ func (mr *MockFileManagerMockRecorder) ExtendFile(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExtendFile", reflect.TypeOf((*MockFileManager)(nil).ExtendFile), arg0)
 }
 
+// IsInit mocks base method.
+func (m *MockFileManager) IsInit() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsInit")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsInit indicates an expected call of IsInit.
+func (mr *MockFileManagerMockRecorder) IsInit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsInit", reflect.TypeOf((*MockFileManager)(nil).IsInit))
+}
+
 // MockLogManager is a mock of LogManager interface.
 type MockLogManager struct {
 	ctrl     *gomock.Controller
