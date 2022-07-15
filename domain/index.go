@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/pkg/errors"
+
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 
 const (
@@ -7,6 +9,8 @@ const (
 	FldID      = "id"
 	FldDataVal = "dataval"
 )
+
+var ErrNotSupportedFieldType = errors.New("not supported field type")
 
 // SearchCostCalculator calculate search cost.
 type SearchCostCalculator interface {
@@ -78,7 +82,6 @@ type IndexInfo struct {
 
 // NewIndexInfo constructs an IndexInfo.
 func NewIndexInfo(driver IndexDriver, idxName IndexName, fldName FieldName, tblSchema *Schema, txn Transaction, si StatInfo) *IndexInfo {
-
 	return &IndexInfo{
 		driver:    driver,
 		idxName:   idxName,
@@ -121,11 +124,15 @@ func createIdxLayout(tblSchema *Schema, fldName FieldName) *Layout {
 	sch := NewSchema()
 	sch.AddInt32Field(FldBlock)
 	sch.AddInt32Field(FldID)
-	if tblSchema.Type(fldName) == Int32FieldType {
+
+	switch tblSchema.Type(fldName) {
+	case Int32FieldType:
 		sch.AddInt32Field(FldDataVal)
-	} else {
+	case StringFieldType:
 		fldLen := tblSchema.Length(fldName)
 		sch.AddStringField(FldDataVal, fldLen)
+	default:
+		panic(ErrNotSupportedFieldType)
 	}
 
 	return NewLayout(sch)

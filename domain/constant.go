@@ -75,3 +75,18 @@ func (c Constant) Equal(other Constant) bool {
 
 	return true
 }
+
+func (c Constant) Less(other Constant) bool {
+	if c.typ != other.typ {
+		panic(errors.New("compare different types"))
+	}
+
+	switch c.typ {
+	case Int32FieldType:
+		return c.val.(int32) < other.val.(int32)
+	case StringFieldType:
+		return c.val.(string) < other.val.(string)
+	default:
+		panic(errors.New("unsupported field type"))
+	}
+}

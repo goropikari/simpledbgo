@@ -117,6 +117,10 @@ func NewBlockNumber(n int32) (BlockNumber, error) {
 	return BlockNumber(n), nil
 }
 
+func (bn BlockNumber) ToInt32() int32 {
+	return int32(bn)
+}
+
 // BlockSize is value object of block size.
 type BlockSize int32
 

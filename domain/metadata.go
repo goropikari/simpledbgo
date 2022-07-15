@@ -43,6 +43,10 @@ func NewSlotID(id int32) SlotID {
 	return SlotID(id)
 }
 
+func (id SlotID) ToInt32() int32 {
+	return int32(id)
+}
+
 // FieldName is value object of field name.
 type FieldName string
 
