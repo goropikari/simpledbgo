@@ -4,7 +4,33 @@
 
 This is Go implementation of [SimpleDB](http://cs.bc.edu/~sciore/simpledb/) by [Database Design and Implementation](https://link.springer.com/book/10.1007/978-3-030-33836-7).
 
-## Progress
+## Run SimpleDB
+
+```bash
+$ make docker-build
+$ make docker-run
+
+# open another terminal
+$ psql -h localhost
+psql (14.3, server 0.0.0)
+Type "help" for help.
+
+arch=> create table foo (id int, name varchar(10));
+OK
+arch=> insert into foo (id, name) values (1, 'dog');
+OK
+arch=> insert into foo (id, name) values (2, 'cat');
+OK
+arch=> select name, id from foo;
+ name | id
+------+----
+ dog  | 1
+ cat  | 2
+(2 rows)
+```
+
+
+## Implementation Progress
 
 | Book Chapter | Feature                                    | Implemented        |
 |--------------|--------------------------------------------|--------------------|
@@ -20,7 +46,7 @@ This is Go implementation of [SimpleDB](http://cs.bc.edu/~sciore/simpledb/) by [
 | 8            | Select Scans, Project Scans, Product Scans | :heavy_check_mark: |
 | 9            | Parser                                     | :heavy_check_mark: |
 | 10           | Planner                                    | :heavy_check_mark: |
-| 11           | Embedded JDBC Interface                    | :heavy_check_mark: |
+| 11           | Embedded JDBC Interface                    | :x:                |
 | 11           | Remote JDBC Interface                      | :x:                |
 | 12           | Static Hash Indexes                        | :heavy_check_mark: |
 | 12           | Btree Indexes                              | :x:                |
@@ -28,7 +54,7 @@ This is Go implementation of [SimpleDB](http://cs.bc.edu/~sciore/simpledb/) by [
 | 14           | MultiBuffer Sorting/Product                | :x:                |
 | 15           | Query Optimization                         | :x:                |
 
-Instead of JDBC interface, I implemented a Go SQL driver.
+Instead of JDBC interface, I implemented a Go SQL driver interface and Postgres wire protocol.
 
 
 ## Appendix

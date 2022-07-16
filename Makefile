@@ -19,6 +19,17 @@ tools:
 	unzip protoc.zip bin/protoc
 	rm -f protoc.zip
 
+build:
+	go build -o simpledb main.go
+
+.PHONY: docker-build
+docker-build:
+	docker build -t simpledb .
+
+.PHONY: docker-run
+docker-run:
+	docker run -p 5432:5432 simpledb
+
 .PHONY: test
 test: mockgen protoc wire
 	go test -shuffle=on ./...
