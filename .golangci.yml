@@ -53,3 +53,5 @@ run:
     - _test.go
     - testing
     - server.go
+  skip-dirs:
+    - sample
