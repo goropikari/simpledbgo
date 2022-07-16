@@ -2,9 +2,9 @@ package bytes
 
 import (
 	"encoding/binary"
-	"errors"
-	"fmt"
 	"io"
+
+	"github.com/goropikari/simpledbgo/errors"
 
 	"github.com/goropikari/simpledbgo/common"
 )
@@ -113,7 +113,7 @@ func (buf *Buffer) Reset() {
 // GetInt32 returns int32 from buffer.
 func (buf *Buffer) GetInt32(offset int64) (int32, error) {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return 0, fmt.Errorf("failed to GetInt32: %w", err)
+		return 0, errors.Err(err, "GetInt32")
 	}
 
 	var ret int32
@@ -121,7 +121,7 @@ func (buf *Buffer) GetInt32(offset int64) (int32, error) {
 		return 0, ErrInvalidOffset
 	}
 	if err := binary.Read(buf, endianness, &ret); err != nil {
-		return 0, fmt.Errorf("failed to GetInt32: %w", err)
+		return 0, errors.Err(err, "GetInt32")
 	}
 
 	return ret, nil
@@ -133,7 +133,7 @@ func (buf *Buffer) GetInt32(offset int64) (int32, error) {
 // --------------------.
 func (buf *Buffer) SetInt32(offset int64, x int32) error {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return fmt.Errorf("failed to SetInt32: %w", err)
+		return errors.Err(err, "Seek")
 	}
 
 	if !buf.hasSpace(x) {
@@ -141,7 +141,7 @@ func (buf *Buffer) SetInt32(offset int64, x int32) error {
 	}
 
 	if err := binary.Write(buf, endianness, x); err != nil {
-		return fmt.Errorf("failed to SetInt32: %w", err)
+		return errors.Err(err, "Write")
 	}
 
 	return nil
@@ -150,7 +150,7 @@ func (buf *Buffer) SetInt32(offset int64, x int32) error {
 // getUint32 returns uint32 from buffer.
 func (buf *Buffer) getUint32(offset int64) (uint32, error) {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return 0, fmt.Errorf("failed to getUint32: %w", err)
+		return 0, errors.Err(err, "Seek")
 	}
 
 	var ret uint32
@@ -158,7 +158,7 @@ func (buf *Buffer) getUint32(offset int64) (uint32, error) {
 		return 0, ErrInvalidOffset
 	}
 	if err := binary.Read(buf, endianness, &ret); err != nil {
-		return 0, fmt.Errorf("failed to getUint32: %w", err)
+		return 0, errors.Err(err, "Read")
 	}
 
 	return ret, nil
@@ -170,7 +170,7 @@ func (buf *Buffer) getUint32(offset int64) (uint32, error) {
 // --------------------.
 func (buf *Buffer) setUint32(offset int64, x uint32) error {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return fmt.Errorf("failed to setUint32: %w", err)
+		return errors.Err(err, "Seek")
 	}
 
 	if !buf.hasSpace(x) {
@@ -179,7 +179,7 @@ func (buf *Buffer) setUint32(offset int64, x uint32) error {
 
 	err := binary.Write(buf, endianness, x)
 	if err != nil {
-		return fmt.Errorf("failed to setUint32: %w", err)
+		return errors.Err(err, "Write")
 	}
 
 	return nil
@@ -188,23 +188,19 @@ func (buf *Buffer) setUint32(offset int64, x uint32) error {
 // GetString returns string from buffer.
 func (buf *Buffer) GetString(offset int64) (string, error) {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return "", fmt.Errorf("failed to get string: %w", err)
+		return "", errors.Err(err, "Seek")
 	}
 
 	length, err := buf.getUint32(offset)
 	if err != nil {
-		return "", err
+		return "", errors.Err(err, "getUint32")
 	}
-
-	// if !buf.hasSpace(int(length)) {
-	// 	return "", ErrInvalidOffset
-	// }
 
 	bytes := make([]byte, length)
 
 	_, err = buf.Read(bytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to get string: %w", err)
+		return "", errors.Err(err, "Read")
 	}
 
 	return string(bytes), nil
@@ -216,7 +212,7 @@ func (buf *Buffer) GetString(offset int64) (string, error) {
 // ----------------------------------------.
 func (buf *Buffer) SetString(offset int64, str string) error {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return fmt.Errorf("failed to set string: %w", err)
+		return errors.Err(err, "Seek")
 	}
 
 	if !buf.hasSpace(str) {
@@ -224,11 +220,11 @@ func (buf *Buffer) SetString(offset int64, str string) error {
 	}
 
 	if err := buf.setUint32(offset, uint32(len(str))); err != nil {
-		return fmt.Errorf("failed to set string: %w", err)
+		return errors.Err(err, "setUint32")
 	}
 
 	if _, err := buf.Write([]byte(str)); err != nil {
-		return fmt.Errorf("failed to set string: %w", err)
+		return errors.Err(err, "Write")
 	}
 
 	return nil
@@ -237,26 +233,22 @@ func (buf *Buffer) SetString(offset int64, str string) error {
 // GetBytes returns bytes from page.
 func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return nil, fmt.Errorf("failed to get bytes: %w", err)
+		return nil, errors.Err(err, "Seek")
 	}
 
 	length, err := buf.getUint32(offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get bytes: %w", err)
+		return nil, errors.Err(err, "getUint32")
 	}
 	if length == 0 {
 		return []byte{}, nil
 	}
 
-	// if !buf.hasSpace(int(length)) {
-	// 	return nil, ErrInvalidOffset
-	// }
-
 	bytes := make([]byte, length)
 
 	_, err = buf.Read(bytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get bytes: %w", err)
+		return nil, errors.Err(err, "Read")
 	}
 
 	return bytes, nil
@@ -268,7 +260,7 @@ func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {
 // ---------------------------------------.
 func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 	if _, err := buf.Seek(offset, io.SeekStart); err != nil {
-		return fmt.Errorf("failed to set bytes: %w", err)
+		return errors.Err(err, "Seek")
 	}
 
 	if !buf.hasSpace(p) {
@@ -276,11 +268,11 @@ func (buf *Buffer) SetBytes(offset int64, p []byte) error {
 	}
 
 	if err := buf.setUint32(offset, uint32(len(p))); err != nil {
-		return fmt.Errorf("failed to set bytes: %w", err)
+		return errors.Err(err, "setUint32")
 	}
 
 	if _, err := buf.Write(p); err != nil && !errors.Is(err, io.EOF) {
-		return fmt.Errorf("failed to set bytes: %w", err)
+		return errors.Err(err, "Write")
 	}
 
 	return nil

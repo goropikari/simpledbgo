@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // ViewManager is manager of view.
@@ -23,7 +24,7 @@ func CreateViewManager(tblMgr *TableManager, txn domain.Transaction) (*ViewManag
 	sch.AddStringField(fldViewName, domain.MaxTableNameLength)
 	sch.AddStringField(fldViewDef, domain.MaxViewDefLength)
 	if err := tblMgr.CreateTable(fldViewCatalog, sch, txn); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreateTable")
 	}
 
 	return viewMgr, nil
@@ -33,21 +34,21 @@ func CreateViewManager(tblMgr *TableManager, txn domain.Transaction) (*ViewManag
 func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef domain.ViewDef, txn domain.Transaction) error {
 	layout, err := viewMgr.tblMgr.GetTableLayout(fldViewCatalog, txn)
 	if err != nil {
-		return err
+		return errors.Err(err, "GetTableLayout")
 	}
 
 	tbl, err := domain.NewTableScan(txn, fldViewCatalog, layout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewTableScan")
 	}
 	if err := tbl.AdvanceNextInsertSlotID(); err != nil {
-		return err
+		return errors.Err(err, "AdvanceNextInsertSlotID")
 	}
 	if err := tbl.SetString(fldViewName, vName.String()); err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 	if err := tbl.SetString(fldViewDef, vDef.String()); err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 	tbl.Close()
 
@@ -58,12 +59,12 @@ func (viewMgr *ViewManager) CreateView(vName domain.ViewName, vDef domain.ViewDe
 func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Transaction) (domain.ViewDef, error) {
 	layout, err := viewMgr.tblMgr.GetTableLayout(fldViewCatalog, txn)
 	if err != nil {
-		return "", err
+		return "", errors.Err(err, "GetTableLayout")
 	}
 
 	tbl, err := domain.NewTableScan(txn, fldViewCatalog, layout)
 	if err != nil {
-		return "", err
+		return "", errors.Err(err, "NewTableScan")
 	}
 	defer tbl.Close()
 
@@ -71,20 +72,20 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 	for tbl.HasNext() {
 		view, err := tbl.GetString(fldViewName)
 		if err != nil {
-			return "", err
+			return "", errors.Err(err, "GetString")
 		}
 
 		if view == viewName.String() {
 			defStr, err = tbl.GetString(fldViewDef)
 			if err != nil {
-				return "", err
+				return "", errors.Err(err, "GetString")
 			}
 
 			break
 		}
 	}
 	if err := tbl.Err(); err != nil {
-		return "", err
+		return "", errors.Err(err, "GetString")
 	}
 
 	return domain.NewViewDef(defStr), nil

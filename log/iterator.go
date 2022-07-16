@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // Iterator is iterator of log.
@@ -17,12 +18,12 @@ type Iterator struct {
 func NewIterator(fileMgr domain.FileManager, block domain.Block, page *Page) (*Iterator, error) {
 	err := fileMgr.CopyBlockToPage(block, page.getDomainPage())
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CopyBlockToPage")
 	}
 
 	currentPos, err := page.getBoundaryOffset()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "getBoundaryOffset")
 	}
 
 	return &Iterator{
@@ -45,14 +46,14 @@ func (iter *Iterator) Next() ([]byte, error) {
 		blk := domain.NewBlock(iter.block.FileName(), iter.block.Number()-1)
 		err := iter.moveToBlock(blk)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "moveToBlock")
 		}
 		iter.block = blk
 	}
 
 	record, err := iter.page.getRecord(iter.currentPos)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "getRecord")
 	}
 
 	iter.currentPos += int32(iter.page.neededByteLength(record))
@@ -63,12 +64,12 @@ func (iter *Iterator) Next() ([]byte, error) {
 func (iter *Iterator) moveToBlock(block domain.Block) error {
 	err := iter.fileMgr.CopyBlockToPage(block, iter.page.getDomainPage())
 	if err != nil {
-		return err
+		return errors.Err(err, "CopyBlockToPage")
 	}
 
 	boundary, err := iter.page.getBoundaryOffset()
 	if err != nil {
-		return err
+		return errors.Err(err, "getBoundaryOffset")
 	}
 
 	iter.currentPos = boundary

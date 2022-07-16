@@ -2,6 +2,7 @@ package logrecord
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/tx/logrecord/protobuf"
 	"google.golang.org/protobuf/proto"
 )
@@ -68,7 +69,7 @@ type StartRecord struct {
 func (rec *StartRecord) Unmarshal(b []byte) error {
 	pb := &protobuf.StartRecord{}
 	if err := proto.Unmarshal(b, pb); err != nil {
-		return err
+		return errors.Err(err, "Unmarshal")
 	}
 
 	rec.TxNum = domain.TransactionNumber(pb.Txnum)
@@ -105,7 +106,7 @@ type CommitRecord struct {
 func (rec *CommitRecord) Unmarshal(b []byte) error {
 	pb := &protobuf.CommitRecord{}
 	if err := proto.Unmarshal(b, pb); err != nil {
-		return err
+		return errors.Err(err, "Unmarshal")
 	}
 
 	rec.TxNum = domain.TransactionNumber(pb.Txnum)
@@ -142,7 +143,7 @@ type RollbackRecord struct {
 func (rec *RollbackRecord) Unmarshal(b []byte) error {
 	pb := &protobuf.RollbackRecord{}
 	if err := proto.Unmarshal(b, pb); err != nil {
-		return err
+		return errors.Err(err, "Unmarshal")
 	}
 
 	rec.TxNum = domain.TransactionNumber(pb.Txnum)
@@ -178,7 +179,7 @@ type CheckpointRecord struct {
 func (rec *CheckpointRecord) Unmarshal(b []byte) error {
 	pb := &protobuf.CheckpointRecord{}
 	if err := proto.Unmarshal(b, pb); err != nil {
-		return err
+		return errors.Err(err, "Unmarshal")
 	}
 
 	return nil
@@ -215,19 +216,19 @@ type SetInt32Record struct {
 func (rec *SetInt32Record) Unmarshal(b []byte) error {
 	pb := &protobuf.SetInt32Record{}
 	if err := proto.Unmarshal(b, pb); err != nil {
-		return err
+		return errors.Err(err, "Unmarshal")
 	}
 
 	var err error
 	rec.FileName, err = domain.NewFileName(pb.Filename)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewFileName")
 	}
 
 	rec.TxNum = domain.TransactionNumber(pb.Txnum)
 	rec.BlockNumber, err = domain.NewBlockNumber(pb.BlockNumber)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewBlockNumber")
 	}
 
 	rec.Offset = pb.Offset
@@ -278,19 +279,19 @@ type SetStringRecord struct {
 func (rec *SetStringRecord) Unmarshal(b []byte) error {
 	pb := &protobuf.SetStringRecord{}
 	if err := proto.Unmarshal(b, pb); err != nil {
-		return err
+		return errors.Err(err, "Unmarshal")
 	}
 
 	var err error
 	rec.FileName, err = domain.NewFileName(pb.Filename)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewFileName")
 	}
 
 	rec.TxNum = domain.TransactionNumber(pb.Txnum)
 	rec.BlockNumber, err = domain.NewBlockNumber(pb.BlockNumber)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewBlockNumber")
 	}
 
 	rec.Offset = pb.Offset

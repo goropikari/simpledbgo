@@ -1,6 +1,9 @@
 package tx
 
-import "github.com/goropikari/simpledbgo/domain"
+import (
+	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
+)
 
 // LockType is a type of lock.
 type LockType int8
@@ -44,7 +47,7 @@ func NewConcurrencyManager(cfg ConcurrencyManagerConfig) *ConcurrencyManager {
 func (conMgr *ConcurrencyManager) SLock(blk domain.Block) error {
 	if _, ok := conMgr.locks[blk]; !ok {
 		if err := conMgr.lt.SLock(blk); err != nil {
-			return err
+			return errors.Err(err, "SLock")
 		}
 		conMgr.locks[blk] = Shared
 	}
@@ -56,7 +59,7 @@ func (conMgr *ConcurrencyManager) SLock(blk domain.Block) error {
 func (conMgr *ConcurrencyManager) XLock(blk domain.Block) error {
 	if _, ok := conMgr.locks[blk]; !ok {
 		if err := conMgr.lt.XLock(blk); err != nil {
-			return err
+			return errors.Err(err, "XLock")
 		}
 		conMgr.locks[blk] = Exclusive
 	}

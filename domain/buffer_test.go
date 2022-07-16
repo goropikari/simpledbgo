@@ -8,10 +8,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/testing/fake"
 	"github.com/goropikari/simpledbgo/testing/mock"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 

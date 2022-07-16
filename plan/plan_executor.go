@@ -1,9 +1,8 @@
 package plan
 
 import (
-	"errors"
-
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/lexer"
 	"github.com/goropikari/simpledbgo/parser"
 )
@@ -27,18 +26,18 @@ func (pe Executor) CreateQueryPlan(query string, txn domain.Transaction) (domain
 	lex := lexer.NewLexer(query)
 	tokens, err := lex.ScanTokens()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "ScanTokens")
 	}
 
 	parser := parser.NewParser(tokens)
 	data, err := parser.Query()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Query")
 	}
 
 	err = pe.verifyQuery(data)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "verifyQuery")
 	}
 
 	return pe.queryPlanner.CreatePlan(data, txn)
@@ -49,18 +48,18 @@ func (pe Executor) ExecuteUpdate(cmd string, txn domain.Transaction) (int, error
 	lex := lexer.NewLexer(cmd)
 	tokens, err := lex.ScanTokens()
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "ScanTokens")
 	}
 
 	parser := parser.NewParser(tokens)
 	data, err := parser.ExecCmd()
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "ExecCmd")
 	}
 
 	err = pe.verifyExec(data)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "verifyExec")
 	}
 
 	switch v := data.(type) {

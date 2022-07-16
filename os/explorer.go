@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 type opener interface {
@@ -43,7 +44,7 @@ func (exp *Explorer) OpenFile(filename domain.FileName) (*domain.File, error) {
 	flag := os.O_RDWR | os.O_CREATE
 	f, err := exp.opener.OpenFile(path, flag, os.ModePerm)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "OpenFile")
 	}
 
 	file := domain.NewFile(f)

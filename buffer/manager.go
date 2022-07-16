@@ -1,9 +1,10 @@
 package buffer
 
 import (
-	"errors"
 	"sync"
 	"time"
+
+	"github.com/goropikari/simpledbgo/errors"
 
 	"github.com/goropikari/simpledbgo/domain"
 )
@@ -24,9 +25,10 @@ type Config struct {
 
 func NewConfig() Config {
 	timeout := 10000
+	numBuf := 20
 
 	return Config{
-		NumberBuffer:       20,
+		NumberBuffer:       numBuf,
 		TimeoutMillisecond: timeout,
 	}
 }
@@ -52,7 +54,7 @@ func NewManager(fileMgr domain.FileManager, logMgr domain.LogManager, config Con
 	for i := 0; i < numBuffer; i++ {
 		buf, err := domain.NewBuffer(fileMgr, logMgr)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "NewBuffer")
 		}
 
 		bufferPool[i] = buf
@@ -87,7 +89,7 @@ func (mgr *Manager) FlushAll(txnum domain.TransactionNumber) error {
 		if buf.TxNumber() == txnum {
 			err := buf.Flush()
 			if err != nil {
-				return err
+				return errors.Err(err, "Flush")
 			}
 		}
 	}
@@ -159,7 +161,7 @@ func (mgr *Manager) tryToPin(block domain.Block, chooseUnpinnedBuffer func([]*do
 			return buf, nil
 		}
 		if err := buf.AssignToBlock(block); err != nil {
-			return nil, err
+			return nil, errors.Err(err, "AssignToBlock")
 		}
 	}
 

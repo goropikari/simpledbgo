@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/goropikari/simpledbgo/common"
-	"github.com/pkg/errors"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // ErrFieldNotFound is an error that means specified field is not found.
@@ -186,7 +186,7 @@ type RecordPage struct {
 // NewRecordPage constructs a RecordPage.
 func NewRecordPage(txn Transaction, blk Block, layout *Layout) (*RecordPage, error) {
 	if err := txn.Pin(blk); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Pin")
 	}
 
 	return &RecordPage{
@@ -234,7 +234,7 @@ func (page *RecordPage) Format() error {
 	slotID := SlotID(0)
 	for page.isValidSlot(slotID) {
 		if err := page.txn.SetInt32(page.blk, page.offset(slotID), Empty, false); err != nil {
-			return err
+			return errors.Err(err, "SetInt32")
 		}
 
 		sch := page.layout.schema
@@ -244,11 +244,11 @@ func (page *RecordPage) Format() error {
 			switch typ {
 			case Int32FieldType:
 				if err := page.txn.SetInt32(page.blk, fldpos, 0, false); err != nil {
-					return err
+					return errors.Err(err, "SetInt32")
 				}
 			case StringFieldType:
 				if err := page.txn.SetString(page.blk, fldpos, "", false); err != nil {
-					return err
+					return errors.Err(err, "SetString")
 				}
 			case UnknownFieldType:
 				log.Fatal(errors.New("unexpected record type"))
@@ -272,12 +272,12 @@ func (page *RecordPage) NextUsedSlot(slotID SlotID) (SlotID, error) {
 func (page *RecordPage) InsertAfter(slotID SlotID) (SlotID, error) {
 	newSlot, err := page.searchAfter(slotID, Empty)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "searchAfter")
 	}
 	if newSlot >= 0 {
 		err := page.setSlotCondition(newSlot, Used)
 		if err != nil {
-			return 0, err
+			return 0, errors.Err(err, "setSlotCondition")
 		}
 	}
 
@@ -290,7 +290,7 @@ func (page *RecordPage) searchAfter(slotID SlotID, flag SlotCondition) (SlotID, 
 	for page.isValidSlot(slotID) {
 		currFlag, err := page.GetSlotCondition(slotID)
 		if err != nil {
-			return 0, err
+			return 0, errors.Wrap(err, "GetSlotCondition")
 		}
 		if flag == currFlag {
 			return slotID, nil

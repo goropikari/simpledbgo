@@ -87,8 +87,8 @@ func (c Constant) Less(other Constant) bool {
 	case StringFieldType:
 		return c.val.(string) < other.val.(string)
 	case UnknownFieldType:
-		panic(errors.New("unsupported field type"))
+		panic(ErrUnsupportedFieldType)
 	default:
-		panic(errors.New("unsupported field type"))
+		panic(ErrUnsupportedFieldType)
 	}
 }

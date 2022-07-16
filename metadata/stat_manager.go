@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // StatManager is stat manager.
@@ -25,7 +26,7 @@ func NewStatManager(tblMgr *TableManager, txn domain.Transaction) (*StatManager,
 	}
 
 	if err := statMgr.refreshStatistics(txn); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "refreshStatistics")
 	}
 
 	return statMgr, nil
@@ -40,7 +41,7 @@ func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain
 	if statMgr.numCalls > updateTimes {
 		// refreshStatistics で numCalls は 0 リセットされる
 		if err := statMgr.refreshStatistics(txn); err != nil {
-			return domain.StatInfo{}, err
+			return domain.StatInfo{}, errors.Err(err, "refreshStatistics")
 		}
 	}
 
@@ -49,7 +50,7 @@ func (statMgr *StatManager) GetStatInfo(tblName domain.TableName, layout *domain
 		var err error
 		si, err = statMgr.calcTableStats(tblName, layout, txn)
 		if err != nil {
-			return domain.StatInfo{}, err
+			return domain.StatInfo{}, errors.Err(err, "calcTableStats")
 		}
 		statMgr.tableStats[tblName] = si
 	}
@@ -63,39 +64,39 @@ func (statMgr *StatManager) refreshStatistics(txn domain.Transaction) error {
 
 	catLayout, err := statMgr.tblMgr.GetTableLayout(tableCatalog, txn)
 	if err != nil {
-		return err
+		return errors.Err(err, "GetTableLayout")
 	}
 
 	tcat, err := domain.NewTableScan(txn, tableCatalog, catLayout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewTableScan")
 	}
 	defer tcat.Close()
 
 	for tcat.HasNext() {
 		tblNameStr, err := tcat.GetString(fldTableName)
 		if err != nil {
-			return err
+			return errors.Err(err, "GetString")
 		}
 
 		tblName, err := domain.NewTableName(tblNameStr)
 		if err != nil {
-			return err
+			return errors.Err(err, "NewTableName")
 		}
 
 		layout, err := statMgr.tblMgr.GetTableLayout(tblName, txn)
 		if err != nil {
-			return err
+			return errors.Err(err, "GetTableLayout")
 		}
 
 		si, err := statMgr.calcTableStats(tblName, layout, txn)
 		if err != nil {
-			return err
+			return errors.Err(err, "calcTableStats")
 		}
 		statMgr.tableStats[tblName] = si
 	}
 	if err := tcat.Err(); err != nil {
-		return err
+		return errors.Err(err, "HasNext")
 	}
 
 	return nil
@@ -107,7 +108,7 @@ func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *dom
 
 	tbl, err := domain.NewTableScan(txn, tblName, layout)
 	if err != nil {
-		return domain.StatInfo{}, err
+		return domain.StatInfo{}, errors.Err(err, "NewTableScan")
 	}
 
 	for tbl.HasNext() {
@@ -115,7 +116,7 @@ func (statMgr *StatManager) calcTableStats(tblName domain.TableName, layout *dom
 		numBlocks = int(tbl.RecordID().BlockNumber() + 1)
 	}
 	if err := tbl.Err(); err != nil {
-		return domain.StatInfo{}, tbl.Err()
+		return domain.StatInfo{}, errors.Err(tbl.Err(), "HasNext")
 	}
 
 	return domain.NewStatInfo(numBlocks, numRecs), nil

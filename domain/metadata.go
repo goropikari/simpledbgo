@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+
+	"github.com/goropikari/simpledbgo/errors"
+)
 
 const (
 	// MaxFieldNameLength is maximum field name length.
@@ -21,10 +25,10 @@ const (
 
 var (
 	// ErrExceedMaxFieldNameLength is an error that means exceeding maximum field name length.
-	ErrExceedMaxFieldNameLength = errors.Errorf("exceeds maximum field name length %v", MaxFieldNameLength)
+	ErrExceedMaxFieldNameLength = fmt.Errorf("exceeds maximum field name length %v", MaxFieldNameLength)
 
 	// ErrExceedMaxViewNameLength is an error that means exceeding maximum view name length.
-	ErrExceedMaxViewNameLength = errors.Errorf("exceeds maximum view name length %v", MaxViewNameLength)
+	ErrExceedMaxViewNameLength = fmt.Errorf("exceeds maximum view name length %v", MaxViewNameLength)
 )
 
 // LSN is log sequence number.
@@ -66,6 +70,8 @@ func NewFieldName(name string) (FieldName, error) {
 func (name FieldName) String() string {
 	return string(name)
 }
+
+var ErrUnsupportedFieldType = errors.New("unsupported field type")
 
 // FieldType is a type of field.
 type FieldType uint

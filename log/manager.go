@@ -1,8 +1,9 @@
 package log
 
 import (
-	"errors"
 	"sync"
+
+	"github.com/goropikari/simpledbgo/errors"
 
 	"github.com/goropikari/simpledbgo/common"
 	"github.com/goropikari/simpledbgo/domain"
@@ -43,7 +44,7 @@ func (p *Page) reset() error {
 	p.dp.Reset()
 
 	if err := p.dp.SetInt32(boundaryPositionOffset, int32(p.dp.Size())); err != nil {
-		return err
+		return errors.Err(err, "SetInt32")
 	}
 
 	return nil
@@ -76,7 +77,7 @@ func (p *Page) neededByteLength(record []byte) int64 {
 func (p *Page) canAppend(record []byte) (bool, error) {
 	boundary, err := p.getBoundaryOffset()
 	if err != nil {
-		return false, err
+		return false, errors.Err(err, "getBoundaryOffset")
 	}
 	bytesNeeded := p.dp.NeededByteLength(record)
 
@@ -86,7 +87,7 @@ func (p *Page) canAppend(record []byte) (bool, error) {
 func (p *Page) append(record []byte) error {
 	boundary, err := p.getBoundaryOffset()
 	if err != nil {
-		return err
+		return errors.Err(err, "getBoundaryOffset")
 	}
 
 	bytesNeeded := p.dp.NeededByteLength(record)
@@ -103,12 +104,12 @@ func (p *Page) append(record []byte) error {
 
 	err = p.dp.SetBytes(int64(recordPos), record)
 	if err != nil {
-		return err
+		return errors.Err(err, "SetBytes")
 	}
 
 	err = p.setBoundaryOffset(recordPos)
 	if err != nil {
-		return err
+		return errors.Err(err, "setBoundaryOffset")
 	}
 
 	return nil
@@ -130,12 +131,12 @@ type Manager struct {
 func NewManager(fileMgr domain.FileManager, config ManagerConfig) (*Manager, error) {
 	logFileName, err := domain.NewFileName(config.LogFileName)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewFileName")
 	}
 
 	block, page, err := prepareManager(fileMgr, logFileName)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "prepareManager")
 	}
 
 	return &Manager{
@@ -158,28 +159,28 @@ func (mgr *Manager) getDomainPage() *domain.Page {
 func prepareManager(fileMgr domain.FileManager, fileName domain.FileName) (domain.Block, *domain.Page, error) {
 	page, err := fileMgr.CreatePage()
 	if err != nil {
-		return domain.Block{}, nil, err
+		return domain.Block{}, nil, errors.Err(err, "CreatePage")
 	}
 
 	blklen, err := fileMgr.BlockLength(fileName)
 	if err != nil {
-		return domain.Block{}, nil, err
+		return domain.Block{}, nil, errors.Err(err, "BlockLength")
 	}
 
 	if blklen == 0 {
 		blk, err := fileMgr.ExtendFile(fileName)
 		if err != nil {
-			return domain.Block{}, nil, err
+			return domain.Block{}, nil, errors.Err(err, "ExtendFile")
 		}
 
 		err = page.SetInt32(boundaryPositionOffset, int32(fileMgr.BlockSize()))
 		if err != nil {
-			return domain.Block{}, nil, err
+			return domain.Block{}, nil, errors.Err(err, "SetInt32")
 		}
 
 		err = fileMgr.CopyPageToBlock(page, blk)
 		if err != nil {
-			return domain.Block{}, nil, err
+			return domain.Block{}, nil, errors.Err(err, "CopyPageToBlock")
 		}
 
 		return blk, page, nil
@@ -187,14 +188,14 @@ func prepareManager(fileMgr domain.FileManager, fileName domain.FileName) (domai
 
 	blknum, err := domain.NewBlockNumber(blklen - 1)
 	if err != nil {
-		return domain.Block{}, nil, err
+		return domain.Block{}, nil, errors.Err(err, "NewBlockNumber")
 	}
 
 	blk := domain.NewBlock(fileName, blknum)
 
 	err = fileMgr.CopyBlockToPage(blk, page)
 	if err != nil {
-		return domain.Block{}, nil, err
+		return domain.Block{}, nil, errors.Err(err, "CopyBlockToPage")
 	}
 
 	return blk, page, nil
@@ -213,7 +214,7 @@ func (mgr *Manager) FlushLSN(lsn domain.LSN) error {
 func (mgr *Manager) Flush() error {
 	err := mgr.fileMgr.CopyPageToBlock(mgr.getDomainPage(), mgr.currentBlock)
 	if err != nil {
-		return err
+		return errors.Err(err, "CopyPageToBlock")
 	}
 
 	mgr.lastSavedLSN = mgr.latestLSN
@@ -228,26 +229,23 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 
 	ok, err := mgr.logPage.canAppend(record)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "canAppend")
 	}
 	if !ok {
 		if err := mgr.Flush(); err != nil {
-			return 0, err
+			return 0, errors.Err(err, "Flush")
 		}
 
 		blk, err := mgr.AppendNewBlock()
 		if err != nil {
-			return 0, err
+			return 0, errors.Err(err, "AppendNewBlock")
 		}
 
 		mgr.currentBlock = blk
-		if err != nil {
-			return 0, err
-		}
 	}
 
 	if err := mgr.logPage.append(record); err != nil {
-		return 0, err
+		return 0, errors.Err(err, "append")
 	}
 
 	mgr.latestLSN++
@@ -259,16 +257,16 @@ func (mgr *Manager) AppendRecord(record []byte) (domain.LSN, error) {
 func (mgr *Manager) AppendNewBlock() (domain.Block, error) {
 	blk, err := mgr.fileMgr.ExtendFile(mgr.logFileName)
 	if err != nil {
-		return domain.Block{}, err
+		return domain.Block{}, errors.Err(err, "ExtendFile")
 	}
 
 	if err := mgr.logPage.reset(); err != nil {
-		return domain.Block{}, err
+		return domain.Block{}, errors.Err(err, "reset")
 	}
 
 	err = mgr.fileMgr.CopyPageToBlock(mgr.getDomainPage(), blk)
 	if err != nil {
-		return domain.Block{}, err
+		return domain.Block{}, errors.Err(err, "CopyPageToBlock")
 	}
 
 	mgr.currentBlock = blk
@@ -279,11 +277,11 @@ func (mgr *Manager) AppendNewBlock() (domain.Block, error) {
 // Iterator returns log record iterator.
 func (mgr *Manager) Iterator() (domain.LogIterator, error) {
 	if err := mgr.Flush(); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Flush")
 	}
 	page, err := mgr.fileMgr.CreatePage()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreatePage")
 	}
 
 	return NewIterator(mgr.fileMgr, mgr.currentBlock, NewPage(page))

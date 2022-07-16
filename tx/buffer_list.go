@@ -2,6 +2,7 @@ package tx
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	ls "github.com/goropikari/simpledbgo/lib/list"
 )
 
@@ -30,7 +31,7 @@ func (list *BufferList) GetBuffer(blk domain.Block) *domain.Buffer {
 func (list *BufferList) Pin(blk domain.Block) error {
 	buf, err := list.bufMgr.Pin(blk)
 	if err != nil {
-		return err
+		return errors.Err(err, "Pin")
 	}
 
 	list.buffers[blk] = buf

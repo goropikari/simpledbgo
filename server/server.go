@@ -12,6 +12,7 @@ import (
 
 	"github.com/goropikari/simpledbgo/database"
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 const (
@@ -119,13 +120,13 @@ func (cn *Connection) startup() error {
 	// https://www.postgresql.org/docs/12/protocol-message-formats.html
 	sizeByte, err := read(cn.conn, payloadBytesLength)
 	if err != nil {
-		return err
+		return errors.Err(err, "read")
 	}
 	cn.conn.Write([]byte{0x4e})
 
 	size := int(binary.BigEndian.Uint32(sizeByte))
 	if _, err := read(cn.conn, size-payloadBytesLength); err != nil {
-		return err
+		return errors.Err(err, "read")
 	}
 	// AuthenticationOk
 	// 0x52 -> Z: ReadyForQuery
@@ -286,7 +287,7 @@ func (cn *Connection) handleQuery(query string) (Result, error) {
 func (cn *Connection) handleSelect(query string) (Result, error) {
 	txn, err := cn.db.NewTx()
 	if err != nil {
-		return Result{}, err
+		return Result{}, errors.Err(err, "NewTx")
 	}
 	p, err := cn.db.Query(txn, query)
 	if err != nil {
@@ -295,7 +296,7 @@ func (cn *Connection) handleSelect(query string) (Result, error) {
 
 	scan, err := p.Open()
 	if err != nil {
-		return Result{}, err
+		return Result{}, errors.Err(err, "Open")
 	}
 
 	rows := &Rows{scan: scan, fields: p.Schema().Fields()}
@@ -314,7 +315,7 @@ func (cn *Connection) handleSelect(query string) (Result, error) {
 func (cn *Connection) handleCommand(query string) (Result, error) {
 	txn, err := cn.db.NewTx()
 	if err != nil {
-		return Result{}, err
+		return Result{}, errors.Err(err, "NewTx")
 	}
 	if _, err = cn.db.Exec(txn, query); err != nil {
 		return Result{}, rollback(txn, err)
@@ -347,7 +348,7 @@ func (cn *Connection) makeResult(rows *Rows) (Result, error) {
 		for _, fld := range rows.fields {
 			v, err := rows.scan.GetVal(fld)
 			if err != nil {
-				return Result{}, err
+				return Result{}, errors.Err(err, "GetVal")
 			}
 			rec = append(rec, v)
 		}
@@ -405,7 +406,7 @@ func read(c net.Conn, n int) ([]byte, error) {
 	for i := 0; i < n; i++ {
 		b, err := reader.ReadByte()
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "ReadByte")
 		}
 		data = append(data, b)
 	}

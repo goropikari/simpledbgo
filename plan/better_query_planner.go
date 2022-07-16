@@ -2,6 +2,7 @@ package plan
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/lexer"
 	"github.com/goropikari/simpledbgo/parser"
 )
@@ -25,31 +26,31 @@ func (planner *BetterQueryPlanner) CreatePlan(data *domain.QueryData, txn domain
 	for _, tblName := range data.Tables() {
 		viewDef, err := planner.metadataMgr.GetViewDef(tblName.ToViewName(), txn)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "GetViewDef")
 		}
 
 		if viewDef == "" {
 			plan, err := NewTablePlan(txn, tblName, planner.metadataMgr)
 			if err != nil {
-				return nil, err
+				return nil, errors.Err(err, "NewTablePlan")
 			}
 			plans = append(plans, plan)
 		} else {
 			l := lexer.NewLexer(viewDef.String())
 			tokens, err := l.ScanTokens()
 			if err != nil {
-				return nil, err
+				return nil, errors.Err(err, "ScanTokens")
 			}
 
 			p := parser.NewParser(tokens)
 			viewData, err := p.Query()
 			if err != nil {
-				return nil, err
+				return nil, errors.Err(err, "Query")
 			}
 
 			plan, err := planner.CreatePlan(viewData, txn)
 			if err != nil {
-				return nil, err
+				return nil, errors.Err(err, "CreatePlan")
 			}
 			plans = append(plans, plan)
 		}

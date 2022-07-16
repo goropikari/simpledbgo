@@ -1,6 +1,6 @@
 package domain
 
-import "github.com/pkg/errors"
+import "github.com/goropikari/simpledbgo/errors"
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 

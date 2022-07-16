@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // TableManager is manager of table.
@@ -35,10 +36,10 @@ func NewTableManager() *TableManager {
 func CreateTableManager(txn domain.Transaction) (*TableManager, error) {
 	tblMgr := NewTableManager()
 	if err := tblMgr.CreateTable(tableCatalog, tblMgr.tblCatalogLayout.Schema(), txn); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreateTable")
 	}
 	if err := tblMgr.CreateTable(fieldCatalog, tblMgr.fldCatalogLayout.Schema(), txn); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreateTable")
 	}
 
 	return tblMgr, nil
@@ -61,44 +62,44 @@ func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Sc
 	// register table
 	tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewTableScan")
 	}
 	if err := tcat.AdvanceNextInsertSlotID(); err != nil {
-		return err
+		return errors.Err(err, "AdvanceNextInsertSlotID")
 	}
 
 	if err := tcat.SetString(fldTableName, tblName.String()); err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 	if err := tcat.SetInt32(fldSlotSize, int32(layout.SlotSize())); err != nil {
-		return err
+		return errors.Err(err, "SetInt32")
 	}
 	tcat.Close()
 
 	// register fields
 	fcat, err := domain.NewTableScan(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewTableScan")
 	}
 
 	for _, fld := range sch.Fields() {
 		if err := fcat.AdvanceNextInsertSlotID(); err != nil {
-			return err
+			return errors.Err(err, "AdvanceNextInsertSlotID")
 		}
 		if err := fcat.SetString(fldTableName, tblName.String()); err != nil {
-			return err
+			return errors.Err(err, "SetString")
 		}
 		if err := fcat.SetString(fldFieldName, string(fld)); err != nil {
-			return err
+			return errors.Err(err, "SetString")
 		}
 		if err := fcat.SetInt32(fldType, int32(sch.Type(fld))); err != nil {
-			return err
+			return errors.Err(err, "SetInt32")
 		}
 		if err := fcat.SetInt32(fldLength, int32(sch.Length(fld))); err != nil {
-			return err
+			return errors.Err(err, "SetInt32")
 		}
 		if err := fcat.SetInt32(fldOffset, int32(layout.Offset(fld))); err != nil {
-			return err
+			return errors.Err(err, "SetInt32")
 		}
 	}
 	fcat.Close()
@@ -110,12 +111,12 @@ func (tblMgr *TableManager) CreateTable(tblName domain.TableName, sch *domain.Sc
 func (tblMgr *TableManager) GetTableLayout(tblName domain.TableName, txn domain.Transaction) (*domain.Layout, error) {
 	slotsize, err := tblMgr.tableSlotSize(tblName, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "tableSlotSize")
 	}
 
 	sch, offsets, err := tblMgr.tableSchema(tblName, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "tableSchema")
 	}
 
 	return domain.NewLayoutWithFields(sch, offsets, int64(slotsize)), nil
@@ -150,7 +151,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 
 	tcat, err := domain.NewTableScan(txn, tableCatalog, tblMgr.tblCatalogLayout)
 	if err != nil {
-		return NonExistSlotSize, err
+		return NonExistSlotSize, errors.Err(err, "NewTableScan")
 	}
 	defer tcat.Close()
 
@@ -158,19 +159,19 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 	for tcat.HasNext() {
 		v, err := tcat.GetString(fldTableName)
 		if err != nil {
-			return NonExistSlotSize, err
+			return NonExistSlotSize, errors.Err(err, "GetString")
 		}
 		if v == tblName.String() {
 			slotsize, err = tcat.GetInt32(fldSlotSize)
 			if err != nil {
-				return NonExistSlotSize, err
+				return NonExistSlotSize, errors.Err(err, "GetInt32")
 			}
 
 			break
 		}
 	}
 	if err := tcat.Err(); err != nil {
-		return NonExistSlotSize, err
+		return NonExistSlotSize, errors.Err(err, "HasNext")
 	}
 
 	return slotsize, nil
@@ -181,36 +182,36 @@ func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Tra
 	offsets := make(map[domain.FieldName]int64)
 	fcat, err := domain.NewTableScan(txn, fieldCatalog, tblMgr.fldCatalogLayout)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.Err(err, "NewTableScan")
 	}
 	defer fcat.Close()
 
 	for fcat.HasNext() {
 		v, err := fcat.GetString(fldTableName)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, errors.Err(err, "GetString")
 		}
 		if v == tblName.String() {
 			fldNameStr, err := fcat.GetString(fldFieldName)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, errors.Err(err, "GetString")
 			}
 			typ, err := fcat.GetInt32(fldType)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, errors.Err(err, "GetInt32")
 			}
 			length, err := fcat.GetInt32(fldLength)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, errors.Err(err, "GetInt32")
 			}
 			offset, err := fcat.GetInt32(fldOffset)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, errors.Err(err, "GetInt32")
 			}
 
 			fldName, err := domain.NewFieldName(fldNameStr)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, errors.Err(err, "NewFieldName")
 			}
 			offsets[fldName] = int64(offset)
 
@@ -219,7 +220,7 @@ func (tblMgr *TableManager) tableSchema(tblName domain.TableName, txn domain.Tra
 		}
 	}
 	if err := fcat.Err(); err != nil {
-		return nil, nil, err
+		return nil, nil, errors.Err(err, "HasNext")
 	}
 
 	return sch, offsets, nil

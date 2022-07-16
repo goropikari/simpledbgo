@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/goropikari/simpledbgo/common"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/tx/logrecord"
 )
@@ -18,12 +19,12 @@ func ParseRecord(b []byte) (logrecord.LogRecorder, error) {
 	bb := bytes.NewBufferBytes(b)
 	typ, err := bb.GetInt32(recordLengthOffset)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "GetInt32")
 	}
 
 	data, err := bb.GetBytes(recordOffset)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "GetBytes")
 	}
 
 	var rec logrecord.LogRecorder
@@ -45,7 +46,7 @@ func ParseRecord(b []byte) (logrecord.LogRecorder, error) {
 	}
 
 	if err := rec.Unmarshal(data); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Unmarshal")
 	}
 
 	return rec, nil

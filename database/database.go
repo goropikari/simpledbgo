@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/plan"
 	"github.com/goropikari/simpledbgo/tx"
 )
@@ -59,7 +60,7 @@ func NewDB(
 func (db *DB) NewTx() (domain.Transaction, error) {
 	txn, err := tx.NewTransaction(db.fmgr, db.lmgr, db.bmgr, db.cmgr, db.gen)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewTransaction")
 	}
 
 	return txn, nil

@@ -1,10 +1,11 @@
 package lexer
 
 import (
-	"errors"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 var keywords = []string{
@@ -43,7 +44,7 @@ func (lex *Lexer) ScanTokens() ([]Token, error) {
 				break
 			}
 
-			return nil, err
+			return nil, errors.Err(err, "scan")
 		}
 		tokens = append(tokens, token)
 	}
@@ -54,12 +55,12 @@ func (lex *Lexer) ScanTokens() ([]Token, error) {
 func (lex *Lexer) scan() (Token, error) {
 	err := lex.skipWhitespace()
 	if err != nil {
-		return Token{}, err
+		return Token{}, errors.Err(err, "skipWhitespace")
 	}
 
 	c, err := lex.readByte()
 	if err != nil {
-		return Token{}, err
+		return Token{}, errors.Err(err, "readByte")
 	}
 
 	switch c {
@@ -78,28 +79,28 @@ func (lex *Lexer) scan() (Token, error) {
 
 	err = lex.unreadByte()
 	if err != nil {
-		return Token{}, err
+		return Token{}, errors.Err(err, "unreadByte")
 	}
 
 	switch {
 	case isNumber(c) || c == '-':
 		numStr, err := lex.scanInteger()
 		if err != nil {
-			return Token{}, err
+			return Token{}, errors.Err(err, "scanInteger")
 		}
 
 		base := 10
 		precision := 32
 		num, err := strconv.ParseInt(numStr, base, precision)
 		if err != nil {
-			return Token{}, err
+			return Token{}, errors.Err(err, "ParseInt")
 		}
 
 		return NewToken(TInt32, int32(num)), nil
 	case isAlpha(c):
 		id, err := lex.scanIdentifier()
 		if err != nil {
-			return Token{}, err
+			return Token{}, errors.Err(err, "scanIdentifier")
 		}
 
 		if lex.isKeyword(id) {
@@ -110,7 +111,7 @@ func (lex *Lexer) scan() (Token, error) {
 	case c == '\'':
 		s, err := lex.scanString()
 		if err != nil {
-			return Token{}, err
+			return Token{}, errors.Err(err, "scanString")
 		}
 
 		return NewToken(TString, s), nil
@@ -127,7 +128,7 @@ func (lex *Lexer) scanInteger() (string, error) {
 	} else {
 		err := lex.unreadByte()
 		if err != nil {
-			return "", err
+			return "", errors.Err(err, "unreadByte")
 		}
 	}
 
@@ -138,7 +139,7 @@ func (lex *Lexer) scanInteger() (string, error) {
 				break
 			}
 
-			return "", err
+			return "", errors.Err(err, "readByte")
 		}
 
 		if isAlpha(c) {
@@ -147,7 +148,7 @@ func (lex *Lexer) scanInteger() (string, error) {
 		if !isNumber(c) {
 			err := lex.unreadByte()
 			if err != nil {
-				return "", errors.New("not number")
+				return "", errors.Wrap(err, "not number")
 			}
 
 			break
@@ -168,13 +169,13 @@ func (lex *Lexer) scanIdentifier() (string, error) {
 				break
 			}
 
-			return "", err
+			return "", errors.Err(err, "readByte")
 		}
 
 		if !isAlphaNumeric(c) {
 			err = lex.unreadByte()
 			if err != nil {
-				return "", err
+				return "", errors.Err(err, "unreadByte")
 			}
 
 			break
@@ -189,7 +190,7 @@ func (lex *Lexer) scanIdentifier() (string, error) {
 func (lex *Lexer) scanString() (string, error) {
 	_, err := lex.readByte()
 	if err != nil {
-		return "", err
+		return "", errors.Err(err, "readByte")
 	}
 
 	b := make([]byte, 0)
@@ -198,7 +199,7 @@ func (lex *Lexer) scanString() (string, error) {
 	for {
 		c, err := lex.readByte()
 		if err != nil {
-			return "", err
+			return "", errors.Err(err, "readByte")
 		}
 
 		switch {
@@ -231,13 +232,13 @@ func (lex *Lexer) skipWhitespace() error {
 	for {
 		c, err := lex.readByte()
 		if err != nil {
-			return err
+			return errors.Err(err, "readByte")
 		}
 
 		if !isWhitespace(c) {
 			err = lex.unreadByte()
 			if err != nil {
-				return err
+				return errors.Err(err, "unreadByte")
 			}
 
 			break

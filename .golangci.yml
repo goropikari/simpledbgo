@@ -8,8 +8,10 @@ linters-settings:
 linters:
   disable:
     - cyclop
+    - dupl
     - exhaustivestruct
     - funlen
+    - gci
     - gochecknoglobals
     - gochecknoinits
     - godox

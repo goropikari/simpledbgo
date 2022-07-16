@@ -1,9 +1,8 @@
 package plan
 
 import (
-	"errors"
-
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // ErrNotUpdatable is error that indicates the scan is not updatable.
@@ -24,12 +23,12 @@ func (p *BasicUpdatePlanner) ExecuteInsert(data *domain.InsertData, txn domain.T
 	var plan domain.Planner
 	plan, err := NewTablePlan(txn, data.TableName(), p.metadataMgr)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "NewTablePlan")
 	}
 
 	s, err := plan.Open()
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "Open")
 	}
 
 	us, ok := s.(domain.UpdateScanner)
@@ -38,14 +37,14 @@ func (p *BasicUpdatePlanner) ExecuteInsert(data *domain.InsertData, txn domain.T
 	}
 
 	if err = us.AdvanceNextInsertSlotID(); err != nil {
-		return 0, err
+		return 0, errors.Err(err, "AdvanceNextInsertSlotID")
 	}
 
 	vals := data.Values()
 	fields := data.Fields()
 	for i := 0; i < len(vals); i++ {
 		if err = us.SetVal(fields[i], vals[i]); err != nil {
-			return 0, err
+			return 0, errors.Err(err, "SetVal")
 		}
 	}
 	us.Close()
@@ -58,13 +57,13 @@ func (p *BasicUpdatePlanner) ExecuteDelete(data *domain.DeleteData, txn domain.T
 	var plan domain.Planner
 	plan, err := NewTablePlan(txn, data.TableName(), p.metadataMgr)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "NewTablePlan")
 	}
 
 	plan = NewSelectPlan(plan, data.Predicate())
 	s, err := plan.Open()
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "Open")
 	}
 
 	us, ok := s.(domain.UpdateScanner)
@@ -75,12 +74,12 @@ func (p *BasicUpdatePlanner) ExecuteDelete(data *domain.DeleteData, txn domain.T
 	cnt := 0
 	for us.HasNext() {
 		if err = us.Delete(); err != nil {
-			return 0, err
+			return 0, errors.Err(err, "Delete")
 		}
 		cnt++
 	}
 	if us.Err() != nil {
-		return 0, us.Err()
+		return 0, errors.Err(us.Err(), "HasNext")
 	}
 	us.Close()
 
@@ -92,13 +91,13 @@ func (p *BasicUpdatePlanner) ExecuteModify(data *domain.ModifyData, txn domain.T
 	var plan domain.Planner
 	plan, err := NewTablePlan(txn, data.TableName(), p.metadataMgr)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "NewTablePlan")
 	}
 	plan = NewSelectPlan(plan, data.Predicate())
 
 	s, err := plan.Open()
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "Open")
 	}
 
 	us, ok := s.(domain.UpdateScanner)
@@ -110,11 +109,11 @@ func (p *BasicUpdatePlanner) ExecuteModify(data *domain.ModifyData, txn domain.T
 	for us.HasNext() {
 		val, err := data.Expression().Evaluate(us)
 		if err != nil {
-			return 0, err
+			return 0, errors.Err(err, "Evaluate")
 		}
 
 		if err = us.SetVal(data.FieldName(), val); err != nil {
-			return 0, err
+			return 0, errors.Err(err, "SetVal")
 		}
 		cnt++
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/tx"
 )
 
@@ -28,32 +29,32 @@ func NewManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr do
 func createManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
 	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewTransaction")
 	}
 
 	tblMgr, err := CreateTableManager(txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreateTableManager")
 	}
 
 	viewMgr, err := CreateViewManager(tblMgr, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreateViewManager")
 	}
 
 	statMgr, err := NewStatManager(tblMgr, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewStatManager")
 	}
 
 	idxMgr, err := CreateIndexManager(driver, tblMgr, statMgr, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "CreateIndexManager")
 	}
 
 	err = txn.Commit()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Commit")
 	}
 
 	return &Manager{
@@ -68,24 +69,24 @@ func createManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr
 func newManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
 	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewTransaction")
 	}
 
 	tblMgr := NewTableManager()
 	viewMgr := NewViewManager(tblMgr)
 	statMgr, err := NewStatManager(tblMgr, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewStatManager")
 	}
 
 	idxMgr, err := NewIndexManager(driver, tblMgr, statMgr, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewIndexManager")
 	}
 
 	err = txn.Commit()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Commit")
 	}
 
 	return &Manager{

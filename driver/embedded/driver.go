@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
-	"errors"
 	"io"
 	"strings"
+
+	"github.com/goropikari/simpledbgo/errors"
 
 	"github.com/goropikari/simpledbgo/database"
 	"github.com/goropikari/simpledbgo/domain"
@@ -20,7 +21,7 @@ func (d *Driver) Open(name string) (driver.Conn, error) {
 	// fmt.Println("*Driver.Open: " + name)
 	db, err := database.InitializeDB()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "InitializeDB")
 	}
 
 	return &Conn{db: db, inTxn: false}, nil
@@ -50,7 +51,7 @@ func (cn *Conn) Prepare(query string) (driver.Stmt, error) {
 	} else {
 		txn, err = cn.db.NewTx()
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "NewTx")
 		}
 	}
 
@@ -61,7 +62,7 @@ func (cn *Conn) Prepare(query string) (driver.Stmt, error) {
 	if strings.HasPrefix(query, "select") {
 		p, err = cn.db.Query(txn, query)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "Query")
 		}
 	} else {
 		cmd = query
@@ -83,7 +84,7 @@ func (cn *Conn) Begin() (driver.Tx, error) {
 	cn.inTxn = true
 	txn, err := cn.db.NewTx()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "NewTx")
 	}
 
 	cn.txn = txn
@@ -113,7 +114,7 @@ func (stmt *Stmt) Exec(args []driver.Value) (driver.Result, error) {
 	// fmt.Println("Stmt.Exec")
 	_, err := stmt.cn.db.Exec(stmt.cn.txn, stmt.cmd)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Exec")
 	}
 
 	return nil, nil
@@ -129,7 +130,7 @@ func (stmt *Stmt) QueryContext(ctx context.Context, args []driver.NamedValue) (d
 	// fmt.Println("Stmt.QueryContext")
 	scan, err := stmt.plan.Open()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Open")
 	}
 
 	fields := stmt.plan.Schema().Fields()
@@ -192,7 +193,7 @@ func (r *Rows) Next(dest []driver.Value) error {
 		for i, f := range r.fields {
 			v, err := r.scan.GetVal(f)
 			if err != nil {
-				return err
+				return errors.Err(err, "GetVal")
 			}
 			dest[i] = v.AsVal()
 		}

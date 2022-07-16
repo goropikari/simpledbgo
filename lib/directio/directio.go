@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/ncw/directio"
 )
 
@@ -31,7 +32,7 @@ func IsAligned(p []byte) bool {
 func OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
 	file, err := directio.OpenFile(name, flag, perm)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, errors.Err(err, "OpenFile")
 	}
 
 	return file, nil

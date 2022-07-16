@@ -1,6 +1,9 @@
 package bytes
 
-import "github.com/goropikari/simpledbgo/lib/directio"
+import (
+	"github.com/goropikari/simpledbgo/errors"
+	"github.com/goropikari/simpledbgo/lib/directio"
+)
 
 // DirectByteSliceCreater is a slice creature with direct io.
 type DirectByteSliceCreater struct{}
@@ -14,7 +17,7 @@ func NewDirectByteSliceCreater() *DirectByteSliceCreater {
 func (s *DirectByteSliceCreater) Create(n int) ([]byte, error) {
 	b, err := directio.AlignedBlock(n)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "AlignedBlock")
 	}
 
 	return b, nil

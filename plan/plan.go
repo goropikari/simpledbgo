@@ -1,6 +1,9 @@
 package plan
 
-import "github.com/goropikari/simpledbgo/domain"
+import (
+	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
+)
 
 // TablePlan is planner for table.
 type TablePlan struct {
@@ -14,12 +17,12 @@ type TablePlan struct {
 func NewTablePlan(txn domain.Transaction, tblName domain.TableName, md domain.MetadataManager) (*TablePlan, error) {
 	layout, err := md.GetTableLayout(tblName, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "GetTableLayout")
 	}
 
 	si, err := md.GetStatInfo(tblName, layout, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "GetStatInfo")
 	}
 
 	return &TablePlan{
@@ -79,11 +82,11 @@ func NewProductPlan(lhs, rhs domain.Planner) *ProductPlan {
 func (plan *ProductPlan) Open() (domain.Scanner, error) {
 	lhs, err := plan.lhsPlan.Open()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Open")
 	}
 	rhs, err := plan.rhsPlan.Open()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Open")
 	}
 
 	return domain.NewProductScan(lhs, rhs)
@@ -131,7 +134,7 @@ func NewSelectPlan(plan domain.Planner, pred *domain.Predicate) *SelectPlan {
 func (p *SelectPlan) Open() (domain.Scanner, error) {
 	s, err := p.plan.Open()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Open")
 	}
 
 	return domain.NewSelectScan(s, p.pred), nil
@@ -196,7 +199,7 @@ func NewProjectPlan(plan domain.Planner, fields []domain.FieldName) *ProjectPlan
 func (p *ProjectPlan) Open() (domain.Scanner, error) {
 	s, err := p.plan.Open()
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "Open")
 	}
 
 	return domain.NewProjectScan(s, p.schema.Fields()), nil

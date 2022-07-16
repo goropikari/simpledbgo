@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/lib/bytes"
-	"github.com/pkg/errors"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
@@ -204,7 +204,7 @@ func NewPageFactory(bsf ByteSliceFactory, blockSize BlockSize) *PageFactory {
 func (pf *PageFactory) Create() (*Page, error) {
 	b, err := pf.bsf.Create(int(pf.blockSize))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create byte slice")
+		return nil, errors.Err(err, "create byte slice")
 	}
 
 	bb := bytes.NewBufferBytes(b)

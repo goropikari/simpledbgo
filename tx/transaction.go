@@ -3,6 +3,7 @@ package tx
 import (
 	"github.com/goropikari/simpledbgo/common"
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/tx/logrecord"
 )
@@ -29,7 +30,7 @@ func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, buffer
 	}
 
 	if _, err := txn.writeStartLog(); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "writeStartLog")
 	}
 
 	return txn, nil
@@ -38,7 +39,7 @@ func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, buffer
 // Pin pins the blk by tx.
 func (tx *Transaction) Pin(blk domain.Block) error {
 	if err := tx.bufferList.Pin(blk); err != nil {
-		return err
+		return errors.Err(err, "Pin")
 	}
 
 	return nil
@@ -52,7 +53,7 @@ func (tx *Transaction) Unpin(blk domain.Block) {
 // Commit commits the transaction.
 func (tx *Transaction) Commit() error {
 	if err := tx.commit(); err != nil {
-		return err
+		return errors.Err(err, "commit")
 	}
 
 	tx.concurMgr.Release()
@@ -63,16 +64,16 @@ func (tx *Transaction) Commit() error {
 
 func (tx *Transaction) commit() error {
 	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
-		return err
+		return errors.Err(err, "FlushAll")
 	}
 
 	lsn, err := tx.writeCommitLog()
 	if err != nil {
-		return err
+		return errors.Err(err, "writeCommitLog")
 	}
 
 	if err := tx.logMgr.FlushLSN(lsn); err != nil {
-		return err
+		return errors.Err(err, "FlushLSN")
 	}
 
 	return nil
@@ -81,7 +82,7 @@ func (tx *Transaction) commit() error {
 // Rollback rollbacks the transaction.
 func (tx *Transaction) Rollback() error {
 	if err := tx.rollback(); err != nil {
-		return err
+		return errors.Err(err, "rollback")
 	}
 
 	tx.concurMgr.Release()
@@ -93,18 +94,18 @@ func (tx *Transaction) Rollback() error {
 func (tx *Transaction) rollback() error {
 	iter, err := tx.logMgr.Iterator()
 	if err != nil {
-		return err
+		return errors.Err(err, "Iterator")
 	}
 
 	for iter.HasNext() {
 		data, err := iter.Next()
 		if err != nil {
-			return err
+			return errors.Err(err, "Next")
 		}
 
 		record, err := ParseRecord(data)
 		if err != nil {
-			return err
+			return errors.Err(err, "ParseRecord")
 		}
 
 		if record.TxNumber() == tx.number {
@@ -112,22 +113,22 @@ func (tx *Transaction) rollback() error {
 				break
 			}
 			if err := record.Undo(tx); err != nil {
-				return err
+				return errors.Err(err, "Undo")
 			}
 		}
 	}
 
 	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
-		return err
+		return errors.Err(err, "FlushAll")
 	}
 
 	lsn, err := tx.writeRollbackLog()
 	if err != nil {
-		return err
+		return errors.Err(err, "writeRollbackLog")
 	}
 
 	if err := tx.logMgr.FlushLSN(lsn); err != nil {
-		return err
+		return errors.Err(err, "FlushLSN")
 	}
 
 	return nil
@@ -136,11 +137,11 @@ func (tx *Transaction) rollback() error {
 // Recover recovers a database.
 func (tx *Transaction) Recover() error {
 	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
-		return err
+		return errors.Err(err, "FlushAll")
 	}
 
 	if err := tx.recover(); err != nil {
-		return err
+		return errors.Err(err, "recover")
 	}
 
 	return nil
@@ -150,18 +151,18 @@ func (tx *Transaction) recover() error {
 	finishedTxns := make(map[domain.TransactionNumber]bool)
 	iter, err := tx.logMgr.Iterator()
 	if err != nil {
-		return err
+		return errors.Err(err, "Iterator")
 	}
 
 	for iter.HasNext() {
 		data, err := iter.Next()
 		if err != nil {
-			return err
+			return errors.Err(err, "Next")
 		}
 
 		record, err := ParseRecord(data)
 		if err != nil {
-			return err
+			return errors.Err(err, "ParseRecord")
 		}
 
 		op := record.Operator()
@@ -173,22 +174,22 @@ func (tx *Transaction) recover() error {
 			finishedTxns[record.TxNumber()] = true
 		} else if _, found := finishedTxns[record.TxNumber()]; !found {
 			if err := record.Undo(tx); err != nil {
-				return err
+				return errors.Err(err, "Undo")
 			}
 		}
 	}
 
 	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
-		return err
+		return errors.Err(err, "FlushAll")
 	}
 
 	lsn, err := tx.writeCheckpointLog()
 	if err != nil {
-		return err
+		return errors.Err(err, "writeCheckpointLog")
 	}
 
 	if err := tx.logMgr.FlushLSN(lsn); err != nil {
-		return err
+		return errors.Err(err, "FlushLSN")
 	}
 
 	return nil
@@ -199,11 +200,11 @@ func (tx *Transaction) UndoSetInt32(rec *logrecord.SetInt32Record) error {
 	blk := domain.NewBlock(rec.FileName, rec.BlockNumber)
 
 	if err := tx.Pin(blk); err != nil {
-		return err
+		return errors.Err(err, "Pin")
 	}
 
 	if err := tx.SetInt32(blk, rec.Offset, rec.Val, false); err != nil {
-		return err
+		return errors.Err(err, "SetInt32")
 	}
 
 	tx.Unpin(blk)
@@ -216,11 +217,11 @@ func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {
 	blk := domain.NewBlock(rec.FileName, rec.BlockNumber)
 
 	if err := tx.Pin(blk); err != nil {
-		return err
+		return errors.Err(err, "Pin")
 	}
 
 	if err := tx.SetString(blk, rec.Offset, rec.Val, false); err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 
 	tx.Unpin(blk)
@@ -231,13 +232,13 @@ func (tx *Transaction) UndoSetString(rec *logrecord.SetStringRecord) error {
 // GetInt32 gets int32 from the blk at offset.
 func (tx *Transaction) GetInt32(blk domain.Block, offset int64) (int32, error) {
 	if err := tx.concurMgr.SLock(blk); err != nil {
-		return 0, err
+		return 0, errors.Err(err, "SLock")
 	}
 
 	buf := tx.bufferList.GetBuffer(blk)
 	x, err := buf.Page().GetInt32(offset)
 	if err != nil {
-		return 0, err
+		return 0, errors.Err(err, "GetInt32")
 	}
 
 	return x, nil
@@ -246,7 +247,7 @@ func (tx *Transaction) GetInt32(blk domain.Block, offset int64) (int32, error) {
 // SetInt32 sets int32 on the given block.
 func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, writeLog bool) error {
 	if err := tx.concurMgr.XLock(blk); err != nil {
-		return err
+		return errors.Err(err, "XLock")
 	}
 
 	buf := tx.bufferList.GetBuffer(blk)
@@ -255,17 +256,17 @@ func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, write
 		var err error
 		oldval, err := buf.Page().GetInt32(offset)
 		if err != nil {
-			return err
+			return errors.Err(err, "GetInt32")
 		}
 
 		lsn, err = tx.writeSetInt32Log(buf.Block(), offset, oldval)
 		if err != nil {
-			return err
+			return errors.Err(err, "writeSetInt32Log")
 		}
 	}
 
 	if err := buf.Page().SetInt32(offset, val); err != nil {
-		return err
+		return errors.Err(err, "SetInt32")
 	}
 
 	buf.SetModifiedTxNumber(tx.number, lsn)
@@ -276,7 +277,7 @@ func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, write
 // GetString gets string from the blk.
 func (tx *Transaction) GetString(blk domain.Block, offset int64) (string, error) {
 	if err := tx.concurMgr.SLock(blk); err != nil {
-		return "", err
+		return "", errors.Err(err, "SLock")
 	}
 
 	buf := tx.bufferList.GetBuffer(blk)
@@ -287,7 +288,7 @@ func (tx *Transaction) GetString(blk domain.Block, offset int64) (string, error)
 // SetString sets string on the blk.
 func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, writeLog bool) error {
 	if err := tx.concurMgr.XLock(blk); err != nil {
-		return err
+		return errors.Err(err, "XLock")
 	}
 
 	buf := tx.bufferList.GetBuffer(blk)
@@ -295,17 +296,17 @@ func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, wri
 	if writeLog {
 		oldval, err := buf.Page().GetString(offset)
 		if err != nil {
-			return err
+			return errors.Err(err, "GetString")
 		}
 		lsn, err = tx.writeSetStringLog(buf.Block(), offset, oldval)
 		if err != nil {
-			return err
+			return errors.Err(err, "writeSetStringLog")
 		}
 	}
 
 	page := buf.Page()
 	if err := page.SetString(offset, val); err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 
 	buf.SetModifiedTxNumber(tx.number, lsn)
@@ -370,21 +371,21 @@ func (tx *Transaction) writeRollbackLog() (domain.LSN, error) {
 func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {
 	data, err := record.Marshal()
 	if err != nil {
-		return domain.DummyLSN, err
+		return domain.DummyLSN, errors.Err(err, "Marshal")
 	}
 
 	buf := bytes.NewBuffer(common.Int32Length + common.Uint32Length + len(data))
 	if err := buf.SetInt32(0, typ); err != nil {
-		return domain.DummyLSN, err
+		return domain.DummyLSN, errors.Err(err, "SetInt32")
 	}
 
 	if err := buf.SetBytes(common.Int32Length, data); err != nil {
-		return domain.DummyLSN, err
+		return domain.DummyLSN, errors.Err(err, "SetBytes")
 	}
 
 	lsn, err := tx.logMgr.AppendRecord(buf.GetData())
 	if err != nil {
-		return domain.DummyLSN, err
+		return domain.DummyLSN, errors.Err(err, "AppendRecord")
 	}
 
 	return lsn, nil
@@ -394,7 +395,7 @@ func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRe
 func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
 	dummyBlk := domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.SLock(dummyBlk); err != nil {
-		return 0, err
+		return 0, errors.Err(err, "SLock")
 	}
 
 	return tx.fileMgr.BlockLength(filename)
@@ -404,7 +405,7 @@ func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
 func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {
 	dummyBlk := domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.XLock(dummyBlk); err != nil {
-		return domain.Block{}, err
+		return domain.Block{}, errors.Err(err, "XLock")
 	}
 
 	return tx.fileMgr.ExtendFile(filename)

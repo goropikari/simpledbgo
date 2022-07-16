@@ -1,9 +1,9 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
-	"log"
+
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
@@ -58,18 +58,18 @@ func NewTableScan(txn Transaction, tblName TableName, layout *Layout) (*TableSca
 
 	blkLen, err := txn.BlockLength(FileName(tblName))
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "BlockLength")
 	}
 
 	if blkLen == 0 {
 		err := tbl.moveToNewBlock()
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "moveToNewBlock")
 		}
 	} else {
 		err := tbl.MoveToFirst()
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "MoveToFirst")
 		}
 	}
 
@@ -105,14 +105,14 @@ func (tbl *TableScan) GetVal(fldName FieldName) (Constant, error) {
 	case Int32FieldType:
 		val, err := tbl.GetInt32(fldName)
 		if err != nil {
-			return Constant{}, err
+			return Constant{}, errors.Err(err, "GetInt32")
 		}
 
 		return NewConstant(Int32FieldType, val), nil
 	case StringFieldType:
 		val, err := tbl.GetString(fldName)
 		if err != nil {
-			return Constant{}, err
+			return Constant{}, errors.Err(err, "GetString")
 		}
 
 		return NewConstant(StringFieldType, val), nil
@@ -146,15 +146,15 @@ func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
 		// TODO: check val type?
 		err := tbl.SetInt32(fldName, val.AsInt32())
 		if err != nil {
-			return err
+			return errors.Wrap(err, "TableScan#SetVal: failed to SetInt32")
 		}
 	case StringFieldType:
 		err := tbl.SetString(fldName, val.AsString())
 		if err != nil {
-			return err
+			return errors.Wrap(err, "TableScan#SetVal: failed to SetString")
 		}
 	case UnknownFieldType:
-		log.Fatal(errors.New("unexpected field type"))
+		return ErrUnsupportedFieldType
 	}
 
 	return nil
@@ -165,31 +165,31 @@ func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
 func (tbl *TableScan) AdvanceNextInsertSlotID() error {
 	slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)
 	if err != nil {
-		return err
+		return errors.Err(err, "InsertAfter")
 	}
 	tbl.currentSlotID = slotID
 
 	for tbl.currentSlotID < 0 {
 		last, err := tbl.isAtLastBlock()
 		if err != nil {
-			return err
+			return errors.Err(err, "isAtLastBlock")
 		}
 		if last {
 			err = tbl.moveToNewBlock()
 			if err != nil {
-				return err
+				return errors.Err(err, "moveToNewBlock")
 			}
 		} else {
 			blk := tbl.recordPage.Block()
 			blkNum := blk.Number()
 			err := tbl.moveToBlock(blkNum + 1)
 			if err != nil {
-				return err
+				return errors.Err(err, "moveToBlock")
 			}
 		}
 		slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)
 		if err != nil {
-			return err
+			return errors.Err(err, "InsertAfter")
 		}
 		tbl.currentSlotID = slotID
 	}
@@ -208,7 +208,7 @@ func (tbl *TableScan) MoveToRecordID(rid RecordID) error {
 	blk := NewBlock(FileName(tbl.tblName), rid.BlockNumber())
 	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewRecordPage")
 	}
 	tbl.recordPage = recordPage
 	tbl.currentSlotID = rid.SlotID()
@@ -273,12 +273,12 @@ func (tbl *TableScan) isAtLastBlock() (bool, error) {
 	blk := tbl.recordPage.Block()
 	size, err := tbl.txn.BlockLength(FileName(tbl.tblName))
 	if err != nil {
-		return false, err
+		return false, errors.Err(err, "txn.BlockLength")
 	}
 
 	blkNum, err := NewBlockNumber(size - 1)
 	if err != nil {
-		return false, err
+		return false, errors.Err(err, "NewBlockNumber")
 	}
 
 	return blk.Number() == blkNum, nil
@@ -288,19 +288,19 @@ func (tbl *TableScan) moveToNewBlock() error {
 	tbl.Close()
 	blk, err := tbl.txn.ExtendFile(FileName(tbl.tblName))
 	if err != nil {
-		return err
+		return errors.Err(err, "txn.ExtendFile")
 	}
 
 	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewRecordPage")
 	}
 
 	tbl.recordPage = recordPage
 
 	err = tbl.recordPage.Format()
 	if err != nil {
-		return err
+		return errors.Err(err, "Page.Format")
 	}
 
 	tbl.currentSlotID = -1
@@ -318,7 +318,7 @@ func (tbl *TableScan) moveToBlock(blkNum BlockNumber) error {
 	blk := NewBlock(FileName(tbl.tblName), blkNum)
 	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewRecordPage")
 	}
 
 	tbl.recordPage = recordPage
@@ -342,7 +342,7 @@ func NewProductScan(lhs, rhs Scanner) (*ProductScan, error) {
 	}
 
 	if err := scan.MoveToFirst(); err != nil {
-		return nil, err
+		return nil, errors.Err(err, "MoveToFirst")
 	}
 
 	return scan, nil
@@ -352,17 +352,17 @@ func NewProductScan(lhs, rhs Scanner) (*ProductScan, error) {
 func (scan *ProductScan) MoveToFirst() error {
 	err := scan.lhsScan.MoveToFirst()
 	if err != nil {
-		return err
+		return errors.Err(err, "MoveToFirst")
 	}
 
 	scan.lhsScan.HasNext()
 	if scan.lhsScan.Err() != nil {
-		return scan.lhsScan.Err()
+		return errors.Wrap(scan.lhsScan.Err(), "failed to Scan")
 	}
 
 	err = scan.rhsScan.MoveToFirst()
 	if err != nil {
-		return err
+		return errors.Err(err, "MoveToFirst")
 	}
 
 	return nil
@@ -413,7 +413,7 @@ func (plan *ProductScan) GetInt32(fld FieldName) (int32, error) {
 		return plan.rhsScan.GetInt32(fld)
 	}
 
-	return 0, fmt.Errorf("field %v not found", fld)
+	return 0, fieldNotFoudError(fld)
 }
 
 // GetString gets fld as string.
@@ -426,7 +426,7 @@ func (plan *ProductScan) GetString(fld FieldName) (string, error) {
 		return plan.rhsScan.GetString(fld)
 	}
 
-	return "", fmt.Errorf("field %v not found", fld)
+	return "", fieldNotFoudError(fld)
 }
 
 // GetVal gets fld as Constant.
@@ -439,7 +439,7 @@ func (plan *ProductScan) GetVal(fld FieldName) (Constant, error) {
 		return plan.rhsScan.GetVal(fld)
 	}
 
-	return Constant{}, fmt.Errorf("field %v not found", fld)
+	return Constant{}, fieldNotFoudError(fld)
 }
 
 // HasField checks whether plan has fld as field or not.
@@ -624,7 +624,7 @@ func (s *ProjectScan) GetInt32(fld FieldName) (int32, error) {
 		return s.scan.GetInt32(fld)
 	}
 
-	return 0, fmt.Errorf("field %v not found", fld)
+	return 0, fieldNotFoudError(fld)
 }
 
 // GetString gets string from the scanner.
@@ -633,7 +633,7 @@ func (s *ProjectScan) GetString(fld FieldName) (string, error) {
 		return s.scan.GetString(fld)
 	}
 
-	return "", fmt.Errorf("field %v not found", fld)
+	return "", fieldNotFoudError(fld)
 }
 
 // GetVal gets value from the scanner.
@@ -642,7 +642,7 @@ func (s *ProjectScan) GetVal(fld FieldName) (Constant, error) {
 		return s.scan.GetVal(fld)
 	}
 
-	return Constant{}, fmt.Errorf("field %v not found", fld)
+	return Constant{}, fieldNotFoudError(fld)
 }
 
 // HasField checks the existence of the field.
@@ -664,4 +664,8 @@ func (s *ProjectScan) Close() {
 // Err returns error.
 func (s *ProjectScan) Err() error {
 	return s.err
+}
+
+func fieldNotFoudError(fld FieldName) error {
+	return fmt.Errorf("field %v not found", fld)
 }

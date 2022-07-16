@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 	"github.com/goropikari/simpledbgo/lib/bytes"
 	"github.com/goropikari/simpledbgo/os"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -61,7 +61,7 @@ func NewManager(config ManagerConfig) (*Manager, error) {
 
 	blkSize, err := domain.NewBlockSize(config.BlockSize)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create BlockSize")
+		return nil, errors.Err(err, "create BlockSize")
 	}
 
 	return &Manager{
@@ -82,24 +82,24 @@ func (mgr *Manager) CopyBlockToPage(blk domain.Block, page *domain.Page) error {
 
 	file, err := mgr.OpenFile(blk.FileName())
 	if err != nil {
-		return errors.Wrap(err, "failed to open file")
+		return errors.Err(err, "open file")
 	}
 
 	_, err = file.Seek(mgr.offset(blk))
 	if err != nil {
-		return errors.Wrap(err, "failed to seek")
+		return errors.Err(err, "seek")
 	}
 
 	// file size が 0 のとき CopyN は EOF を返す。
 	// block size 分読んだことにしたいので EOF は無視する。
 	_, err = io.CopyN(page, file, int64(mgr.blockSize))
 	if err != nil && !errors.Is(err, io.EOF) {
-		return errors.Wrap(err, "failed to copy from file to page")
+		return errors.Err(err, "copy from file to page")
 	}
 
 	_, err = page.Seek(0, io.SeekStart)
 	if err != nil {
-		return errors.Wrap(err, "failed to seek")
+		return errors.Err(err, "seek")
 	}
 
 	return nil
@@ -112,19 +112,19 @@ func (mgr *Manager) CopyPageToBlock(page *domain.Page, block domain.Block) error
 
 	file, err := mgr.OpenFile(block.FileName())
 	if err != nil {
-		return errors.Wrap(err, "failed to open file")
+		return errors.Err(err, "open file")
 	}
 
 	if _, err = file.Seek(mgr.offset(block)); err != nil {
-		return errors.Wrap(err, "failed to seek")
+		return errors.Err(err, "seek")
 	}
 
 	if _, err := file.Write(page.GetData()); err != nil {
-		return errors.Wrap(err, "failed to write")
+		return errors.Err(err, "write")
 	}
 
 	if _, err := page.Seek(0, io.SeekStart); err != nil {
-		return errors.Wrap(err, "failed to seek")
+		return errors.Err(err, "seek")
 	}
 
 	return nil
@@ -137,39 +137,39 @@ func (mgr *Manager) ExtendFile(filename domain.FileName) (domain.Block, error) {
 
 	blkLen, err := mgr.BlockLength(filename)
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to take block length")
+		return domain.Block{}, errors.Err(err, "take block length")
 	}
 
 	numBlk, err := domain.NewBlockNumber(blkLen)
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to constnruct BlockNumber")
+		return domain.Block{}, errors.Err(err, "constnruct BlockNumber")
 	}
 
 	blk := domain.NewBlock(filename, numBlk)
 
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to open file")
+		return domain.Block{}, errors.Err(err, "open file")
 	}
 
 	n, err := file.Size()
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to take file size")
+		return domain.Block{}, errors.Err(err, "take file size")
 	}
 
 	_, err = file.Seek(n)
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to seek")
+		return domain.Block{}, errors.Err(err, "seek")
 	}
 
 	bs, err := mgr.bsf.Create(int(mgr.blockSize))
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to create byte slice")
+		return domain.Block{}, errors.Err(err, "create byte slice")
 	}
 
 	_, err = file.Write(bs)
 	if err != nil {
-		return domain.Block{}, errors.Wrap(err, "failed to write")
+		return domain.Block{}, errors.Err(err, "write")
 	}
 
 	return blk, nil
@@ -179,12 +179,12 @@ func (mgr *Manager) ExtendFile(filename domain.FileName) (domain.Block, error) {
 func (mgr *Manager) BlockLength(filename domain.FileName) (int32, error) {
 	file, err := mgr.OpenFile(filename)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to open file")
+		return 0, errors.Err(err, "open file")
 	}
 
 	n, err := file.Size()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to take file size")
+		return 0, errors.Err(err, "take file size")
 	}
 
 	return int32(n) / int32(mgr.blockSize), nil

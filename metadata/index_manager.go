@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"github.com/goropikari/simpledbgo/domain"
+	"github.com/goropikari/simpledbgo/errors"
 )
 
 // IndexManager is an index manager.
@@ -16,7 +17,7 @@ type IndexManager struct {
 func NewIndexManager(factory domain.IndexDriver, tblMgr *TableManager, statMgr *StatManager, txn domain.Transaction) (*IndexManager, error) {
 	cat, err := tblMgr.GetTableLayout(fldIndexCatalog, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "GetTableLayout")
 	}
 
 	return &IndexManager{
@@ -39,7 +40,7 @@ func CreateIndexManager(factory domain.IndexDriver, tblMgr *TableManager, statMg
 
 	layout, err := tblMgr.GetTableLayout(fldIndexCatalog, txn)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "GetTableLayout")
 	}
 
 	return &IndexManager{
@@ -54,27 +55,27 @@ func CreateIndexManager(factory domain.IndexDriver, tblMgr *TableManager, statMg
 func (idxMgr *IndexManager) CreateIndex(idxName domain.IndexName, tblName domain.TableName, fldName domain.FieldName, txn domain.Transaction) error {
 	tbl, err := domain.NewTableScan(txn, fldIndexCatalog, idxMgr.layout)
 	if err != nil {
-		return err
+		return errors.Err(err, "NewTableScan")
 	}
 	defer tbl.Close()
 
 	if err := tbl.AdvanceNextInsertSlotID(); err != nil {
-		return err
+		return errors.Err(err, "AdvanceNextInsertSlotID")
 	}
 
 	err = tbl.SetString(fldIndexName, idxName.String())
 	if err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 
 	err = tbl.SetString(fldTableName, tblName.String())
 	if err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 
 	err = tbl.SetString(fldFieldName, fldName.String())
 	if err != nil {
-		return err
+		return errors.Err(err, "SetString")
 	}
 
 	return nil
@@ -85,14 +86,14 @@ func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Tr
 	infos := make(map[domain.FieldName]*domain.IndexInfo)
 	tbl, err := domain.NewTableScan(txn, fldIndexCatalog, idxMgr.layout)
 	if err != nil {
-		return nil, err
+		return nil, errors.Err(err, "SetString")
 	}
 	defer tbl.Close()
 
 	for tbl.HasNext() {
 		storedTblName, err := tbl.GetString(fldTableName)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 		if storedTblName != tblName.String() {
 			continue
@@ -100,30 +101,30 @@ func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Tr
 
 		idxNameStr, err := tbl.GetString(fldIndexName)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 		idxName, err := domain.NewIndexName(idxNameStr)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 
 		fldNameStr, err := tbl.GetString(fldFieldName)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 		fldName, err := domain.NewFieldName(fldNameStr)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 
 		tblLayout, err := idxMgr.tblMgr.GetTableLayout(tblName, txn)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 
 		tblsi, err := idxMgr.statMgr.GetStatInfo(tblName, tblLayout, txn)
 		if err != nil {
-			return nil, err
+			return nil, errors.Err(err, "SetString")
 		}
 
 		idxInfo := domain.NewIndexInfo(idxMgr.idxFactory, idxName, fldName, tblLayout.Schema(), txn, tblsi)
@@ -131,7 +132,7 @@ func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Tr
 		infos[fldName] = idxInfo
 	}
 	if tbl.Err() != nil {
-		return nil, tbl.Err()
+		return nil, errors.Err(tbl.Err(), "HasNext")
 	}
 
 	return infos, nil
