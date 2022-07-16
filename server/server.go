@@ -23,8 +23,6 @@ const (
 
 var dbmsPORT = getEnvWithDefault("DBMS_PORT", "5432")
 var dbmsHOST = getEnvWithDefault("DBMS_HOST", "127.0.0.1")
-var queryReady []byte = []byte{0x5a, 0x00, 0x00, 0x00, 0x05, 0x49}
-var acceptMsg []byte = []byte{0x43, 0x00, 0x00, 0x00, 0x7, 0x4f, 0x4b, 0x00}
 
 type ResultType int
 
@@ -74,7 +72,7 @@ func (s *Server) Run() {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("%v\n", err)
 		}
 		cn := NewConnection(s.db, conn)
 		go cn.handleConnection()
@@ -88,7 +86,7 @@ func (cn *Connection) handleConnection() {
 		tag, query, err := cn.readQuery()
 		if err != nil {
 			if err != io.EOF {
-				fmt.Println(err)
+				log.Printf("%v\n", err)
 				os.Exit(1)
 			}
 			break
@@ -99,18 +97,18 @@ func (cn *Connection) handleConnection() {
 		}
 		res, err := cn.handleQuery(query)
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("%v\n", err)
 			// Ideally, error msg should be sent if errors occur
-			cn.conn.Write(makeCommandCompleteMsg(err.Error()))
-			cn.conn.Write(queryReady)
+			cn.conn.Write(makeCommandCompleteMsg(baseError(err).Error()))
+			cn.conn.Write(makeReadyForQueryMsg())
 			continue
 		}
 		if res.isQuery() {
 			sendResult(cn.conn, res)
 		} else {
 			// Query except for SELECT
-			cn.conn.Write(acceptMsg)
-			cn.conn.Write(queryReady)
+			cn.conn.Write(makeCommandCompleteMsg("OK"))
+			cn.conn.Write(makeReadyForQueryMsg())
 		}
 	}
 }
@@ -131,34 +129,20 @@ func (cn *Connection) startup() error {
 	// AuthenticationOk
 	// 0x52 -> Z: ReadyForQuery
 	cn.conn.Write([]byte{0x52, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00})
+	// 0x53 -> S: ParameterStatus
 	// fake client encoding for python PostgreSQL connector
-	cn.conn.Write([]byte{0x53, 0x00, 0x00, 0x00, 0x19, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x65, 0x6e, 0x63, 0x6f, 0x64, 0x69, 0x6e, 0x67, 0x00, 0x55, 0x54, 0x46, 0x38, 0x00})
-	// // fake server version
-	// c.Write([]byte{0x53, 0x00, 0x00, 0x00, 0x18, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x00, 0x31, 0x32, 0x2e, 0x36, 0x00})
+	cn.conn.Write(makeParameterStatusMsg("client_encoding", "SQL_ASCII"))
+	// fake server version
+	cn.conn.Write(makeParameterStatusMsg("server_version", "0.0.0"))
 
 	// ReadyForQuery
-	cn.conn.Write(queryReady)
+	cn.conn.Write(makeReadyForQueryMsg())
 
 	return nil
 }
 
 func (cn *Connection) Close() error {
 	return cn.conn.Close()
-}
-
-func makeCommandCompleteMsg(s string) []byte {
-	body := make([]byte, 0)
-	body = append(body, []byte(s)...)
-	body = append(body, 0x00)
-	l := len(body)
-	lb := make([]byte, payloadBytesLength)
-	binary.BigEndian.PutUint32(lb, uint32(l+payloadBytesLength))
-	payload := make([]byte, 0)
-	payload = append(payload, 0x43) // 0x43 -> C: CommandComplete
-	payload = append(payload, lb...)
-	payload = append(payload, body...)
-
-	return payload
 }
 
 func sendResult(c net.Conn, res Result) {
@@ -175,7 +159,7 @@ func sendResult(c net.Conn, res Result) {
 	// 	}
 
 	// 	c.Write(selectFooter(len(recs)))
-	// 	c.Write(queryReady)
+	// 	c.Write(makeReadyForQueryMsg())
 
 	cols := res.fields
 	header := makeColDesc(cols)
@@ -187,7 +171,7 @@ func sendResult(c net.Conn, res Result) {
 	}
 
 	c.Write(selectFooter(len(recs)))
-	c.Write(queryReady)
+	c.Write(makeReadyForQueryMsg())
 }
 
 func selectFooter(n int) []byte {
@@ -423,9 +407,18 @@ func setupDB() *database.DB {
 	return db
 }
 
+func baseError(err error) error {
+	for errors.Unwrap(err) != nil {
+		err = errors.Unwrap(err)
+	}
+
+	return err
+}
+
 func getEnvWithDefault(key string, d string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
 	}
+
 	return d
 }

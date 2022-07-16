@@ -6,6 +6,9 @@ export PATH := $(ROOT_DIR)/bin:$(PATH)
 
 MOCK_FILE := $(shell find -name "*.go" | xargs grep mockgen | cut -d: -f1)
 
+build:
+	go build -o simpledb main.go
+
 .PHONY: tools
 tools:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.45.2
@@ -18,9 +21,6 @@ tools:
 	curl -Lf -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-linux-x86_64.zip
 	unzip protoc.zip bin/protoc
 	rm -f protoc.zip
-
-build:
-	go build -o simpledb main.go
 
 .PHONY: docker-build
 docker-build:
