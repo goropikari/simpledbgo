@@ -550,3 +550,139 @@ Chap 8 の時点では実装しないで Chap 8 ~ 10 の3章を読んでから�
 Chap 10 まで読んでわかったが、`Plan` は `interface` だし、
 Chapter 10 で作る `BasicQueryPlanner`, `BetterQueryPlanner` だと `reductionFactor` は
 実装していなくても問題なかったので、3章一気読みしてから実装でなく Chapter 8 から順に実装していっても特段の問題はなかったようである。
+
+
+# Chapter 12: Indexing
+## 2022/7/10
+
+IndexInfo の情報は `idxcat` テーブルに保存されている。
+leaf node の layout は `IndexInfo.java#createIdxLayout` で定義されているやつが入ってくる。
+```
+---------------------------------------------------------------
+| block number (int32) | slot id (int32) | dataval (Constant) |
+---------------------------------------------------------------
+```
+
+## 2022/7/12
+BTPage の flag は
+- directory page のときは level
+- leaf page のときは overflow block の block number を指している。oveflow block がないときは -1 が flag として入っている。`BTreeLeaf#insert` では overflow block の判定を flag が 0 以上で判定しているけど
+
+(ref: text p.337)
+
+## 2022/7/13
+
+`BTreeLeaf#delete` は node split はするけど node merge はしていない。
+この場合 overflow block は永遠に残り続けるので次の overflow block には record が1個もないのに `BTreeLeaf#tryOverflow` は true を返してしまいそうな気がする。
+
+directory node に関しては dir entry を消すことをそもそもしていない。
+
+
+バグっているか調査実験
+- `SimpleDB_3.4/simpledb/metadata/IndexInfo.java` の HashIndex を BTreeIndex に変更
+- `SimpleDB_3.4/simpledb/server/SimpleDB.java` の `QueryPlanner`, `UpdatePlanner` を `HeuristicQueryPlanner`, `IndexUpdatePlanner` に変更
+
+```sql
+jdbc:simpledb:hoge
+create table hoge (name varchar(100));
+create index idx_hoge on hoge (name);
+insert into hoge (name) values ('hoge');
+insert into hoge (name) values ('hoge');
+insert into hoge (name) values ('hoge');
+insert into hoge (name) values ('hoge');
+insert into hoge (name) values ('hoge');
+insert into hoge (name) values ('hoge');
+select name from hoge;
+select name from hoge where name = 'hoge';
+delet from hoge where name = 'hoge';
+select name from hoge;
+select name from hoge where name = 'hoge';
+```
+
+```sql
+~/simpledb_go ⑂main* ↑8 $ docker run --rm -it -v $(pwd)/SimpleDB_3.4:/app/SimpleDB_3.4 simpledb
+Note: ./simpledb/jdbc/ResultSetAdapter.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+creating new database
+transaction 1 committed
+database server ready
+Connect>
+jdbc:simpledb:hoge
+creating new database
+transaction 1 committed
+
+SQL> create table hoge (name varchar(100));
+transaction 2 committed
+0 records processed
+
+SQL> create index idx_hoge on hoge (name);
+transaction 3 committed
+0 records processed
+
+SQL> insert into hoge (name) values ('hoge');
+transaction 4 committed
+1 records processed
+
+SQL> insert into hoge (name) values ('hoge');
+transaction 5 committed
+1 records processed
+
+SQL> insert into hoge (name) values ('hoge');
+transaction 6 committed
+1 records processed
+
+SQL> insert into hoge (name) values ('hoge');
+transaction 7 committed
+1 records processed
+
+SQL> insert into hoge (name) values ('hoge');
+transaction 8 committed
+1 records processed
+
+SQL> insert into hoge (name) values ('hoge');
+transaction 9 committed
+1 records processed
+
+SQL> select name from hoge;
+                                                                                                 name
+-----------------------------------------------------------------------------------------------------
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+transaction 10 committed
+
+SQL> select name from hoge where name = 'hoge';
+index on name used
+                                                                                                 name
+-----------------------------------------------------------------------------------------------------
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+                                                                                                 hoge
+transaction 11 committed
+
+SQL> delete from hoge where name = 'hoge';
+transaction 12 committed
+6 records processed
+
+SQL> select name from hoge;
+                                                                                                 name
+-----------------------------------------------------------------------------------------------------
+transaction 13 committed
+
+SQL> select name from hoge where name = 'hoge';
+index on name used
+                                                                                                 name
+-----------------------------------------------------------------------------------------------------
+                                                                                                 hoge
+                                                                                                 hoge
+transaction 14 committed
+```
+
+全レコードを消したあとでも `where` をつけて `SELECT` すると2件 record が返ってきた。
+printf debug によると overflow block 由来だったのでやはり `tryOverflow` はバグっている。
