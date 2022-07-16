@@ -6,6 +6,7 @@ This is Go implementation of [SimpleDB](http://cs.bc.edu/~sciore/simpledb/) by [
 
 ## Run SimpleDB
 
+### Server mode
 ```bash
 $ make docker-build
 $ make docker-run
@@ -29,6 +30,66 @@ arch=> select name, id from foo;
 (2 rows)
 ```
 
+### Embedded mode
+
+```go
+package main
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "github.com/goropikari/simpledbgo/driver/embedded"
+)
+
+func main() {
+	db, err := sql.Open("simpledb", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec("create table T1(A int, B varchar(9))")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	n := 3
+	for i := 0; i < n; i++ {
+		cmd := fmt.Sprintf("insert into T1(A, B) values (%v, 'rec%v')", i, i)
+		db.Exec(cmd)
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows, err := tx.QueryContext(context.Background(), "select A, B from T1")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var a int
+		var b string
+		err := rows.Scan(&a, &b)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%v %v\n", a, b)
+	}
+}
+```
+
+output
+```
+0 rec0
+1 rec1
+2 rec2
+```
+
 
 ## Implementation Progress
 
@@ -46,8 +107,7 @@ arch=> select name, id from foo;
 | 8            | Select Scans, Project Scans, Product Scans | :heavy_check_mark: |
 | 9            | Parser                                     | :heavy_check_mark: |
 | 10           | Planner                                    | :heavy_check_mark: |
-| 11           | Embedded JDBC Interface                    | :x:                |
-| 11           | Remote JDBC Interface                      | :x:                |
+| 11           | JDBC Interface                             | :x:                |
 | 12           | Static Hash Indexes                        | :heavy_check_mark: |
 | 12           | Btree Indexes                              | :x:                |
 | 13           | Materialization and Sorting                | :x:                |
@@ -59,7 +119,8 @@ Instead of JDBC interface, I implemented a Go SQL driver interface and Postgres 
 
 ## Appendix
 ### Original SimpleDB setup
-```
+
+```bash
 wget http://www.cs.bc.edu/%7Esciore/simpledb/SimpleDB_3.4.zip
 unzip SimpleDB_3.4.zip
 sed -i -e "1i package simpleclient;" SimpleDB_3.4/simpleclient/SimpleIJ.java
