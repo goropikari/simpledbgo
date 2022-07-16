@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-15 19:20:57</td>
+            <td class="headerValue">2022-07-16 06:15:05</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -179,7 +179,7 @@
 <a name="117"><span class="lineNum">     117 </span>            : </a>
 <a name="118"><span class="lineNum">     118 </span><span class="lineCov">          1 :                 return NewConstant(StringFieldType, val), nil</span></a>
 <a name="119"><span class="lineNum">     119 </span><span class="lineNoCov">          0 :         case UnknownFieldType:</span></a>
-<a name="120"><span class="lineNum">     120 </span><span class="lineNoCov">          0 :                 log.Fatal(errors.New(&quot;unexpected field type&quot;))</span></a>
+<a name="120"><span class="lineNum">     120 </span><span class="lineNoCov">          0 :                 return Constant{}, errors.New(&quot;unexpected field type&quot;)</span></a>
 <a name="121"><span class="lineNum">     121 </span>            :         }</a>
 <a name="122"><span class="lineNum">     122 </span>            : </a>
 <a name="123"><span class="lineNum">     123 </span><span class="lineNoCov">          0 :         return Constant{}, errors.New(&quot;GetVal error&quot;)</span></a>
