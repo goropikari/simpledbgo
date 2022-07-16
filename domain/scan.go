@@ -143,15 +143,20 @@ func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
 	typ := tbl.layout.schema.Type(fldName)
 	switch typ {
 	case Int32FieldType:
-		// TODO: check val type?
-		err := tbl.SetInt32(fldName, val.AsInt32())
+		v, err := val.AsInt32()
 		if err != nil {
-			return errors.Wrap(err, "TableScan#SetVal: failed to SetInt32")
+			return errors.Err(err, "AsInt32")
+		}
+		if err := tbl.SetInt32(fldName, v); err != nil {
+			return errors.Err(err, "SetInt32")
 		}
 	case StringFieldType:
-		err := tbl.SetString(fldName, val.AsString())
+		v, err := val.AsString()
 		if err != nil {
-			return errors.Wrap(err, "TableScan#SetVal: failed to SetString")
+			return errors.Err(err, "AsString")
+		}
+		if err := tbl.SetString(fldName, v); err != nil {
+			return errors.Err(err, "SetString")
 		}
 	case UnknownFieldType:
 		return ErrUnsupportedFieldType

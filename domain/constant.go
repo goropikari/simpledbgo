@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"log"
 )
 
 // Constant is constant type of database.
@@ -19,23 +18,23 @@ func NewConstant(typ FieldType, val any) Constant {
 }
 
 // AsInt32 returns a value as int32.
-func (c Constant) AsInt32() int32 {
+func (c Constant) AsInt32() (int32, error) {
 	v, ok := c.val.(int32)
 	if !ok {
-		log.Fatal(errors.New("ToInt32 cannot convert Constant to int32"))
+		return 0, errors.New("ToInt32 cannot convert Constant to int32")
 	}
 
-	return v
+	return v, nil
 }
 
 // AsString returns a value as string.
-func (c Constant) AsString() string {
+func (c Constant) AsString() (string, error) {
 	v, ok := c.val.(string)
 	if !ok {
-		log.Fatal(errors.New("AsString cannot convert Constant to string"))
+		return "", errors.New("AsString cannot convert Constant to string")
 	}
 
-	return v
+	return v, nil
 }
 
 // String stringfies constant.
