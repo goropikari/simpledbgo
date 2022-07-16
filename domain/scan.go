@@ -647,13 +647,7 @@ func (s *ProjectScan) GetVal(fld FieldName) (Constant, error) {
 
 // HasField checks the existence of the field.
 func (s *ProjectScan) HasField(fld FieldName) bool {
-	for _, f := range s.fields {
-		if f == fld {
-			return true
-		}
-	}
-
-	return false
+	return s.scan.HasField(fld)
 }
 
 // Close closes scanner.
