@@ -94,7 +94,7 @@ func (term Term) ReductionFactor(p Planner) int {
 		lhsName := term.lhs.AsFieldName()
 		rhsName := term.rhs.AsFieldName()
 
-		return math.Max(p.EstDistinctVals(lhsName), p.EstDistinctVals(rhsName))
+		return math.Max[int](p.EstDistinctVals(lhsName), p.EstDistinctVals(rhsName))
 	}
 
 	if term.lhs.IsFieldName() {

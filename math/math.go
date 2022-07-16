@@ -1,7 +1,9 @@
 package math
 
+import "golang.org/x/exp/constraints"
+
 // Max returns max number.
-func Max(a, b int) int {
+func Max[T constraints.Ordered](a, b T) T {
 	if a > b {
 		return a
 	}
