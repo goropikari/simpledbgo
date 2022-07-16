@@ -22,7 +22,7 @@ func NewConstant(typ FieldType, val any) Constant {
 func (c Constant) AsInt32() int32 {
 	v, ok := c.val.(int32)
 	if !ok {
-		log.Fatal(errors.New("ToInt32 cant't convert Constant to int32"))
+		log.Fatal(errors.New("ToInt32 cannot convert Constant to int32"))
 	}
 
 	return v
@@ -32,7 +32,7 @@ func (c Constant) AsInt32() int32 {
 func (c Constant) AsString() string {
 	v, ok := c.val.(string)
 	if !ok {
-		log.Fatal(errors.New("AsString cant't convert Constant to string"))
+		log.Fatal(errors.New("AsString cannot convert Constant to string"))
 	}
 
 	return v

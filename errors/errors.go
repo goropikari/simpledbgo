@@ -14,6 +14,10 @@ func Wrap(err error, message string) error {
 	return errors.Wrap(err, message)
 }
 
+func Unwrap(err error) error {
+	return errors.Unwrap(err)
+}
+
 func Err(err error, word string) error {
 	return Wrap(err, fmt.Sprintf("failed to %s", word))
 }

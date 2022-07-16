@@ -1,6 +1,8 @@
 package metadata
 
 import (
+	"fmt"
+
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/errors"
 )
@@ -172,6 +174,10 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 	}
 	if err := tcat.Err(); err != nil {
 		return NonExistSlotSize, errors.Err(err, "HasNext")
+	}
+
+	if slotsize <= 0 {
+		return NonExistSlotSize, fmt.Errorf("non existence table %v", tblName)
 	}
 
 	return slotsize, nil
