@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-16 06:22:07</td>
+            <td class="headerValue">2022-07-16 08:35:39</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -156,7 +156,7 @@
 <a name="94"><span class="lineNum">      94 </span><span class="lineNoCov">          0 :                 lhsName := term.lhs.AsFieldName()</span></a>
 <a name="95"><span class="lineNum">      95 </span><span class="lineNoCov">          0 :                 rhsName := term.rhs.AsFieldName()</span></a>
 <a name="96"><span class="lineNum">      96 </span><span class="lineNoCov">          0 : </span></a>
-<a name="97"><span class="lineNum">      97 </span><span class="lineNoCov">          0 :                 return math.Max(p.EstDistinctVals(lhsName), p.EstDistinctVals(rhsName))</span></a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineNoCov">          0 :                 return math.Max[int](p.EstDistinctVals(lhsName), p.EstDistinctVals(rhsName))</span></a>
 <a name="98"><span class="lineNum">      98 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="99"><span class="lineNum">      99 </span>            : </a>
 <a name="100"><span class="lineNum">     100 </span><span class="lineNoCov">          0 :         if term.lhs.IsFieldName() {</span></a>

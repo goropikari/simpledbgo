@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-16 06:22:07</td>
+            <td class="headerValue">2022-07-16 08:35:39</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -64,9 +64,9 @@
 <a name="2"><span class="lineNum">       2 </span>            : </a>
 <a name="3"><span class="lineNum">       3 </span>            : import (</a>
 <a name="4"><span class="lineNum">       4 </span>            :         &quot;encoding/binary&quot;</a>
-<a name="5"><span class="lineNum">       5 </span>            :         &quot;errors&quot;</a>
-<a name="6"><span class="lineNum">       6 </span>            :         &quot;fmt&quot;</a>
-<a name="7"><span class="lineNum">       7 </span>            :         &quot;io&quot;</a>
+<a name="5"><span class="lineNum">       5 </span>            :         &quot;io&quot;</a>
+<a name="6"><span class="lineNum">       6 </span>            : </a>
+<a name="7"><span class="lineNum">       7 </span>            :         &quot;github.com/goropikari/simpledbgo/errors&quot;</a>
 <a name="8"><span class="lineNum">       8 </span>            : </a>
 <a name="9"><span class="lineNum">       9 </span>            :         &quot;github.com/goropikari/simpledbgo/common&quot;</a>
 <a name="10"><span class="lineNum">      10 </span>            : )</a>
@@ -175,7 +175,7 @@
 <a name="113"><span class="lineNum">     113 </span>            : // GetInt32 returns int32 from buffer.</a>
 <a name="114"><span class="lineNum">     114 </span><span class="lineCov">          1 : func (buf *Buffer) GetInt32(offset int64) (int32, error) {</span></a>
 <a name="115"><span class="lineNum">     115 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="116"><span class="lineNum">     116 </span><span class="lineCov">          1 :                 return 0, fmt.Errorf(&quot;failed to GetInt32: %w&quot;, err)</span></a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineCov">          1 :                 return 0, errors.Err(err, &quot;GetInt32&quot;)</span></a>
 <a name="117"><span class="lineNum">     117 </span><span class="lineCov">          1 :         }</span></a>
 <a name="118"><span class="lineNum">     118 </span>            : </a>
 <a name="119"><span class="lineNum">     119 </span><span class="lineCov">          1 :         var ret int32</span></a>
@@ -183,7 +183,7 @@
 <a name="121"><span class="lineNum">     121 </span><span class="lineCov">          1 :                 return 0, ErrInvalidOffset</span></a>
 <a name="122"><span class="lineNum">     122 </span><span class="lineCov">          1 :         }</span></a>
 <a name="123"><span class="lineNum">     123 </span><span class="lineCov">          1 :         if err := binary.Read(buf, endianness, &amp;ret); err != nil {</span></a>
-<a name="124"><span class="lineNum">     124 </span><span class="lineNoCov">          0 :                 return 0, fmt.Errorf(&quot;failed to GetInt32: %w&quot;, err)</span></a>
+<a name="124"><span class="lineNum">     124 </span><span class="lineNoCov">          0 :                 return 0, errors.Err(err, &quot;GetInt32&quot;)</span></a>
 <a name="125"><span class="lineNum">     125 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="126"><span class="lineNum">     126 </span>            : </a>
 <a name="127"><span class="lineNum">     127 </span><span class="lineCov">          1 :         return ret, nil</span></a>
@@ -195,7 +195,7 @@
 <a name="133"><span class="lineNum">     133 </span>            : // --------------------.</a>
 <a name="134"><span class="lineNum">     134 </span><span class="lineCov">          1 : func (buf *Buffer) SetInt32(offset int64, x int32) error {</span></a>
 <a name="135"><span class="lineNum">     135 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="136"><span class="lineNum">     136 </span><span class="lineCov">          1 :                 return fmt.Errorf(&quot;failed to SetInt32: %w&quot;, err)</span></a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineCov">          1 :                 return errors.Err(err, &quot;Seek&quot;)</span></a>
 <a name="137"><span class="lineNum">     137 </span><span class="lineCov">          1 :         }</span></a>
 <a name="138"><span class="lineNum">     138 </span>            : </a>
 <a name="139"><span class="lineNum">     139 </span><span class="lineCov">          2 :         if !buf.hasSpace(x) {</span></a>
@@ -203,7 +203,7 @@
 <a name="141"><span class="lineNum">     141 </span><span class="lineCov">          1 :         }</span></a>
 <a name="142"><span class="lineNum">     142 </span>            : </a>
 <a name="143"><span class="lineNum">     143 </span><span class="lineCov">          1 :         if err := binary.Write(buf, endianness, x); err != nil {</span></a>
-<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to SetInt32: %w&quot;, err)</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;Write&quot;)</span></a>
 <a name="145"><span class="lineNum">     145 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="146"><span class="lineNum">     146 </span>            : </a>
 <a name="147"><span class="lineNum">     147 </span><span class="lineCov">          1 :         return nil</span></a>
@@ -212,7 +212,7 @@
 <a name="150"><span class="lineNum">     150 </span>            : // getUint32 returns uint32 from buffer.</a>
 <a name="151"><span class="lineNum">     151 </span><span class="lineCov">          1 : func (buf *Buffer) getUint32(offset int64) (uint32, error) {</span></a>
 <a name="152"><span class="lineNum">     152 </span><span class="lineCov">          1 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 :                 return 0, fmt.Errorf(&quot;failed to getUint32: %w&quot;, err)</span></a>
+<a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 :                 return 0, errors.Err(err, &quot;Seek&quot;)</span></a>
 <a name="154"><span class="lineNum">     154 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="155"><span class="lineNum">     155 </span>            : </a>
 <a name="156"><span class="lineNum">     156 </span><span class="lineCov">          1 :         var ret uint32</span></a>
@@ -220,7 +220,7 @@
 <a name="158"><span class="lineNum">     158 </span><span class="lineCov">          1 :                 return 0, ErrInvalidOffset</span></a>
 <a name="159"><span class="lineNum">     159 </span><span class="lineCov">          1 :         }</span></a>
 <a name="160"><span class="lineNum">     160 </span><span class="lineCov">          1 :         if err := binary.Read(buf, endianness, &amp;ret); err != nil {</span></a>
-<a name="161"><span class="lineNum">     161 </span><span class="lineNoCov">          0 :                 return 0, fmt.Errorf(&quot;failed to getUint32: %w&quot;, err)</span></a>
+<a name="161"><span class="lineNum">     161 </span><span class="lineNoCov">          0 :                 return 0, errors.Err(err, &quot;Read&quot;)</span></a>
 <a name="162"><span class="lineNum">     162 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="163"><span class="lineNum">     163 </span>            : </a>
 <a name="164"><span class="lineNum">     164 </span><span class="lineCov">          1 :         return ret, nil</span></a>
@@ -232,7 +232,7 @@
 <a name="170"><span class="lineNum">     170 </span>            : // --------------------.</a>
 <a name="171"><span class="lineNum">     171 </span><span class="lineCov">          1 : func (buf *Buffer) setUint32(offset int64, x uint32) error {</span></a>
 <a name="172"><span class="lineNum">     172 </span><span class="lineCov">          1 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to setUint32: %w&quot;, err)</span></a>
+<a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;Seek&quot;)</span></a>
 <a name="174"><span class="lineNum">     174 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="175"><span class="lineNum">     175 </span>            : </a>
 <a name="176"><span class="lineNum">     176 </span><span class="lineCov">          1 :         if !buf.hasSpace(x) {</span></a>
@@ -241,7 +241,7 @@
 <a name="179"><span class="lineNum">     179 </span>            : </a>
 <a name="180"><span class="lineNum">     180 </span><span class="lineCov">          1 :         err := binary.Write(buf, endianness, x)</span></a>
 <a name="181"><span class="lineNum">     181 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to setUint32: %w&quot;, err)</span></a>
+<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;Write&quot;)</span></a>
 <a name="183"><span class="lineNum">     183 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="184"><span class="lineNum">     184 </span>            : </a>
 <a name="185"><span class="lineNum">     185 </span><span class="lineCov">          1 :         return nil</span></a>
@@ -250,126 +250,118 @@
 <a name="188"><span class="lineNum">     188 </span>            : // GetString returns string from buffer.</a>
 <a name="189"><span class="lineNum">     189 </span><span class="lineCov">          1 : func (buf *Buffer) GetString(offset int64) (string, error) {</span></a>
 <a name="190"><span class="lineNum">     190 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="191"><span class="lineNum">     191 </span><span class="lineCov">          1 :                 return &quot;&quot;, fmt.Errorf(&quot;failed to get string: %w&quot;, err)</span></a>
+<a name="191"><span class="lineNum">     191 </span><span class="lineCov">          1 :                 return &quot;&quot;, errors.Err(err, &quot;Seek&quot;)</span></a>
 <a name="192"><span class="lineNum">     192 </span><span class="lineCov">          1 :         }</span></a>
 <a name="193"><span class="lineNum">     193 </span>            : </a>
 <a name="194"><span class="lineNum">     194 </span><span class="lineCov">          1 :         length, err := buf.getUint32(offset)</span></a>
 <a name="195"><span class="lineNum">     195 </span><span class="lineCov">          2 :         if err != nil {</span></a>
-<a name="196"><span class="lineNum">     196 </span><span class="lineCov">          1 :                 return &quot;&quot;, err</span></a>
+<a name="196"><span class="lineNum">     196 </span><span class="lineCov">          1 :                 return &quot;&quot;, errors.Err(err, &quot;getUint32&quot;)</span></a>
 <a name="197"><span class="lineNum">     197 </span><span class="lineCov">          1 :         }</span></a>
 <a name="198"><span class="lineNum">     198 </span>            : </a>
-<a name="199"><span class="lineNum">     199 </span>            :         // if !buf.hasSpace(int(length)) {</a>
-<a name="200"><span class="lineNum">     200 </span>            :         //      return &quot;&quot;, ErrInvalidOffset</a>
-<a name="201"><span class="lineNum">     201 </span>            :         // }</a>
-<a name="202"><span class="lineNum">     202 </span>            : </a>
-<a name="203"><span class="lineNum">     203 </span><span class="lineCov">          1 :         bytes := make([]byte, length)</span></a>
-<a name="204"><span class="lineNum">     204 </span><span class="lineCov">          1 : </span></a>
-<a name="205"><span class="lineNum">     205 </span><span class="lineCov">          1 :         _, err = buf.Read(bytes)</span></a>
-<a name="206"><span class="lineNum">     206 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="207"><span class="lineNum">     207 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, fmt.Errorf(&quot;failed to get string: %w&quot;, err)</span></a>
-<a name="208"><span class="lineNum">     208 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="209"><span class="lineNum">     209 </span>            : </a>
-<a name="210"><span class="lineNum">     210 </span><span class="lineCov">          1 :         return string(bytes), nil</span></a>
-<a name="211"><span class="lineNum">     211 </span>            : }</a>
-<a name="212"><span class="lineNum">     212 </span>            : </a>
-<a name="213"><span class="lineNum">     213 </span>            : // SetString returns string from buffer.</a>
-<a name="214"><span class="lineNum">     214 </span>            : // ----------------------------------------</a>
-<a name="215"><span class="lineNum">     215 </span>            : // | string length (uint32)| body (string)|</a>
-<a name="216"><span class="lineNum">     216 </span>            : // ----------------------------------------.</a>
-<a name="217"><span class="lineNum">     217 </span><span class="lineCov">          1 : func (buf *Buffer) SetString(offset int64, str string) error {</span></a>
-<a name="218"><span class="lineNum">     218 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="219"><span class="lineNum">     219 </span><span class="lineCov">          1 :                 return fmt.Errorf(&quot;failed to set string: %w&quot;, err)</span></a>
+<a name="199"><span class="lineNum">     199 </span><span class="lineCov">          1 :         bytes := make([]byte, length)</span></a>
+<a name="200"><span class="lineNum">     200 </span><span class="lineCov">          1 : </span></a>
+<a name="201"><span class="lineNum">     201 </span><span class="lineCov">          1 :         _, err = buf.Read(bytes)</span></a>
+<a name="202"><span class="lineNum">     202 </span><span class="lineCov">          1 :         if err != nil {</span></a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.Err(err, &quot;Read&quot;)</span></a>
+<a name="204"><span class="lineNum">     204 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="205"><span class="lineNum">     205 </span>            : </a>
+<a name="206"><span class="lineNum">     206 </span><span class="lineCov">          1 :         return string(bytes), nil</span></a>
+<a name="207"><span class="lineNum">     207 </span>            : }</a>
+<a name="208"><span class="lineNum">     208 </span>            : </a>
+<a name="209"><span class="lineNum">     209 </span>            : // SetString returns string from buffer.</a>
+<a name="210"><span class="lineNum">     210 </span>            : // ----------------------------------------</a>
+<a name="211"><span class="lineNum">     211 </span>            : // | string length (uint32)| body (string)|</a>
+<a name="212"><span class="lineNum">     212 </span>            : // ----------------------------------------.</a>
+<a name="213"><span class="lineNum">     213 </span><span class="lineCov">          1 : func (buf *Buffer) SetString(offset int64, str string) error {</span></a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
+<a name="215"><span class="lineNum">     215 </span><span class="lineCov">          1 :                 return errors.Err(err, &quot;Seek&quot;)</span></a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineCov">          1 :         }</span></a>
+<a name="217"><span class="lineNum">     217 </span>            : </a>
+<a name="218"><span class="lineNum">     218 </span><span class="lineCov">          2 :         if !buf.hasSpace(str) {</span></a>
+<a name="219"><span class="lineNum">     219 </span><span class="lineCov">          1 :                 return ErrInvalidOffset</span></a>
 <a name="220"><span class="lineNum">     220 </span><span class="lineCov">          1 :         }</span></a>
 <a name="221"><span class="lineNum">     221 </span>            : </a>
-<a name="222"><span class="lineNum">     222 </span><span class="lineCov">          2 :         if !buf.hasSpace(str) {</span></a>
-<a name="223"><span class="lineNum">     223 </span><span class="lineCov">          1 :                 return ErrInvalidOffset</span></a>
-<a name="224"><span class="lineNum">     224 </span><span class="lineCov">          1 :         }</span></a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineCov">          1 :         if err := buf.setUint32(offset, uint32(len(str))); err != nil {</span></a>
+<a name="223"><span class="lineNum">     223 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;setUint32&quot;)</span></a>
+<a name="224"><span class="lineNum">     224 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="225"><span class="lineNum">     225 </span>            : </a>
-<a name="226"><span class="lineNum">     226 </span><span class="lineCov">          1 :         if err := buf.setUint32(offset, uint32(len(str))); err != nil {</span></a>
-<a name="227"><span class="lineNum">     227 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to set string: %w&quot;, err)</span></a>
+<a name="226"><span class="lineNum">     226 </span><span class="lineCov">          1 :         if _, err := buf.Write([]byte(str)); err != nil {</span></a>
+<a name="227"><span class="lineNum">     227 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;Write&quot;)</span></a>
 <a name="228"><span class="lineNum">     228 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="229"><span class="lineNum">     229 </span>            : </a>
-<a name="230"><span class="lineNum">     230 </span><span class="lineCov">          1 :         if _, err := buf.Write([]byte(str)); err != nil {</span></a>
-<a name="231"><span class="lineNum">     231 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to set string: %w&quot;, err)</span></a>
-<a name="232"><span class="lineNum">     232 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="233"><span class="lineNum">     233 </span>            : </a>
-<a name="234"><span class="lineNum">     234 </span><span class="lineCov">          1 :         return nil</span></a>
-<a name="235"><span class="lineNum">     235 </span>            : }</a>
-<a name="236"><span class="lineNum">     236 </span>            : </a>
-<a name="237"><span class="lineNum">     237 </span>            : // GetBytes returns bytes from page.</a>
-<a name="238"><span class="lineNum">     238 </span><span class="lineCov">          1 : func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {</span></a>
-<a name="239"><span class="lineNum">     239 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="240"><span class="lineNum">     240 </span><span class="lineCov">          1 :                 return nil, fmt.Errorf(&quot;failed to get bytes: %w&quot;, err)</span></a>
-<a name="241"><span class="lineNum">     241 </span><span class="lineCov">          1 :         }</span></a>
-<a name="242"><span class="lineNum">     242 </span>            : </a>
-<a name="243"><span class="lineNum">     243 </span><span class="lineCov">          1 :         length, err := buf.getUint32(offset)</span></a>
-<a name="244"><span class="lineNum">     244 </span><span class="lineCov">          2 :         if err != nil {</span></a>
-<a name="245"><span class="lineNum">     245 </span><span class="lineCov">          1 :                 return nil, fmt.Errorf(&quot;failed to get bytes: %w&quot;, err)</span></a>
-<a name="246"><span class="lineNum">     246 </span><span class="lineCov">          1 :         }</span></a>
-<a name="247"><span class="lineNum">     247 </span><span class="lineCov">          1 :         if length == 0 {</span></a>
-<a name="248"><span class="lineNum">     248 </span><span class="lineNoCov">          0 :                 return []byte{}, nil</span></a>
-<a name="249"><span class="lineNum">     249 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="250"><span class="lineNum">     250 </span>            : </a>
-<a name="251"><span class="lineNum">     251 </span>            :         // if !buf.hasSpace(int(length)) {</a>
-<a name="252"><span class="lineNum">     252 </span>            :         //      return nil, ErrInvalidOffset</a>
-<a name="253"><span class="lineNum">     253 </span>            :         // }</a>
-<a name="254"><span class="lineNum">     254 </span>            : </a>
-<a name="255"><span class="lineNum">     255 </span><span class="lineCov">          1 :         bytes := make([]byte, length)</span></a>
-<a name="256"><span class="lineNum">     256 </span><span class="lineCov">          1 : </span></a>
-<a name="257"><span class="lineNum">     257 </span><span class="lineCov">          1 :         _, err = buf.Read(bytes)</span></a>
-<a name="258"><span class="lineNum">     258 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="259"><span class="lineNum">     259 </span><span class="lineNoCov">          0 :                 return nil, fmt.Errorf(&quot;failed to get bytes: %w&quot;, err)</span></a>
-<a name="260"><span class="lineNum">     260 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="261"><span class="lineNum">     261 </span>            : </a>
-<a name="262"><span class="lineNum">     262 </span><span class="lineCov">          1 :         return bytes, nil</span></a>
-<a name="263"><span class="lineNum">     263 </span>            : }</a>
-<a name="264"><span class="lineNum">     264 </span>            : </a>
-<a name="265"><span class="lineNum">     265 </span>            : // SetBytes writes bytes to page.</a>
-<a name="266"><span class="lineNum">     266 </span>            : // ---------------------------------------</a>
-<a name="267"><span class="lineNum">     267 </span>            : // | bytes length (uint32) | body (bytes)|</a>
-<a name="268"><span class="lineNum">     268 </span>            : // ---------------------------------------.</a>
-<a name="269"><span class="lineNum">     269 </span><span class="lineCov">          1 : func (buf *Buffer) SetBytes(offset int64, p []byte) error {</span></a>
-<a name="270"><span class="lineNum">     270 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
-<a name="271"><span class="lineNum">     271 </span><span class="lineCov">          1 :                 return fmt.Errorf(&quot;failed to set bytes: %w&quot;, err)</span></a>
-<a name="272"><span class="lineNum">     272 </span><span class="lineCov">          1 :         }</span></a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineCov">          1 :         return nil</span></a>
+<a name="231"><span class="lineNum">     231 </span>            : }</a>
+<a name="232"><span class="lineNum">     232 </span>            : </a>
+<a name="233"><span class="lineNum">     233 </span>            : // GetBytes returns bytes from page.</a>
+<a name="234"><span class="lineNum">     234 </span><span class="lineCov">          1 : func (buf *Buffer) GetBytes(offset int64) ([]byte, error) {</span></a>
+<a name="235"><span class="lineNum">     235 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
+<a name="236"><span class="lineNum">     236 </span><span class="lineCov">          1 :                 return nil, errors.Err(err, &quot;Seek&quot;)</span></a>
+<a name="237"><span class="lineNum">     237 </span><span class="lineCov">          1 :         }</span></a>
+<a name="238"><span class="lineNum">     238 </span>            : </a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineCov">          1 :         length, err := buf.getUint32(offset)</span></a>
+<a name="240"><span class="lineNum">     240 </span><span class="lineCov">          2 :         if err != nil {</span></a>
+<a name="241"><span class="lineNum">     241 </span><span class="lineCov">          1 :                 return nil, errors.Err(err, &quot;getUint32&quot;)</span></a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineCov">          1 :         }</span></a>
+<a name="243"><span class="lineNum">     243 </span><span class="lineCov">          1 :         if length == 0 {</span></a>
+<a name="244"><span class="lineNum">     244 </span><span class="lineNoCov">          0 :                 return []byte{}, nil</span></a>
+<a name="245"><span class="lineNum">     245 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="246"><span class="lineNum">     246 </span>            : </a>
+<a name="247"><span class="lineNum">     247 </span><span class="lineCov">          1 :         bytes := make([]byte, length)</span></a>
+<a name="248"><span class="lineNum">     248 </span><span class="lineCov">          1 : </span></a>
+<a name="249"><span class="lineNum">     249 </span><span class="lineCov">          1 :         _, err = buf.Read(bytes)</span></a>
+<a name="250"><span class="lineNum">     250 </span><span class="lineCov">          1 :         if err != nil {</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :                 return nil, errors.Err(err, &quot;Read&quot;)</span></a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="253"><span class="lineNum">     253 </span>            : </a>
+<a name="254"><span class="lineNum">     254 </span><span class="lineCov">          1 :         return bytes, nil</span></a>
+<a name="255"><span class="lineNum">     255 </span>            : }</a>
+<a name="256"><span class="lineNum">     256 </span>            : </a>
+<a name="257"><span class="lineNum">     257 </span>            : // SetBytes writes bytes to page.</a>
+<a name="258"><span class="lineNum">     258 </span>            : // ---------------------------------------</a>
+<a name="259"><span class="lineNum">     259 </span>            : // | bytes length (uint32) | body (bytes)|</a>
+<a name="260"><span class="lineNum">     260 </span>            : // ---------------------------------------.</a>
+<a name="261"><span class="lineNum">     261 </span><span class="lineCov">          1 : func (buf *Buffer) SetBytes(offset int64, p []byte) error {</span></a>
+<a name="262"><span class="lineNum">     262 </span><span class="lineCov">          2 :         if _, err := buf.Seek(offset, io.SeekStart); err != nil {</span></a>
+<a name="263"><span class="lineNum">     263 </span><span class="lineCov">          1 :                 return errors.Err(err, &quot;Seek&quot;)</span></a>
+<a name="264"><span class="lineNum">     264 </span><span class="lineCov">          1 :         }</span></a>
+<a name="265"><span class="lineNum">     265 </span>            : </a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineCov">          2 :         if !buf.hasSpace(p) {</span></a>
+<a name="267"><span class="lineNum">     267 </span><span class="lineCov">          1 :                 return ErrInvalidOffset</span></a>
+<a name="268"><span class="lineNum">     268 </span><span class="lineCov">          1 :         }</span></a>
+<a name="269"><span class="lineNum">     269 </span>            : </a>
+<a name="270"><span class="lineNum">     270 </span><span class="lineCov">          1 :         if err := buf.setUint32(offset, uint32(len(p))); err != nil {</span></a>
+<a name="271"><span class="lineNum">     271 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;setUint32&quot;)</span></a>
+<a name="272"><span class="lineNum">     272 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="273"><span class="lineNum">     273 </span>            : </a>
-<a name="274"><span class="lineNum">     274 </span><span class="lineCov">          2 :         if !buf.hasSpace(p) {</span></a>
-<a name="275"><span class="lineNum">     275 </span><span class="lineCov">          1 :                 return ErrInvalidOffset</span></a>
-<a name="276"><span class="lineNum">     276 </span><span class="lineCov">          1 :         }</span></a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineCov">          1 :         if _, err := buf.Write(p); err != nil &amp;&amp; !errors.Is(err, io.EOF) {</span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;Write&quot;)</span></a>
+<a name="276"><span class="lineNum">     276 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="277"><span class="lineNum">     277 </span>            : </a>
-<a name="278"><span class="lineNum">     278 </span><span class="lineCov">          1 :         if err := buf.setUint32(offset, uint32(len(p))); err != nil {</span></a>
-<a name="279"><span class="lineNum">     279 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to set bytes: %w&quot;, err)</span></a>
-<a name="280"><span class="lineNum">     280 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="281"><span class="lineNum">     281 </span>            : </a>
-<a name="282"><span class="lineNum">     282 </span><span class="lineCov">          1 :         if _, err := buf.Write(p); err != nil &amp;&amp; !errors.Is(err, io.EOF) {</span></a>
-<a name="283"><span class="lineNum">     283 </span><span class="lineNoCov">          0 :                 return fmt.Errorf(&quot;failed to set bytes: %w&quot;, err)</span></a>
-<a name="284"><span class="lineNum">     284 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="285"><span class="lineNum">     285 </span>            : </a>
-<a name="286"><span class="lineNum">     286 </span><span class="lineCov">          1 :         return nil</span></a>
-<a name="287"><span class="lineNum">     287 </span>            : }</a>
+<a name="278"><span class="lineNum">     278 </span><span class="lineCov">          1 :         return nil</span></a>
+<a name="279"><span class="lineNum">     279 </span>            : }</a>
+<a name="280"><span class="lineNum">     280 </span>            : </a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineCov">          1 : func (buf *Buffer) hasSpace(x any) bool {</span></a>
+<a name="282"><span class="lineNum">     282 </span><span class="lineCov">          1 :         return buf.NeededByteLength(x)+buf.pos &lt;= buf.capacity</span></a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineCov">          1 : }</span></a>
+<a name="284"><span class="lineNum">     284 </span>            : </a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineCov">          1 : func (buf *Buffer) NeededByteLength(x any) int64 {</span></a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineCov">          1 :         return NeededByteLength(x)</span></a>
+<a name="287"><span class="lineNum">     287 </span><span class="lineCov">          1 : }</span></a>
 <a name="288"><span class="lineNum">     288 </span>            : </a>
-<a name="289"><span class="lineNum">     289 </span><span class="lineCov">          1 : func (buf *Buffer) hasSpace(x any) bool {</span></a>
-<a name="290"><span class="lineNum">     290 </span><span class="lineCov">          1 :         return buf.NeededByteLength(x)+buf.pos &lt;= buf.capacity</span></a>
-<a name="291"><span class="lineNum">     291 </span><span class="lineCov">          1 : }</span></a>
-<a name="292"><span class="lineNum">     292 </span>            : </a>
-<a name="293"><span class="lineNum">     293 </span><span class="lineCov">          1 : func (buf *Buffer) NeededByteLength(x any) int64 {</span></a>
-<a name="294"><span class="lineNum">     294 </span><span class="lineCov">          1 :         return NeededByteLength(x)</span></a>
-<a name="295"><span class="lineNum">     295 </span><span class="lineCov">          1 : }</span></a>
-<a name="296"><span class="lineNum">     296 </span>            : </a>
-<a name="297"><span class="lineNum">     297 </span><span class="lineCov">          1 : func NeededByteLength(x any) int64 {</span></a>
-<a name="298"><span class="lineNum">     298 </span><span class="lineCov">          1 :         switch v := x.(type) {</span></a>
-<a name="299"><span class="lineNum">     299 </span><span class="lineCov">          1 :         case int32, uint32:</span></a>
-<a name="300"><span class="lineNum">     300 </span><span class="lineCov">          1 :                 return common.Int32Length</span></a>
-<a name="301"><span class="lineNum">     301 </span><span class="lineNoCov">          0 :         case int64:</span></a>
-<a name="302"><span class="lineNum">     302 </span><span class="lineNoCov">          0 :                 return common.Int64Length</span></a>
-<a name="303"><span class="lineNum">     303 </span><span class="lineCov">          1 :         case []byte:</span></a>
-<a name="304"><span class="lineNum">     304 </span><span class="lineCov">          1 :                 return byteFieldByteLength + int64(len(v))</span></a>
-<a name="305"><span class="lineNum">     305 </span><span class="lineCov">          1 :         case string:</span></a>
-<a name="306"><span class="lineNum">     306 </span><span class="lineCov">          1 :                 return stringFieldByteLength + int64(len(v))</span></a>
-<a name="307"><span class="lineNum">     307 </span><span class="lineNoCov">          0 :         default:</span></a>
-<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 :                 panic(errors.New(&quot;invalid data type&quot;))</span></a>
-<a name="309"><span class="lineNum">     309 </span>            :         }</a>
-<a name="310"><span class="lineNum">     310 </span>            : }</a>
+<a name="289"><span class="lineNum">     289 </span><span class="lineCov">          1 : func NeededByteLength(x any) int64 {</span></a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineCov">          1 :         switch v := x.(type) {</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineCov">          1 :         case int32, uint32:</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineCov">          1 :                 return common.Int32Length</span></a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :         case int64:</span></a>
+<a name="294"><span class="lineNum">     294 </span><span class="lineNoCov">          0 :                 return common.Int64Length</span></a>
+<a name="295"><span class="lineNum">     295 </span><span class="lineCov">          1 :         case []byte:</span></a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineCov">          1 :                 return byteFieldByteLength + int64(len(v))</span></a>
+<a name="297"><span class="lineNum">     297 </span><span class="lineCov">          1 :         case string:</span></a>
+<a name="298"><span class="lineNum">     298 </span><span class="lineCov">          1 :                 return stringFieldByteLength + int64(len(v))</span></a>
+<a name="299"><span class="lineNum">     299 </span><span class="lineNoCov">          0 :         default:</span></a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :                 panic(errors.New(&quot;invalid data type&quot;))</span></a>
+<a name="301"><span class="lineNum">     301 </span>            :         }</a>
+<a name="302"><span class="lineNum">     302 </span>            : }</a>
 </pre>
       </td>
     </tr>

@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-16 06:22:07</td>
+            <td class="headerValue">2022-07-16 08:35:39</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -66,7 +66,7 @@
 <a name="4"><span class="lineNum">       4 </span>            :         &quot;log&quot;</a>
 <a name="5"><span class="lineNum">       5 </span>            : </a>
 <a name="6"><span class="lineNum">       6 </span>            :         &quot;github.com/goropikari/simpledbgo/common&quot;</a>
-<a name="7"><span class="lineNum">       7 </span>            :         &quot;github.com/pkg/errors&quot;</a>
+<a name="7"><span class="lineNum">       7 </span>            :         &quot;github.com/goropikari/simpledbgo/errors&quot;</a>
 <a name="8"><span class="lineNum">       8 </span>            : )</a>
 <a name="9"><span class="lineNum">       9 </span>            : </a>
 <a name="10"><span class="lineNum">      10 </span>            : // ErrFieldNotFound is an error that means specified field is not found.</a>
@@ -248,7 +248,7 @@
 <a name="186"><span class="lineNum">     186 </span>            : // NewRecordPage constructs a RecordPage.</a>
 <a name="187"><span class="lineNum">     187 </span><span class="lineCov">          1 : func NewRecordPage(txn Transaction, blk Block, layout *Layout) (*RecordPage, error) {</span></a>
 <a name="188"><span class="lineNum">     188 </span><span class="lineCov">          1 :         if err := txn.Pin(blk); err != nil {</span></a>
-<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :                 return nil, err</span></a>
+<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :                 return nil, errors.Err(err, &quot;Pin&quot;)</span></a>
 <a name="190"><span class="lineNum">     190 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="191"><span class="lineNum">     191 </span>            : </a>
 <a name="192"><span class="lineNum">     192 </span><span class="lineCov">          1 :         return &amp;RecordPage{</span></a>
@@ -296,7 +296,7 @@
 <a name="234"><span class="lineNum">     234 </span><span class="lineCov">          1 :         slotID := SlotID(0)</span></a>
 <a name="235"><span class="lineNum">     235 </span><span class="lineCov">          2 :         for page.isValidSlot(slotID) {</span></a>
 <a name="236"><span class="lineNum">     236 </span><span class="lineCov">          1 :                 if err := page.txn.SetInt32(page.blk, page.offset(slotID), Empty, false); err != nil {</span></a>
-<a name="237"><span class="lineNum">     237 </span><span class="lineNoCov">          0 :                         return err</span></a>
+<a name="237"><span class="lineNum">     237 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;SetInt32&quot;)</span></a>
 <a name="238"><span class="lineNum">     238 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="239"><span class="lineNum">     239 </span>            : </a>
 <a name="240"><span class="lineNum">     240 </span><span class="lineCov">          1 :                 sch := page.layout.schema</span></a>
@@ -306,11 +306,11 @@
 <a name="244"><span class="lineNum">     244 </span><span class="lineCov">          1 :                         switch typ {</span></a>
 <a name="245"><span class="lineNum">     245 </span><span class="lineCov">          1 :                         case Int32FieldType:</span></a>
 <a name="246"><span class="lineNum">     246 </span><span class="lineCov">          1 :                                 if err := page.txn.SetInt32(page.blk, fldpos, 0, false); err != nil {</span></a>
-<a name="247"><span class="lineNum">     247 </span><span class="lineNoCov">          0 :                                         return err</span></a>
+<a name="247"><span class="lineNum">     247 </span><span class="lineNoCov">          0 :                                         return errors.Err(err, &quot;SetInt32&quot;)</span></a>
 <a name="248"><span class="lineNum">     248 </span><span class="lineNoCov">          0 :                                 }</span></a>
 <a name="249"><span class="lineNum">     249 </span><span class="lineCov">          1 :                         case StringFieldType:</span></a>
 <a name="250"><span class="lineNum">     250 </span><span class="lineCov">          1 :                                 if err := page.txn.SetString(page.blk, fldpos, &quot;&quot;, false); err != nil {</span></a>
-<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :                                         return err</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :                                         return errors.Err(err, &quot;SetString&quot;)</span></a>
 <a name="252"><span class="lineNum">     252 </span><span class="lineNoCov">          0 :                                 }</span></a>
 <a name="253"><span class="lineNum">     253 </span><span class="lineNoCov">          0 :                         case UnknownFieldType:</span></a>
 <a name="254"><span class="lineNum">     254 </span><span class="lineNoCov">          0 :                                 log.Fatal(errors.New(&quot;unexpected record type&quot;))</span></a>
@@ -334,12 +334,12 @@
 <a name="272"><span class="lineNum">     272 </span><span class="lineCov">          1 : func (page *RecordPage) InsertAfter(slotID SlotID) (SlotID, error) {</span></a>
 <a name="273"><span class="lineNum">     273 </span><span class="lineCov">          1 :         newSlot, err := page.searchAfter(slotID, Empty)</span></a>
 <a name="274"><span class="lineNum">     274 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :                 return 0, err</span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :                 return 0, errors.Err(err, &quot;searchAfter&quot;)</span></a>
 <a name="276"><span class="lineNum">     276 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="277"><span class="lineNum">     277 </span><span class="lineCov">          2 :         if newSlot &gt;= 0 {</span></a>
 <a name="278"><span class="lineNum">     278 </span><span class="lineCov">          1 :                 err := page.setSlotCondition(newSlot, Used)</span></a>
 <a name="279"><span class="lineNum">     279 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="280"><span class="lineNum">     280 </span><span class="lineNoCov">          0 :                         return 0, err</span></a>
+<a name="280"><span class="lineNum">     280 </span><span class="lineNoCov">          0 :                         return 0, errors.Err(err, &quot;setSlotCondition&quot;)</span></a>
 <a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="282"><span class="lineNum">     282 </span>            :         }</a>
 <a name="283"><span class="lineNum">     283 </span>            : </a>
@@ -352,7 +352,7 @@
 <a name="290"><span class="lineNum">     290 </span><span class="lineCov">          2 :         for page.isValidSlot(slotID) {</span></a>
 <a name="291"><span class="lineNum">     291 </span><span class="lineCov">          1 :                 currFlag, err := page.GetSlotCondition(slotID)</span></a>
 <a name="292"><span class="lineNum">     292 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :                         return 0, err</span></a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :                         return 0, errors.Wrap(err, &quot;GetSlotCondition&quot;)</span></a>
 <a name="294"><span class="lineNum">     294 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="295"><span class="lineNum">     295 </span><span class="lineCov">          2 :                 if flag == currFlag {</span></a>
 <a name="296"><span class="lineNum">     296 </span><span class="lineCov">          1 :                         return slotID, nil</span></a>

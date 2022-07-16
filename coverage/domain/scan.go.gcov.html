@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntry">257</td>
-            <td class="headerCovTableEntry">415</td>
-            <td class="headerCovTableEntryLo">61.9 %</td>
+            <td class="headerCovTableEntry">418</td>
+            <td class="headerCovTableEntryLo">61.5 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-16 06:22:07</td>
+            <td class="headerValue">2022-07-16 08:35:39</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -63,9 +63,9 @@
 <a name="1"><span class="lineNum">       1 </span>            : package domain</a>
 <a name="2"><span class="lineNum">       2 </span>            : </a>
 <a name="3"><span class="lineNum">       3 </span>            : import (</a>
-<a name="4"><span class="lineNum">       4 </span>            :         &quot;errors&quot;</a>
-<a name="5"><span class="lineNum">       5 </span>            :         &quot;fmt&quot;</a>
-<a name="6"><span class="lineNum">       6 </span>            :         &quot;log&quot;</a>
+<a name="4"><span class="lineNum">       4 </span>            :         &quot;fmt&quot;</a>
+<a name="5"><span class="lineNum">       5 </span>            : </a>
+<a name="6"><span class="lineNum">       6 </span>            :         &quot;github.com/goropikari/simpledbgo/errors&quot;</a>
 <a name="7"><span class="lineNum">       7 </span>            : )</a>
 <a name="8"><span class="lineNum">       8 </span>            : </a>
 <a name="9"><span class="lineNum">       9 </span>            : //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock</a>
@@ -120,18 +120,18 @@
 <a name="58"><span class="lineNum">      58 </span><span class="lineCov">          1 : </span></a>
 <a name="59"><span class="lineNum">      59 </span><span class="lineCov">          1 :         blkLen, err := txn.BlockLength(FileName(tblName))</span></a>
 <a name="60"><span class="lineNum">      60 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :                 return nil, err</span></a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :                 return nil, errors.Err(err, &quot;BlockLength&quot;)</span></a>
 <a name="62"><span class="lineNum">      62 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="63"><span class="lineNum">      63 </span>            : </a>
 <a name="64"><span class="lineNum">      64 </span><span class="lineCov">          2 :         if blkLen == 0 {</span></a>
 <a name="65"><span class="lineNum">      65 </span><span class="lineCov">          1 :                 err := tbl.moveToNewBlock()</span></a>
 <a name="66"><span class="lineNum">      66 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="67"><span class="lineNum">      67 </span><span class="lineNoCov">          0 :                         return nil, err</span></a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineNoCov">          0 :                         return nil, errors.Wrap(err, &quot;moveToNewBlock&quot;)</span></a>
 <a name="68"><span class="lineNum">      68 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="69"><span class="lineNum">      69 </span><span class="lineCov">          1 :         } else {</span></a>
 <a name="70"><span class="lineNum">      70 </span><span class="lineCov">          1 :                 err := tbl.MoveToFirst()</span></a>
 <a name="71"><span class="lineNum">      71 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="72"><span class="lineNum">      72 </span><span class="lineNoCov">          0 :                         return nil, err</span></a>
+<a name="72"><span class="lineNum">      72 </span><span class="lineNoCov">          0 :                         return nil, errors.Wrap(err, &quot;MoveToFirst&quot;)</span></a>
 <a name="73"><span class="lineNum">      73 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="74"><span class="lineNum">      74 </span>            :         }</a>
 <a name="75"><span class="lineNum">      75 </span>            : </a>
@@ -167,14 +167,14 @@
 <a name="105"><span class="lineNum">     105 </span><span class="lineCov">          1 :         case Int32FieldType:</span></a>
 <a name="106"><span class="lineNum">     106 </span><span class="lineCov">          1 :                 val, err := tbl.GetInt32(fldName)</span></a>
 <a name="107"><span class="lineNum">     107 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :                         return Constant{}, err</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :                         return Constant{}, errors.Err(err, &quot;GetInt32&quot;)</span></a>
 <a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="110"><span class="lineNum">     110 </span>            : </a>
 <a name="111"><span class="lineNum">     111 </span><span class="lineCov">          1 :                 return NewConstant(Int32FieldType, val), nil</span></a>
 <a name="112"><span class="lineNum">     112 </span><span class="lineCov">          1 :         case StringFieldType:</span></a>
 <a name="113"><span class="lineNum">     113 </span><span class="lineCov">          1 :                 val, err := tbl.GetString(fldName)</span></a>
 <a name="114"><span class="lineNum">     114 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="115"><span class="lineNum">     115 </span><span class="lineNoCov">          0 :                         return Constant{}, err</span></a>
+<a name="115"><span class="lineNum">     115 </span><span class="lineNoCov">          0 :                         return Constant{}, errors.Err(err, &quot;GetString&quot;)</span></a>
 <a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="117"><span class="lineNum">     117 </span>            : </a>
 <a name="118"><span class="lineNum">     118 </span><span class="lineCov">          1 :                 return NewConstant(StringFieldType, val), nil</span></a>
@@ -208,15 +208,15 @@
 <a name="146"><span class="lineNum">     146 </span><span class="lineCov">          1 :                 // TODO: check val type?</span></a>
 <a name="147"><span class="lineNum">     147 </span><span class="lineCov">          1 :                 err := tbl.SetInt32(fldName, val.AsInt32())</span></a>
 <a name="148"><span class="lineNum">     148 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 :                         return err</span></a>
+<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 :                         return errors.Wrap(err, &quot;TableScan#SetVal: failed to SetInt32&quot;)</span></a>
 <a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 :         case StringFieldType:</span></a>
 <a name="152"><span class="lineNum">     152 </span><span class="lineNoCov">          0 :                 err := tbl.SetString(fldName, val.AsString())</span></a>
 <a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 :                 if err != nil {</span></a>
-<a name="154"><span class="lineNum">     154 </span><span class="lineNoCov">          0 :                         return err</span></a>
+<a name="154"><span class="lineNum">     154 </span><span class="lineNoCov">          0 :                         return errors.Wrap(err, &quot;TableScan#SetVal: failed to SetString&quot;)</span></a>
 <a name="155"><span class="lineNum">     155 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 :         case UnknownFieldType:</span></a>
-<a name="157"><span class="lineNum">     157 </span><span class="lineNoCov">          0 :                 log.Fatal(errors.New(&quot;unexpected field type&quot;))</span></a>
+<a name="157"><span class="lineNum">     157 </span><span class="lineNoCov">          0 :                 return ErrUnsupportedFieldType</span></a>
 <a name="158"><span class="lineNum">     158 </span>            :         }</a>
 <a name="159"><span class="lineNum">     159 </span>            : </a>
 <a name="160"><span class="lineNum">     160 </span><span class="lineCov">          1 :         return nil</span></a>
@@ -227,31 +227,31 @@
 <a name="165"><span class="lineNum">     165 </span><span class="lineCov">          1 : func (tbl *TableScan) AdvanceNextInsertSlotID() error {</span></a>
 <a name="166"><span class="lineNum">     166 </span><span class="lineCov">          1 :         slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)</span></a>
 <a name="167"><span class="lineNum">     167 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;InsertAfter&quot;)</span></a>
 <a name="169"><span class="lineNum">     169 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="170"><span class="lineNum">     170 </span><span class="lineCov">          1 :         tbl.currentSlotID = slotID</span></a>
 <a name="171"><span class="lineNum">     171 </span><span class="lineCov">          1 : </span></a>
 <a name="172"><span class="lineNum">     172 </span><span class="lineCov">          2 :         for tbl.currentSlotID &lt; 0 {</span></a>
 <a name="173"><span class="lineNum">     173 </span><span class="lineCov">          1 :                 last, err := tbl.isAtLastBlock()</span></a>
 <a name="174"><span class="lineNum">     174 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :                         return err</span></a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;isAtLastBlock&quot;)</span></a>
 <a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="177"><span class="lineNum">     177 </span><span class="lineCov">          2 :                 if last {</span></a>
 <a name="178"><span class="lineNum">     178 </span><span class="lineCov">          1 :                         err = tbl.moveToNewBlock()</span></a>
 <a name="179"><span class="lineNum">     179 </span><span class="lineCov">          1 :                         if err != nil {</span></a>
-<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :                                 return err</span></a>
+<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :                                 return errors.Err(err, &quot;moveToNewBlock&quot;)</span></a>
 <a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 :                         }</span></a>
 <a name="182"><span class="lineNum">     182 </span><span class="lineCov">          1 :                 } else {</span></a>
 <a name="183"><span class="lineNum">     183 </span><span class="lineCov">          1 :                         blk := tbl.recordPage.Block()</span></a>
 <a name="184"><span class="lineNum">     184 </span><span class="lineCov">          1 :                         blkNum := blk.Number()</span></a>
 <a name="185"><span class="lineNum">     185 </span><span class="lineCov">          1 :                         err := tbl.moveToBlock(blkNum + 1)</span></a>
 <a name="186"><span class="lineNum">     186 </span><span class="lineCov">          1 :                         if err != nil {</span></a>
-<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :                                 return err</span></a>
+<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :                                 return errors.Err(err, &quot;moveToBlock&quot;)</span></a>
 <a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 :                         }</span></a>
 <a name="189"><span class="lineNum">     189 </span>            :                 }</a>
 <a name="190"><span class="lineNum">     190 </span><span class="lineCov">          1 :                 slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)</span></a>
 <a name="191"><span class="lineNum">     191 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :                         return err</span></a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;InsertAfter&quot;)</span></a>
 <a name="193"><span class="lineNum">     193 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="194"><span class="lineNum">     194 </span><span class="lineCov">          1 :                 tbl.currentSlotID = slotID</span></a>
 <a name="195"><span class="lineNum">     195 </span>            :         }</a>
@@ -270,7 +270,7 @@
 <a name="208"><span class="lineNum">     208 </span><span class="lineNoCov">          0 :         blk := NewBlock(FileName(tbl.tblName), rid.BlockNumber())</span></a>
 <a name="209"><span class="lineNum">     209 </span><span class="lineNoCov">          0 :         recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)</span></a>
 <a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :         if err != nil {</span></a>
-<a name="211"><span class="lineNum">     211 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="211"><span class="lineNum">     211 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;NewRecordPage&quot;)</span></a>
 <a name="212"><span class="lineNum">     212 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="213"><span class="lineNum">     213 </span><span class="lineNoCov">          0 :         tbl.recordPage = recordPage</span></a>
 <a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 :         tbl.currentSlotID = rid.SlotID()</span></a>
@@ -335,12 +335,12 @@
 <a name="273"><span class="lineNum">     273 </span><span class="lineCov">          1 :         blk := tbl.recordPage.Block()</span></a>
 <a name="274"><span class="lineNum">     274 </span><span class="lineCov">          1 :         size, err := tbl.txn.BlockLength(FileName(tbl.tblName))</span></a>
 <a name="275"><span class="lineNum">     275 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="276"><span class="lineNum">     276 </span><span class="lineNoCov">          0 :                 return false, err</span></a>
+<a name="276"><span class="lineNum">     276 </span><span class="lineNoCov">          0 :                 return false, errors.Err(err, &quot;txn.BlockLength&quot;)</span></a>
 <a name="277"><span class="lineNum">     277 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="278"><span class="lineNum">     278 </span>            : </a>
 <a name="279"><span class="lineNum">     279 </span><span class="lineCov">          1 :         blkNum, err := NewBlockNumber(size - 1)</span></a>
 <a name="280"><span class="lineNum">     280 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :                 return false, err</span></a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :                 return false, errors.Err(err, &quot;NewBlockNumber&quot;)</span></a>
 <a name="282"><span class="lineNum">     282 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="283"><span class="lineNum">     283 </span>            : </a>
 <a name="284"><span class="lineNum">     284 </span><span class="lineCov">          1 :         return blk.Number() == blkNum, nil</span></a>
@@ -350,19 +350,19 @@
 <a name="288"><span class="lineNum">     288 </span><span class="lineCov">          1 :         tbl.Close()</span></a>
 <a name="289"><span class="lineNum">     289 </span><span class="lineCov">          1 :         blk, err := tbl.txn.ExtendFile(FileName(tbl.tblName))</span></a>
 <a name="290"><span class="lineNum">     290 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;txn.ExtendFile&quot;)</span></a>
 <a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="293"><span class="lineNum">     293 </span>            : </a>
 <a name="294"><span class="lineNum">     294 </span><span class="lineCov">          1 :         recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)</span></a>
 <a name="295"><span class="lineNum">     295 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;NewRecordPage&quot;)</span></a>
 <a name="297"><span class="lineNum">     297 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="298"><span class="lineNum">     298 </span>            : </a>
 <a name="299"><span class="lineNum">     299 </span><span class="lineCov">          1 :         tbl.recordPage = recordPage</span></a>
 <a name="300"><span class="lineNum">     300 </span><span class="lineCov">          1 : </span></a>
 <a name="301"><span class="lineNum">     301 </span><span class="lineCov">          1 :         err = tbl.recordPage.Format()</span></a>
 <a name="302"><span class="lineNum">     302 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;Page.Format&quot;)</span></a>
 <a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="305"><span class="lineNum">     305 </span>            : </a>
 <a name="306"><span class="lineNum">     306 </span><span class="lineCov">          1 :         tbl.currentSlotID = -1</span></a>
@@ -380,7 +380,7 @@
 <a name="318"><span class="lineNum">     318 </span><span class="lineCov">          1 :         blk := NewBlock(FileName(tbl.tblName), blkNum)</span></a>
 <a name="319"><span class="lineNum">     319 </span><span class="lineCov">          1 :         recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)</span></a>
 <a name="320"><span class="lineNum">     320 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;NewRecordPage&quot;)</span></a>
 <a name="322"><span class="lineNum">     322 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="323"><span class="lineNum">     323 </span>            : </a>
 <a name="324"><span class="lineNum">     324 </span><span class="lineCov">          1 :         tbl.recordPage = recordPage</span></a>
@@ -404,7 +404,7 @@
 <a name="342"><span class="lineNum">     342 </span><span class="lineCov">          1 :         }</span></a>
 <a name="343"><span class="lineNum">     343 </span><span class="lineCov">          1 : </span></a>
 <a name="344"><span class="lineNum">     344 </span><span class="lineCov">          1 :         if err := scan.MoveToFirst(); err != nil {</span></a>
-<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :                 return nil, err</span></a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :                 return nil, errors.Err(err, &quot;MoveToFirst&quot;)</span></a>
 <a name="346"><span class="lineNum">     346 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="347"><span class="lineNum">     347 </span>            : </a>
 <a name="348"><span class="lineNum">     348 </span><span class="lineCov">          1 :         return scan, nil</span></a>
@@ -414,17 +414,17 @@
 <a name="352"><span class="lineNum">     352 </span><span class="lineCov">          1 : func (scan *ProductScan) MoveToFirst() error {</span></a>
 <a name="353"><span class="lineNum">     353 </span><span class="lineCov">          1 :         err := scan.lhsScan.MoveToFirst()</span></a>
 <a name="354"><span class="lineNum">     354 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="355"><span class="lineNum">     355 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="355"><span class="lineNum">     355 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;MoveToFirst&quot;)</span></a>
 <a name="356"><span class="lineNum">     356 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="357"><span class="lineNum">     357 </span>            : </a>
 <a name="358"><span class="lineNum">     358 </span><span class="lineCov">          1 :         scan.lhsScan.HasNext()</span></a>
 <a name="359"><span class="lineNum">     359 </span><span class="lineCov">          1 :         if scan.lhsScan.Err() != nil {</span></a>
-<a name="360"><span class="lineNum">     360 </span><span class="lineNoCov">          0 :                 return scan.lhsScan.Err()</span></a>
+<a name="360"><span class="lineNum">     360 </span><span class="lineNoCov">          0 :                 return errors.Wrap(scan.lhsScan.Err(), &quot;failed to Scan&quot;)</span></a>
 <a name="361"><span class="lineNum">     361 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="362"><span class="lineNum">     362 </span>            : </a>
 <a name="363"><span class="lineNum">     363 </span><span class="lineCov">          1 :         err = scan.rhsScan.MoveToFirst()</span></a>
 <a name="364"><span class="lineNum">     364 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="365"><span class="lineNum">     365 </span><span class="lineNoCov">          0 :                 return err</span></a>
+<a name="365"><span class="lineNum">     365 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;MoveToFirst&quot;)</span></a>
 <a name="366"><span class="lineNum">     366 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="367"><span class="lineNum">     367 </span>            : </a>
 <a name="368"><span class="lineNum">     368 </span><span class="lineCov">          1 :         return nil</span></a>
@@ -475,7 +475,7 @@
 <a name="413"><span class="lineNum">     413 </span><span class="lineCov">          1 :                 return plan.rhsScan.GetInt32(fld)</span></a>
 <a name="414"><span class="lineNum">     414 </span><span class="lineCov">          1 :         }</span></a>
 <a name="415"><span class="lineNum">     415 </span>            : </a>
-<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 :         return 0, fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 :         return 0, fieldNotFoudError(fld)</span></a>
 <a name="417"><span class="lineNum">     417 </span>            : }</a>
 <a name="418"><span class="lineNum">     418 </span>            : </a>
 <a name="419"><span class="lineNum">     419 </span>            : // GetString gets fld as string.</a>
@@ -488,7 +488,7 @@
 <a name="426"><span class="lineNum">     426 </span><span class="lineCov">          1 :                 return plan.rhsScan.GetString(fld)</span></a>
 <a name="427"><span class="lineNum">     427 </span><span class="lineCov">          1 :         }</span></a>
 <a name="428"><span class="lineNum">     428 </span>            : </a>
-<a name="429"><span class="lineNum">     429 </span><span class="lineNoCov">          0 :         return &quot;&quot;, fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="429"><span class="lineNum">     429 </span><span class="lineNoCov">          0 :         return &quot;&quot;, fieldNotFoudError(fld)</span></a>
 <a name="430"><span class="lineNum">     430 </span>            : }</a>
 <a name="431"><span class="lineNum">     431 </span>            : </a>
 <a name="432"><span class="lineNum">     432 </span>            : // GetVal gets fld as Constant.</a>
@@ -501,7 +501,7 @@
 <a name="439"><span class="lineNum">     439 </span><span class="lineCov">          1 :                 return plan.rhsScan.GetVal(fld)</span></a>
 <a name="440"><span class="lineNum">     440 </span><span class="lineCov">          1 :         }</span></a>
 <a name="441"><span class="lineNum">     441 </span>            : </a>
-<a name="442"><span class="lineNum">     442 </span><span class="lineNoCov">          0 :         return Constant{}, fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="442"><span class="lineNum">     442 </span><span class="lineNoCov">          0 :         return Constant{}, fieldNotFoudError(fld)</span></a>
 <a name="443"><span class="lineNum">     443 </span>            : }</a>
 <a name="444"><span class="lineNum">     444 </span>            : </a>
 <a name="445"><span class="lineNum">     445 </span>            : // HasField checks whether plan has fld as field or not.</a>
@@ -686,7 +686,7 @@
 <a name="624"><span class="lineNum">     624 </span><span class="lineCov">          1 :                 return s.scan.GetInt32(fld)</span></a>
 <a name="625"><span class="lineNum">     625 </span><span class="lineCov">          1 :         }</span></a>
 <a name="626"><span class="lineNum">     626 </span>            : </a>
-<a name="627"><span class="lineNum">     627 </span><span class="lineNoCov">          0 :         return 0, fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="627"><span class="lineNum">     627 </span><span class="lineNoCov">          0 :         return 0, fieldNotFoudError(fld)</span></a>
 <a name="628"><span class="lineNum">     628 </span>            : }</a>
 <a name="629"><span class="lineNum">     629 </span>            : </a>
 <a name="630"><span class="lineNum">     630 </span>            : // GetString gets string from the scanner.</a>
@@ -695,7 +695,7 @@
 <a name="633"><span class="lineNum">     633 </span><span class="lineCov">          1 :                 return s.scan.GetString(fld)</span></a>
 <a name="634"><span class="lineNum">     634 </span><span class="lineCov">          1 :         }</span></a>
 <a name="635"><span class="lineNum">     635 </span>            : </a>
-<a name="636"><span class="lineNum">     636 </span><span class="lineNoCov">          0 :         return &quot;&quot;, fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="636"><span class="lineNum">     636 </span><span class="lineNoCov">          0 :         return &quot;&quot;, fieldNotFoudError(fld)</span></a>
 <a name="637"><span class="lineNum">     637 </span>            : }</a>
 <a name="638"><span class="lineNum">     638 </span>            : </a>
 <a name="639"><span class="lineNum">     639 </span>            : // GetVal gets value from the scanner.</a>
@@ -704,7 +704,7 @@
 <a name="642"><span class="lineNum">     642 </span><span class="lineNoCov">          0 :                 return s.scan.GetVal(fld)</span></a>
 <a name="643"><span class="lineNum">     643 </span><span class="lineNoCov">          0 :         }</span></a>
 <a name="644"><span class="lineNum">     644 </span>            : </a>
-<a name="645"><span class="lineNum">     645 </span><span class="lineNoCov">          0 :         return Constant{}, fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="645"><span class="lineNum">     645 </span><span class="lineNoCov">          0 :         return Constant{}, fieldNotFoudError(fld)</span></a>
 <a name="646"><span class="lineNum">     646 </span>            : }</a>
 <a name="647"><span class="lineNum">     647 </span>            : </a>
 <a name="648"><span class="lineNum">     648 </span>            : // HasField checks the existence of the field.</a>
@@ -727,6 +727,10 @@
 <a name="665"><span class="lineNum">     665 </span><span class="lineCov">          1 : func (s *ProjectScan) Err() error {</span></a>
 <a name="666"><span class="lineNum">     666 </span><span class="lineCov">          1 :         return s.err</span></a>
 <a name="667"><span class="lineNum">     667 </span><span class="lineCov">          1 : }</span></a>
+<a name="668"><span class="lineNum">     668 </span>            : </a>
+<a name="669"><span class="lineNum">     669 </span><span class="lineNoCov">          0 : func fieldNotFoudError(fld FieldName) error {</span></a>
+<a name="670"><span class="lineNum">     670 </span><span class="lineNoCov">          0 :         return fmt.Errorf(&quot;field %v not found&quot;, fld)</span></a>
+<a name="671"><span class="lineNum">     671 </span><span class="lineNoCov">          0 : }</span></a>
 </pre>
       </td>
     </tr>
