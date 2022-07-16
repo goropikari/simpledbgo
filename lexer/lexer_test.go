@@ -15,11 +15,9 @@ func TestLexer(t *testing.T) {
 	}{
 		{
 			name:  "select query",
-			query: "SELECT *, id, name FROM foo_bar WHERE id = 123 and name = 'Mike\\'s dog'",
+			query: "SELECT id, name FROM foo_bar WHERE id = 123 and name = 'Mike\\'s dog'",
 			tokens: []lexer.Token{
 				lexer.NewToken(lexer.TKeyword, "select"),
-				lexer.NewToken(lexer.TStar, "*"),
-				lexer.NewToken(lexer.TComma, ","),
 				lexer.NewToken(lexer.TIdentifier, "id"),
 				lexer.NewToken(lexer.TComma, ","),
 				lexer.NewToken(lexer.TIdentifier, "name"),
@@ -37,10 +35,10 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			name:  "select query with combination upper/lower",
-			query: "SeLEcT * from foo",
+			query: "SeLEcT hoge from foo",
 			tokens: []lexer.Token{
 				lexer.NewToken(lexer.TKeyword, "select"),
-				lexer.NewToken(lexer.TStar, "*"),
+				lexer.NewToken(lexer.TIdentifier, "hoge"),
 				lexer.NewToken(lexer.TKeyword, "from"),
 				lexer.NewToken(lexer.TIdentifier, "foo"),
 			},

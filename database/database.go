@@ -6,6 +6,12 @@ import (
 	"github.com/goropikari/simpledbgo/tx"
 )
 
+const (
+	blockSize       = 4096
+	numBuf          = 20
+	timeoutMilliSec = 10000
+)
+
 type Config struct {
 	DBPath          string
 	BlockSize       int32
@@ -15,9 +21,9 @@ type Config struct {
 
 func NewConfig() Config {
 	c := Config{
-		BlockSize:       4096,
-		NumBuf:          20,
-		TimeoutMilliSec: 10000,
+		BlockSize:       blockSize,
+		NumBuf:          numBuf,
+		TimeoutMilliSec: timeoutMilliSec,
 	}
 
 	return c
@@ -64,6 +70,5 @@ func (db *DB) Query(txn domain.Transaction, query string) (domain.Planner, error
 }
 
 func (db *DB) Exec(txn domain.Transaction, cmd string) (int, error) {
-
 	return db.pe.ExecuteUpdate(cmd, txn)
 }

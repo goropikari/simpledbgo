@@ -117,7 +117,7 @@ func (tbl *TableScan) GetVal(fldName FieldName) (Constant, error) {
 
 		return NewConstant(StringFieldType, val), nil
 	case UnknownFieldType:
-		log.Fatal(errors.New("unexpected field type"))
+		return Constant{}, errors.New("unexpected field type")
 	}
 
 	return Constant{}, errors.New("GetVal error")

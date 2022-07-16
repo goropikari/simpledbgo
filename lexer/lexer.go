@@ -38,9 +38,11 @@ func (lex *Lexer) ScanTokens() ([]Token, error) {
 
 	for {
 		token, err := lex.scan()
-		if errors.Is(err, io.EOF) {
-			break
-		} else if err != nil {
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
 			return nil, err
 		}
 		tokens = append(tokens, token)
@@ -62,7 +64,8 @@ func (lex *Lexer) scan() (Token, error) {
 
 	switch c {
 	case '*':
-		return NewToken(TStar, "*"), nil
+		// return NewToken(TStar, "*"), nil
+		return Token{}, errors.New("* is not supported")
 	case '=':
 		return NewToken(TEqual, "="), nil
 	case ',':
