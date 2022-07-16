@@ -29,6 +29,9 @@ type ResultType int
 const (
 	queryResult ResultType = iota + 1
 	commandResult
+	beginResult
+	commitResult
+	rollbackResult
 )
 
 type Result struct {
@@ -51,8 +54,10 @@ func NewServer() *Server {
 }
 
 type Connection struct {
-	db   *database.DB
-	conn net.Conn
+	db    *database.DB
+	conn  net.Conn
+	txn   domain.Transaction
+	inTxn bool
 }
 
 func NewConnection(db *database.DB, conn net.Conn) Connection {
@@ -60,6 +65,19 @@ func NewConnection(db *database.DB, conn net.Conn) Connection {
 		db:   db,
 		conn: conn,
 	}
+}
+
+func (cn *Connection) Txn() (domain.Transaction, error) {
+	if cn.inTxn {
+		return cn.txn, nil
+	}
+
+	txn, err := cn.db.NewTx()
+	if err != nil {
+		return nil, errors.Err(err, "NewTx")
+	}
+
+	return txn, nil
 }
 
 // Run starts DBMS server
@@ -100,16 +118,53 @@ func (cn *Connection) handleConnection() {
 			log.Printf("%v\n", err)
 			// Ideally, error msg should be sent if errors occur
 			cn.conn.Write(makeCommandCompleteMsg(baseError(err).Error()))
-			cn.conn.Write(makeReadyForQueryMsg())
+			cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
 			continue
 		}
-		if res.isQuery() {
-			sendResult(cn.conn, res)
-		} else {
-			// Query except for SELECT
-			cn.conn.Write(makeCommandCompleteMsg("OK"))
-			cn.conn.Write(makeReadyForQueryMsg())
+		// if res.isQuery() {
+		// 	cn.sendResult(res)
+		// } else {
+		// 	// Query except for SELECT
+		// 	cn.conn.Write(makeCommandCompleteMsg("OK"))
+		// 	cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
+		// }
+		switch res.typ {
+		case queryResult:
+			cn.sendResult(res)
+		case commandResult:
+			cn.sendCommand(res)
+		case beginResult:
+			cn.sendBegin(res)
+		case commitResult:
+			cn.sendCommit(res)
+		case rollbackResult:
+			cn.sendRollback(res)
 		}
+		cn.sendReadyForQueryMsg()
+	}
+}
+
+func (cn *Connection) sendCommand(res Result) {
+	cn.conn.Write(makeCommandCompleteMsg("OK"))
+}
+
+func (cn *Connection) sendBegin(res Result) {
+	cn.conn.Write(makeCommandCompleteMsg("BEGIN"))
+}
+
+func (cn *Connection) sendCommit(res Result) {
+	cn.conn.Write(makeCommandCompleteMsg("COMMIT"))
+}
+
+func (cn *Connection) sendRollback(res Result) {
+	cn.conn.Write(makeCommandCompleteMsg("ROLLBACK"))
+}
+
+func (cn *Connection) sendReadyForQueryMsg() {
+	if cn.inTxn {
+		cn.conn.Write(makeReadyForQueryMsg(Transaction))
+	} else {
+		cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
 	}
 }
 
@@ -136,7 +191,7 @@ func (cn *Connection) startup() error {
 	cn.conn.Write(makeParameterStatusMsg("server_version", "0.0.0"))
 
 	// ReadyForQuery
-	cn.conn.Write(makeReadyForQueryMsg())
+	cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
 
 	return nil
 }
@@ -145,7 +200,7 @@ func (cn *Connection) Close() error {
 	return cn.conn.Close()
 }
 
-func sendResult(c net.Conn, res Result) {
+func (cn *Connection) sendResult(res Result) {
 	// 	cols := []string{"hoge", "piyo"}
 	// 	header := makeColDesc(cols)
 	// 	c.Write(header)
@@ -159,19 +214,19 @@ func sendResult(c net.Conn, res Result) {
 	// 	}
 
 	// 	c.Write(selectFooter(len(recs)))
-	// 	c.Write(makeReadyForQueryMsg())
+	// 	c.Write(makeReadyForQueryMsg(TransactionIdle))
 
 	cols := res.fields
 	header := makeColDesc(cols)
-	c.Write(header)
+	cn.conn.Write(header)
 	recs := res.records
 	if len(recs) != 0 {
 		rowByte := makeDataRows(recs)
-		c.Write(rowByte)
+		cn.conn.Write(rowByte)
 	}
 
-	c.Write(selectFooter(len(recs)))
-	c.Write(makeReadyForQueryMsg())
+	cn.conn.Write(selectFooter(len(recs)))
+	// cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
 }
 
 func selectFooter(n int) []byte {
@@ -265,17 +320,67 @@ func (cn *Connection) handleQuery(query string) (Result, error) {
 	if strings.HasPrefix(query, "select") {
 		return cn.handleSelect(query)
 	}
+	if strings.HasPrefix(query, "begin") {
+		return cn.handleBegin(query)
+	}
+	if strings.HasPrefix(query, "commit") {
+		return cn.handleCommit(query)
+	}
+	if strings.HasPrefix(query, "rollback") {
+		return cn.handleRollback(query)
+	}
 	return cn.handleCommand(query)
 }
 
+func (cn *Connection) handleBegin(query string) (Result, error) {
+	cn.inTxn = false
+	txn, err := cn.Txn()
+	if err != nil {
+		return Result{}, errors.Err(err, "Txn")
+	}
+	cn.txn = txn
+	cn.inTxn = true
+
+	return Result{typ: beginResult}, nil
+}
+
+func (cn *Connection) handleCommit(query string) (Result, error) {
+	cn.inTxn = false
+	txn, err := cn.Txn()
+	if err != nil {
+		return Result{}, errors.Err(err, "Txn")
+	}
+	if err := txn.Commit(); err != nil {
+		return Result{}, errors.Err(err, "Commit")
+	}
+	cn.txn = nil
+
+	return Result{typ: commitResult}, nil
+}
+
+func (cn *Connection) handleRollback(query string) (Result, error) {
+	txn, err := cn.Txn()
+	if err != nil {
+		return Result{}, errors.Err(err, "Txn")
+	}
+	if err := txn.Rollback(); err != nil {
+		return Result{}, errors.Err(err, "Rollback")
+	}
+	cn.txn = nil
+	cn.inTxn = false
+
+	return Result{typ: rollbackResult}, nil
+}
+
 func (cn *Connection) handleSelect(query string) (Result, error) {
-	txn, err := cn.db.NewTx()
+	// txn, err := cn.db.NewTx()
+	txn, err := cn.Txn()
 	if err != nil {
 		return Result{}, errors.Err(err, "NewTx")
 	}
 	p, err := cn.db.Query(txn, query)
 	if err != nil {
-		return Result{}, rollback(txn, err)
+		return Result{}, cn.rollback(txn, err)
 	}
 
 	scan, err := p.Open()
@@ -286,33 +391,39 @@ func (cn *Connection) handleSelect(query string) (Result, error) {
 	rows := &Rows{scan: scan, fields: p.Schema().Fields()}
 	result, err := cn.makeResult(rows)
 	if err != nil {
-		return Result{}, rollback(txn, err)
+		return Result{}, cn.rollback(txn, err)
 	}
 
-	if err := txn.Commit(); err != nil {
-		return Result{}, rollback(txn, err)
+	if !cn.inTxn {
+		if err := txn.Commit(); err != nil {
+			return Result{}, cn.rollback(txn, err)
+		}
 	}
 
 	return result, nil
 }
 
 func (cn *Connection) handleCommand(query string) (Result, error) {
-	txn, err := cn.db.NewTx()
+	// txn, err := cn.db.NewTx()
+	txn, err := cn.Txn()
 	if err != nil {
 		return Result{}, errors.Err(err, "NewTx")
 	}
 	if _, err = cn.db.Exec(txn, query); err != nil {
-		return Result{}, rollback(txn, err)
+		return Result{}, cn.rollback(txn, err)
 	}
 
-	if err := txn.Commit(); err != nil {
-		return Result{}, rollback(txn, err)
+	if !cn.inTxn {
+		if err := txn.Commit(); err != nil {
+			return Result{}, cn.rollback(txn, err)
+		}
 	}
 
 	return Result{typ: commandResult}, nil
 }
 
-func rollback(txn domain.Transaction, err error) error {
+func (cn *Connection) rollback(txn domain.Transaction, err error) error {
+	cn.inTxn = false
 	if err2 := txn.Rollback(); err2 != nil {
 		panic(err2)
 	}

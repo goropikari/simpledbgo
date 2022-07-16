@@ -4,8 +4,16 @@ import "encoding/binary"
 
 // ref: https://www.postgresql.org/docs/14/protocol-message-formats.html
 
-func makeReadyForQueryMsg() []byte {
-	return []byte{0x5a, 0x00, 0x00, 0x00, 0x05, 0x49}
+type TransactionStatus = byte
+
+const (
+	TransactionIdle   TransactionStatus = 0x49 // I
+	Transaction       TransactionStatus = 0x54 // T
+	TransactionFailed TransactionStatus = 0x45 // E
+)
+
+func makeReadyForQueryMsg(status TransactionStatus) []byte {
+	return []byte{0x5a, 0x00, 0x00, 0x00, 0x05, status}
 }
 
 func makeCommandCompleteMsg(s string) []byte {
@@ -16,7 +24,7 @@ func makeCommandCompleteMsg(s string) []byte {
 	lb := make([]byte, payloadBytesLength)
 	binary.BigEndian.PutUint32(lb, uint32(l+payloadBytesLength))
 	payload := make([]byte, 0)
-	payload = append(payload, 0x43) // 0x43 -> C: CommandComplete
+	payload = append(payload, 'C') // 0x43 -> C: CommandComplete
 	payload = append(payload, lb...)
 	payload = append(payload, body...)
 
