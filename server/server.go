@@ -332,6 +332,37 @@ func (cn *Connection) handleQuery(query string) (Result, error) {
 	return cn.handleCommand(query)
 }
 
+func (cn *Connection) handleSelect(query string) (Result, error) {
+	// txn, err := cn.db.NewTx()
+	txn, err := cn.Txn()
+	if err != nil {
+		return Result{}, errors.Err(err, "NewTx")
+	}
+	p, err := cn.db.Query(txn, query)
+	if err != nil {
+		return Result{}, cn.rollback(txn, err)
+	}
+
+	scan, err := p.Open()
+	if err != nil {
+		return Result{}, errors.Err(err, "Open")
+	}
+
+	rows := &Rows{scan: scan, fields: p.Schema().Fields()}
+	result, err := cn.makeResult(rows)
+	if err != nil {
+		return Result{}, cn.rollback(txn, err)
+	}
+
+	if !cn.inTxn {
+		if err := txn.Commit(); err != nil {
+			return Result{}, cn.rollback(txn, err)
+		}
+	}
+
+	return result, nil
+}
+
 func (cn *Connection) handleBegin(query string) (Result, error) {
 	cn.inTxn = false
 	txn, err := cn.Txn()
@@ -370,37 +401,6 @@ func (cn *Connection) handleRollback(query string) (Result, error) {
 	cn.inTxn = false
 
 	return Result{typ: rollbackResult}, nil
-}
-
-func (cn *Connection) handleSelect(query string) (Result, error) {
-	// txn, err := cn.db.NewTx()
-	txn, err := cn.Txn()
-	if err != nil {
-		return Result{}, errors.Err(err, "NewTx")
-	}
-	p, err := cn.db.Query(txn, query)
-	if err != nil {
-		return Result{}, cn.rollback(txn, err)
-	}
-
-	scan, err := p.Open()
-	if err != nil {
-		return Result{}, errors.Err(err, "Open")
-	}
-
-	rows := &Rows{scan: scan, fields: p.Schema().Fields()}
-	result, err := cn.makeResult(rows)
-	if err != nil {
-		return Result{}, cn.rollback(txn, err)
-	}
-
-	if !cn.inTxn {
-		if err := txn.Commit(); err != nil {
-			return Result{}, cn.rollback(txn, err)
-		}
-	}
-
-	return result, nil
 }
 
 func (cn *Connection) handleCommand(query string) (Result, error) {
