@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntry">197</td>
-            <td class="headerCovTableEntry">288</td>
-            <td class="headerCovTableEntryLo">68.4 %</td>
+            <td class="headerCovTableEntry">292</td>
+            <td class="headerCovTableEntryLo">67.5 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-16 12:15:50</td>
+            <td class="headerValue">2022-07-17 06:06:38</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -75,18 +75,18 @@
 <a name="13"><span class="lineNum">      13 </span>            :         fileMgr    domain.FileManager</a>
 <a name="14"><span class="lineNum">      14 </span>            :         logMgr     domain.LogManager</a>
 <a name="15"><span class="lineNum">      15 </span>            :         bufferMgr  domain.BufferPoolManager</a>
-<a name="16"><span class="lineNum">      16 </span>            :         concurMgr  domain.ConcurrencyManager</a>
+<a name="16"><span class="lineNum">      16 </span>            :         concurMgr  *ConcurrencyManager</a>
 <a name="17"><span class="lineNum">      17 </span>            :         bufferList *BufferList</a>
 <a name="18"><span class="lineNum">      18 </span>            :         number     domain.TransactionNumber</a>
 <a name="19"><span class="lineNum">      19 </span>            : }</a>
 <a name="20"><span class="lineNum">      20 </span>            : </a>
 <a name="21"><span class="lineNum">      21 </span>            : // NewTransaction constructs Transaction.</a>
-<a name="22"><span class="lineNum">      22 </span><span class="lineCov">          1 : func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {</span></a>
+<a name="22"><span class="lineNum">      22 </span><span class="lineCov">          1 : func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferPoolManager, lt *LockTable, gen domain.TxNumberGenerator) (*Transaction, error) {</span></a>
 <a name="23"><span class="lineNum">      23 </span><span class="lineCov">          1 :         txn := &amp;Transaction{</span></a>
 <a name="24"><span class="lineNum">      24 </span><span class="lineCov">          1 :                 fileMgr:    fileMgr,</span></a>
 <a name="25"><span class="lineNum">      25 </span><span class="lineCov">          1 :                 logMgr:     logMgr,</span></a>
 <a name="26"><span class="lineNum">      26 </span><span class="lineCov">          1 :                 bufferMgr:  bufferMgr,</span></a>
-<a name="27"><span class="lineNum">      27 </span><span class="lineCov">          1 :                 concurMgr:  concurMgr,</span></a>
+<a name="27"><span class="lineNum">      27 </span><span class="lineCov">          1 :                 concurMgr:  NewConcurrencyManager(lt),</span></a>
 <a name="28"><span class="lineNum">      28 </span><span class="lineCov">          1 :                 bufferList: NewBufferList(bufferMgr),</span></a>
 <a name="29"><span class="lineNum">      29 </span><span class="lineCov">          1 :                 number:     gen.Generate(),</span></a>
 <a name="30"><span class="lineNum">      30 </span><span class="lineCov">          1 :         }</span></a>
@@ -228,8 +228,8 @@
 <a name="166"><span class="lineNum">     166 </span><span class="lineNoCov">          0 :                 }</span></a>
 <a name="167"><span class="lineNum">     167 </span>            : </a>
 <a name="168"><span class="lineNum">     168 </span><span class="lineCov">          1 :                 op := record.Operator()</span></a>
-<a name="169"><span class="lineNum">     169 </span><span class="lineCov">          2 :                 if op == logrecord.Checkpoint {</span></a>
-<a name="170"><span class="lineNum">     170 </span><span class="lineCov">          1 :                         break</span></a>
+<a name="169"><span class="lineNum">     169 </span><span class="lineCov">          1 :                 if op == logrecord.Checkpoint {</span></a>
+<a name="170"><span class="lineNum">     170 </span><span class="lineNoCov">          0 :                         break</span></a>
 <a name="171"><span class="lineNum">     171 </span>            :                 }</a>
 <a name="172"><span class="lineNum">     172 </span>            : </a>
 <a name="173"><span class="lineNum">     173 </span><span class="lineCov">          2 :                 if op == logrecord.Commit || op == logrecord.Rollback {</span></a>
@@ -308,180 +308,185 @@
 <a name="246"><span class="lineNum">     246 </span>            : </a>
 <a name="247"><span class="lineNum">     247 </span>            : // SetInt32 sets int32 on the given block.</a>
 <a name="248"><span class="lineNum">     248 </span><span class="lineCov">          1 : func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, writeLog bool) error {</span></a>
-<a name="249"><span class="lineNum">     249 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(blk); err != nil {</span></a>
-<a name="250"><span class="lineNum">     250 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;XLock&quot;)</span></a>
-<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="252"><span class="lineNum">     252 </span>            : </a>
-<a name="253"><span class="lineNum">     253 </span><span class="lineCov">          1 :         buf := tx.bufferList.GetBuffer(blk)</span></a>
-<a name="254"><span class="lineNum">     254 </span><span class="lineCov">          1 :         lsn := domain.DummyLSN</span></a>
-<a name="255"><span class="lineNum">     255 </span><span class="lineCov">          2 :         if writeLog {</span></a>
-<a name="256"><span class="lineNum">     256 </span><span class="lineCov">          1 :                 var err error</span></a>
-<a name="257"><span class="lineNum">     257 </span><span class="lineCov">          1 :                 oldval, err := buf.Page().GetInt32(offset)</span></a>
-<a name="258"><span class="lineNum">     258 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="259"><span class="lineNum">     259 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;GetInt32&quot;)</span></a>
-<a name="260"><span class="lineNum">     260 </span><span class="lineNoCov">          0 :                 }</span></a>
-<a name="261"><span class="lineNum">     261 </span>            : </a>
-<a name="262"><span class="lineNum">     262 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetInt32Log(buf.Block(), offset, oldval)</span></a>
-<a name="263"><span class="lineNum">     263 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="264"><span class="lineNum">     264 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;writeSetInt32Log&quot;)</span></a>
-<a name="265"><span class="lineNum">     265 </span><span class="lineNoCov">          0 :                 }</span></a>
-<a name="266"><span class="lineNum">     266 </span>            :         }</a>
-<a name="267"><span class="lineNum">     267 </span>            : </a>
-<a name="268"><span class="lineNum">     268 </span><span class="lineCov">          1 :         if err := buf.Page().SetInt32(offset, val); err != nil {</span></a>
-<a name="269"><span class="lineNum">     269 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;SetInt32&quot;)</span></a>
-<a name="270"><span class="lineNum">     270 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="271"><span class="lineNum">     271 </span>            : </a>
-<a name="272"><span class="lineNum">     272 </span><span class="lineCov">          1 :         buf.SetModifiedTxNumber(tx.number, lsn)</span></a>
-<a name="273"><span class="lineNum">     273 </span><span class="lineCov">          1 : </span></a>
-<a name="274"><span class="lineNum">     274 </span><span class="lineCov">          1 :         return nil</span></a>
-<a name="275"><span class="lineNum">     275 </span>            : }</a>
-<a name="276"><span class="lineNum">     276 </span>            : </a>
-<a name="277"><span class="lineNum">     277 </span>            : // GetString gets string from the blk.</a>
-<a name="278"><span class="lineNum">     278 </span><span class="lineCov">          1 : func (tx *Transaction) GetString(blk domain.Block, offset int64) (string, error) {</span></a>
-<a name="279"><span class="lineNum">     279 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(blk); err != nil {</span></a>
-<a name="280"><span class="lineNum">     280 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.Err(err, &quot;SLock&quot;)</span></a>
-<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="282"><span class="lineNum">     282 </span>            : </a>
-<a name="283"><span class="lineNum">     283 </span><span class="lineCov">          1 :         buf := tx.bufferList.GetBuffer(blk)</span></a>
-<a name="284"><span class="lineNum">     284 </span><span class="lineCov">          1 : </span></a>
-<a name="285"><span class="lineNum">     285 </span><span class="lineCov">          1 :         return buf.Page().GetString(offset)</span></a>
-<a name="286"><span class="lineNum">     286 </span>            : }</a>
-<a name="287"><span class="lineNum">     287 </span>            : </a>
-<a name="288"><span class="lineNum">     288 </span>            : // SetString sets string on the blk.</a>
-<a name="289"><span class="lineNum">     289 </span><span class="lineCov">          1 : func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, writeLog bool) error {</span></a>
-<a name="290"><span class="lineNum">     290 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(blk); err != nil {</span></a>
-<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;XLock&quot;)</span></a>
-<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="293"><span class="lineNum">     293 </span>            : </a>
-<a name="294"><span class="lineNum">     294 </span><span class="lineCov">          1 :         buf := tx.bufferList.GetBuffer(blk)</span></a>
-<a name="295"><span class="lineNum">     295 </span><span class="lineCov">          1 :         lsn := domain.DummyLSN</span></a>
-<a name="296"><span class="lineNum">     296 </span><span class="lineCov">          2 :         if writeLog {</span></a>
-<a name="297"><span class="lineNum">     297 </span><span class="lineCov">          1 :                 oldval, err := buf.Page().GetString(offset)</span></a>
-<a name="298"><span class="lineNum">     298 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="299"><span class="lineNum">     299 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;GetString&quot;)</span></a>
-<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :                 }</span></a>
-<a name="301"><span class="lineNum">     301 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetStringLog(buf.Block(), offset, oldval)</span></a>
-<a name="302"><span class="lineNum">     302 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
-<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;writeSetStringLog&quot;)</span></a>
-<a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :                 }</span></a>
-<a name="305"><span class="lineNum">     305 </span>            :         }</a>
-<a name="306"><span class="lineNum">     306 </span>            : </a>
-<a name="307"><span class="lineNum">     307 </span><span class="lineCov">          1 :         page := buf.Page()</span></a>
-<a name="308"><span class="lineNum">     308 </span><span class="lineCov">          1 :         if err := page.SetString(offset, val); err != nil {</span></a>
-<a name="309"><span class="lineNum">     309 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;SetString&quot;)</span></a>
-<a name="310"><span class="lineNum">     310 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="311"><span class="lineNum">     311 </span>            : </a>
-<a name="312"><span class="lineNum">     312 </span><span class="lineCov">          1 :         buf.SetModifiedTxNumber(tx.number, lsn)</span></a>
-<a name="313"><span class="lineNum">     313 </span><span class="lineCov">          1 : </span></a>
-<a name="314"><span class="lineNum">     314 </span><span class="lineCov">          1 :         return nil</span></a>
-<a name="315"><span class="lineNum">     315 </span>            : }</a>
-<a name="316"><span class="lineNum">     316 </span>            : </a>
-<a name="317"><span class="lineNum">     317 </span><span class="lineCov">          1 : func (tx *Transaction) writeStartLog() (domain.LSN, error) {</span></a>
-<a name="318"><span class="lineNum">     318 </span><span class="lineCov">          1 :         record := &amp;logrecord.StartRecord{</span></a>
-<a name="319"><span class="lineNum">     319 </span><span class="lineCov">          1 :                 TxNum: tx.number,</span></a>
-<a name="320"><span class="lineNum">     320 </span><span class="lineCov">          1 :         }</span></a>
-<a name="321"><span class="lineNum">     321 </span><span class="lineCov">          1 : </span></a>
-<a name="322"><span class="lineNum">     322 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Start, record)</span></a>
-<a name="323"><span class="lineNum">     323 </span><span class="lineCov">          1 : }</span></a>
-<a name="324"><span class="lineNum">     324 </span>            : </a>
-<a name="325"><span class="lineNum">     325 </span><span class="lineCov">          1 : func (tx *Transaction) writeCommitLog() (domain.LSN, error) {</span></a>
-<a name="326"><span class="lineNum">     326 </span><span class="lineCov">          1 :         record := &amp;logrecord.CommitRecord{TxNum: tx.number}</span></a>
-<a name="327"><span class="lineNum">     327 </span><span class="lineCov">          1 : </span></a>
-<a name="328"><span class="lineNum">     328 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Commit, record)</span></a>
-<a name="329"><span class="lineNum">     329 </span><span class="lineCov">          1 : }</span></a>
-<a name="330"><span class="lineNum">     330 </span>            : </a>
-<a name="331"><span class="lineNum">     331 </span><span class="lineCov">          1 : func (tx *Transaction) writeCheckpointLog() (domain.LSN, error) {</span></a>
-<a name="332"><span class="lineNum">     332 </span><span class="lineCov">          1 :         record := &amp;logrecord.CheckpointRecord{}</span></a>
-<a name="333"><span class="lineNum">     333 </span><span class="lineCov">          1 : </span></a>
-<a name="334"><span class="lineNum">     334 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Checkpoint, record)</span></a>
-<a name="335"><span class="lineNum">     335 </span><span class="lineCov">          1 : }</span></a>
-<a name="336"><span class="lineNum">     336 </span>            : </a>
-<a name="337"><span class="lineNum">     337 </span><span class="lineCov">          1 : func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {</span></a>
-<a name="338"><span class="lineNum">     338 </span><span class="lineCov">          1 :         record := &amp;logrecord.SetInt32Record{</span></a>
-<a name="339"><span class="lineNum">     339 </span><span class="lineCov">          1 :                 FileName:    blk.FileName(),</span></a>
-<a name="340"><span class="lineNum">     340 </span><span class="lineCov">          1 :                 TxNum:       tx.number,</span></a>
-<a name="341"><span class="lineNum">     341 </span><span class="lineCov">          1 :                 BlockNumber: blk.Number(),</span></a>
-<a name="342"><span class="lineNum">     342 </span><span class="lineCov">          1 :                 Offset:      offset,</span></a>
-<a name="343"><span class="lineNum">     343 </span><span class="lineCov">          1 :                 Val:         val,</span></a>
-<a name="344"><span class="lineNum">     344 </span><span class="lineCov">          1 :         }</span></a>
-<a name="345"><span class="lineNum">     345 </span><span class="lineCov">          1 : </span></a>
-<a name="346"><span class="lineNum">     346 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.SetInt32, record)</span></a>
-<a name="347"><span class="lineNum">     347 </span><span class="lineCov">          1 : }</span></a>
-<a name="348"><span class="lineNum">     348 </span>            : </a>
-<a name="349"><span class="lineNum">     349 </span><span class="lineCov">          1 : func (tx *Transaction) writeSetStringLog(blk domain.Block, offset int64, val string) (domain.LSN, error) {</span></a>
-<a name="350"><span class="lineNum">     350 </span><span class="lineCov">          1 :         record := &amp;logrecord.SetStringRecord{</span></a>
-<a name="351"><span class="lineNum">     351 </span><span class="lineCov">          1 :                 FileName:    blk.FileName(),</span></a>
-<a name="352"><span class="lineNum">     352 </span><span class="lineCov">          1 :                 TxNum:       tx.number,</span></a>
-<a name="353"><span class="lineNum">     353 </span><span class="lineCov">          1 :                 BlockNumber: blk.Number(),</span></a>
-<a name="354"><span class="lineNum">     354 </span><span class="lineCov">          1 :                 Offset:      offset,</span></a>
-<a name="355"><span class="lineNum">     355 </span><span class="lineCov">          1 :                 Val:         val,</span></a>
-<a name="356"><span class="lineNum">     356 </span><span class="lineCov">          1 :         }</span></a>
-<a name="357"><span class="lineNum">     357 </span><span class="lineCov">          1 : </span></a>
-<a name="358"><span class="lineNum">     358 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.SetString, record)</span></a>
-<a name="359"><span class="lineNum">     359 </span><span class="lineCov">          1 : }</span></a>
-<a name="360"><span class="lineNum">     360 </span>            : </a>
-<a name="361"><span class="lineNum">     361 </span><span class="lineCov">          1 : func (tx *Transaction) writeRollbackLog() (domain.LSN, error) {</span></a>
-<a name="362"><span class="lineNum">     362 </span><span class="lineCov">          1 :         record := &amp;logrecord.RollbackRecord{TxNum: tx.number}</span></a>
-<a name="363"><span class="lineNum">     363 </span><span class="lineCov">          1 : </span></a>
-<a name="364"><span class="lineNum">     364 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Rollback, record)</span></a>
-<a name="365"><span class="lineNum">     365 </span><span class="lineCov">          1 : }</span></a>
-<a name="366"><span class="lineNum">     366 </span>            : </a>
-<a name="367"><span class="lineNum">     367 </span>            : // log record structure</a>
-<a name="368"><span class="lineNum">     368 </span>            : // ----------------------------------------------------------------------</a>
-<a name="369"><span class="lineNum">     369 </span>            : // | log record type (int32) | record length (uint32) | record (varlen) |</a>
-<a name="370"><span class="lineNum">     370 </span>            : // ----------------------------------------------------------------------.</a>
-<a name="371"><span class="lineNum">     371 </span><span class="lineCov">          1 : func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {</span></a>
-<a name="372"><span class="lineNum">     372 </span><span class="lineCov">          1 :         data, err := record.Marshal()</span></a>
-<a name="373"><span class="lineNum">     373 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;Marshal&quot;)</span></a>
-<a name="375"><span class="lineNum">     375 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="376"><span class="lineNum">     376 </span>            : </a>
-<a name="377"><span class="lineNum">     377 </span><span class="lineCov">          1 :         buf := bytes.NewBuffer(common.Int32Length + common.Uint32Length + len(data))</span></a>
-<a name="378"><span class="lineNum">     378 </span><span class="lineCov">          1 :         if err := buf.SetInt32(0, typ); err != nil {</span></a>
-<a name="379"><span class="lineNum">     379 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;SetInt32&quot;)</span></a>
-<a name="380"><span class="lineNum">     380 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="381"><span class="lineNum">     381 </span>            : </a>
-<a name="382"><span class="lineNum">     382 </span><span class="lineCov">          1 :         if err := buf.SetBytes(common.Int32Length, data); err != nil {</span></a>
-<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;SetBytes&quot;)</span></a>
-<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="385"><span class="lineNum">     385 </span>            : </a>
-<a name="386"><span class="lineNum">     386 </span><span class="lineCov">          1 :         lsn, err := tx.logMgr.AppendRecord(buf.GetData())</span></a>
-<a name="387"><span class="lineNum">     387 </span><span class="lineCov">          1 :         if err != nil {</span></a>
-<a name="388"><span class="lineNum">     388 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;AppendRecord&quot;)</span></a>
-<a name="389"><span class="lineNum">     389 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="390"><span class="lineNum">     390 </span>            : </a>
-<a name="391"><span class="lineNum">     391 </span><span class="lineCov">          1 :         return lsn, nil</span></a>
-<a name="392"><span class="lineNum">     392 </span>            : }</a>
-<a name="393"><span class="lineNum">     393 </span>            : </a>
-<a name="394"><span class="lineNum">     394 </span>            : // BlockLength returns block length of the `filename`.</a>
-<a name="395"><span class="lineNum">     395 </span><span class="lineCov">          1 : func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {</span></a>
-<a name="396"><span class="lineNum">     396 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
-<a name="397"><span class="lineNum">     397 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(dummyBlk); err != nil {</span></a>
-<a name="398"><span class="lineNum">     398 </span><span class="lineNoCov">          0 :                 return 0, errors.Err(err, &quot;SLock&quot;)</span></a>
-<a name="399"><span class="lineNum">     399 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="400"><span class="lineNum">     400 </span>            : </a>
-<a name="401"><span class="lineNum">     401 </span><span class="lineCov">          1 :         return tx.fileMgr.BlockLength(filename)</span></a>
-<a name="402"><span class="lineNum">     402 </span>            : }</a>
-<a name="403"><span class="lineNum">     403 </span>            : </a>
-<a name="404"><span class="lineNum">     404 </span>            : // ExtendFile extends the file by a block.</a>
-<a name="405"><span class="lineNum">     405 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {</span></a>
-<a name="406"><span class="lineNum">     406 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
-<a name="407"><span class="lineNum">     407 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(dummyBlk); err != nil {</span></a>
-<a name="408"><span class="lineNum">     408 </span><span class="lineNoCov">          0 :                 return domain.Block{}, errors.Err(err, &quot;XLock&quot;)</span></a>
-<a name="409"><span class="lineNum">     409 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="410"><span class="lineNum">     410 </span>            : </a>
-<a name="411"><span class="lineNum">     411 </span><span class="lineCov">          1 :         return tx.fileMgr.ExtendFile(filename)</span></a>
-<a name="412"><span class="lineNum">     412 </span>            : }</a>
-<a name="413"><span class="lineNum">     413 </span>            : </a>
-<a name="414"><span class="lineNum">     414 </span>            : // BlockSize returns block size.</a>
-<a name="415"><span class="lineNum">     415 </span><span class="lineNoCov">          0 : func (tx *Transaction) BlockSize() domain.BlockSize {</span></a>
-<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 :         return tx.fileMgr.BlockSize()</span></a>
-<a name="417"><span class="lineNum">     417 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="418"><span class="lineNum">     418 </span>            : </a>
-<a name="419"><span class="lineNum">     419 </span>            : // Available returns the number of available buffers.</a>
-<a name="420"><span class="lineNum">     420 </span><span class="lineCov">          1 : func (tx *Transaction) Available() int {</span></a>
-<a name="421"><span class="lineNum">     421 </span><span class="lineCov">          1 :         return tx.bufferMgr.Available()</span></a>
-<a name="422"><span class="lineNum">     422 </span><span class="lineCov">          1 : }</span></a>
+<a name="249"><span class="lineNum">     249 </span><span class="lineCov">          1 :         // fmt.Printf(&quot;%v %v %v %v %v\n&quot;, tx.GetTxNum(), blk, val, writeLog, tx.concurMgr.GetLockTable())</span></a>
+<a name="250"><span class="lineNum">     250 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(blk); err != nil {</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;XLock&quot;)</span></a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="253"><span class="lineNum">     253 </span>            : </a>
+<a name="254"><span class="lineNum">     254 </span><span class="lineCov">          1 :         buf := tx.bufferList.GetBuffer(blk)</span></a>
+<a name="255"><span class="lineNum">     255 </span><span class="lineCov">          1 :         lsn := domain.DummyLSN</span></a>
+<a name="256"><span class="lineNum">     256 </span><span class="lineCov">          2 :         if writeLog {</span></a>
+<a name="257"><span class="lineNum">     257 </span><span class="lineCov">          1 :                 var err error</span></a>
+<a name="258"><span class="lineNum">     258 </span><span class="lineCov">          1 :                 oldval, err := buf.Page().GetInt32(offset)</span></a>
+<a name="259"><span class="lineNum">     259 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
+<a name="260"><span class="lineNum">     260 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;GetInt32&quot;)</span></a>
+<a name="261"><span class="lineNum">     261 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="262"><span class="lineNum">     262 </span>            : </a>
+<a name="263"><span class="lineNum">     263 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetInt32Log(buf.Block(), offset, oldval)</span></a>
+<a name="264"><span class="lineNum">     264 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
+<a name="265"><span class="lineNum">     265 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;writeSetInt32Log&quot;)</span></a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="267"><span class="lineNum">     267 </span>            :         }</a>
+<a name="268"><span class="lineNum">     268 </span>            : </a>
+<a name="269"><span class="lineNum">     269 </span><span class="lineCov">          1 :         if err := buf.Page().SetInt32(offset, val); err != nil {</span></a>
+<a name="270"><span class="lineNum">     270 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;SetInt32&quot;)</span></a>
+<a name="271"><span class="lineNum">     271 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="272"><span class="lineNum">     272 </span>            : </a>
+<a name="273"><span class="lineNum">     273 </span><span class="lineCov">          1 :         buf.SetModifiedTxNumber(tx.number, lsn)</span></a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineCov">          1 : </span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineCov">          1 :         return nil</span></a>
+<a name="276"><span class="lineNum">     276 </span>            : }</a>
+<a name="277"><span class="lineNum">     277 </span>            : </a>
+<a name="278"><span class="lineNum">     278 </span>            : // GetString gets string from the blk.</a>
+<a name="279"><span class="lineNum">     279 </span><span class="lineCov">          1 : func (tx *Transaction) GetString(blk domain.Block, offset int64) (string, error) {</span></a>
+<a name="280"><span class="lineNum">     280 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(blk); err != nil {</span></a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.Err(err, &quot;SLock&quot;)</span></a>
+<a name="282"><span class="lineNum">     282 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="283"><span class="lineNum">     283 </span>            : </a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineCov">          1 :         buf := tx.bufferList.GetBuffer(blk)</span></a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineCov">          1 : </span></a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineCov">          1 :         return buf.Page().GetString(offset)</span></a>
+<a name="287"><span class="lineNum">     287 </span>            : }</a>
+<a name="288"><span class="lineNum">     288 </span>            : </a>
+<a name="289"><span class="lineNum">     289 </span>            : // SetString sets string on the blk.</a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineCov">          1 : func (tx *Transaction) SetString(blk domain.Block, offset int64, val string, writeLog bool) error {</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(blk); err != nil {</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;XLock&quot;)</span></a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="294"><span class="lineNum">     294 </span>            : </a>
+<a name="295"><span class="lineNum">     295 </span><span class="lineCov">          1 :         buf := tx.bufferList.GetBuffer(blk)</span></a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineCov">          1 :         lsn := domain.DummyLSN</span></a>
+<a name="297"><span class="lineNum">     297 </span><span class="lineCov">          2 :         if writeLog {</span></a>
+<a name="298"><span class="lineNum">     298 </span><span class="lineCov">          1 :                 oldval, err := buf.Page().GetString(offset)</span></a>
+<a name="299"><span class="lineNum">     299 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;GetString&quot;)</span></a>
+<a name="301"><span class="lineNum">     301 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="302"><span class="lineNum">     302 </span><span class="lineCov">          1 :                 lsn, err = tx.writeSetStringLog(buf.Block(), offset, oldval)</span></a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineCov">          1 :                 if err != nil {</span></a>
+<a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :                         return errors.Err(err, &quot;writeSetStringLog&quot;)</span></a>
+<a name="305"><span class="lineNum">     305 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="306"><span class="lineNum">     306 </span>            :         }</a>
+<a name="307"><span class="lineNum">     307 </span>            : </a>
+<a name="308"><span class="lineNum">     308 </span><span class="lineCov">          1 :         page := buf.Page()</span></a>
+<a name="309"><span class="lineNum">     309 </span><span class="lineCov">          1 :         if err := page.SetString(offset, val); err != nil {</span></a>
+<a name="310"><span class="lineNum">     310 </span><span class="lineNoCov">          0 :                 return errors.Err(err, &quot;SetString&quot;)</span></a>
+<a name="311"><span class="lineNum">     311 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="312"><span class="lineNum">     312 </span>            : </a>
+<a name="313"><span class="lineNum">     313 </span><span class="lineCov">          1 :         buf.SetModifiedTxNumber(tx.number, lsn)</span></a>
+<a name="314"><span class="lineNum">     314 </span><span class="lineCov">          1 : </span></a>
+<a name="315"><span class="lineNum">     315 </span><span class="lineCov">          1 :         return nil</span></a>
+<a name="316"><span class="lineNum">     316 </span>            : }</a>
+<a name="317"><span class="lineNum">     317 </span>            : </a>
+<a name="318"><span class="lineNum">     318 </span><span class="lineCov">          1 : func (tx *Transaction) writeStartLog() (domain.LSN, error) {</span></a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineCov">          1 :         record := &amp;logrecord.StartRecord{</span></a>
+<a name="320"><span class="lineNum">     320 </span><span class="lineCov">          1 :                 TxNum: tx.number,</span></a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineCov">          1 :         }</span></a>
+<a name="322"><span class="lineNum">     322 </span><span class="lineCov">          1 : </span></a>
+<a name="323"><span class="lineNum">     323 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Start, record)</span></a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineCov">          1 : }</span></a>
+<a name="325"><span class="lineNum">     325 </span>            : </a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineCov">          1 : func (tx *Transaction) writeCommitLog() (domain.LSN, error) {</span></a>
+<a name="327"><span class="lineNum">     327 </span><span class="lineCov">          1 :         record := &amp;logrecord.CommitRecord{TxNum: tx.number}</span></a>
+<a name="328"><span class="lineNum">     328 </span><span class="lineCov">          1 : </span></a>
+<a name="329"><span class="lineNum">     329 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Commit, record)</span></a>
+<a name="330"><span class="lineNum">     330 </span><span class="lineCov">          1 : }</span></a>
+<a name="331"><span class="lineNum">     331 </span>            : </a>
+<a name="332"><span class="lineNum">     332 </span><span class="lineCov">          1 : func (tx *Transaction) writeCheckpointLog() (domain.LSN, error) {</span></a>
+<a name="333"><span class="lineNum">     333 </span><span class="lineCov">          1 :         record := &amp;logrecord.CheckpointRecord{}</span></a>
+<a name="334"><span class="lineNum">     334 </span><span class="lineCov">          1 : </span></a>
+<a name="335"><span class="lineNum">     335 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Checkpoint, record)</span></a>
+<a name="336"><span class="lineNum">     336 </span><span class="lineCov">          1 : }</span></a>
+<a name="337"><span class="lineNum">     337 </span>            : </a>
+<a name="338"><span class="lineNum">     338 </span><span class="lineCov">          1 : func (tx *Transaction) writeSetInt32Log(blk domain.Block, offset int64, val int32) (domain.LSN, error) {</span></a>
+<a name="339"><span class="lineNum">     339 </span><span class="lineCov">          1 :         record := &amp;logrecord.SetInt32Record{</span></a>
+<a name="340"><span class="lineNum">     340 </span><span class="lineCov">          1 :                 FileName:    blk.FileName(),</span></a>
+<a name="341"><span class="lineNum">     341 </span><span class="lineCov">          1 :                 TxNum:       tx.number,</span></a>
+<a name="342"><span class="lineNum">     342 </span><span class="lineCov">          1 :                 BlockNumber: blk.Number(),</span></a>
+<a name="343"><span class="lineNum">     343 </span><span class="lineCov">          1 :                 Offset:      offset,</span></a>
+<a name="344"><span class="lineNum">     344 </span><span class="lineCov">          1 :                 Val:         val,</span></a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineCov">          1 :         }</span></a>
+<a name="346"><span class="lineNum">     346 </span><span class="lineCov">          1 : </span></a>
+<a name="347"><span class="lineNum">     347 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.SetInt32, record)</span></a>
+<a name="348"><span class="lineNum">     348 </span><span class="lineCov">          1 : }</span></a>
+<a name="349"><span class="lineNum">     349 </span>            : </a>
+<a name="350"><span class="lineNum">     350 </span><span class="lineCov">          1 : func (tx *Transaction) writeSetStringLog(blk domain.Block, offset int64, val string) (domain.LSN, error) {</span></a>
+<a name="351"><span class="lineNum">     351 </span><span class="lineCov">          1 :         record := &amp;logrecord.SetStringRecord{</span></a>
+<a name="352"><span class="lineNum">     352 </span><span class="lineCov">          1 :                 FileName:    blk.FileName(),</span></a>
+<a name="353"><span class="lineNum">     353 </span><span class="lineCov">          1 :                 TxNum:       tx.number,</span></a>
+<a name="354"><span class="lineNum">     354 </span><span class="lineCov">          1 :                 BlockNumber: blk.Number(),</span></a>
+<a name="355"><span class="lineNum">     355 </span><span class="lineCov">          1 :                 Offset:      offset,</span></a>
+<a name="356"><span class="lineNum">     356 </span><span class="lineCov">          1 :                 Val:         val,</span></a>
+<a name="357"><span class="lineNum">     357 </span><span class="lineCov">          1 :         }</span></a>
+<a name="358"><span class="lineNum">     358 </span><span class="lineCov">          1 : </span></a>
+<a name="359"><span class="lineNum">     359 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.SetString, record)</span></a>
+<a name="360"><span class="lineNum">     360 </span><span class="lineCov">          1 : }</span></a>
+<a name="361"><span class="lineNum">     361 </span>            : </a>
+<a name="362"><span class="lineNum">     362 </span><span class="lineCov">          1 : func (tx *Transaction) writeRollbackLog() (domain.LSN, error) {</span></a>
+<a name="363"><span class="lineNum">     363 </span><span class="lineCov">          1 :         record := &amp;logrecord.RollbackRecord{TxNum: tx.number}</span></a>
+<a name="364"><span class="lineNum">     364 </span><span class="lineCov">          1 : </span></a>
+<a name="365"><span class="lineNum">     365 </span><span class="lineCov">          1 :         return tx.writeLog(logrecord.Rollback, record)</span></a>
+<a name="366"><span class="lineNum">     366 </span><span class="lineCov">          1 : }</span></a>
+<a name="367"><span class="lineNum">     367 </span>            : </a>
+<a name="368"><span class="lineNum">     368 </span>            : // log record structure</a>
+<a name="369"><span class="lineNum">     369 </span>            : // ----------------------------------------------------------------------</a>
+<a name="370"><span class="lineNum">     370 </span>            : // | log record type (int32) | record length (uint32) | record (varlen) |</a>
+<a name="371"><span class="lineNum">     371 </span>            : // ----------------------------------------------------------------------.</a>
+<a name="372"><span class="lineNum">     372 </span><span class="lineCov">          1 : func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRecorder) (domain.LSN, error) {</span></a>
+<a name="373"><span class="lineNum">     373 </span><span class="lineCov">          1 :         data, err := record.Marshal()</span></a>
+<a name="374"><span class="lineNum">     374 </span><span class="lineCov">          1 :         if err != nil {</span></a>
+<a name="375"><span class="lineNum">     375 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;Marshal&quot;)</span></a>
+<a name="376"><span class="lineNum">     376 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="377"><span class="lineNum">     377 </span>            : </a>
+<a name="378"><span class="lineNum">     378 </span><span class="lineCov">          1 :         buf := bytes.NewBuffer(common.Int32Length + common.Uint32Length + len(data))</span></a>
+<a name="379"><span class="lineNum">     379 </span><span class="lineCov">          1 :         if err := buf.SetInt32(0, typ); err != nil {</span></a>
+<a name="380"><span class="lineNum">     380 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;SetInt32&quot;)</span></a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="382"><span class="lineNum">     382 </span>            : </a>
+<a name="383"><span class="lineNum">     383 </span><span class="lineCov">          1 :         if err := buf.SetBytes(common.Int32Length, data); err != nil {</span></a>
+<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;SetBytes&quot;)</span></a>
+<a name="385"><span class="lineNum">     385 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="386"><span class="lineNum">     386 </span>            : </a>
+<a name="387"><span class="lineNum">     387 </span><span class="lineCov">          1 :         lsn, err := tx.logMgr.AppendRecord(buf.GetData())</span></a>
+<a name="388"><span class="lineNum">     388 </span><span class="lineCov">          1 :         if err != nil {</span></a>
+<a name="389"><span class="lineNum">     389 </span><span class="lineNoCov">          0 :                 return domain.DummyLSN, errors.Err(err, &quot;AppendRecord&quot;)</span></a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="391"><span class="lineNum">     391 </span>            : </a>
+<a name="392"><span class="lineNum">     392 </span><span class="lineCov">          1 :         return lsn, nil</span></a>
+<a name="393"><span class="lineNum">     393 </span>            : }</a>
+<a name="394"><span class="lineNum">     394 </span>            : </a>
+<a name="395"><span class="lineNum">     395 </span>            : // BlockLength returns block length of the `filename`.</a>
+<a name="396"><span class="lineNum">     396 </span><span class="lineCov">          1 : func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {</span></a>
+<a name="397"><span class="lineNum">     397 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
+<a name="398"><span class="lineNum">     398 </span><span class="lineCov">          1 :         if err := tx.concurMgr.SLock(dummyBlk); err != nil {</span></a>
+<a name="399"><span class="lineNum">     399 </span><span class="lineNoCov">          0 :                 return 0, errors.Err(err, &quot;SLock&quot;)</span></a>
+<a name="400"><span class="lineNum">     400 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="401"><span class="lineNum">     401 </span>            : </a>
+<a name="402"><span class="lineNum">     402 </span><span class="lineCov">          1 :         return tx.fileMgr.BlockLength(filename)</span></a>
+<a name="403"><span class="lineNum">     403 </span>            : }</a>
+<a name="404"><span class="lineNum">     404 </span>            : </a>
+<a name="405"><span class="lineNum">     405 </span>            : // ExtendFile extends the file by a block.</a>
+<a name="406"><span class="lineNum">     406 </span><span class="lineCov">          1 : func (tx *Transaction) ExtendFile(filename domain.FileName) (domain.Block, error) {</span></a>
+<a name="407"><span class="lineNum">     407 </span><span class="lineCov">          1 :         dummyBlk := domain.NewDummyBlock(filename)</span></a>
+<a name="408"><span class="lineNum">     408 </span><span class="lineCov">          1 :         if err := tx.concurMgr.XLock(dummyBlk); err != nil {</span></a>
+<a name="409"><span class="lineNum">     409 </span><span class="lineNoCov">          0 :                 return domain.Block{}, errors.Err(err, &quot;XLock&quot;)</span></a>
+<a name="410"><span class="lineNum">     410 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="411"><span class="lineNum">     411 </span>            : </a>
+<a name="412"><span class="lineNum">     412 </span><span class="lineCov">          1 :         return tx.fileMgr.ExtendFile(filename)</span></a>
+<a name="413"><span class="lineNum">     413 </span>            : }</a>
+<a name="414"><span class="lineNum">     414 </span>            : </a>
+<a name="415"><span class="lineNum">     415 </span>            : // BlockSize returns block size.</a>
+<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 : func (tx *Transaction) BlockSize() domain.BlockSize {</span></a>
+<a name="417"><span class="lineNum">     417 </span><span class="lineNoCov">          0 :         return tx.fileMgr.BlockSize()</span></a>
+<a name="418"><span class="lineNum">     418 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="419"><span class="lineNum">     419 </span>            : </a>
+<a name="420"><span class="lineNum">     420 </span>            : // Available returns the number of available buffers.</a>
+<a name="421"><span class="lineNum">     421 </span><span class="lineCov">          1 : func (tx *Transaction) Available() int {</span></a>
+<a name="422"><span class="lineNum">     422 </span><span class="lineCov">          1 :         return tx.bufferMgr.Available()</span></a>
+<a name="423"><span class="lineNum">     423 </span><span class="lineCov">          1 : }</span></a>
+<a name="424"><span class="lineNum">     424 </span>            : </a>
+<a name="425"><span class="lineNum">     425 </span><span class="lineNoCov">          0 : func (tx *Transaction) GetTxNum() domain.TransactionNumber {</span></a>
+<a name="426"><span class="lineNum">     426 </span><span class="lineNoCov">          0 :         return tx.number</span></a>
+<a name="427"><span class="lineNum">     427 </span><span class="lineNoCov">          0 : }</span></a>
 </pre>
       </td>
     </tr>
