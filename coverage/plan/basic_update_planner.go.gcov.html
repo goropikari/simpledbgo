@@ -31,13 +31,13 @@
             <td class="headerValue">coverage.lcov</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">63</td>
-            <td class="headerCovTableEntry">94</td>
-            <td class="headerCovTableEntryLo">67.0 %</td>
+            <td class="headerCovTableEntry">64</td>
+            <td class="headerCovTableEntry">97</td>
+            <td class="headerCovTableEntryLo">66.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-17 06:06:38</td>
+            <td class="headerValue">2022-07-17 17:57:53</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -179,25 +179,28 @@
 <a name="117"><span class="lineNum">     117 </span><span class="lineCov">          1 :                 }</span></a>
 <a name="118"><span class="lineNum">     118 </span><span class="lineCov">          1 :                 cnt++</span></a>
 <a name="119"><span class="lineNum">     119 </span>            :         }</a>
-<a name="120"><span class="lineNum">     120 </span><span class="lineCov">          1 :         us.Close()</span></a>
-<a name="121"><span class="lineNum">     121 </span><span class="lineCov">          1 : </span></a>
-<a name="122"><span class="lineNum">     122 </span><span class="lineCov">          1 :         return cnt, nil</span></a>
-<a name="123"><span class="lineNum">     123 </span>            : }</a>
-<a name="124"><span class="lineNum">     124 </span>            : </a>
-<a name="125"><span class="lineNum">     125 </span>            : // ExecuteCreateTable executes create table command.</a>
-<a name="126"><span class="lineNum">     126 </span><span class="lineCov">          1 : func (p *BasicUpdatePlanner) ExecuteCreateTable(data *domain.CreateTableData, txn domain.Transaction) (int, error) {</span></a>
-<a name="127"><span class="lineNum">     127 </span><span class="lineCov">          1 :         return 0, p.metadataMgr.CreateTable(data.TableName(), data.Schema(), txn)</span></a>
-<a name="128"><span class="lineNum">     128 </span><span class="lineCov">          1 : }</span></a>
-<a name="129"><span class="lineNum">     129 </span>            : </a>
-<a name="130"><span class="lineNum">     130 </span>            : // ExecuteCreateView executes create view command.</a>
-<a name="131"><span class="lineNum">     131 </span><span class="lineCov">          1 : func (p *BasicUpdatePlanner) ExecuteCreateView(data *domain.CreateViewData, txn domain.Transaction) (int, error) {</span></a>
-<a name="132"><span class="lineNum">     132 </span><span class="lineCov">          1 :         return 0, p.metadataMgr.CreateView(data.ViewName(), data.ViewDef(), txn)</span></a>
-<a name="133"><span class="lineNum">     133 </span><span class="lineCov">          1 : }</span></a>
-<a name="134"><span class="lineNum">     134 </span>            : </a>
-<a name="135"><span class="lineNum">     135 </span>            : // ExecuteCreateIndex executes create index command.</a>
-<a name="136"><span class="lineNum">     136 </span><span class="lineNoCov">          0 : func (p *BasicUpdatePlanner) ExecuteCreateIndex(data *domain.CreateIndexData, txn domain.Transaction) (int, error) {</span></a>
-<a name="137"><span class="lineNum">     137 </span><span class="lineNoCov">          0 :         return 0, p.metadataMgr.CreateIndex(data.IndexName(), data.TableName(), data.FieldName(), txn)</span></a>
-<a name="138"><span class="lineNum">     138 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="120"><span class="lineNum">     120 </span><span class="lineCov">          1 :         if us.Err() != nil {</span></a>
+<a name="121"><span class="lineNum">     121 </span><span class="lineNoCov">          0 :                 return 0, us.Err()</span></a>
+<a name="122"><span class="lineNum">     122 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="123"><span class="lineNum">     123 </span><span class="lineCov">          1 :         us.Close()</span></a>
+<a name="124"><span class="lineNum">     124 </span><span class="lineCov">          1 : </span></a>
+<a name="125"><span class="lineNum">     125 </span><span class="lineCov">          1 :         return cnt, nil</span></a>
+<a name="126"><span class="lineNum">     126 </span>            : }</a>
+<a name="127"><span class="lineNum">     127 </span>            : </a>
+<a name="128"><span class="lineNum">     128 </span>            : // ExecuteCreateTable executes create table command.</a>
+<a name="129"><span class="lineNum">     129 </span><span class="lineCov">          1 : func (p *BasicUpdatePlanner) ExecuteCreateTable(data *domain.CreateTableData, txn domain.Transaction) (int, error) {</span></a>
+<a name="130"><span class="lineNum">     130 </span><span class="lineCov">          1 :         return 0, p.metadataMgr.CreateTable(data.TableName(), data.Schema(), txn)</span></a>
+<a name="131"><span class="lineNum">     131 </span><span class="lineCov">          1 : }</span></a>
+<a name="132"><span class="lineNum">     132 </span>            : </a>
+<a name="133"><span class="lineNum">     133 </span>            : // ExecuteCreateView executes create view command.</a>
+<a name="134"><span class="lineNum">     134 </span><span class="lineCov">          1 : func (p *BasicUpdatePlanner) ExecuteCreateView(data *domain.CreateViewData, txn domain.Transaction) (int, error) {</span></a>
+<a name="135"><span class="lineNum">     135 </span><span class="lineCov">          1 :         return 0, p.metadataMgr.CreateView(data.ViewName(), data.ViewDef(), txn)</span></a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineCov">          1 : }</span></a>
+<a name="137"><span class="lineNum">     137 </span>            : </a>
+<a name="138"><span class="lineNum">     138 </span>            : // ExecuteCreateIndex executes create index command.</a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineNoCov">          0 : func (p *BasicUpdatePlanner) ExecuteCreateIndex(data *domain.CreateIndexData, txn domain.Transaction) (int, error) {</span></a>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 :         return 0, p.metadataMgr.CreateIndex(data.IndexName(), data.TableName(), data.FieldName(), txn)</span></a>
+<a name="141"><span class="lineNum">     141 </span><span class="lineNoCov">          0 : }</span></a>
 </pre>
       </td>
     </tr>
