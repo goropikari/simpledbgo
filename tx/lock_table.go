@@ -11,102 +11,156 @@ import (
 // ErrTransactionTimeoutExceeded is an error that means exceeding timeout.
 var ErrTransactionTimeoutExceeded = errors.New("transaction timeout exceeded")
 
-// LockTable manages locked Block which used by transaction.
-type LockTable struct {
-	locks              *sync.Map
-	timeoutMillisecond time.Duration
-}
-
-// NewLockTable constructs LockTable.
-func NewLockTable(lockTimeout int) *LockTable {
-	return &LockTable{
-		locks:              &sync.Map{},
-		timeoutMillisecond: time.Duration(int64(lockTimeout)) * time.Millisecond,
-	}
-}
-
 type result struct {
 	err error
 }
 
-// SLock aquires shared lock on the blk.
+// LockTable manages locked Block which used by transaction.
+type LockTable struct {
+	mu                 *sync.Mutex
+	cond               *sync.Cond
+	locks              map[domain.Block]int
+	timeoutMillisecond time.Duration
+}
+
+type LockTableConfig struct {
+	LockTimeoutMillisecond int
+}
+
+func NewLockTableConfig() LockTableConfig {
+	const timeout = 10000
+
+	return LockTableConfig{LockTimeoutMillisecond: timeout}
+}
+
+// NewLockTable constructs LockTable.
+func NewLockTable(cfg LockTableConfig) *LockTable {
+	mu := &sync.Mutex{}
+	cond := sync.NewCond(mu)
+
+	return &LockTable{
+		mu:                 mu,
+		cond:               cond,
+		locks:              make(map[domain.Block]int),
+		timeoutMillisecond: time.Duration(cfg.LockTimeoutMillisecond) * time.Millisecond,
+	}
+}
+
 func (lt *LockTable) SLock(blk domain.Block) error {
 	done := make(chan *result)
-	defer close(done)
 
 	go lt.slock(done, blk)
+	res := <-done
 
-	select {
-	case result := <-done:
-		if result.err != nil {
-			return result.err
-		}
-
-		return nil
-	case <-time.After(lt.timeoutMillisecond):
-		return ErrTransactionTimeoutExceeded
-	}
+	return res.err
 }
 
 func (lt *LockTable) slock(done chan *result, blk domain.Block) {
 	now := time.Now()
-	lock, _ := lt.locks.LoadOrStore(blk, &sync.RWMutex{})
-	lock.(*sync.RWMutex).RLock()
-
-	if time.Since(now) > lt.timeoutMillisecond {
-		lock.(*sync.RWMutex).RUnlock()
+	defer close(done)
+	for !lt.mu.TryLock() && time.Since(now) < lt.timeoutMillisecond {
+	}
+	if time.Since(now) >= lt.timeoutMillisecond {
+		lt.mu.Unlock()
+		done <- &result{err: ErrTransactionTimeoutExceeded}
 
 		return
 	}
 
-	done <- &result{err: nil}
-}
+	go func() {
+		time.Sleep(lt.timeoutMillisecond - time.Since(now))
+		lt.cond.Broadcast()
+	}()
 
-// SUnlock releases shared lock on the blk.
-func (lt *LockTable) SUnlock(blk domain.Block) {
-	lock, loaded := lt.locks.Load(blk)
-	if loaded {
-		lock.(*sync.RWMutex).RUnlock()
+	for lt.hasXLock(blk) && time.Since(now) < lt.timeoutMillisecond {
+		lt.cond.Wait()
 	}
+	if lt.hasXLock(blk) {
+		lt.mu.Unlock()
+		done <- &result{err: ErrTransactionTimeoutExceeded}
+
+		return
+	}
+	val := lt.getLockVal(blk)
+	lt.locks[blk] = val + 1
+	done <- &result{}
+	lt.mu.Unlock()
 }
 
-// XLock aquires exclusive lock on the blk.
 func (lt *LockTable) XLock(blk domain.Block) error {
 	done := make(chan *result)
-	defer close(done)
 
 	go lt.xlock(done, blk)
+	res := <-done
 
-	select {
-	case result := <-done:
-		if result.err != nil {
-			return result.err
-		}
-
-		return nil
-	case <-time.After(lt.timeoutMillisecond):
-		return ErrTransactionTimeoutExceeded
-	}
+	return res.err
 }
 
 func (lt *LockTable) xlock(done chan *result, blk domain.Block) {
 	now := time.Now()
-	lock, _ := lt.locks.LoadOrStore(blk, &sync.RWMutex{})
-	lock.(*sync.RWMutex).Lock()
-
-	if time.Since(now) > lt.timeoutMillisecond {
-		lock.(*sync.RWMutex).Unlock()
+	defer close(done)
+	for !lt.mu.TryLock() && time.Since(now) < lt.timeoutMillisecond {
+	}
+	if time.Since(now) >= lt.timeoutMillisecond {
+		lt.mu.Unlock()
+		done <- &result{err: ErrTransactionTimeoutExceeded}
 
 		return
 	}
 
-	done <- &result{err: nil}
+	go func() {
+		time.Sleep(lt.timeoutMillisecond - time.Since(now))
+		lt.cond.Broadcast()
+	}()
+
+	for lt.hasOtherSlocks(blk) && time.Since(now) < lt.timeoutMillisecond {
+		lt.cond.Wait()
+	}
+	if lt.hasOtherSlocks(blk) {
+		lt.mu.Unlock()
+		done <- &result{err: ErrTransactionTimeoutExceeded}
+
+		return
+	}
+	lt.locks[blk] = -1
+	done <- &result{}
+	lt.mu.Unlock()
 }
 
-// XUnlock releases exclusive lock on the blk.
-func (lt *LockTable) XUnlock(blk domain.Block) {
-	lock, loaded := lt.locks.Load(blk)
-	if loaded {
-		lock.(*sync.RWMutex).Unlock()
+func (lt *LockTable) Unlock(blk domain.Block) {
+	lt.mu.Lock()
+	defer lt.mu.Unlock()
+
+	val := lt.getLockVal(blk)
+	if val > 1 {
+		lt.locks[blk] = val - 1
+		if val-1 == 1 {
+			// lt.locks[blk] = 1 のとき、単に shared lock が取られているだけの場合もあれば、xlock 用の slock が取られている場合の2通りがある。
+			lt.cond.Broadcast()
+		}
+	} else {
+		delete(lt.locks, blk)
+		lt.cond.Broadcast()
 	}
+}
+
+func (lt *LockTable) hasXLock(blk domain.Block) bool {
+	return lt.getLockVal(blk) < 0
+}
+
+func (lt *LockTable) hasOtherSlocks(blk domain.Block) bool {
+	return lt.getLockVal(blk) > 1
+}
+
+func (lt *LockTable) getLockVal(blk domain.Block) int {
+	n, ok := lt.locks[blk]
+	if ok {
+		return n
+	}
+
+	return 0
+}
+
+func (lt *LockTable) GetLockVal(blk domain.Block) int {
+	return lt.getLockVal(blk)
 }

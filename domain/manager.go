@@ -27,6 +27,7 @@ type LogManager interface {
 type LogIterator interface {
 	HasNext() bool
 	Next() ([]byte, error)
+	Err() error
 }
 
 // MetadataManager is an interface of MetadataManager.
@@ -48,9 +49,9 @@ type BufferPoolManager interface {
 	Pin(Block) (*Buffer, error)
 }
 
-// ConcurrencyManager is an interface of concurrency manager.
-type ConcurrencyManager interface {
-	SLock(Block) error
-	XLock(Block) error
-	Release()
-}
+// // ConcurrencyManager is an interface of concurrency manager.
+// type ConcurrencyManager interface {
+// 	SLock(Block) error
+// 	XLock(Block) error
+// 	Release()
+// }

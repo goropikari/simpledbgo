@@ -34,16 +34,17 @@ type DB struct {
 	fmgr domain.FileManager
 	lmgr domain.LogManager
 	bmgr domain.BufferPoolManager
-	cmgr domain.ConcurrencyManager
-	gen  domain.TxNumberGenerator
-	pe   *plan.Executor
+	// cmgr domain.ConcurrencyManager
+	lt  *tx.LockTable
+	gen domain.TxNumberGenerator
+	pe  *plan.Executor
 }
 
 func NewDB(
 	fmgr domain.FileManager,
 	lmgr domain.LogManager,
 	bmgr domain.BufferPoolManager,
-	cmgr domain.ConcurrencyManager,
+	lt *tx.LockTable,
 	gen domain.TxNumberGenerator,
 	pe *plan.Executor,
 ) *DB {
@@ -51,14 +52,14 @@ func NewDB(
 		fmgr: fmgr,
 		lmgr: lmgr,
 		bmgr: bmgr,
-		cmgr: cmgr,
+		lt:   lt,
 		gen:  gen,
 		pe:   pe,
 	}
 }
 
 func (db *DB) NewTx() (domain.Transaction, error) {
-	txn, err := tx.NewTransaction(db.fmgr, db.lmgr, db.bmgr, db.cmgr, db.gen)
+	txn, err := tx.NewTransaction(db.fmgr, db.lmgr, db.bmgr, db.lt, db.gen)
 	if err != nil {
 		return nil, errors.Err(err, "NewTransaction")
 	}

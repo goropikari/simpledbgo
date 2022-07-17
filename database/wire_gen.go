@@ -36,23 +36,23 @@ func InitializeDB() (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	concurrencyManagerConfig := tx.NewConcurrencyManagerConfig()
-	concurrencyManager := tx.NewConcurrencyManager(concurrencyManagerConfig)
+	lockTableConfig := tx.NewLockTableConfig()
+	lockTable := tx.NewLockTable(lockTableConfig)
 	numberGenerator := tx.NewNumberGenerator()
 	indexFactory := hash.NewIndexFactory()
 	searchCostCalculator := hash.NewSearchCostCalculator()
 	indexDriver := domain.NewIndexDriver(indexFactory, searchCostCalculator)
-	metadataManager, err := metadata.NewManager(indexDriver, manager, logManager, bufferManager, concurrencyManager, numberGenerator)
+	metadataManager, err := metadata.NewManager(indexDriver, manager, logManager, bufferManager, lockTable, numberGenerator)
 	if err != nil {
 		return nil, err
 	}
 	basicQueryPlanner := plan.NewBasicQueryPlanner(metadataManager)
 	basicUpdatePlanner := plan.NewBasicUpdatePlanner(metadataManager)
 	executor := plan.NewExecutor(basicQueryPlanner, basicUpdatePlanner)
-	db := NewDB(manager, logManager, bufferManager, concurrencyManager, numberGenerator, executor)
+	db := NewDB(manager, logManager, bufferManager, lockTable, numberGenerator, executor)
 	return db, nil
 }
 
 // wire.go:
 
-var Set = wire.NewSet(file.NewManagerConfig, file.NewManager, wire.Bind(new(domain.FileManager), new(*file.Manager)), log.NewManagerConfig, log.NewManager, wire.Bind(new(domain.LogManager), new(*log.Manager)), buffer.NewConfig, buffer.NewManager, wire.Bind(new(domain.BufferPoolManager), new(*buffer.Manager)), tx.NewConcurrencyManagerConfig, tx.NewConcurrencyManager, wire.Bind(new(domain.ConcurrencyManager), new(*tx.ConcurrencyManager)), tx.NewNumberGenerator, wire.Bind(new(domain.TxNumberGenerator), new(*tx.NumberGenerator)), hash.NewIndexFactory, wire.Bind(new(domain.IndexFactory), new(*hash.IndexFactory)), hash.NewSearchCostCalculator, wire.Bind(new(domain.SearchCostCalculator), new(*hash.SearchCostCalculator)), domain.NewIndexDriver, metadata.NewManager, wire.Bind(new(domain.MetadataManager), new(*metadata.Manager)), plan.NewBasicQueryPlanner, wire.Bind(new(domain.QueryPlanner), new(*plan.BasicQueryPlanner)), plan.NewBasicUpdatePlanner, wire.Bind(new(domain.UpdateExecutor), new(*plan.BasicUpdatePlanner)), plan.NewExecutor, NewDB)
+var Set = wire.NewSet(file.NewManagerConfig, file.NewManager, wire.Bind(new(domain.FileManager), new(*file.Manager)), log.NewManagerConfig, log.NewManager, wire.Bind(new(domain.LogManager), new(*log.Manager)), buffer.NewConfig, buffer.NewManager, wire.Bind(new(domain.BufferPoolManager), new(*buffer.Manager)), tx.NewLockTableConfig, tx.NewLockTable, tx.NewNumberGenerator, wire.Bind(new(domain.TxNumberGenerator), new(*tx.NumberGenerator)), hash.NewIndexFactory, wire.Bind(new(domain.IndexFactory), new(*hash.IndexFactory)), hash.NewSearchCostCalculator, wire.Bind(new(domain.SearchCostCalculator), new(*hash.SearchCostCalculator)), domain.NewIndexDriver, metadata.NewManager, wire.Bind(new(domain.MetadataManager), new(*metadata.Manager)), plan.NewBasicQueryPlanner, wire.Bind(new(domain.QueryPlanner), new(*plan.BasicQueryPlanner)), plan.NewBasicUpdatePlanner, wire.Bind(new(domain.UpdateExecutor), new(*plan.BasicUpdatePlanner)), plan.NewExecutor, NewDB)

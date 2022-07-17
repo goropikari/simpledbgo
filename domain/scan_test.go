@@ -21,15 +21,15 @@ func TestTableScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test scanning table", func(t *testing.T) {
 		// transaction 1
 		// insert 50 records
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch := domain.NewSchema()
@@ -55,7 +55,7 @@ func TestTableScan(t *testing.T) {
 
 		// transaction 2
 		// delete even id records
-		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch2 := domain.NewSchema()
@@ -92,7 +92,7 @@ func TestTableScan(t *testing.T) {
 
 		// transaction 3
 		// get 25 records
-		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch3 := domain.NewSchema()
@@ -136,15 +136,15 @@ func TestTableScan2(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test scannig table", func(t *testing.T) {
 		// transaction 1
 		// insert 50 records
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch := domain.NewSchema()
@@ -170,7 +170,7 @@ func TestTableScan2(t *testing.T) {
 
 		// transaction 2
 		// delete last 25 records
-		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch2 := domain.NewSchema()
@@ -197,7 +197,7 @@ func TestTableScan2(t *testing.T) {
 		// transaction 3
 		// insert a record
 		// gets 26 records
-		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch3 := domain.NewSchema()
@@ -255,13 +255,13 @@ func TestProductScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test ProductScan", func(t *testing.T) {
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch1 := domain.NewSchema()
@@ -344,13 +344,13 @@ func TestSelectScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test SelectScan", func(t *testing.T) {
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch1 := domain.NewSchema()
@@ -440,13 +440,13 @@ func TestSelectScan_update_column(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test SelectScan update column", func(t *testing.T) {
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch := domain.NewSchema()
@@ -527,13 +527,13 @@ func TestSelectScan_delete_record(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test SelectScan delete record", func(t *testing.T) {
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch := domain.NewSchema()
@@ -611,13 +611,13 @@ func TestProjectScan(t *testing.T) {
 	fileMgr, logMgr, bufMgr := factory.Create()
 	defer factory.Finish()
 
-	conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 
 	gen := tx.NewNumberGenerator()
 
 	t.Run("test ProjectScan", func(t *testing.T) {
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		sch1 := domain.NewSchema()

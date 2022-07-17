@@ -25,7 +25,7 @@ func TestMetadataManager(t *testing.T) {
 	cal := mock.NewMockSearchCostCalculator(ctrl)
 	cal.EXPECT().Calculate(gomock.Any(), gomock.Any()).Return(0).AnyTimes()
 	idxDriver := domain.NewIndexDriver(mock.NewMockIndexFactory(ctrl), cal)
-	metaMgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
+	metaMgr, err := metadata.NewManager(idxDriver, cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.LockTbl, cr.Gen)
 	require.NoError(t, err)
 
 	sch := domain.NewSchema()

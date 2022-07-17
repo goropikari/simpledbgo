@@ -11,7 +11,6 @@ type Iterator struct {
 	block      domain.Block
 	page       *Page
 	currentPos int32
-	err        error
 }
 
 // NewIterator is a constructor of Iterator.
@@ -31,7 +30,6 @@ func NewIterator(fileMgr domain.FileManager, block domain.Block, page *Page) (*I
 		block:      block,
 		page:       page,
 		currentPos: currentPos,
-		err:        nil,
 	}, nil
 }
 
@@ -74,5 +72,10 @@ func (iter *Iterator) moveToBlock(block domain.Block) error {
 
 	iter.currentPos = boundary
 
+	return nil
+}
+
+// Err returns iterator's error.
+func (iter *Iterator) Err() error {
 	return nil
 }

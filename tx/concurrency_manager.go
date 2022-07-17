@@ -20,13 +20,6 @@ type ConcurrencyManagerConfig struct {
 	LockTimeoutMillisecond int
 }
 
-// NewConcurrencyManagerConfig constructs a ConcurrencyManagerConfig.
-func NewConcurrencyManagerConfig() ConcurrencyManagerConfig {
-	timeout := 10000
-
-	return ConcurrencyManagerConfig{LockTimeoutMillisecond: timeout}
-}
-
 // ConcurrencyManager is a manager of concurrency.
 type ConcurrencyManager struct {
 	lt    *LockTable
@@ -34,9 +27,7 @@ type ConcurrencyManager struct {
 }
 
 // NewConcurrencyManager constructs a ConcurrencyManager.
-func NewConcurrencyManager(cfg ConcurrencyManagerConfig) *ConcurrencyManager {
-	lt := NewLockTable(cfg.LockTimeoutMillisecond)
-
+func NewConcurrencyManager(lt *LockTable) *ConcurrencyManager {
 	return &ConcurrencyManager{
 		lt:    lt,
 		locks: make(map[domain.Block]LockType),
@@ -57,7 +48,10 @@ func (conMgr *ConcurrencyManager) SLock(blk domain.Block) error {
 
 // XLock takes exclusive lock.
 func (conMgr *ConcurrencyManager) XLock(blk domain.Block) error {
-	if _, ok := conMgr.locks[blk]; !ok {
+	if typ, ok := conMgr.locks[blk]; !(ok && typ == Exclusive) {
+		if err := conMgr.SLock(blk); err != nil {
+			return errors.Err(err, "SLock in XLock")
+		}
 		if err := conMgr.lt.XLock(blk); err != nil {
 			return errors.Err(err, "XLock")
 		}
@@ -69,13 +63,12 @@ func (conMgr *ConcurrencyManager) XLock(blk domain.Block) error {
 
 // Release releases all taken locks.
 func (conMgr *ConcurrencyManager) Release() {
-	for blk, typ := range conMgr.locks {
-		switch typ {
-		case Shared:
-			conMgr.lt.SUnlock(blk)
-		case Exclusive:
-			conMgr.lt.XUnlock(blk)
-		}
+	for blk := range conMgr.locks {
+		conMgr.lt.Unlock(blk)
 	}
 	conMgr.locks = make(map[domain.Block]LockType)
+}
+
+func (conMgr *ConcurrencyManager) GetLockTable() *LockTable {
+	return conMgr.lt
 }

@@ -131,8 +131,8 @@ func (idxMgr *IndexManager) GetIndexInfo(tblName domain.TableName, txn domain.Tr
 
 		infos[fldName] = idxInfo
 	}
-	if tbl.Err() != nil {
-		return nil, errors.Err(tbl.Err(), "HasNext")
+	if err := tbl.Err(); err != nil {
+		return nil, errors.Err(err, "HasNext")
 	}
 
 	return infos, nil

@@ -22,11 +22,10 @@ func TestTransaction_Start(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
-
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 		gen := tx.NewNumberGenerator()
-		_, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		_, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		err = logMgr.Flush()
@@ -61,12 +60,11 @@ func TestTransaction_Commit(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
-
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 		gen := tx.NewNumberGenerator()
 		gen.Generate()
-		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		err = transaction.Commit()
@@ -107,11 +105,10 @@ func TestTransaction_GetSetInt32(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
-
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 		gen := tx.NewNumberGenerator()
-		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		blk := domain.NewBlock(domain.FileName("table_"+fake.RandString()), domain.BlockNumber(0))
@@ -119,16 +116,16 @@ func TestTransaction_GetSetInt32(t *testing.T) {
 		offset := int64(10)
 		val := int32(100)
 		writeLog := true
-		err = transaction.Pin(blk)
+		err = txn.Pin(blk)
 		require.NoError(t, err)
-		err = transaction.SetInt32(blk, offset, val, writeLog)
+		err = txn.SetInt32(blk, offset, val, writeLog)
 		require.NoError(t, err)
-		err = transaction.SetInt32(blk, offset, val+1, writeLog)
+		err = txn.SetInt32(blk, offset, val+1, writeLog)
 		require.NoError(t, err)
-		v, err := transaction.GetInt32(blk, offset)
+		v, err := txn.GetInt32(blk, offset)
 		require.NoError(t, err)
 		require.Equal(t, val+1, v)
-		transaction.Commit()
+		txn.Commit()
 
 		err = logMgr.Flush()
 		require.NoError(t, err)
@@ -149,14 +146,14 @@ func TestTransaction_GetSetInt32(t *testing.T) {
 			&logrecord.CommitRecord{TxNum: domain.TransactionNumber(1)},
 			&logrecord.SetInt32Record{
 				FileName:    blk.FileName(),
-				TxNum:       transaction.Number(),
+				TxNum:       txn.Number(),
 				BlockNumber: blk.Number(),
 				Offset:      offset,
 				Val:         val,
 			},
 			&logrecord.SetInt32Record{
 				FileName:    blk.FileName(),
-				TxNum:       transaction.Number(),
+				TxNum:       txn.Number(),
 				BlockNumber: blk.Number(),
 				Offset:      offset,
 				Val:         0,
@@ -179,11 +176,11 @@ func TestTransaction_GetSetString(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 
 		gen := tx.NewNumberGenerator()
-		transaction, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		blk := domain.NewBlock(domain.FileName("table_"+fake.RandString()), domain.BlockNumber(0))
@@ -192,16 +189,16 @@ func TestTransaction_GetSetString(t *testing.T) {
 		val1 := fake.RandString()
 		val2 := fake.RandString()
 		writeLog := true
-		err = transaction.Pin(blk)
+		err = txn.Pin(blk)
 		require.NoError(t, err)
-		err = transaction.SetString(blk, offset, val1, writeLog)
+		err = txn.SetString(blk, offset, val1, writeLog)
 		require.NoError(t, err)
-		err = transaction.SetString(blk, offset, val2, writeLog)
+		err = txn.SetString(blk, offset, val2, writeLog)
 		require.NoError(t, err)
-		v, err := transaction.GetString(blk, offset)
+		v, err := txn.GetString(blk, offset)
 		require.NoError(t, err)
 		require.Equal(t, val2, v)
-		transaction.Commit()
+		txn.Commit()
 
 		err = logMgr.Flush()
 		require.NoError(t, err)
@@ -222,14 +219,14 @@ func TestTransaction_GetSetString(t *testing.T) {
 			&logrecord.CommitRecord{TxNum: domain.TransactionNumber(1)},
 			&logrecord.SetStringRecord{
 				FileName:    blk.FileName(),
-				TxNum:       transaction.Number(),
+				TxNum:       txn.Number(),
 				BlockNumber: blk.Number(),
 				Offset:      offset,
 				Val:         val1,
 			},
 			&logrecord.SetStringRecord{
 				FileName:    blk.FileName(),
-				TxNum:       transaction.Number(),
+				TxNum:       txn.Number(),
 				BlockNumber: blk.Number(),
 				Offset:      offset,
 				Val:         "",
@@ -252,11 +249,11 @@ func TestTransaction_Rollback(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 
 		gen := tx.NewNumberGenerator()
-		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		blk := domain.NewBlock(domain.FileName("table_"+fake.RandString()), domain.BlockNumber(0))
@@ -272,7 +269,7 @@ func TestTransaction_Rollback(t *testing.T) {
 		require.NoError(t, err)
 		txn1.Commit()
 
-		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 		err = txn2.Pin(blk)
 		require.NoError(t, err)
@@ -290,7 +287,7 @@ func TestTransaction_Rollback(t *testing.T) {
 		require.Equal(t, "bar", vs)
 		txn2.Rollback()
 
-		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 		err = txn3.Pin(blk)
 		require.NoError(t, err)
@@ -367,29 +364,27 @@ func TestTransaction_Recover(t *testing.T) {
 	t.Run("test commit", func(t *testing.T) {
 		const (
 			blockSize = 100
-			numBuf    = 2
+			numBuf    = 10
 		)
 
-		dbPath := fake.RandString()
+		dbPath := "txn_" + fake.RandString()
 		factory := fake.NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
-
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 10000}
+		lt := tx.NewLockTable(cfg)
 		gen := tx.NewNumberGenerator()
 
 		filename := "table_" + fake.RandString()
 		blk := domain.NewBlock(domain.FileName(filename), domain.BlockNumber(0))
-		blk2 := domain.NewBlock(domain.FileName(filename), domain.BlockNumber(1))
 
 		offset := int64(10)
 		val := int32(100)
 		writeLog := true
 
 		// commit
-		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 		err = txn1.Pin(blk)
 		require.NoError(t, err)
@@ -397,59 +392,30 @@ func TestTransaction_Recover(t *testing.T) {
 		require.NoError(t, err)
 		err = txn1.SetString(blk, offset+4, "foo", writeLog)
 		require.NoError(t, err)
-		txn1.Commit()
-
-		// uncommit
-		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
-		require.NoError(t, err)
-		err = txn2.Pin(blk2)
-		require.NoError(t, err)
-		err = txn2.SetInt32(blk2, offset, val+1, writeLog)
-		require.NoError(t, err)
-		err = txn2.SetString(blk2, offset+4, "bar", writeLog)
-		require.NoError(t, err)
-		err = txn2.SetInt32(blk2, offset, val+2, writeLog)
-		require.NoError(t, err)
-		v, err := txn2.GetInt32(blk2, offset)
-		require.NoError(t, err)
-		require.Equal(t, val+2, v)
-		vs, err := txn2.GetString(blk2, offset+4)
-		require.NoError(t, err)
-		require.Equal(t, "bar", vs)
-		txn2.Unpin(blk2)
-
-		// recover
-		txn3, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
-		require.NoError(t, err)
-		err = txn3.Recover()
+		err = txn1.Commit()
 		require.NoError(t, err)
 
 		// uncommit
-		txn4, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
 		require.NoError(t, err)
-		err = txn4.Pin(blk)
+		err = txn1.Pin(blk)
 		require.NoError(t, err)
-		vs4, err := txn4.GetString(blk, offset+4)
+		err = txn1.SetInt32(blk, offset, val+1, writeLog)
 		require.NoError(t, err)
-		require.Equal(t, "foo", vs4)
-		v4, err := txn4.GetInt32(blk, offset)
+		err = txn1.SetString(blk, offset+4, "baz", writeLog)
 		require.NoError(t, err)
-		require.Equal(t, val, v4)
-
-		// uncommit
-		txn5, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
-		require.NoError(t, err)
-		err = txn5.Pin(blk2)
-		require.NoError(t, err)
-		err = txn5.SetInt32(blk2, offset, val+1, writeLog)
-		require.NoError(t, err)
-		err = txn5.SetString(blk2, offset+4, "baz", writeLog)
+		err = logMgr.Flush()
 		require.NoError(t, err)
 
 		// recover
-		txn6, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		fileMgr2, logMgr2, bufMgr2 := factory.Create()
+		cfg2 := tx.LockTableConfig{LockTimeoutMillisecond: 10000}
+		lt2 := tx.NewLockTable(cfg2)
+		gen2 := tx.NewNumberGenerator()
+		txn2, err := tx.NewTransaction(fileMgr2, logMgr2, bufMgr2, lt2, gen2)
 		require.NoError(t, err)
-		err = txn6.Recover()
+		err = txn2.Pin(blk)
+		require.NoError(t, err)
+		err = txn2.Recover()
 		require.NoError(t, err)
 
 		it, err := logMgr.Iterator()
@@ -464,52 +430,25 @@ func TestTransaction_Recover(t *testing.T) {
 		}
 
 		expected := []logrecord.LogRecorder{
+			// recover
 			&logrecord.CheckpointRecord{},
-			&logrecord.StartRecord{TxNum: domain.TransactionNumber(6)},
-			// fifth transaction
+			&logrecord.StartRecord{TxNum: domain.TransactionNumber(1)},
+
+			// transaction
 			&logrecord.SetStringRecord{
-				FileName:    blk2.FileName(),
-				TxNum:       txn5.Number(),
-				BlockNumber: blk2.Number(),
+				FileName:    blk.FileName(),
+				TxNum:       txn1.Number(),
+				BlockNumber: blk.Number(),
 				Offset:      offset + 4,
-				Val:         "",
+				Val:         "foo",
 			},
 			&logrecord.SetInt32Record{
-				FileName:    blk2.FileName(),
-				TxNum:       txn5.Number(),
-				BlockNumber: blk2.Number(),
+				FileName:    blk.FileName(),
+				TxNum:       txn1.Number(),
+				BlockNumber: blk.Number(),
 				Offset:      offset,
-				Val:         0,
+				Val:         100,
 			},
-			&logrecord.StartRecord{TxNum: domain.TransactionNumber(5)},
-			// forth transaction
-			&logrecord.StartRecord{TxNum: domain.TransactionNumber(4)},
-			// third transaction
-			&logrecord.CheckpointRecord{},
-			&logrecord.StartRecord{TxNum: domain.TransactionNumber(3)},
-			&logrecord.SetInt32Record{
-				FileName:    blk2.FileName(),
-				TxNum:       txn2.Number(),
-				BlockNumber: blk2.Number(),
-				Offset:      offset,
-				Val:         val + 1,
-			},
-			&logrecord.SetStringRecord{
-				FileName:    blk2.FileName(),
-				TxNum:       txn2.Number(),
-				BlockNumber: blk2.Number(),
-				Offset:      offset + 4,
-				Val:         "",
-			},
-			&logrecord.SetInt32Record{
-				FileName:    blk2.FileName(),
-				TxNum:       txn2.Number(),
-				BlockNumber: blk2.Number(),
-				Offset:      offset,
-				Val:         0,
-			},
-			&logrecord.StartRecord{TxNum: domain.TransactionNumber(2)},
-			// first transaction
 			&logrecord.CommitRecord{TxNum: domain.TransactionNumber(1)},
 			&logrecord.SetStringRecord{
 				FileName:    blk.FileName(),
@@ -531,6 +470,48 @@ func TestTransaction_Recover(t *testing.T) {
 	})
 }
 
+func TestTransaction_TransactionTimeout(t *testing.T) {
+	t.Run("test commit", func(t *testing.T) {
+		const (
+			blockSize = 100
+			numBuf    = 10
+		)
+
+		dbPath := "txn_" + fake.RandString()
+		filename := "table_" + fake.RandString()
+		blk := domain.NewBlock(domain.FileName(filename), domain.BlockNumber(0))
+
+		offset := int64(10)
+		val := int32(100)
+		writeLog := true
+
+		factory := fake.NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
+		fileMgr, logMgr, bufMgr := factory.Create()
+		defer factory.Finish()
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 200}
+		lt := tx.NewLockTable(cfg)
+		gen := tx.NewNumberGenerator()
+
+		// uncommit
+		txn1, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
+		require.NoError(t, err)
+		err = txn1.Pin(blk)
+		require.NoError(t, err)
+		err = txn1.SetInt32(blk, offset, val, writeLog)
+		require.NoError(t, err)
+		err = txn1.SetString(blk, offset+4, "foo", writeLog)
+		require.NoError(t, err)
+
+		// uncommit
+		txn2, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
+		require.NoError(t, err)
+		err = txn2.Pin(blk)
+		require.NoError(t, err)
+		err = txn2.SetInt32(blk, offset, val+1, writeLog)
+		require.Error(t, err)
+	})
+}
+
 func TestTransaction_Size(t *testing.T) {
 	t.Run("test size", func(t *testing.T) {
 		const (
@@ -543,11 +524,11 @@ func TestTransaction_Size(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 
 		gen := tx.NewNumberGenerator()
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		err = logMgr.Flush()
@@ -572,11 +553,11 @@ func TestTransaction_ExtendFIle(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 
 		gen := tx.NewNumberGenerator()
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		err = logMgr.Flush()
@@ -608,11 +589,11 @@ func TestTransaction_Available(t *testing.T) {
 		fileMgr, logMgr, bufMgr := factory.Create()
 		defer factory.Finish()
 
-		conCurrCfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-		concurMgr := tx.NewConcurrencyManager(conCurrCfg)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 
 		gen := tx.NewNumberGenerator()
-		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+		txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 		require.NoError(t, err)
 
 		nbuf := txn.Available()

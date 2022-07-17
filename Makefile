@@ -32,7 +32,7 @@ docker-run:
 
 .PHONY: test
 test: mockgen protoc wire
-	go test -shuffle=on ./...
+	go test -timeout 20s -shuffle=on ./...
 
 .PHONY: ci-test
 ci-test:

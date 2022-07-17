@@ -13,18 +13,18 @@ type Transaction struct {
 	fileMgr    domain.FileManager
 	logMgr     domain.LogManager
 	bufferMgr  domain.BufferPoolManager
-	concurMgr  domain.ConcurrencyManager
+	concurMgr  *ConcurrencyManager
 	bufferList *BufferList
 	number     domain.TransactionNumber
 }
 
 // NewTransaction constructs Transaction.
-func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Transaction, error) {
+func NewTransaction(fileMgr domain.FileManager, logMgr domain.LogManager, bufferMgr domain.BufferPoolManager, lt *LockTable, gen domain.TxNumberGenerator) (*Transaction, error) {
 	txn := &Transaction{
 		fileMgr:    fileMgr,
 		logMgr:     logMgr,
 		bufferMgr:  bufferMgr,
-		concurMgr:  concurMgr,
+		concurMgr:  NewConcurrencyManager(lt),
 		bufferList: NewBufferList(bufferMgr),
 		number:     gen.Generate(),
 	}
@@ -117,6 +117,9 @@ func (tx *Transaction) rollback() error {
 			}
 		}
 	}
+	if err := iter.Err(); err != nil {
+		return errors.Err(err, "HasNext")
+	}
 
 	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
 		return errors.Err(err, "FlushAll")
@@ -177,6 +180,9 @@ func (tx *Transaction) recover() error {
 				return errors.Err(err, "Undo")
 			}
 		}
+	}
+	if err := iter.Err(); err != nil {
+		return errors.Err(err, "HasNext")
 	}
 
 	if err := tx.bufferMgr.FlushAll(tx.number); err != nil {
@@ -246,6 +252,7 @@ func (tx *Transaction) GetInt32(blk domain.Block, offset int64) (int32, error) {
 
 // SetInt32 sets int32 on the given block.
 func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, writeLog bool) error {
+	// fmt.Printf("%v %v %v %v %v\n", tx.GetTxNum(), blk, val, writeLog, tx.concurMgr.GetLockTable())
 	if err := tx.concurMgr.XLock(blk); err != nil {
 		return errors.Err(err, "XLock")
 	}
@@ -392,6 +399,7 @@ func (tx *Transaction) writeLog(typ logrecord.RecordType, record logrecord.LogRe
 }
 
 // BlockLength returns block length of the `filename`.
+// original method name is `size`.
 func (tx *Transaction) BlockLength(filename domain.FileName) (int32, error) {
 	dummyBlk := domain.NewDummyBlock(filename)
 	if err := tx.concurMgr.SLock(dummyBlk); err != nil {
@@ -419,4 +427,8 @@ func (tx *Transaction) BlockSize() domain.BlockSize {
 // Available returns the number of available buffers.
 func (tx *Transaction) Available() int {
 	return tx.bufferMgr.Available()
+}
+
+func (tx *Transaction) GetTxNum() domain.TransactionNumber {
+	return tx.number
 }

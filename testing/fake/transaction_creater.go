@@ -8,12 +8,12 @@ import (
 )
 
 type TransactionCreater struct {
-	factory   *NonDirectBufferManagerFactory
-	FileMgr   domain.FileManager
-	LogMgr    domain.LogManager
-	BufMgr    domain.BufferPoolManager
-	ConcurMgr *tx.ConcurrencyManager
-	Gen       *tx.NumberGenerator
+	factory *NonDirectBufferManagerFactory
+	FileMgr domain.FileManager
+	LogMgr  domain.LogManager
+	BufMgr  domain.BufferPoolManager
+	LockTbl *tx.LockTable
+	Gen     *tx.NumberGenerator
 }
 
 func NewTransactionCreater(blockSize int32, numBuf int) *TransactionCreater {
@@ -21,23 +21,22 @@ func NewTransactionCreater(blockSize int32, numBuf int) *TransactionCreater {
 	factory := NewNonDirectBufferManagerFactory(dbPath, blockSize, numBuf)
 	fileMgr, logMgr, bufMgr := factory.Create()
 
-	cfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 1000}
-	concurMgr := tx.NewConcurrencyManager(cfg)
-
+	cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+	lt := tx.NewLockTable(cfg)
 	gen := tx.NewNumberGenerator()
 
 	return &TransactionCreater{
-		factory:   factory,
-		FileMgr:   fileMgr,
-		LogMgr:    logMgr,
-		BufMgr:    bufMgr,
-		ConcurMgr: concurMgr,
-		Gen:       gen,
+		factory: factory,
+		FileMgr: fileMgr,
+		LogMgr:  logMgr,
+		BufMgr:  bufMgr,
+		LockTbl: lt,
+		Gen:     gen,
 	}
 }
 
 func (cr *TransactionCreater) NewTxn() domain.Transaction {
-	txn, err := tx.NewTransaction(cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.ConcurMgr, cr.Gen)
+	txn, err := tx.NewTransaction(cr.FileMgr, cr.LogMgr, cr.BufMgr, cr.LockTbl, cr.Gen)
 	if err != nil {
 		log.Fatal(err)
 	}

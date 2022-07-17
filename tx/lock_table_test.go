@@ -12,97 +12,37 @@ import (
 )
 
 func TestLockTable_Lock(t *testing.T) {
-	t.Run("RRW", func(t *testing.T) {
-		timeout := 1000
-		lt := tx.NewLockTable(timeout)
+	t.Run("W", func(t *testing.T) {
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 10000}
+		lt := tx.NewLockTable(cfg)
+
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		tryLock := make([]string, 0)
 		actualLock := make([]string, 0)
 		wg := &sync.WaitGroup{}
-		wg.Add(3)
+		wg.Add(1)
 
 		go func() {
-			tryLock = append(tryLock, "read1")
-			err := lt.SLock(blk)
-			require.NoError(t, err)
-			actualLock = append(actualLock, "read1")
-			time.Sleep(150 * time.Millisecond)
-			lt.SUnlock(blk)
-			wg.Done()
-		}()
-
-		go func() {
-			time.Sleep(50 * time.Millisecond)
-			tryLock = append(tryLock, "read2")
-			err := lt.SLock(blk)
-			require.NoError(t, err)
-			actualLock = append(actualLock, "read2")
-			lt.SUnlock(blk)
-			wg.Done()
-		}()
-
-		go func() {
-			time.Sleep(100 * time.Millisecond)
 			tryLock = append(tryLock, "write")
-			err := lt.XLock(blk)
+			err := lt.SLock(blk)
+			require.NoError(t, err)
+			err = lt.XLock(blk)
 			require.NoError(t, err)
 			actualLock = append(actualLock, "write")
-			lt.XUnlock(blk)
+			lt.Unlock(blk)
 			wg.Done()
 		}()
 
 		wg.Wait()
 
-		require.Equal(t, []string{"read1", "read2", "write"}, tryLock, "try lock not equal")
-		require.Equal(t, []string{"read1", "read2", "write"}, actualLock, "actual lock not equal")
+		require.Equal(t, []string{"write"}, tryLock, "try lock not equal")
+		require.Equal(t, []string{"write"}, actualLock, "actual lock not equal")
 	})
 
-	t.Run("RWR", func(t *testing.T) {
-		// RWMutex は RLock 取った後に Lock を取ると、最初の RLock が release されるまで
-		// 他の RLock も取ることはできない
-		// ref: https://pkg.go.dev/sync#RWMutex
-		timeout := 100
-		lt := tx.NewLockTable(timeout)
-		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
-
-		wg := &sync.WaitGroup{}
-		wg.Add(3)
-
-		now := time.Now()
-		go func() {
-			err := lt.SLock(blk)
-			require.NoError(t, err)
-			time.Sleep(20 * time.Millisecond)
-			lt.SUnlock(blk)
-			wg.Done()
-		}()
-
-		go func() {
-			time.Sleep(10 * time.Millisecond)
-			err := lt.XLock(blk)
-			time.Sleep(10 * time.Millisecond)
-			require.NoError(t, err)
-			lt.XUnlock(blk)
-			wg.Done()
-		}()
-
-		go func() {
-			time.Sleep(15 * time.Millisecond)
-			err := lt.SLock(blk)
-			time.Sleep(10 * time.Millisecond)
-			require.NoError(t, err)
-			lt.SUnlock(blk)
-			wg.Done()
-		}()
-
-		wg.Wait()
-		require.Greater(t, time.Since(now), 40*time.Millisecond)
-	})
-
-	t.Run("RW timeout", func(t *testing.T) {
-		timeout := 10
-		lt := tx.NewLockTable(timeout)
+	t.Run("RR", func(t *testing.T) {
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 1000}
+		lt := tx.NewLockTable(cfg)
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
@@ -111,14 +51,83 @@ func TestLockTable_Lock(t *testing.T) {
 		go func() {
 			err := lt.SLock(blk)
 			require.NoError(t, err)
-			time.Sleep(20 * time.Millisecond)
-			lt.SUnlock(blk)
+			time.Sleep(150 * time.Millisecond)
+			lt.Unlock(blk)
 			wg.Done()
 		}()
 
 		go func() {
-			time.Sleep(5 * time.Millisecond)
-			err := lt.XLock(blk)
+			time.Sleep(50 * time.Millisecond)
+			err := lt.SLock(blk)
+			require.NoError(t, err)
+			lt.Unlock(blk)
+			wg.Done()
+		}()
+
+		wg.Wait()
+	})
+
+	t.Run("RW", func(t *testing.T) {
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 10000}
+		lt := tx.NewLockTable(cfg)
+
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
+
+		tryLock := make([]string, 0)
+		actualLock := make([]string, 0)
+		wg := &sync.WaitGroup{}
+		wg.Add(2)
+
+		go func() {
+			tryLock = append(tryLock, "read1")
+			err := lt.SLock(blk)
+			require.NoError(t, err)
+			actualLock = append(actualLock, "read1")
+			time.Sleep(300 * time.Millisecond)
+			lt.Unlock(blk)
+			wg.Done()
+		}()
+
+		go func() {
+			time.Sleep(100 * time.Millisecond)
+			tryLock = append(tryLock, "write")
+			var err error
+			err = lt.SLock(blk)
+			require.NoError(t, err)
+			err = lt.XLock(blk)
+			require.NoError(t, err)
+			actualLock = append(actualLock, "write")
+			lt.Unlock(blk)
+			wg.Done()
+		}()
+
+		wg.Wait()
+
+		require.Equal(t, []string{"read1", "write"}, tryLock, "try lock not equal")
+		require.Equal(t, []string{"read1", "write"}, actualLock, "actual lock not equal")
+	})
+
+	t.Run("RW timeout", func(t *testing.T) {
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 10}
+		lt := tx.NewLockTable(cfg)
+		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
+
+		wg := &sync.WaitGroup{}
+		wg.Add(2)
+
+		go func() {
+			err := lt.SLock(blk)
+			require.NoError(t, err)
+			time.Sleep(100 * time.Millisecond)
+			lt.Unlock(blk)
+			wg.Done()
+		}()
+
+		go func() {
+			time.Sleep(30 * time.Millisecond)
+			err := lt.SLock(blk)
+			require.NoError(t, err)
+			err = lt.XLock(blk)
 			require.Error(t, err)
 			wg.Done()
 		}()
@@ -127,23 +136,26 @@ func TestLockTable_Lock(t *testing.T) {
 	})
 
 	t.Run("WR timeout", func(t *testing.T) {
-		timeout := 5
-		lt := tx.NewLockTable(timeout)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 50}
+		lt := tx.NewLockTable(cfg)
 		blk := domain.NewBlock(domain.FileName(fake.RandString()), domain.BlockNumber(0))
 
 		wg := &sync.WaitGroup{}
 		wg.Add(2)
 
 		go func() {
-			err := lt.XLock(blk)
+			var err error
+			err = lt.SLock(blk)
 			require.NoError(t, err)
-			time.Sleep(20 * time.Millisecond)
-			lt.XUnlock(blk)
+			err = lt.XLock(blk)
+			require.NoError(t, err)
+			time.Sleep(100 * time.Millisecond)
+			lt.Unlock(blk)
 			wg.Done()
 		}()
 
 		go func() {
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 			err := lt.SLock(blk)
 			require.Error(t, err)
 			wg.Done()

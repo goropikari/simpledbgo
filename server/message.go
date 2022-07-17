@@ -10,6 +10,8 @@ const (
 	TransactionIdle   TransactionStatus = 0x49 // I
 	Transaction       TransactionStatus = 0x54 // T
 	TransactionFailed TransactionStatus = 0x45 // E
+
+	nullEnd = 0x00
 )
 
 func makeReadyForQueryMsg(status TransactionStatus) []byte {
@@ -19,7 +21,7 @@ func makeReadyForQueryMsg(status TransactionStatus) []byte {
 func makeCommandCompleteMsg(s string) []byte {
 	body := make([]byte, 0)
 	body = append(body, []byte(s)...)
-	body = append(body, 0x00)
+	body = append(body, nullEnd)
 	l := len(body)
 	lb := make([]byte, payloadBytesLength)
 	binary.BigEndian.PutUint32(lb, uint32(l+payloadBytesLength))
@@ -36,9 +38,9 @@ func makeParameterStatusMsg(param, value string) []byte {
 	length := make([]byte, payloadBytesLength)
 	body := make([]byte, 0)
 	body = append(body, []byte(param)...)
-	body = append(body, 0x00)
+	body = append(body, nullEnd)
 	body = append(body, []byte(value)...)
-	body = append(body, 0x00)
+	body = append(body, nullEnd)
 	binary.BigEndian.PutUint32(length, uint32(len(body)+payloadBytesLength))
 
 	msg = append(msg, 'S')

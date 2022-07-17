@@ -121,13 +121,6 @@ func (cn *Connection) handleConnection() {
 			cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
 			continue
 		}
-		// if res.isQuery() {
-		// 	cn.sendResult(res)
-		// } else {
-		// 	// Query except for SELECT
-		// 	cn.conn.Write(makeCommandCompleteMsg("OK"))
-		// 	cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
-		// }
 		switch res.typ {
 		case queryResult:
 			cn.sendResult(res)
@@ -333,7 +326,6 @@ func (cn *Connection) handleQuery(query string) (Result, error) {
 }
 
 func (cn *Connection) handleSelect(query string) (Result, error) {
-	// txn, err := cn.db.NewTx()
 	txn, err := cn.Txn()
 	if err != nil {
 		return Result{}, errors.Err(err, "NewTx")
@@ -376,7 +368,6 @@ func (cn *Connection) handleBegin(query string) (Result, error) {
 }
 
 func (cn *Connection) handleCommit(query string) (Result, error) {
-	cn.inTxn = false
 	txn, err := cn.Txn()
 	if err != nil {
 		return Result{}, errors.Err(err, "Txn")
@@ -384,6 +375,7 @@ func (cn *Connection) handleCommit(query string) (Result, error) {
 	if err := txn.Commit(); err != nil {
 		return Result{}, errors.Err(err, "Commit")
 	}
+	cn.inTxn = false
 	cn.txn = nil
 
 	return Result{typ: commitResult}, nil
@@ -404,7 +396,6 @@ func (cn *Connection) handleRollback(query string) (Result, error) {
 }
 
 func (cn *Connection) handleCommand(query string) (Result, error) {
-	// txn, err := cn.db.NewTx()
 	txn, err := cn.Txn()
 	if err != nil {
 		return Result{}, errors.Err(err, "NewTx")
@@ -448,6 +439,9 @@ func (cn *Connection) makeResult(rows *Rows) (Result, error) {
 			rec = append(rec, v)
 		}
 		recs = append(recs, rec)
+	}
+	if err := rows.scan.Err(); err != nil {
+		return Result{}, errors.Err(err, "HasNext")
 	}
 
 	fields := make([]string, 0)

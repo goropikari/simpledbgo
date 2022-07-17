@@ -6,9 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrNotImplemented = errors.New("not implemented")
-)
+var ErrNotImplemented = errors.New("not implemented")
 
 func New(msg string) error {
 	return errors.New(msg)

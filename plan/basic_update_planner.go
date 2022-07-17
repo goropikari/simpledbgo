@@ -117,6 +117,9 @@ func (p *BasicUpdatePlanner) ExecuteModify(data *domain.ModifyData, txn domain.T
 		}
 		cnt++
 	}
+	if us.Err() != nil {
+		return 0, us.Err()
+	}
 	us.Close()
 
 	return cnt, nil

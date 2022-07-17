@@ -85,7 +85,7 @@ func (viewMgr *ViewManager) GetViewDef(viewName domain.ViewName, txn domain.Tran
 		}
 	}
 	if err := tbl.Err(); err != nil {
-		return "", errors.Err(err, "GetString")
+		return "", errors.Err(err, "HasNext")
 	}
 
 	return domain.NewViewDef(defStr), nil

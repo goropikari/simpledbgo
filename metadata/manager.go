@@ -17,17 +17,17 @@ type Manager struct {
 }
 
 // NewManager constructs a metadata manager.
-func NewManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
+func NewManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, lt *tx.LockTable, gen domain.TxNumberGenerator) (*Manager, error) {
 	if fileMgr.IsInit() {
-		return createManager(driver, fileMgr, logMgr, bufMgr, concurMgr, gen)
+		return createManager(driver, fileMgr, logMgr, bufMgr, lt, gen)
 	}
 
-	return newManager(driver, fileMgr, logMgr, bufMgr, concurMgr, gen)
+	return newManager(driver, fileMgr, logMgr, bufMgr, lt, gen)
 }
 
 // createManager creates metadata manager with initializing tables related to metadata.
-func createManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
-	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+func createManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, lt *tx.LockTable, gen domain.TxNumberGenerator) (*Manager, error) {
+	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 	if err != nil {
 		return nil, errors.Err(err, "NewTransaction")
 	}
@@ -66,8 +66,8 @@ func createManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr
 }
 
 // newManager constructs metadata manager.
-func newManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, concurMgr domain.ConcurrencyManager, gen domain.TxNumberGenerator) (*Manager, error) {
-	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, concurMgr, gen)
+func newManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr domain.LogManager, bufMgr domain.BufferPoolManager, lt *tx.LockTable, gen domain.TxNumberGenerator) (*Manager, error) {
+	txn, err := tx.NewTransaction(fileMgr, logMgr, bufMgr, lt, gen)
 	if err != nil {
 		return nil, errors.Err(err, "NewTransaction")
 	}

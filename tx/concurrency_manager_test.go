@@ -14,8 +14,9 @@ func TestConcurrencyManager(t *testing.T) {
 		blk2 := fake.Block()
 		blk3 := fake.Block()
 
-		cfg := tx.ConcurrencyManagerConfig{LockTimeoutMillisecond: 100}
-		mgr := tx.NewConcurrencyManager(cfg)
+		cfg := tx.LockTableConfig{LockTimeoutMillisecond: 100}
+		lt := tx.NewLockTable(cfg)
+		mgr := tx.NewConcurrencyManager(lt)
 
 		err := mgr.SLock(blk1)
 		require.NoError(t, err)

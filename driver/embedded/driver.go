@@ -188,7 +188,6 @@ func (r *Rows) Close() error {
 // Next satisfies drivers.Rows.
 // dest は Rows.Columns が返すスライスと同じ長さ.
 func (r *Rows) Next(dest []driver.Value) error {
-	// fmt.Println("Rows.Next")
 	if r.scan.HasNext() {
 		for i, f := range r.fields {
 			v, err := r.scan.GetVal(f)
@@ -199,6 +198,9 @@ func (r *Rows) Next(dest []driver.Value) error {
 		}
 
 		return nil
+	}
+	if err := r.scan.Err(); err != nil {
+		return errors.Err(err, "HasNext")
 	}
 
 	return io.EOF

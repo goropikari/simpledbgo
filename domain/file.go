@@ -151,7 +151,7 @@ func NewBlock(filename FileName, number BlockNumber) Block {
 func NewDummyBlock(filename FileName) Block {
 	return Block{
 		filename: filename,
-		number:   0,
+		number:   -1,
 	}
 }
 

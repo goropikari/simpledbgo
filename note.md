@@ -469,6 +469,100 @@ writer 優先ならばその心配はなさそうである。
 write の頻度が少なくて read の頻度が高いならば writer 優先にしても並列度への影響は
 少ないということでなるほどなぁと思った。
 
+## 2022/7/18
+RWMutex を使った実装はどうにも間違った実装はバグっていた。
+もともとテキストの実装だと exclusive lock は slock を取ったあとに xlock を呼ぶ(xlock を呼ぶ前に unlock は呼ばない)という方針になっていたところを無理やり LockTable だけ RWMutex を使う実装にしていたので全体的な整合性が崩れてしまうようになっていた。
+そのせいで異なる transaction が同時に同じ領域を書き込める状態になってしまっていた。そのためテキスト通りに LockTable を作ることにしたがどうにもテキストの実装は実装でバグっている気がする。
+
+
+```java
+class LockTable {
+    ...
+
+    public synchronized void sLock(BlockId blk) {
+        try {
+            long timestamp = System.currentTimeMillis();
+            while (hasXlock(blk) && !waitingTooLong(timestamp))
+                wait(MAX_TIME);
+            if (hasXlock(blk))
+                throw new LockAbortException();
+            int val = getLockVal(blk);  // will not be negative
+            locks.put(blk, val+1);
+        }
+        catch(InterruptedException e) {
+            throw new LockAbortException();
+        }
+    }
+
+    synchronized void xLock(BlockId blk) {
+        try {
+            long timestamp = System.currentTimeMillis();
+            while (hasOtherSLocks(blk) && !waitingTooLong(timestamp))
+                wait(MAX_TIME);
+            if (hasOtherSLocks(blk))
+                throw new LockAbortException();
+            locks.put(blk, -1);
+        }
+        catch(InterruptedException e) {
+            throw new LockAbortException();
+        }
+    }
+
+    synchronized void unlock(BlockId blk) {
+        int val = getLockVal(blk);
+        if (val > 1)
+            locks.put(blk, val-1);
+        else {
+            locks.remove(blk);
+            notifyAll();
+        }
+    }
+
+    private boolean hasXlock(BlockId blk) {
+        return getLockVal(blk) < 0;
+    }
+
+    private boolean hasOtherSLocks(BlockId blk) {
+        return getLockVal(blk) > 1;
+    }
+}
+
+public class ConcurrencyMgr {
+    ...
+
+    public void sLock(BlockId blk) {
+        if (locks.get(blk) == null) {
+            locktbl.sLock(blk);
+            locks.put(blk, "S");
+        }
+    }
+
+    public void xLock(BlockId blk) {
+        if (!hasXLock(blk)) {
+            sLock(blk);
+            locktbl.xLock(blk);
+            locks.put(blk, "X");
+        }
+    }
+}
+```
+
+
+気になっているのは unlock の中で呼ばれる notifyAll のタイミングで、xlock 取っている状態(val = -1) のときはここに入れるだけで次に来る slock の待ちを正しく解消することができる。(exclusine lock のときでも最初は slock を取っているので現時点で xlock が取られているときの待っている lock は常に slock になる。)
+問題は現時点で slock が取られている状態のときに exclusive lock を取ろうとした場合である。
+この場合、(`slock`), (`slock`, `xlock`) の順に method が呼ばれるが、slock は重ねて取ることができるので最初の transaction が unlock を呼ぶ前までは `locks[blk]` の値は 2 となる。そしてこの状態で xlock は wait で待ち続ける。
+ここで最初の transaction が unlock すると `locks.put(blk, val-1);` は呼ばれるが `notifyAll` は呼ばれないので xlock の wait は timeout になるまで待ち続けることになってしまう。
+なので `val = 2` のときは decrement に加えて notifyAll も加えないといけないように思える。
+
+```java
+if (val > 1)
+    locks.put(blk, val-1);
+else {
+    locks.remove(blk);
+    notifyAll();
+}
+```
+
 
 ### 謎の newval
 
