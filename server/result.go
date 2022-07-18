@@ -57,6 +57,7 @@ func makeColDesc(cols []string) []byte {
 		payload = append(payload, []byte{0x00, 0x00, 0x40, 0x06}...) // object id
 		idx := make([]byte, 2)
 		binary.BigEndian.PutUint16(idx, uint16(k+1))
+		// For simplicity, send value as varchar type.
 		payload = append(payload, idx...)                            // col id
 		payload = append(payload, []byte{0x00, 0x00, 0x04, 0x13}...) // data type
 		payload = append(payload, []byte{0xff, 0xff}...)             // data type size
@@ -64,14 +65,7 @@ func makeColDesc(cols []string) []byte {
 		payload = append(payload, []byte{0x00, 0x00}...)             // format code
 	}
 
-	length := make([]byte, payloadBytesLength)
-	binary.BigEndian.PutUint32(length, uint32(len(payload)+payloadBytesLength))
-	packet := make([]byte, 0)
-	packet = append(packet, 'T') // 0x54 -> T: RowDescription
-	packet = append(packet, length...)
-	packet = append(packet, payload...)
-
-	return packet
+	return makeMsg('T', payload)
 }
 
 func makeDataRows(recs [][]any) []byte {
