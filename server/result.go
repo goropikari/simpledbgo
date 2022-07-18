@@ -29,13 +29,13 @@ func makeDataRow(rec []any) []byte {
 			slen := len(sb)
 			lenByte := make([]byte, payloadBytesLength)
 			binary.BigEndian.PutUint32(lenByte, uint32(slen))
-			dataRow = append(dataRow, lenByte[:]...)
-			dataRow = append(dataRow, sb[:]...)
+			dataRow = append(dataRow, lenByte...)
+			dataRow = append(dataRow, sb...)
 		}
 	}
 
 	payload := make([]byte, 0)
-	payload = append(payload, 0x44) // 0x44 -> D: DataRow
+	payload = append(payload, 'D') // 0x44 -> D: DataRow
 	lenByte := make([]byte, payloadBytesLength)
 	binary.BigEndian.PutUint32(lenByte, uint32(len(dataRow)+payloadBytesLength))
 	payload = append(payload, lenByte...)
@@ -49,15 +49,15 @@ func makeColDesc(cols []string) []byte {
 	n := len(cols)
 	numCols := make([]byte, 2)
 	binary.BigEndian.PutUint16(numCols, uint16(n))
-	payload = append(payload, numCols[:]...)
+	payload = append(payload, numCols...)
 
 	for k, col := range cols {
 		payload = append(payload, []byte(col)...)
-		payload = append(payload, 0x00)
+		payload = append(payload, nullEnd)
 		payload = append(payload, []byte{0x00, 0x00, 0x40, 0x06}...) // object id
 		idx := make([]byte, 2)
 		binary.BigEndian.PutUint16(idx, uint16(k+1))
-		payload = append(payload, idx[:]...)                         // col id
+		payload = append(payload, idx...)                            // col id
 		payload = append(payload, []byte{0x00, 0x00, 0x04, 0x13}...) // data type
 		payload = append(payload, []byte{0xff, 0xff}...)             // data type size
 		payload = append(payload, []byte{0xff, 0xff, 0xff, 0xff}...) // type modifier
@@ -67,9 +67,9 @@ func makeColDesc(cols []string) []byte {
 	length := make([]byte, payloadBytesLength)
 	binary.BigEndian.PutUint32(length, uint32(len(payload)+payloadBytesLength))
 	packet := make([]byte, 0)
-	packet = append(packet, 0x54) // 0x54 -> T: RowDescription
-	packet = append(packet, length[:]...)
-	packet = append(packet, payload[:]...)
+	packet = append(packet, 'T') // 0x54 -> T: RowDescription
+	packet = append(packet, length...)
+	packet = append(packet, payload...)
 
 	return packet
 }

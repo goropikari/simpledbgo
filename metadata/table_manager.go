@@ -177,7 +177,7 @@ func (tblMgr *TableManager) tableSlotSize(tblName domain.TableName, txn domain.T
 	}
 
 	if slotsize <= 0 {
-		return NonExistSlotSize, fmt.Errorf("non existence table %v", tblName)
+		return NonExistSlotSize, fmt.Errorf("relation \"%v\" does not exist", tblName)
 	}
 
 	return slotsize, nil

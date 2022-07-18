@@ -100,7 +100,7 @@ func newManager(driver domain.IndexDriver, fileMgr domain.FileManager, logMgr do
 // CreateTable creates a table.
 func (mgr *Manager) CreateTable(tblName domain.TableName, sch *domain.Schema, txn domain.Transaction) error {
 	if mgr.tblMgr.Exists(tblName, txn) {
-		return fmt.Errorf("table %v already exists", tblName)
+		return fmt.Errorf("relation \"%v\" already exists", tblName)
 	}
 
 	return mgr.tblMgr.CreateTable(tblName, sch, txn)

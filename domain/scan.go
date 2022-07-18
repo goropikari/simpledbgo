@@ -666,5 +666,5 @@ func (s *ProjectScan) Err() error {
 }
 
 func fieldNotFoudError(fld FieldName) error {
-	return fmt.Errorf("field %v not found", fld)
+	return fmt.Errorf("column \"%v\" does not exist", fld)
 }
