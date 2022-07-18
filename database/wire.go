@@ -29,8 +29,6 @@ var Set = wire.NewSet(
 	wire.Bind(new(domain.BufferPoolManager), new(*buffer.Manager)),
 	tx.NewLockTableConfig,
 	tx.NewLockTable,
-	// tx.NewConcurrencyManager,
-	// wire.Bind(new(domain.ConcurrencyManager), new(*tx.ConcurrencyManager)),
 	tx.NewNumberGenerator,
 	wire.Bind(new(domain.TxNumberGenerator), new(*tx.NumberGenerator)),
 	hash.NewIndexFactory,

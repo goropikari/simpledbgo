@@ -3,6 +3,7 @@ package main
 import "github.com/goropikari/simpledbgo/server"
 
 func main() {
-	s := server.NewServer()
+	cfg := server.NewConfig()
+	s := server.NewServer(cfg)
 	s.Run()
 }

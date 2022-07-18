@@ -16,13 +16,11 @@ import (
 )
 
 const (
-	payloadBytesLength = 4
-	tagLength          = 1
-	bufferSize         = 1024
+	tagLength           = 1
+	payloadBytesLength  = 4
+	payloadLengthOffset = tagLength
+	bufferSize          = 1024
 )
-
-var dbmsPORT = getEnvWithDefault("DBMS_PORT", "5432")
-var dbmsHOST = getEnvWithDefault("DBMS_HOST", "127.0.0.1")
 
 type ResultType int
 
@@ -34,55 +32,35 @@ const (
 	rollbackResult
 )
 
-type Result struct {
-	typ     ResultType
-	records [][]any
-	fields  []string
+type Config struct {
+	host string
+	port string
 }
 
-func (res Result) isQuery() bool {
-	return res.typ == queryResult
+func NewConfig() Config {
+	return Config{
+		host: getEnvWithDefault("DBMS_HOST", "127.0.0.1"),
+		port: getEnvWithDefault("DBMS_PORT", "5432"),
+	}
 }
 
 type Server struct {
-	db *database.DB
+	cfg Config
+	db  *database.DB
 }
 
-func NewServer() *Server {
-	db := setupDB()
-	return &Server{db: db}
-}
-
-type Connection struct {
-	db    *database.DB
-	conn  net.Conn
-	txn   domain.Transaction
-	inTxn bool
-}
-
-func NewConnection(db *database.DB, conn net.Conn) Connection {
-	return Connection{
-		db:   db,
-		conn: conn,
-	}
-}
-
-func (cn *Connection) Txn() (domain.Transaction, error) {
-	if cn.inTxn {
-		return cn.txn, nil
-	}
-
-	txn, err := cn.db.NewTx()
+func NewServer(cfg Config) *Server {
+	db, err := database.InitializeDB()
 	if err != nil {
-		return nil, errors.Err(err, "NewTx")
+		log.Fatal(err)
 	}
 
-	return txn, nil
+	return &Server{cfg: cfg, db: db}
 }
 
 // Run starts DBMS server
 func (s *Server) Run() {
-	ln, err := net.Listen("tcp", dbmsHOST+":"+dbmsPORT)
+	ln, err := net.Listen("tcp", s.cfg.host+":"+s.cfg.port)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,67 +75,17 @@ func (s *Server) Run() {
 	}
 }
 
-func (cn *Connection) handleConnection() {
-	cn.startup()
-	defer cn.Close()
-	for {
-		tag, query, err := cn.readQuery()
-		if err != nil {
-			if err != io.EOF {
-				log.Printf("%v\n", err)
-				os.Exit(1)
-			}
-			break
-		}
-		if tag == 0x58 {
-			// 0x58 -> X: terminate
-			return
-		}
-		res, err := cn.handleQuery(query)
-		if err != nil {
-			log.Printf("%v\n", err)
-			// Ideally, error msg should be sent if errors occur
-			cn.conn.Write(makeCommandCompleteMsg(baseError(err).Error()))
-			cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
-			continue
-		}
-		switch res.typ {
-		case queryResult:
-			cn.sendResult(res)
-		case commandResult:
-			cn.sendCommand(res)
-		case beginResult:
-			cn.sendBegin(res)
-		case commitResult:
-			cn.sendCommit(res)
-		case rollbackResult:
-			cn.sendRollback(res)
-		}
-		cn.sendReadyForQueryMsg()
-	}
+type Connection struct {
+	db    *database.DB
+	conn  net.Conn
+	txn   domain.Transaction
+	inTxn bool
 }
 
-func (cn *Connection) sendCommand(res Result) {
-	cn.conn.Write(makeCommandCompleteMsg("OK"))
-}
-
-func (cn *Connection) sendBegin(res Result) {
-	cn.conn.Write(makeCommandCompleteMsg("BEGIN"))
-}
-
-func (cn *Connection) sendCommit(res Result) {
-	cn.conn.Write(makeCommandCompleteMsg("COMMIT"))
-}
-
-func (cn *Connection) sendRollback(res Result) {
-	cn.conn.Write(makeCommandCompleteMsg("ROLLBACK"))
-}
-
-func (cn *Connection) sendReadyForQueryMsg() {
-	if cn.inTxn {
-		cn.conn.Write(makeReadyForQueryMsg(Transaction))
-	} else {
-		cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
+func NewConnection(db *database.DB, conn net.Conn) Connection {
+	return Connection{
+		db:   db,
+		conn: conn,
 	}
 }
 
@@ -193,22 +121,99 @@ func (cn *Connection) Close() error {
 	return cn.conn.Close()
 }
 
+func (cn *Connection) Txn() (domain.Transaction, error) {
+	if cn.inTxn {
+		return cn.txn, nil
+	}
+
+	txn, err := cn.db.NewTx()
+	if err != nil {
+		return nil, errors.Err(err, "NewTx")
+	}
+
+	return txn, nil
+}
+
+func (cn *Connection) handleConnection() {
+	cn.startup()
+	defer cn.Close()
+	for {
+		tag, query, err := cn.readQuery()
+		if err != nil {
+			cn.sendError(err)
+			continue
+		}
+		if tag == 0x58 {
+			// 0x58 -> X: terminate
+			return
+		}
+		res, err := cn.handleQuery(query)
+		if err != nil {
+			cn.sendError(err)
+			continue
+		}
+		switch res.typ {
+		case queryResult:
+			cn.sendResult(res)
+		case commandResult:
+			cn.sendCommand()
+		case beginResult:
+			cn.sendBegin()
+		case commitResult:
+			cn.sendCommit()
+		case rollbackResult:
+			cn.sendRollback()
+		}
+		cn.sendReadyForQueryMsg()
+	}
+}
+
+func (cn *Connection) sendError(err error) {
+	log.Printf("%v\n", err)
+	// Ideally, error msg should be sent if errors occur
+	cn.conn.Write(makeCommandCompleteMsg(baseError(err).Error()))
+	cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
+}
+
+func (cn *Connection) sendCommand() {
+	cn.conn.Write(makeCommandCompleteMsg("OK"))
+}
+
+func (cn *Connection) sendBegin() {
+	cn.conn.Write(makeCommandCompleteMsg("BEGIN"))
+}
+
+func (cn *Connection) sendCommit() {
+	cn.conn.Write(makeCommandCompleteMsg("COMMIT"))
+}
+
+func (cn *Connection) sendRollback() {
+	cn.conn.Write(makeCommandCompleteMsg("ROLLBACK"))
+}
+
+func (cn *Connection) sendReadyForQueryMsg() {
+	if cn.inTxn {
+		cn.conn.Write(makeReadyForQueryMsg(Transaction))
+	} else {
+		cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
+	}
+}
+
+// 	cols := []string{"hoge", "piyo"}
+// 	header := makeColDesc(cols)
+// 	c.Write(header)
+// 	recs := [][]any{
+// 		{"1", "taro"},
+// 		{"2", "hanako"},
+// 	}
+// 	if len(recs) != 0 {
+// 		rowByte := makeDataRows(recs)
+// 		c.Write(rowByte)
+// 	}
+
+// 	c.Write(selectFooter(len(recs)))
+// 	c.Write(makeReadyForQueryMsg(TransactionIdle))
 func (cn *Connection) sendResult(res Result) {
-	// 	cols := []string{"hoge", "piyo"}
-	// 	header := makeColDesc(cols)
-	// 	c.Write(header)
-	// 	recs := [][]any{
-	// 		{"1", "taro"},
-	// 		{"2", "hanako"},
-	// 	}
-	// 	if len(recs) != 0 {
-	// 		rowByte := makeDataRows(recs)
-	// 		c.Write(rowByte)
-	// 	}
-
-	// 	c.Write(selectFooter(len(recs)))
-	// 	c.Write(makeReadyForQueryMsg(TransactionIdle))
-
 	cols := res.fields
 	header := makeColDesc(cols)
 	cn.conn.Write(header)
@@ -218,111 +223,26 @@ func (cn *Connection) sendResult(res Result) {
 		cn.conn.Write(rowByte)
 	}
 
-	cn.conn.Write(selectFooter(len(recs)))
-	// cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
-}
-
-func selectFooter(n int) []byte {
-	body := []byte("SELECT ")
-	s := fmt.Sprintf("%v", n)
-	body = append(body, []byte(s)...)
-	body = append(body, 0x00)
-
-	payload := make([]byte, 0)
-	payload = append(payload, 0x43)
-	lenBytes := make([]byte, payloadBytesLength)
-	binary.BigEndian.PutUint32(lenBytes, uint32(len(body)+payloadBytesLength))
-	payload = append(payload, lenBytes...)
-	payload = append(payload, body...)
-
-	return payload
-}
-
-func makeDataRow(rec []any) []byte {
-	dataRow := make([]byte, 0)
-	nc := len(rec)
-	ncb := make([]byte, 2)
-	binary.BigEndian.PutUint16(ncb, uint16(nc))
-	dataRow = append(dataRow, ncb...)
-	for _, val := range rec {
-		if val == nil {
-			dataRow = append(dataRow, []byte{0xff, 0xff, 0xff, 0xff}...)
-		} else {
-			s := fmt.Sprintf("%v", val)
-			sb := []byte(s)
-			slen := len(sb)
-			lenByte := make([]byte, payloadBytesLength)
-			binary.BigEndian.PutUint32(lenByte, uint32(slen))
-			dataRow = append(dataRow, lenByte[:]...)
-			dataRow = append(dataRow, sb[:]...)
-		}
-	}
-
-	payload := make([]byte, 0)
-	payload = append(payload, 0x44) // 0x44 -> D: DataRow
-	lenByte := make([]byte, payloadBytesLength)
-	binary.BigEndian.PutUint32(lenByte, uint32(len(dataRow)+payloadBytesLength))
-	payload = append(payload, lenByte...)
-	payload = append(payload, dataRow...)
-
-	return payload
-}
-
-func makeColDesc(cols []string) []byte {
-	payload := make([]byte, 0)
-	n := len(cols)
-	numCols := make([]byte, 2)
-	binary.BigEndian.PutUint16(numCols, uint16(n))
-	payload = append(payload, numCols[:]...)
-
-	for k, col := range cols {
-		payload = append(payload, []byte(col)...)
-		payload = append(payload, 0x00)
-		payload = append(payload, []byte{0x00, 0x00, 0x40, 0x06}...) // object id
-		idx := make([]byte, 2)
-		binary.BigEndian.PutUint16(idx, uint16(k+1))
-		payload = append(payload, idx[:]...)                         // col id
-		payload = append(payload, []byte{0x00, 0x00, 0x04, 0x13}...) // data type
-		payload = append(payload, []byte{0xff, 0xff}...)             // data type size
-		payload = append(payload, []byte{0xff, 0xff, 0xff, 0xff}...) // type modifier
-		payload = append(payload, []byte{0x00, 0x00}...)             // format code
-	}
-
-	length := make([]byte, payloadBytesLength)
-	binary.BigEndian.PutUint32(length, uint32(len(payload)+payloadBytesLength))
-	packet := make([]byte, 0)
-	packet = append(packet, 0x54) // 0x54 -> T: RowDescription
-	packet = append(packet, length[:]...)
-	packet = append(packet, payload[:]...)
-
-	return packet
-}
-
-func makeDataRows(recs [][]any) []byte {
-	dataRows := make([]byte, 0)
-	for _, rec := range recs {
-		dataRows = append(dataRows, makeDataRow(rec)...)
-	}
-
-	return dataRows
+	cn.conn.Write(makeCommandCompleteMsg(fmt.Sprintf("SELECT %v", len(recs))))
 }
 
 func (cn *Connection) handleQuery(query string) (Result, error) {
-	fmt.Println(query)
+	log.Println(query)
+	query = strings.TrimSpace(query)
 	query = strings.TrimRight(query, ";")
-	if strings.HasPrefix(query, "select") {
+	prefix := strings.ToLower(strings.Fields(query)[0])
+	switch prefix {
+	case "select":
 		return cn.handleSelect(query)
-	}
-	if strings.HasPrefix(query, "begin") {
+	case "begin":
 		return cn.handleBegin(query)
-	}
-	if strings.HasPrefix(query, "commit") {
+	case "commit":
 		return cn.handleCommit(query)
-	}
-	if strings.HasPrefix(query, "rollback") {
+	case "rollback":
 		return cn.handleRollback(query)
+	default:
+		return cn.handleCommand(query)
 	}
-	return cn.handleCommand(query)
 }
 
 func (cn *Connection) handleSelect(query string) (Result, error) {
@@ -422,51 +342,16 @@ func (cn *Connection) rollback(txn domain.Transaction, err error) error {
 	return err
 }
 
-type Rows struct {
-	scan   domain.Scanner
-	fields []domain.FieldName
-}
-
-func (cn *Connection) makeResult(rows *Rows) (Result, error) {
-	recs := make([][]any, 0)
-	for rows.scan.HasNext() {
-		rec := make([]any, 0)
-		for _, fld := range rows.fields {
-			v, err := rows.scan.GetVal(fld)
-			if err != nil {
-				return Result{}, errors.Err(err, "GetVal")
-			}
-			rec = append(rec, v)
-		}
-		recs = append(recs, rec)
-	}
-	if err := rows.scan.Err(); err != nil {
-		return Result{}, errors.Err(err, "HasNext")
-	}
-
-	fields := make([]string, 0)
-	for _, fld := range rows.fields {
-		fields = append(fields, string(fld))
-	}
-
-	return Result{
-		typ:     queryResult,
-		records: recs,
-		fields:  fields,
-	}, nil
-}
-
 func (cn *Connection) readQuery() (byte, string, error) {
 	data := make([]byte, 0)
 	buf := make([]byte, bufferSize)
 	for {
 		n, err := cn.conn.Read(buf)
 		if err != nil {
-			if err != io.EOF {
-				fmt.Println(err)
-				os.Exit(1)
+			if err == io.EOF {
+				break
 			}
-			break
+			return 0, "", errors.Err(err, "Read")
 		}
 		if n < bufferSize {
 			data = append(data, buf[:n]...)
@@ -475,7 +360,7 @@ func (cn *Connection) readQuery() (byte, string, error) {
 		data = append(data, buf[:]...)
 	}
 	tag := data[0]
-	size := parseSize(data[1:5])
+	size := parseSize(data[payloadLengthOffset : payloadLengthOffset+payloadBytesLength])
 	var query string
 	if size >= 5 {
 		query = string(data[5:size][:])
@@ -501,15 +386,6 @@ func read(c net.Conn, n int) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-func setupDB() *database.DB {
-	db, err := database.InitializeDB()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return db
 }
 
 func baseError(err error) error {
