@@ -1,3 +1,4 @@
 # Welcome to SimpleDB-Go
 
-[coverage](coverage)
+- [coverage](coverage)
+- [godoc](goropikari/simpledbgo.html)

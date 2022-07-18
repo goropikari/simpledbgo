@@ -69,3 +69,6 @@ site: coverage
 .PHONY: godoc
 godoc:
 	bin/godoc -http=:8080 &
+	sleep 5
+	wget -r -np -N -E -k http://localhost:8080/pkg/github.com/goropikari/simpledbgo
+	mv localhost:8080/pkg/github.com/goropikari docs

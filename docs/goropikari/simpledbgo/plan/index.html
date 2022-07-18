@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>plan - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="http://localhost:8080/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="http://localhost:8080/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.18.3";</script>
+<script src="http://localhost:8080/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:8080/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:8080/pkg/">GoDoc</a></div>
+<a href="index.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:8080/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package plan
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/goropikari/simpledbgo/plan"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="index.html#pkg-variables">Variables</a></dd>
+			
+			
+			
+				
+				<dd><a href="index.html#BasicQueryPlanner">type BasicQueryPlanner</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewBasicQueryPlanner">func NewBasicQueryPlanner(metadataMgr domain.MetadataManager) *BasicQueryPlanner</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicQueryPlanner.CreatePlan">func (planner *BasicQueryPlanner) CreatePlan(data *domain.QueryData, txn domain.Transaction) (domain.Planner, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#BasicUpdatePlanner">type BasicUpdatePlanner</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewBasicUpdatePlanner">func NewBasicUpdatePlanner(mgr domain.MetadataManager) *BasicUpdatePlanner</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicUpdatePlanner.ExecuteCreateIndex">func (p *BasicUpdatePlanner) ExecuteCreateIndex(data *domain.CreateIndexData, txn domain.Transaction) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicUpdatePlanner.ExecuteCreateTable">func (p *BasicUpdatePlanner) ExecuteCreateTable(data *domain.CreateTableData, txn domain.Transaction) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicUpdatePlanner.ExecuteCreateView">func (p *BasicUpdatePlanner) ExecuteCreateView(data *domain.CreateViewData, txn domain.Transaction) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicUpdatePlanner.ExecuteDelete">func (p *BasicUpdatePlanner) ExecuteDelete(data *domain.DeleteData, txn domain.Transaction) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicUpdatePlanner.ExecuteInsert">func (p *BasicUpdatePlanner) ExecuteInsert(data *domain.InsertData, txn domain.Transaction) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BasicUpdatePlanner.ExecuteModify">func (p *BasicUpdatePlanner) ExecuteModify(data *domain.ModifyData, txn domain.Transaction) (int, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#BetterQueryPlanner">type BetterQueryPlanner</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewBetterQueryPlanner">func NewBetterQueryPlanner(metadataMgr domain.MetadataManager) *BetterQueryPlanner</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BetterQueryPlanner.CreatePlan">func (planner *BetterQueryPlanner) CreatePlan(data *domain.QueryData, txn domain.Transaction) (domain.Planner, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#Executor">type Executor</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewExecutor">func NewExecutor(qp domain.QueryPlanner, ue domain.UpdateExecutor) *Executor</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Executor.CreateQueryPlan">func (pe Executor) CreateQueryPlan(query string, txn domain.Transaction) (domain.Planner, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Executor.ExecuteUpdate">func (pe Executor) ExecuteUpdate(cmd string, txn domain.Transaction) (int, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#ProductPlan">type ProductPlan</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewProductPlan">func NewProductPlan(lhs, rhs domain.Planner) *ProductPlan</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProductPlan.EstDistinctVals">func (plan *ProductPlan) EstDistinctVals(fldName domain.FieldName) int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProductPlan.EstNumBlocks">func (plan *ProductPlan) EstNumBlocks() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProductPlan.EstNumRecord">func (plan *ProductPlan) EstNumRecord() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProductPlan.Open">func (plan *ProductPlan) Open() (domain.Scanner, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProductPlan.Schema">func (plan *ProductPlan) Schema() *domain.Schema</a></dd>
+				
+			
+				
+				<dd><a href="index.html#ProjectPlan">type ProjectPlan</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewProjectPlan">func NewProjectPlan(plan domain.Planner, fields []domain.FieldName) *ProjectPlan</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProjectPlan.EstDistinctVals">func (p *ProjectPlan) EstDistinctVals(fld domain.FieldName) int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProjectPlan.EstNumBlocks">func (p *ProjectPlan) EstNumBlocks() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProjectPlan.EstNumRecord">func (p *ProjectPlan) EstNumRecord() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProjectPlan.Open">func (p *ProjectPlan) Open() (domain.Scanner, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ProjectPlan.Schema">func (p *ProjectPlan) Schema() *domain.Schema</a></dd>
+				
+			
+				
+				<dd><a href="index.html#SelectPlan">type SelectPlan</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewSelectPlan">func NewSelectPlan(plan domain.Planner, pred *domain.Predicate) *SelectPlan</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SelectPlan.EstDistinctVals">func (p *SelectPlan) EstDistinctVals(fldName domain.FieldName) int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SelectPlan.EstNumBlocks">func (p *SelectPlan) EstNumBlocks() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SelectPlan.EstNumRecord">func (p *SelectPlan) EstNumRecord() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SelectPlan.Open">func (p *SelectPlan) Open() (domain.Scanner, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SelectPlan.Schema">func (p *SelectPlan) Schema() *domain.Schema</a></dd>
+				
+			
+				
+				<dd><a href="index.html#TablePlan">type TablePlan</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewTablePlan">func NewTablePlan(txn domain.Transaction, tblName domain.TableName, md domain.MetadataManager) (*TablePlan, error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#TablePlan.EstDistinctVals">func (plan *TablePlan) EstDistinctVals(fldName domain.FieldName) int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#TablePlan.EstNumBlocks">func (plan *TablePlan) EstNumBlocks() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#TablePlan.EstNumRecord">func (plan *TablePlan) EstNumRecord() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#TablePlan.Open">func (plan *TablePlan) Open() (domain.Scanner, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#TablePlan.Schema">func (plan *TablePlan) Schema() *domain.Schema</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_query_planner.go">basic_query_planner.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go">basic_update_planner.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/better_query_planner.go">better_query_planner.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go">plan.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan_executor.go">plan_executor.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				<p>
+ErrNotUpdatable is error that indicates the scan is not updatable.
+</p>
+
+				<pre>var <span id="ErrNotUpdatable">ErrNotUpdatable</span> = <a href="../errors/index.html">errors</a>.<a href="../errors/index.html#New">New</a>(&#34;not updatable&#34;)</pre>
+			
+		
+		
+		
+			
+			
+			<h2 id="BasicQueryPlanner">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_query_planner.go?s=244:313#L1">BasicQueryPlanner</a>
+				<a class="permalink" href="index.html#BasicQueryPlanner">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+BasicQueryPlanner is a basic query planner.
+</p>
+
+			<pre>type BasicQueryPlanner struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewBasicQueryPlanner">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_query_planner.go?s=371:451#L6">NewBasicQueryPlanner</a>
+					<a class="permalink" href="index.html#NewBasicQueryPlanner">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewBasicQueryPlanner(metadataMgr <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#MetadataManager">MetadataManager</a>) *<a href="index.html#BasicQueryPlanner">BasicQueryPlanner</a></pre>
+				<p>
+NewBasicQueryPlanner constructs a BasicQueryPlanner.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="BasicQueryPlanner.CreatePlan">func (*BasicQueryPlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_query_planner.go?s=549:665#L13">CreatePlan</a>
+					<a class="permalink" href="index.html#BasicQueryPlanner.CreatePlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (planner *<a href="index.html#BasicQueryPlanner">BasicQueryPlanner</a>) CreatePlan(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#QueryData">QueryData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CreatePlan creates a planner.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="BasicUpdatePlanner">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=280:350#L2">BasicUpdatePlanner</a>
+				<a class="permalink" href="index.html#BasicUpdatePlanner">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+BasicUpdatePlanner is a BasicUpdatePlanner.
+</p>
+
+			<pre>type BasicUpdatePlanner struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewBasicUpdatePlanner">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=410:484#L7">NewBasicUpdatePlanner</a>
+					<a class="permalink" href="index.html#NewBasicUpdatePlanner">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewBasicUpdatePlanner(mgr <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#MetadataManager">MetadataManager</a>) *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a></pre>
+				<p>
+NewBasicUpdatePlanner constructs a BasicUpdatePlanner.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="BasicUpdatePlanner.ExecuteCreateIndex">func (*BasicUpdatePlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=3440:3554#L129">ExecuteCreateIndex</a>
+					<a class="permalink" href="index.html#BasicUpdatePlanner.ExecuteCreateIndex">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>) ExecuteCreateIndex(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#CreateIndexData">CreateIndexData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteCreateIndex executes create index command.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="BasicUpdatePlanner.ExecuteCreateTable">func (*BasicUpdatePlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=2949:3063#L119">ExecuteCreateTable</a>
+					<a class="permalink" href="index.html#BasicUpdatePlanner.ExecuteCreateTable">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>) ExecuteCreateTable(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#CreateTableData">CreateTableData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteCreateTable executes create table command.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="BasicUpdatePlanner.ExecuteCreateView">func (*BasicUpdatePlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=3195:3307#L124">ExecuteCreateView</a>
+					<a class="permalink" href="index.html#BasicUpdatePlanner.ExecuteCreateView">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>) ExecuteCreateView(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#CreateViewData">CreateViewData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteCreateView executes create view command.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="BasicUpdatePlanner.ExecuteDelete">func (*BasicUpdatePlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=1369:1473#L46">ExecuteDelete</a>
+					<a class="permalink" href="index.html#BasicUpdatePlanner.ExecuteDelete">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>) ExecuteDelete(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#DeleteData">DeleteData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteDelete executes delete command.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="BasicUpdatePlanner.ExecuteInsert">func (*BasicUpdatePlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=581:685#L12">ExecuteInsert</a>
+					<a class="permalink" href="index.html#BasicUpdatePlanner.ExecuteInsert">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>) ExecuteInsert(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#InsertData">InsertData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteInsert executes insersion command.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="BasicUpdatePlanner.ExecuteModify">func (*BasicUpdatePlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/basic_update_planner.go?s=2100:2204#L80">ExecuteModify</a>
+					<a class="permalink" href="index.html#BasicUpdatePlanner.ExecuteModify">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>) ExecuteModify(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#ModifyData">ModifyData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteModify executes update command.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="BetterQueryPlanner">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/better_query_planner.go?s=245:315#L1">BetterQueryPlanner</a>
+				<a class="permalink" href="index.html#BetterQueryPlanner">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+BetterQueryPlanner is a basic query planner.
+</p>
+
+			<pre>type BetterQueryPlanner struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewBetterQueryPlanner">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/better_query_planner.go?s=375:457#L6">NewBetterQueryPlanner</a>
+					<a class="permalink" href="index.html#NewBetterQueryPlanner">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewBetterQueryPlanner(metadataMgr <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#MetadataManager">MetadataManager</a>) *<a href="index.html#BetterQueryPlanner">BetterQueryPlanner</a></pre>
+				<p>
+NewBetterQueryPlanner constructs a BetterQueryPlanner.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="BetterQueryPlanner.CreatePlan">func (*BetterQueryPlanner) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/better_query_planner.go?s=556:673#L13">CreatePlan</a>
+					<a class="permalink" href="index.html#BetterQueryPlanner.CreatePlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (planner *<a href="index.html#BetterQueryPlanner">BetterQueryPlanner</a>) CreatePlan(data *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#QueryData">QueryData</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CreatePlan creates a planner.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Executor">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan_executor.go?s=240:338#L1">Executor</a>
+				<a class="permalink" href="index.html#Executor">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+Executor is interface of plan executor.
+</p>
+
+			<pre>type Executor struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewExecutor">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan_executor.go?s=378:454#L7">NewExecutor</a>
+					<a class="permalink" href="index.html#NewExecutor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewExecutor(qp <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#QueryPlanner">QueryPlanner</a>, ue <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#UpdateExecutor">UpdateExecutor</a>) *<a href="index.html#Executor">Executor</a></pre>
+				<p>
+NewExecutor constructs a Executor.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Executor.CreateQueryPlan">func (Executor) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan_executor.go?s=579:675#L15">CreateQueryPlan</a>
+					<a class="permalink" href="index.html#Executor.CreateQueryPlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (pe <a href="index.html#Executor">Executor</a>) CreateQueryPlan(query <a href="http://localhost:8080/pkg/builtin/#string">string</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CreateQueryPlan creates planner for select query.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Executor.ExecuteUpdate">func (Executor) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan_executor.go?s=1109:1190#L37">ExecuteUpdate</a>
+					<a class="permalink" href="index.html#Executor.ExecuteUpdate">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (pe <a href="index.html#Executor">Executor</a>) ExecuteUpdate(cmd <a href="http://localhost:8080/pkg/builtin/#string">string</a>, txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ExecuteUpdate executes command.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ProductPlan">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=1541:1640#L52">ProductPlan</a>
+				<a class="permalink" href="index.html#ProductPlan">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+ProductPlan is planner for product of table.
+</p>
+
+			<pre>type ProductPlan struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewProductPlan">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=1686:1743#L59">NewProductPlan</a>
+					<a class="permalink" href="index.html#NewProductPlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewProductPlan(lhs, rhs <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>) *<a href="index.html#ProductPlan">ProductPlan</a></pre>
+				<p>
+NewProductPlan constructs a ProductPlan.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="ProductPlan.EstDistinctVals">func (*ProductPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=2664:2734#L96">EstDistinctVals</a>
+					<a class="permalink" href="index.html#ProductPlan.EstDistinctVals">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#ProductPlan">ProductPlan</a>) EstDistinctVals(fldName <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FieldName">FieldName</a>) <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstDistinctVals estimates the number of distinct value at given fldName.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProductPlan.EstNumBlocks">func (*ProductPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=2275:2318#L86">EstNumBlocks</a>
+					<a class="permalink" href="index.html#ProductPlan.EstNumBlocks">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#ProductPlan">ProductPlan</a>) EstNumBlocks() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumBlocks estimates the number of block access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProductPlan.EstNumRecord">func (*ProductPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=2473:2516#L91">EstNumRecord</a>
+					<a class="permalink" href="index.html#ProductPlan.EstNumRecord">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#ProductPlan">ProductPlan</a>) EstNumRecord() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumRecord estimates the number of record access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProductPlan.Open">func (*ProductPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=1937:1992#L72">Open</a>
+					<a class="permalink" href="index.html#ProductPlan.Open">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#ProductPlan">ProductPlan</a>) Open() (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Scanner">Scanner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Open opens scanner.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProductPlan.Schema">func (*ProductPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=2925:2973#L105">Schema</a>
+					<a class="permalink" href="index.html#ProductPlan.Schema">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#ProductPlan">ProductPlan</a>) Schema() *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Schema">Schema</a></pre>
+				<p>
+Schema returns schema of table schema.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ProjectPlan">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=4396:4469#L170">ProjectPlan</a>
+				<a class="permalink" href="index.html#ProjectPlan">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+ProjectPlan is planner of projection.
+</p>
+
+			<pre>type ProjectPlan struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewProjectPlan">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=4515:4595#L176">NewProjectPlan</a>
+					<a class="permalink" href="index.html#NewProjectPlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewProjectPlan(plan <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>, fields []<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FieldName">FieldName</a>) *<a href="index.html#ProjectPlan">ProjectPlan</a></pre>
+				<p>
+NewProjectPlan constructs a ProjectPlan.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="ProjectPlan.EstDistinctVals">func (*ProjectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=5303:5366#L209">EstDistinctVals</a>
+					<a class="permalink" href="index.html#ProjectPlan.EstDistinctVals">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#ProjectPlan">ProjectPlan</a>) EstDistinctVals(fld <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FieldName">FieldName</a>) <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstDistinctVals estimates the number of distinct value at given fldName.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProjectPlan.EstNumBlocks">func (*ProjectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=5020:5060#L199">EstNumBlocks</a>
+					<a class="permalink" href="index.html#ProjectPlan.EstNumBlocks">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#ProjectPlan">ProjectPlan</a>) EstNumBlocks() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumBlocks estimates the number of block access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProjectPlan.EstNumRecord">func (*ProjectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=5151:5191#L204">EstNumRecord</a>
+					<a class="permalink" href="index.html#ProjectPlan.EstNumRecord">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#ProjectPlan">ProjectPlan</a>) EstNumRecord() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumRecord estimates the number of record access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProjectPlan.Open">func (*ProjectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=4767:4819#L189">Open</a>
+					<a class="permalink" href="index.html#ProjectPlan.Open">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#ProjectPlan">ProjectPlan</a>) Open() (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Scanner">Scanner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Open opens scanner.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ProjectPlan.Schema">func (*ProjectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=5450:5495#L214">Schema</a>
+					<a class="permalink" href="index.html#ProjectPlan.Schema">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#ProjectPlan">ProjectPlan</a>) Schema() *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Schema">Schema</a></pre>
+				<p>
+Schema returns schema of table schema.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="SelectPlan">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=3036:3107#L110">SelectPlan</a>
+				<a class="permalink" href="index.html#SelectPlan">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+SelectPlan is planner for select.
+</p>
+
+			<pre>type SelectPlan struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewSelectPlan">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=3151:3226#L116">NewSelectPlan</a>
+					<a class="permalink" href="index.html#NewSelectPlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewSelectPlan(plan <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>, pred *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Predicate">Predicate</a>) *<a href="index.html#SelectPlan">SelectPlan</a></pre>
+				<p>
+NewSelectPlan constructs a SelectPlan.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="SelectPlan.EstDistinctVals">func (*SelectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=3861:3927#L144">EstDistinctVals</a>
+					<a class="permalink" href="index.html#SelectPlan.EstDistinctVals">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#SelectPlan">SelectPlan</a>) EstDistinctVals(fldName <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FieldName">FieldName</a>) <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstDistinctVals estimates the number of distinct value at given fldName.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="SelectPlan.EstNumBlocks">func (*SelectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=3547:3586#L134">EstNumBlocks</a>
+					<a class="permalink" href="index.html#SelectPlan.EstNumBlocks">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#SelectPlan">SelectPlan</a>) EstNumBlocks() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumBlocks estimates the number of block access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="SelectPlan.EstNumRecord">func (*SelectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=3677:3716#L139">EstNumRecord</a>
+					<a class="permalink" href="index.html#SelectPlan.EstNumRecord">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#SelectPlan">SelectPlan</a>) EstNumRecord() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumRecord estimates the number of record access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="SelectPlan.Open">func (*SelectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=3307:3358#L124">Open</a>
+					<a class="permalink" href="index.html#SelectPlan.Open">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#SelectPlan">SelectPlan</a>) Open() (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Scanner">Scanner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Open opens scanner.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="SelectPlan.Schema">func (*SelectPlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=4281:4325#L165">Schema</a>
+					<a class="permalink" href="index.html#SelectPlan.Schema">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p *<a href="index.html#SelectPlan">SelectPlan</a>) Schema() *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Schema">Schema</a></pre>
+				<p>
+Schema returns schema of table schema.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="TablePlan">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=147:275#L1">TablePlan</a>
+				<a class="permalink" href="index.html#TablePlan">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+TablePlan is planner for table.
+</p>
+
+			<pre>type TablePlan struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewTablePlan">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=317:431#L7">NewTablePlan</a>
+					<a class="permalink" href="index.html#NewTablePlan">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewTablePlan(txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>, tblName <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#TableName">TableName</a>, md <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#MetadataManager">MetadataManager</a>) (*<a href="index.html#TablePlan">TablePlan</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+NewTablePlan constructs a TablePlan.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="TablePlan.EstDistinctVals">func (*TablePlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=1255:1323#L42">EstDistinctVals</a>
+					<a class="permalink" href="index.html#TablePlan.EstDistinctVals">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#TablePlan">TablePlan</a>) EstDistinctVals(fldName <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FieldName">FieldName</a>) <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstDistinctVals estimates the number of distinct value at given fldName.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="TablePlan.EstNumBlocks">func (*TablePlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=968:1009#L32">EstNumBlocks</a>
+					<a class="permalink" href="index.html#TablePlan.EstNumBlocks">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#TablePlan">TablePlan</a>) EstNumBlocks() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumBlocks estimates the number of block access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="TablePlan.EstNumRecord">func (*TablePlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=1101:1142#L37">EstNumRecord</a>
+					<a class="permalink" href="index.html#TablePlan.EstNumRecord">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#TablePlan">TablePlan</a>) EstNumRecord() <a href="http://localhost:8080/pkg/builtin/#int">int</a></pre>
+				<p>
+EstNumRecord estimates the number of record access.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="TablePlan.Open">func (*TablePlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=790:843#L27">Open</a>
+					<a class="permalink" href="index.html#TablePlan.Open">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#TablePlan">TablePlan</a>) Open() (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Scanner">Scanner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Open opens scanner.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="TablePlan.Schema">func (*TablePlan) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/plan/plan.go?s=1412:1458#L47">Schema</a>
+					<a class="permalink" href="index.html#TablePlan.Schema">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (plan *<a href="index.html#TablePlan">TablePlan</a>) Schema() *<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Schema">Schema</a></pre>
+				<p>
+Schema returns schema of table schema.
+</p>
+
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.18.3.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:8080/LICENSE">BSD license</a>.<br>
+<a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
