@@ -41,7 +41,7 @@ type MetadataManager interface {
 	GetStatInfo(tblName TableName, layout *Layout, txn Transaction) (StatInfo, error)
 }
 
-// BufferManager is an interface of buffer manager.
+// BufferPoolManager is an interface of buffer manager.
 type BufferPoolManager interface {
 	Available() int
 	FlushAll(txnum TransactionNumber) error

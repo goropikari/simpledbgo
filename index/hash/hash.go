@@ -40,6 +40,7 @@ func (idx *Index) Err() error {
 	return idx.err
 }
 
+// BeforeFirst move to table which has searchKey (if any).
 // searchKey を持っている table をセットする.
 func (idx *Index) BeforeFirst(searchKey domain.Constant) error {
 	idx.Close()

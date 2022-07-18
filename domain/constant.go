@@ -75,6 +75,7 @@ func (c Constant) Equal(other Constant) bool {
 	return true
 }
 
+// Less check whether c is less than other or not.
 func (c Constant) Less(other Constant) bool {
 	if c.typ != other.typ {
 		panic(errors.New("compare different types"))

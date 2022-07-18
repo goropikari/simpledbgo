@@ -24,6 +24,7 @@ type ManagerConfig struct {
 	DirectIO  bool
 }
 
+// NewManagerConfig constructs a ManagerConfig.
 func NewManagerConfig() ManagerConfig {
 	c := ManagerConfig{
 		DBPath:    path.Join(stdos.Getenv("HOME"), "simpledb"),

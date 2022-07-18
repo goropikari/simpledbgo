@@ -11,6 +11,7 @@ import (
 var ErrFieldNotFound = errors.New("specified field is not found")
 
 const (
+	// RecordOffset is offset of record.
 	RecordOffset = common.Int32Length
 )
 
@@ -312,6 +313,7 @@ func (page *RecordPage) setSlotCondition(slotID SlotID, flag SlotCondition) erro
 	return page.txn.SetInt32(page.blk, page.offset(slotID), flag, true)
 }
 
+// GetSlotCondition gets slot condition (used/unused).
 func (page *RecordPage) GetSlotCondition(slotID SlotID) (SlotCondition, error) {
 	return page.txn.GetInt32(page.blk, page.offset(slotID))
 }

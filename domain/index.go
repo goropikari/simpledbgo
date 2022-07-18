@@ -1,16 +1,17 @@
 package domain
 
-import "github.com/goropikari/simpledbgo/errors"
-
 //go:generate mockgen -source=${GOFILE} -destination=${ROOT_DIR}/testing/mock/mock_${GOPACKAGE}_${GOFILE} -package=mock
 
 const (
-	FldBlock   = "block"
-	FldID      = "id"
+	// FldBlock is column name for block.
+	FldBlock = "block"
+
+	// FldID is column name for column.
+	FldID = "id"
+
+	// FldDataVal is column name for data value.
 	FldDataVal = "dataval"
 )
-
-var ErrNotSupportedFieldType = errors.New("not supported field type")
 
 // SearchCostCalculator calculate search cost.
 type SearchCostCalculator interface {
@@ -27,11 +28,13 @@ type Indexer interface {
 	Close()
 }
 
+// IndexDriver is driver for index.
 type IndexDriver struct {
 	fty IndexFactory
 	cal SearchCostCalculator
 }
 
+// NewIndexDriver constructs a IndexDriver.
 func NewIndexDriver(fty IndexFactory, cal SearchCostCalculator) IndexDriver {
 	return IndexDriver{
 		fty: fty,
@@ -39,10 +42,12 @@ func NewIndexDriver(fty IndexFactory, cal SearchCostCalculator) IndexDriver {
 	}
 }
 
+// Create creates a index.
 func (d IndexDriver) Create(txn Transaction, name IndexName, layout *Layout) Indexer {
 	return d.fty.Create(txn, name, layout)
 }
 
+// Calculate calculates a search cost.
 func (d IndexDriver) Calculate(numBlk, rpb int) int {
 	return d.cal.Calculate(numBlk, rpb)
 }
@@ -132,9 +137,9 @@ func createIdxLayout(tblSchema *Schema, fldName FieldName) *Layout {
 		fldLen := tblSchema.Length(fldName)
 		sch.AddStringField(FldDataVal, fldLen)
 	case UnknownFieldType:
-		panic(ErrNotSupportedFieldType)
+		panic(ErrUnsupportedFieldType)
 	default:
-		panic(ErrNotSupportedFieldType)
+		panic(ErrUnsupportedFieldType)
 	}
 
 	return NewLayout(sch)

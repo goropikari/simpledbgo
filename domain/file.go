@@ -117,6 +117,7 @@ func NewBlockNumber(n int32) (BlockNumber, error) {
 	return BlockNumber(n), nil
 }
 
+// ToInt32 converts block number to int32.
 func (bn BlockNumber) ToInt32() int32 {
 	return int32(bn)
 }

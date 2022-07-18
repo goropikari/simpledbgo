@@ -53,6 +53,7 @@ func NewBufferBytes(data []byte) *Buffer {
 	}
 }
 
+// Size returns a buffer size.
 func (buf *Buffer) Size() int64 {
 	return buf.capacity
 }
@@ -282,10 +283,12 @@ func (buf *Buffer) hasSpace(x any) bool {
 	return buf.NeededByteLength(x)+buf.pos <= buf.capacity
 }
 
+// NeededByteLength returns needed byte length for given type.
 func (buf *Buffer) NeededByteLength(x any) int64 {
 	return NeededByteLength(x)
 }
 
+// NeededByteLength returns needed byte length for given type.
 func NeededByteLength(x any) int64 {
 	switch v := x.(type) {
 	case int32, uint32:

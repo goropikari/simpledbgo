@@ -15,10 +15,12 @@ type result struct {
 	err error
 }
 
+// LockTableConfig is configuration for LockTable.
 type LockTableConfig struct {
 	LockTimeoutMillisecond int
 }
 
+// NewLockTableConfig constructs a LockTableConfig.
 func NewLockTableConfig() LockTableConfig {
 	const timeout = 10000
 
@@ -46,6 +48,7 @@ func NewLockTable(cfg LockTableConfig) *LockTable {
 	}
 }
 
+// SLock takes a shared lock on given blk.
 func (lt *LockTable) SLock(blk domain.Block) error {
 	done := make(chan *result)
 
@@ -87,6 +90,7 @@ func (lt *LockTable) slock(done chan *result, blk domain.Block) {
 	lt.mu.Unlock()
 }
 
+// XLock takes a exclusive lock on given blk.
 func (lt *LockTable) XLock(blk domain.Block) error {
 	done := make(chan *result)
 
@@ -124,6 +128,7 @@ func (lt *LockTable) xlock(done chan *result, blk domain.Block) {
 	done <- &result{}
 }
 
+// Unlock unlocks given blk.
 func (lt *LockTable) Unlock(blk domain.Block) {
 	lt.mu.Lock()
 	defer lt.mu.Unlock()
@@ -156,8 +161,4 @@ func (lt *LockTable) getLockVal(blk domain.Block) int {
 	}
 
 	return 0
-}
-
-func (lt *LockTable) GetLockVal(blk domain.Block) int {
-	return lt.getLockVal(blk)
 }

@@ -13,6 +13,7 @@ const (
 	timeoutMilliSec = 10000
 )
 
+// Config is configuration for server.
 type Config struct {
 	DBPath          string
 	BlockSize       int32
@@ -20,6 +21,7 @@ type Config struct {
 	TimeoutMilliSec int
 }
 
+// NewConfig constructs a Config.
 func NewConfig() Config {
 	c := Config{
 		BlockSize:       blockSize,
@@ -30,16 +32,17 @@ func NewConfig() Config {
 	return c
 }
 
+// DB is database.
 type DB struct {
 	fmgr domain.FileManager
 	lmgr domain.LogManager
 	bmgr domain.BufferPoolManager
-	// cmgr domain.ConcurrencyManager
-	lt  *tx.LockTable
-	gen domain.TxNumberGenerator
-	pe  *plan.Executor
+	lt   *tx.LockTable
+	gen  domain.TxNumberGenerator
+	pe   *plan.Executor
 }
 
+// NewDB constructs a DB.
 func NewDB(
 	fmgr domain.FileManager,
 	lmgr domain.LogManager,
@@ -58,6 +61,7 @@ func NewDB(
 	}
 }
 
+// NewTx make a new transaction.
 func (db *DB) NewTx() (domain.Transaction, error) {
 	txn, err := tx.NewTransaction(db.fmgr, db.lmgr, db.bmgr, db.lt, db.gen)
 	if err != nil {
@@ -67,10 +71,12 @@ func (db *DB) NewTx() (domain.Transaction, error) {
 	return txn, nil
 }
 
+// Query queries given sql.
 func (db *DB) Query(txn domain.Transaction, query string) (domain.Planner, error) {
 	return db.pe.CreateQueryPlan(query, txn)
 }
 
+// Exec executes a command.
 func (db *DB) Exec(txn domain.Transaction, cmd string) (int, error) {
 	return db.pe.ExecuteUpdate(cmd, txn)
 }

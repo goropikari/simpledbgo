@@ -8,6 +8,7 @@ import (
 	"github.com/goropikari/simpledbgo/errors"
 )
 
+// Result is result of SQL.
 type Result struct {
 	typ     ResultType
 	records [][]any
@@ -77,6 +78,7 @@ func makeDataRows(recs [][]any) []byte {
 	return dataRows
 }
 
+// Rows is returned rows.
 type Rows struct {
 	scan   domain.Scanner
 	fields []domain.FieldName

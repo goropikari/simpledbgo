@@ -22,7 +22,6 @@ linters:
     - lll
     - maligned
     - nestif
-    - revive
     - scopelint
     - varnamelen
     - wrapcheck
@@ -31,12 +30,12 @@ linters:
 issues:
   exclude-use-default: false
   exclude:
+    - "endianness"
     - "G304:"
     - "G404:"
-    - "Txnum"
-    - "endianness"
     - "mnd: Magic number: 2"
     - "stdmethods:"
+    - "Txnum"
   exclude-rules:
     - path: tx/lock_table.go
       linters:
@@ -51,7 +50,8 @@ issues:
 run:
   skip-files:
     - _test.go
-    - testing
     - server.go
+    - testing
   skip-dirs:
+    - errors
     - sample

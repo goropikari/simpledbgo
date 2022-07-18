@@ -37,6 +37,7 @@ func (expr Expression) IsFieldName() bool {
 	return expr.field != ""
 }
 
+// IsConstant checks expr is constant or not.
 func (expr Expression) IsConstant() bool {
 	return expr.value != Constant{}
 }

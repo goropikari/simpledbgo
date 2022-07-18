@@ -4,11 +4,17 @@ import "encoding/binary"
 
 // ref: https://www.postgresql.org/docs/14/protocol-message-formats.html
 
+// TransactionStatus is a status of transaction.
 type TransactionStatus = byte
 
 const (
-	TransactionIdle   TransactionStatus = 0x49 // I
-	Transaction       TransactionStatus = 0x54 // T
+	// TransactionIdle means no transaction.
+	TransactionIdle TransactionStatus = 0x49 // I
+
+	// Transaction means within transaction.
+	Transaction TransactionStatus = 0x54 // T
+
+	// TransactionFailed means transaction failed.
 	TransactionFailed TransactionStatus = 0x45 // E
 
 	nullEnd = 0x00

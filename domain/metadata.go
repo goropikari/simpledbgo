@@ -47,6 +47,7 @@ func NewSlotID(id int32) SlotID {
 	return SlotID(id)
 }
 
+// ToInt32 converts slot id to int32.
 func (id SlotID) ToInt32() int32 {
 	return int32(id)
 }
@@ -71,14 +72,15 @@ func (name FieldName) String() string {
 	return string(name)
 }
 
+// ErrUnsupportedFieldType is error for unsupported field.
 var ErrUnsupportedFieldType = errors.New("unsupported field type")
 
 // FieldType is a type of field.
 type FieldType uint
 
 const (
-	// TODO: remove UnknownFieldType
 	// UnknownFieldType is unknown field type.
+	// TODO: remove UnknownFieldType.
 	UnknownFieldType FieldType = iota
 
 	// Int32FieldType is integer field type.

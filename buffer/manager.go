@@ -23,6 +23,7 @@ type Config struct {
 	TimeoutMillisecond int
 }
 
+// NewConfig constructs a Config.
 func NewConfig() Config {
 	timeout := 10000
 	numBuf := 1024

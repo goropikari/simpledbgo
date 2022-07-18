@@ -16,6 +16,7 @@ const (
 	Exclusive
 )
 
+// ConcurrencyManagerConfig is configuration for concurrency manager.
 type ConcurrencyManagerConfig struct {
 	LockTimeoutMillisecond int
 }
@@ -69,6 +70,7 @@ func (conMgr *ConcurrencyManager) Release() {
 	conMgr.locks = make(map[domain.Block]LockType)
 }
 
+// GetLockTable returns *LockTable.
 func (conMgr *ConcurrencyManager) GetLockTable() *LockTable {
 	return conMgr.lt
 }

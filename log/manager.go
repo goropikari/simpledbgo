@@ -19,6 +19,7 @@ type ManagerConfig struct {
 	LogFileName string
 }
 
+// NewManagerConfig constructs a ManagerConfig.
 func NewManagerConfig() ManagerConfig {
 	return ManagerConfig{LogFileName: "logfile"}
 }
@@ -34,6 +35,7 @@ type Page struct {
 	dp *domain.Page
 }
 
+// NewPage constructs a Page.
 func NewPage(page *domain.Page) *Page {
 	return &Page{
 		dp: page,
@@ -54,6 +56,7 @@ func (p *Page) getDomainPage() *domain.Page {
 	return p.dp
 }
 
+// Size returns page size.
 func (p *Page) Size() int64 {
 	return p.dp.Size()
 }
