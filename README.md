@@ -30,6 +30,11 @@ arch=> select name, id from foo;
 (2 rows)
 ```
 
+configurable environment variable settings
+- `SIMPLEDB_PATH`: default is `${HOME}/simpledb`
+- `SIMPLEDB_HOST`: default is `0.0.0.0`
+- `SIMPLEDB_PORT`: default is `5432`
+
 ### Embedded mode
 
 ```go

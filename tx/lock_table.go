@@ -15,14 +15,6 @@ type result struct {
 	err error
 }
 
-// LockTable manages locked Block which used by transaction.
-type LockTable struct {
-	mu                 *sync.Mutex
-	cond               *sync.Cond
-	locks              map[domain.Block]int
-	timeoutMillisecond time.Duration
-}
-
 type LockTableConfig struct {
 	LockTimeoutMillisecond int
 }
@@ -31,6 +23,14 @@ func NewLockTableConfig() LockTableConfig {
 	const timeout = 10000
 
 	return LockTableConfig{LockTimeoutMillisecond: timeout}
+}
+
+// LockTable manages locked Block which used by transaction.
+type LockTable struct {
+	mu                 *sync.Mutex
+	cond               *sync.Cond
+	locks              map[domain.Block]int
+	timeoutMillisecond time.Duration
 }
 
 // NewLockTable constructs LockTable.

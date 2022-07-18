@@ -33,14 +33,14 @@ const (
 )
 
 type Config struct {
-	host string
-	port string
+	Host string
+	Port string
 }
 
 func NewConfig() Config {
 	return Config{
-		host: getEnvWithDefault("DBMS_HOST", "127.0.0.1"),
-		port: getEnvWithDefault("DBMS_PORT", "5432"),
+		Host: getEnvWithDefault("SIMPLEDB_HOST", "127.0.0.1"),
+		Port: getEnvWithDefault("SIMPLEDB_PORT", "5432"),
 	}
 }
 
@@ -60,7 +60,7 @@ func NewServer(cfg Config) *Server {
 
 // Run starts DBMS server
 func (s *Server) Run() {
-	ln, err := net.Listen("tcp", s.cfg.host+":"+s.cfg.port)
+	ln, err := net.Listen("tcp", s.cfg.Host+":"+s.cfg.Port)
 	if err != nil {
 		log.Fatal(err)
 	}

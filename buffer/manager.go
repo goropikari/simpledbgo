@@ -24,8 +24,10 @@ type Config struct {
 }
 
 func NewConfig() Config {
-	timeout := 10000
-	numBuf := 20
+	const (
+		timeout = 10000
+		numBuf  = 1024
+	)
 
 	return Config{
 		NumberBuffer:       numBuf,
