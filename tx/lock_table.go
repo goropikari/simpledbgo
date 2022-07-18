@@ -98,11 +98,10 @@ func (lt *LockTable) XLock(blk domain.Block) error {
 
 func (lt *LockTable) xlock(done chan *result, blk domain.Block) {
 	now := time.Now()
+	lt.mu.Lock()
+	defer lt.mu.Unlock()
 	defer close(done)
-	for !lt.mu.TryLock() && time.Since(now) < lt.timeoutMillisecond {
-	}
 	if time.Since(now) >= lt.timeoutMillisecond {
-		lt.mu.Unlock()
 		done <- &result{err: ErrTransactionTimeoutExceeded}
 
 		return
@@ -117,14 +116,12 @@ func (lt *LockTable) xlock(done chan *result, blk domain.Block) {
 		lt.cond.Wait()
 	}
 	if lt.hasOtherSlocks(blk) {
-		lt.mu.Unlock()
 		done <- &result{err: ErrTransactionTimeoutExceeded}
 
 		return
 	}
 	lt.locks[blk] = -1
 	done <- &result{}
-	lt.mu.Unlock()
 }
 
 func (lt *LockTable) Unlock(blk domain.Block) {

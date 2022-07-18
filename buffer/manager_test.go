@@ -161,7 +161,7 @@ func TestBufferMgr_Pin(t *testing.T) {
 		require.Equal(t, 0, bufMgr.Available())
 		block := domain.NewBlock(domain.FileName(filenames[3]), domain.BlockNumber(0))
 		_, err = bufMgr.Pin(block)
-		require.EqualError(t, err, "timeout exceeded")
+		require.EqualError(t, err, "buffer pin timeout exceeded")
 	})
 }
 

@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	// ErrTimeoutExceeded is an error type that means timeout exceeded.
-	ErrTimeoutExceeded = errors.New("timeout exceeded")
+	// ErrBufferPinTimeoutExceeded is an error type that means timeout exceeded.
+	ErrBufferPinTimeoutExceeded = errors.New("buffer pin timeout exceeded")
 
 	// ErrInvalidNumberOfBuffer is an error that means number of buffer must be positive.
 	ErrInvalidNumberOfBuffer = errors.New("number of buffer must be positive")
@@ -24,10 +24,8 @@ type Config struct {
 }
 
 func NewConfig() Config {
-	const (
-		timeout = 10000
-		numBuf  = 1024
-	)
+	timeout := 10000
+	numBuf := 1024
 
 	return Config{
 		NumberBuffer:       numBuf,
@@ -41,7 +39,7 @@ type Manager struct {
 	cond               *sync.Cond
 	bufferPool         []*domain.Buffer
 	numAvailableBuffer int
-	timeout            time.Duration
+	timeoutMillisecond time.Duration
 }
 
 // NewManager is a constructor of Manager.
@@ -70,7 +68,7 @@ func NewManager(fileMgr domain.FileManager, logMgr domain.LogManager, config Con
 		cond:               cond,
 		bufferPool:         bufferPool,
 		numAvailableBuffer: numBuffer,
-		timeout:            time.Millisecond * time.Duration(config.TimeoutMillisecond),
+		timeoutMillisecond: time.Millisecond * time.Duration(config.TimeoutMillisecond),
 	}, nil
 }
 
@@ -121,18 +119,22 @@ func (mgr *Manager) Pin(block domain.Block) (*domain.Buffer, error) {
 	done := make(chan *result)
 
 	go mgr.pin(done, block)
-	select {
-	case result := <-done:
-		return result.buf, result.err
-	case <-time.After(mgr.timeout):
-		return nil, ErrTimeoutExceeded
-	}
+	res := <-done
+
+	return res.buf, res.err
 }
 
 func (mgr *Manager) pin(done chan *result, block domain.Block) {
+	now := time.Now()
 	mgr.mu.Lock()
 	defer mgr.mu.Unlock()
 	defer close(done)
+
+	if time.Since(now) >= mgr.timeoutMillisecond {
+		done <- &result{err: ErrBufferPinTimeoutExceeded}
+
+		return
+	}
 
 	buf, err := mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 	if err != nil {
@@ -141,7 +143,12 @@ func (mgr *Manager) pin(done chan *result, block domain.Block) {
 		return
 	}
 
-	for buf == nil {
+	go func() {
+		time.Sleep(mgr.timeoutMillisecond - time.Since(now))
+		mgr.cond.Broadcast()
+	}()
+
+	for buf == nil && time.Since(now) <= mgr.timeoutMillisecond {
 		mgr.cond.Wait()
 		buf, err = mgr.tryToPin(block, naiveSearchUnpinnedBuffer)
 		if err != nil {
@@ -149,6 +156,11 @@ func (mgr *Manager) pin(done chan *result, block domain.Block) {
 
 			return
 		}
+	}
+	if buf == nil {
+		done <- &result{err: ErrBufferPinTimeoutExceeded}
+
+		return
 	}
 
 	done <- &result{buf: buf, err: nil}
