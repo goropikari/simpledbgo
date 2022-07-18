@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-18 04:24:31</td>
+            <td class="headerValue">2022-07-18 06:41:47</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -109,113 +109,115 @@
 <a name="47"><span class="lineNum">      47 </span><span class="lineNoCov">          0 :         return SlotID(id)</span></a>
 <a name="48"><span class="lineNum">      48 </span><span class="lineNoCov">          0 : }</span></a>
 <a name="49"><span class="lineNum">      49 </span>            : </a>
-<a name="50"><span class="lineNum">      50 </span><span class="lineNoCov">          0 : func (id SlotID) ToInt32() int32 {</span></a>
-<a name="51"><span class="lineNum">      51 </span><span class="lineNoCov">          0 :         return int32(id)</span></a>
-<a name="52"><span class="lineNum">      52 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="53"><span class="lineNum">      53 </span>            : </a>
-<a name="54"><span class="lineNum">      54 </span>            : // FieldName is value object of field name.</a>
-<a name="55"><span class="lineNum">      55 </span>            : type FieldName string</a>
-<a name="56"><span class="lineNum">      56 </span>            : </a>
-<a name="57"><span class="lineNum">      57 </span>            : // NewFieldName constructs FieldName.</a>
-<a name="58"><span class="lineNum">      58 </span><span class="lineNoCov">          0 : func NewFieldName(name string) (FieldName, error) {</span></a>
-<a name="59"><span class="lineNum">      59 </span><span class="lineNoCov">          0 :         if len(name) &gt; MaxFieldNameLength {</span></a>
-<a name="60"><span class="lineNum">      60 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, ErrExceedMaxFieldNameLength</span></a>
-<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="62"><span class="lineNum">      62 </span><span class="lineNoCov">          0 :         if name == &quot;&quot; {</span></a>
-<a name="63"><span class="lineNum">      63 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.New(&quot;field name must not be empty&quot;)</span></a>
-<a name="64"><span class="lineNum">      64 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="65"><span class="lineNum">      65 </span>            : </a>
-<a name="66"><span class="lineNum">      66 </span><span class="lineNoCov">          0 :         return FieldName(name), nil</span></a>
-<a name="67"><span class="lineNum">      67 </span>            : }</a>
-<a name="68"><span class="lineNum">      68 </span>            : </a>
-<a name="69"><span class="lineNum">      69 </span>            : // String stringfies name.</a>
-<a name="70"><span class="lineNum">      70 </span><span class="lineNoCov">          0 : func (name FieldName) String() string {</span></a>
-<a name="71"><span class="lineNum">      71 </span><span class="lineNoCov">          0 :         return string(name)</span></a>
-<a name="72"><span class="lineNum">      72 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="73"><span class="lineNum">      73 </span>            : </a>
-<a name="74"><span class="lineNum">      74 </span>            : var ErrUnsupportedFieldType = errors.New(&quot;unsupported field type&quot;)</a>
-<a name="75"><span class="lineNum">      75 </span>            : </a>
-<a name="76"><span class="lineNum">      76 </span>            : // FieldType is a type of field.</a>
-<a name="77"><span class="lineNum">      77 </span>            : type FieldType uint</a>
-<a name="78"><span class="lineNum">      78 </span>            : </a>
-<a name="79"><span class="lineNum">      79 </span>            : const (</a>
-<a name="80"><span class="lineNum">      80 </span>            :         // TODO: remove UnknownFieldType</a>
-<a name="81"><span class="lineNum">      81 </span>            :         // UnknownFieldType is unknown field type.</a>
-<a name="82"><span class="lineNum">      82 </span>            :         UnknownFieldType FieldType = iota</a>
-<a name="83"><span class="lineNum">      83 </span>            : </a>
-<a name="84"><span class="lineNum">      84 </span>            :         // Int32FieldType is integer field type.</a>
-<a name="85"><span class="lineNum">      85 </span>            :         Int32FieldType</a>
-<a name="86"><span class="lineNum">      86 </span>            : </a>
-<a name="87"><span class="lineNum">      87 </span>            :         // StringFieldType is string field type.</a>
-<a name="88"><span class="lineNum">      88 </span>            :         StringFieldType</a>
-<a name="89"><span class="lineNum">      89 </span>            : )</a>
-<a name="90"><span class="lineNum">      90 </span>            : </a>
-<a name="91"><span class="lineNum">      91 </span>            : // FieldInfo is a model of field information.</a>
-<a name="92"><span class="lineNum">      92 </span>            : // length は、その field が max 何 bytes 保存できるかの情報。VARCHAR(255) なら length は 255.</a>
-<a name="93"><span class="lineNum">      93 </span>            : type FieldInfo struct {</a>
-<a name="94"><span class="lineNum">      94 </span>            :         typ    FieldType</a>
-<a name="95"><span class="lineNum">      95 </span>            :         length int</a>
-<a name="96"><span class="lineNum">      96 </span>            : }</a>
-<a name="97"><span class="lineNum">      97 </span>            : </a>
-<a name="98"><span class="lineNum">      98 </span>            : // TableName is value object of table name.</a>
-<a name="99"><span class="lineNum">      99 </span>            : type TableName string</a>
-<a name="100"><span class="lineNum">     100 </span>            : </a>
-<a name="101"><span class="lineNum">     101 </span>            : // NewTableName constructs TableName.</a>
-<a name="102"><span class="lineNum">     102 </span><span class="lineNoCov">          0 : func NewTableName(name string) (TableName, error) {</span></a>
-<a name="103"><span class="lineNum">     103 </span><span class="lineNoCov">          0 :         if len(name) &gt; MaxTableNameLength {</span></a>
-<a name="104"><span class="lineNum">     104 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, ErrExceedMaxFieldNameLength</span></a>
-<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="106"><span class="lineNum">     106 </span><span class="lineNoCov">          0 :         if name == &quot;&quot; {</span></a>
-<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.New(&quot;table name must not be empty&quot;)</span></a>
-<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="109"><span class="lineNum">     109 </span>            : </a>
-<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :         return TableName(name), nil</span></a>
-<a name="111"><span class="lineNum">     111 </span>            : }</a>
-<a name="112"><span class="lineNum">     112 </span>            : </a>
-<a name="113"><span class="lineNum">     113 </span>            : // String stringfies name.</a>
-<a name="114"><span class="lineNum">     114 </span><span class="lineNoCov">          0 : func (name TableName) String() string {</span></a>
-<a name="115"><span class="lineNum">     115 </span><span class="lineNoCov">          0 :         return string(name)</span></a>
-<a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="117"><span class="lineNum">     117 </span>            : </a>
-<a name="118"><span class="lineNum">     118 </span>            : // ToFileName converts type from TableName into FileName.</a>
-<a name="119"><span class="lineNum">     119 </span><span class="lineNoCov">          0 : func (name TableName) ToFileName() FileName {</span></a>
-<a name="120"><span class="lineNum">     120 </span><span class="lineNoCov">          0 :         return FileName(name)</span></a>
-<a name="121"><span class="lineNum">     121 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="122"><span class="lineNum">     122 </span>            : </a>
-<a name="123"><span class="lineNum">     123 </span>            : // ToViewName converts type from ViewName into ViewName.</a>
-<a name="124"><span class="lineNum">     124 </span><span class="lineNoCov">          0 : func (name TableName) ToViewName() ViewName {</span></a>
-<a name="125"><span class="lineNum">     125 </span><span class="lineNoCov">          0 :         return ViewName(name)</span></a>
-<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="127"><span class="lineNum">     127 </span>            : </a>
-<a name="128"><span class="lineNum">     128 </span>            : // ViewName is type of view name.</a>
-<a name="129"><span class="lineNum">     129 </span>            : type ViewName string</a>
-<a name="130"><span class="lineNum">     130 </span>            : </a>
-<a name="131"><span class="lineNum">     131 </span>            : // NewViewName constructs a ViewName.</a>
-<a name="132"><span class="lineNum">     132 </span><span class="lineNoCov">          0 : func NewViewName(name string) (ViewName, error) {</span></a>
-<a name="133"><span class="lineNum">     133 </span><span class="lineNoCov">          0 :         if len(name) &gt; MaxViewNameLength {</span></a>
-<a name="134"><span class="lineNum">     134 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, ErrExceedMaxViewNameLength</span></a>
-<a name="135"><span class="lineNum">     135 </span><span class="lineNoCov">          0 :         }</span></a>
-<a name="136"><span class="lineNum">     136 </span>            : </a>
-<a name="137"><span class="lineNum">     137 </span><span class="lineNoCov">          0 :         return ViewName(name), nil</span></a>
-<a name="138"><span class="lineNum">     138 </span>            : }</a>
-<a name="139"><span class="lineNum">     139 </span>            : </a>
-<a name="140"><span class="lineNum">     140 </span>            : // String stringfies ViewName.</a>
-<a name="141"><span class="lineNum">     141 </span><span class="lineNoCov">          0 : func (name ViewName) String() string {</span></a>
-<a name="142"><span class="lineNum">     142 </span><span class="lineNoCov">          0 :         return string(name)</span></a>
-<a name="143"><span class="lineNum">     143 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="144"><span class="lineNum">     144 </span>            : </a>
-<a name="145"><span class="lineNum">     145 </span>            : // ViewDef is type of view definition.</a>
-<a name="146"><span class="lineNum">     146 </span>            : type ViewDef string</a>
-<a name="147"><span class="lineNum">     147 </span>            : </a>
-<a name="148"><span class="lineNum">     148 </span>            : // NewViewDef constructs a ViewDef.</a>
-<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 : func NewViewDef(def string) ViewDef {</span></a>
-<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 :         return ViewDef(def)</span></a>
-<a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 : }</span></a>
-<a name="152"><span class="lineNum">     152 </span>            : </a>
-<a name="153"><span class="lineNum">     153 </span>            : // String stringfies ViewDef.</a>
-<a name="154"><span class="lineNum">     154 </span><span class="lineNoCov">          0 : func (def ViewDef) String() string {</span></a>
-<a name="155"><span class="lineNum">     155 </span><span class="lineNoCov">          0 :         return string(def)</span></a>
-<a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="50"><span class="lineNum">      50 </span>            : // ToInt32 converts slot id to int32.</a>
+<a name="51"><span class="lineNum">      51 </span><span class="lineNoCov">          0 : func (id SlotID) ToInt32() int32 {</span></a>
+<a name="52"><span class="lineNum">      52 </span><span class="lineNoCov">          0 :         return int32(id)</span></a>
+<a name="53"><span class="lineNum">      53 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="54"><span class="lineNum">      54 </span>            : </a>
+<a name="55"><span class="lineNum">      55 </span>            : // FieldName is value object of field name.</a>
+<a name="56"><span class="lineNum">      56 </span>            : type FieldName string</a>
+<a name="57"><span class="lineNum">      57 </span>            : </a>
+<a name="58"><span class="lineNum">      58 </span>            : // NewFieldName constructs FieldName.</a>
+<a name="59"><span class="lineNum">      59 </span><span class="lineNoCov">          0 : func NewFieldName(name string) (FieldName, error) {</span></a>
+<a name="60"><span class="lineNum">      60 </span><span class="lineNoCov">          0 :         if len(name) &gt; MaxFieldNameLength {</span></a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, ErrExceedMaxFieldNameLength</span></a>
+<a name="62"><span class="lineNum">      62 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="63"><span class="lineNum">      63 </span><span class="lineNoCov">          0 :         if name == &quot;&quot; {</span></a>
+<a name="64"><span class="lineNum">      64 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.New(&quot;field name must not be empty&quot;)</span></a>
+<a name="65"><span class="lineNum">      65 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="66"><span class="lineNum">      66 </span>            : </a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineNoCov">          0 :         return FieldName(name), nil</span></a>
+<a name="68"><span class="lineNum">      68 </span>            : }</a>
+<a name="69"><span class="lineNum">      69 </span>            : </a>
+<a name="70"><span class="lineNum">      70 </span>            : // String stringfies name.</a>
+<a name="71"><span class="lineNum">      71 </span><span class="lineNoCov">          0 : func (name FieldName) String() string {</span></a>
+<a name="72"><span class="lineNum">      72 </span><span class="lineNoCov">          0 :         return string(name)</span></a>
+<a name="73"><span class="lineNum">      73 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="74"><span class="lineNum">      74 </span>            : </a>
+<a name="75"><span class="lineNum">      75 </span>            : // ErrUnsupportedFieldType is error for unsupported field.</a>
+<a name="76"><span class="lineNum">      76 </span>            : var ErrUnsupportedFieldType = errors.New(&quot;unsupported field type&quot;)</a>
+<a name="77"><span class="lineNum">      77 </span>            : </a>
+<a name="78"><span class="lineNum">      78 </span>            : // FieldType is a type of field.</a>
+<a name="79"><span class="lineNum">      79 </span>            : type FieldType uint</a>
+<a name="80"><span class="lineNum">      80 </span>            : </a>
+<a name="81"><span class="lineNum">      81 </span>            : const (</a>
+<a name="82"><span class="lineNum">      82 </span>            :         // UnknownFieldType is unknown field type.</a>
+<a name="83"><span class="lineNum">      83 </span>            :         // TODO: remove UnknownFieldType.</a>
+<a name="84"><span class="lineNum">      84 </span>            :         UnknownFieldType FieldType = iota</a>
+<a name="85"><span class="lineNum">      85 </span>            : </a>
+<a name="86"><span class="lineNum">      86 </span>            :         // Int32FieldType is integer field type.</a>
+<a name="87"><span class="lineNum">      87 </span>            :         Int32FieldType</a>
+<a name="88"><span class="lineNum">      88 </span>            : </a>
+<a name="89"><span class="lineNum">      89 </span>            :         // StringFieldType is string field type.</a>
+<a name="90"><span class="lineNum">      90 </span>            :         StringFieldType</a>
+<a name="91"><span class="lineNum">      91 </span>            : )</a>
+<a name="92"><span class="lineNum">      92 </span>            : </a>
+<a name="93"><span class="lineNum">      93 </span>            : // FieldInfo is a model of field information.</a>
+<a name="94"><span class="lineNum">      94 </span>            : // length は、その field が max 何 bytes 保存できるかの情報。VARCHAR(255) なら length は 255.</a>
+<a name="95"><span class="lineNum">      95 </span>            : type FieldInfo struct {</a>
+<a name="96"><span class="lineNum">      96 </span>            :         typ    FieldType</a>
+<a name="97"><span class="lineNum">      97 </span>            :         length int</a>
+<a name="98"><span class="lineNum">      98 </span>            : }</a>
+<a name="99"><span class="lineNum">      99 </span>            : </a>
+<a name="100"><span class="lineNum">     100 </span>            : // TableName is value object of table name.</a>
+<a name="101"><span class="lineNum">     101 </span>            : type TableName string</a>
+<a name="102"><span class="lineNum">     102 </span>            : </a>
+<a name="103"><span class="lineNum">     103 </span>            : // NewTableName constructs TableName.</a>
+<a name="104"><span class="lineNum">     104 </span><span class="lineNoCov">          0 : func NewTableName(name string) (TableName, error) {</span></a>
+<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 :         if len(name) &gt; MaxTableNameLength {</span></a>
+<a name="106"><span class="lineNum">     106 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, ErrExceedMaxFieldNameLength</span></a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :         if name == &quot;&quot; {</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, errors.New(&quot;table name must not be empty&quot;)</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="111"><span class="lineNum">     111 </span>            : </a>
+<a name="112"><span class="lineNum">     112 </span><span class="lineNoCov">          0 :         return TableName(name), nil</span></a>
+<a name="113"><span class="lineNum">     113 </span>            : }</a>
+<a name="114"><span class="lineNum">     114 </span>            : </a>
+<a name="115"><span class="lineNum">     115 </span>            : // String stringfies name.</a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 : func (name TableName) String() string {</span></a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineNoCov">          0 :         return string(name)</span></a>
+<a name="118"><span class="lineNum">     118 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="119"><span class="lineNum">     119 </span>            : </a>
+<a name="120"><span class="lineNum">     120 </span>            : // ToFileName converts type from TableName into FileName.</a>
+<a name="121"><span class="lineNum">     121 </span><span class="lineNoCov">          0 : func (name TableName) ToFileName() FileName {</span></a>
+<a name="122"><span class="lineNum">     122 </span><span class="lineNoCov">          0 :         return FileName(name)</span></a>
+<a name="123"><span class="lineNum">     123 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="124"><span class="lineNum">     124 </span>            : </a>
+<a name="125"><span class="lineNum">     125 </span>            : // ToViewName converts type from ViewName into ViewName.</a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 : func (name TableName) ToViewName() ViewName {</span></a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineNoCov">          0 :         return ViewName(name)</span></a>
+<a name="128"><span class="lineNum">     128 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="129"><span class="lineNum">     129 </span>            : </a>
+<a name="130"><span class="lineNum">     130 </span>            : // ViewName is type of view name.</a>
+<a name="131"><span class="lineNum">     131 </span>            : type ViewName string</a>
+<a name="132"><span class="lineNum">     132 </span>            : </a>
+<a name="133"><span class="lineNum">     133 </span>            : // NewViewName constructs a ViewName.</a>
+<a name="134"><span class="lineNum">     134 </span><span class="lineNoCov">          0 : func NewViewName(name string) (ViewName, error) {</span></a>
+<a name="135"><span class="lineNum">     135 </span><span class="lineNoCov">          0 :         if len(name) &gt; MaxViewNameLength {</span></a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineNoCov">          0 :                 return &quot;&quot;, ErrExceedMaxViewNameLength</span></a>
+<a name="137"><span class="lineNum">     137 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="138"><span class="lineNum">     138 </span>            : </a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineNoCov">          0 :         return ViewName(name), nil</span></a>
+<a name="140"><span class="lineNum">     140 </span>            : }</a>
+<a name="141"><span class="lineNum">     141 </span>            : </a>
+<a name="142"><span class="lineNum">     142 </span>            : // String stringfies ViewName.</a>
+<a name="143"><span class="lineNum">     143 </span><span class="lineNoCov">          0 : func (name ViewName) String() string {</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :         return string(name)</span></a>
+<a name="145"><span class="lineNum">     145 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="146"><span class="lineNum">     146 </span>            : </a>
+<a name="147"><span class="lineNum">     147 </span>            : // ViewDef is type of view definition.</a>
+<a name="148"><span class="lineNum">     148 </span>            : type ViewDef string</a>
+<a name="149"><span class="lineNum">     149 </span>            : </a>
+<a name="150"><span class="lineNum">     150 </span>            : // NewViewDef constructs a ViewDef.</a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 : func NewViewDef(def string) ViewDef {</span></a>
+<a name="152"><span class="lineNum">     152 </span><span class="lineNoCov">          0 :         return ViewDef(def)</span></a>
+<a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="154"><span class="lineNum">     154 </span>            : </a>
+<a name="155"><span class="lineNum">     155 </span>            : // String stringfies ViewDef.</a>
+<a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 : func (def ViewDef) String() string {</span></a>
+<a name="157"><span class="lineNum">     157 </span><span class="lineNoCov">          0 :         return string(def)</span></a>
+<a name="158"><span class="lineNum">     158 </span><span class="lineNoCov">          0 : }</span></a>
 </pre>
       </td>
     </tr>
