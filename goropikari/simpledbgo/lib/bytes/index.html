@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>bytes - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="http://localhost:8080/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="http://localhost:8080/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.18.3";</script>
+<script src="http://localhost:8080/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:8080/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:8080/pkg/">GoDoc</a></div>
+<a href="index.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:8080/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package bytes
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/goropikari/simpledbgo/lib/bytes"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="index.html#pkg-variables">Variables</a></dd>
+			
+			
+				
+				<dd><a href="index.html#NeededByteLength">func NeededByteLength(x any) int64</a></dd>
+			
+			
+				
+				<dd><a href="index.html#Buffer">type Buffer</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewBuffer">func NewBuffer(n int) *Buffer</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewBufferBytes">func NewBufferBytes(data []byte) *Buffer</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.GetBytes">func (buf *Buffer) GetBytes(offset int64) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.GetData">func (buf *Buffer) GetData() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.GetInt32">func (buf *Buffer) GetInt32(offset int64) (int32, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.GetString">func (buf *Buffer) GetString(offset int64) (string, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.NeededByteLength">func (buf *Buffer) NeededByteLength(x any) int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.Read">func (buf *Buffer) Read(p []byte) (n int, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.Reset">func (buf *Buffer) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.Seek">func (buf *Buffer) Seek(offset int64, whence int) (int64, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.SetBytes">func (buf *Buffer) SetBytes(offset int64, p []byte) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.SetInt32">func (buf *Buffer) SetInt32(offset int64, x int32) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.SetString">func (buf *Buffer) SetString(offset int64, str string) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.Size">func (buf *Buffer) Size() int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#Buffer.Write">func (buf *Buffer) Write(p []byte) (n int, err error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#ByteSliceCreater">type ByteSliceCreater</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewByteSliceCreater">func NewByteSliceCreater() *ByteSliceCreater</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ByteSliceCreater.Create">func (s *ByteSliceCreater) Create(n int) ([]byte, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#DirectByteSliceCreater">type DirectByteSliceCreater</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewDirectByteSliceCreater">func NewDirectByteSliceCreater() *DirectByteSliceCreater</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#DirectByteSliceCreater.Create">func (s *DirectByteSliceCreater) Create(n int) ([]byte, error)</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go">buffer.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/byte_slice_creater.go">byte_slice_creater.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/direct_byte_slice_creater.go">direct_byte_slice_creater.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				
+				<pre>var (
+    <span class="comment">// ErrInvalidOffset is an error that means given offset is invalid.</span>
+    <span id="ErrInvalidOffset">ErrInvalidOffset</span> = <a href="../../errors/index.html">errors</a>.<a href="../../errors/index.html#New">New</a>(&#34;invalid offset&#34;)
+
+    <span class="comment">// ErrNotEnoughSpace is an error that means there is no enough space.</span>
+    <span id="ErrNotEnoughSpace">ErrNotEnoughSpace</span> = <a href="../../errors/index.html">errors</a>.<a href="../../errors/index.html#New">New</a>(&#34;not enough space&#34;)
+
+    <span class="comment">// ErrOutOfRange is an error type that refer out of range.</span>
+    <span id="ErrOutOfRange">ErrOutOfRange</span> = <a href="../../errors/index.html">errors</a>.<a href="../../errors/index.html#New">New</a>(&#34;reference out of range of buffer&#34;)
+
+    <span class="comment">// ErrUnsupportedWhence is an error type that given whence is unsupported.</span>
+    <span id="ErrUnsupportedWhence">ErrUnsupportedWhence</span> = <a href="../../errors/index.html">errors</a>.<a href="../../errors/index.html#New">New</a>(&#34;unsupported whence&#34;)
+)</pre>
+			
+		
+		
+			
+			
+			<h2 id="NeededByteLength">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=6456:6490#L282">NeededByteLength</a>
+				<a class="permalink" href="index.html#NeededByteLength">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func NeededByteLength(x <a href="http://localhost:8080/pkg/builtin/#any">any</a>) <a href="http://localhost:8080/pkg/builtin/#int64">int64</a></pre>
+			<p>
+NeededByteLength returns needed byte length for given type.
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="Buffer">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=930:1001#L26">Buffer</a>
+				<a class="permalink" href="index.html#Buffer">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+Buffer is a buffer.
+</p>
+
+			<pre>type Buffer struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewBuffer">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=1044:1073#L33">NewBuffer</a>
+					<a class="permalink" href="index.html#NewBuffer">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewBuffer(n <a href="http://localhost:8080/pkg/builtin/#int">int</a>) *<a href="index.html#Buffer">Buffer</a></pre>
+				<p>
+NewBuffer is a constructor of Buffer.
+</p>
+
+				
+				
+			
+				
+				<h3 id="NewBufferBytes">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=1179:1219#L38">NewBufferBytes</a>
+					<a class="permalink" href="index.html#NewBufferBytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewBufferBytes(data []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>) *<a href="index.html#Buffer">Buffer</a></pre>
+				<p>
+NewBufferBytes is a constructor of Buffer by byte slice.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Buffer.GetBytes">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=5102:5159#L225">GetBytes</a>
+					<a class="permalink" href="index.html#Buffer.GetBytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) GetBytes(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>) ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GetBytes returns bytes from page.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.GetData">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=2170:2205#L92">GetData</a>
+					<a class="permalink" href="index.html#Buffer.GetData">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) GetData() []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a></pre>
+				<p>
+GetData returns buffer.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.GetInt32">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=2399:2455#L105">GetInt32</a>
+					<a class="permalink" href="index.html#Buffer.GetInt32">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) GetInt32(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>) (<a href="http://localhost:8080/pkg/builtin/#int32">int32</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GetInt32 returns int32 from buffer.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.GetString">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=4058:4116#L180">GetString</a>
+					<a class="permalink" href="index.html#Buffer.GetString">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) GetString(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>) (<a href="http://localhost:8080/pkg/builtin/#string">string</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GetString returns string from buffer.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.NeededByteLength">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=6311:6359#L277">NeededByteLength</a>
+					<a class="permalink" href="index.html#Buffer.NeededByteLength">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) NeededByteLength(x <a href="http://localhost:8080/pkg/builtin/#any">any</a>) <a href="http://localhost:8080/pkg/builtin/#int64">int64</a></pre>
+				<p>
+NeededByteLength returns needed byte length for given type.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.Read">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=1430:1482#L52">Read</a>
+					<a class="permalink" href="index.html#Buffer.Read">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) Read(p []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>) (n <a href="http://localhost:8080/pkg/builtin/#int">int</a>, err <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Read reads bytes from Reader.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.Reset">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=2252:2278#L97">Reset</a>
+					<a class="permalink" href="index.html#Buffer.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) Reset()</pre>
+				<p>
+Reset resets buffer.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.Seek">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=1895:1959#L77">Seek</a>
+					<a class="permalink" href="index.html#Buffer.Seek">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) Seek(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>, whence <a href="http://localhost:8080/pkg/builtin/#int">int</a>) (<a href="http://localhost:8080/pkg/builtin/#int64">int64</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Seek seeks position.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.SetBytes">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=5712:5769#L252">SetBytes</a>
+					<a class="permalink" href="index.html#Buffer.SetBytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) SetBytes(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>, p []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>) <a href="http://localhost:8080/pkg/builtin/#error">error</a></pre>
+				<p>
+SetBytes writes bytes to page.
+---------------------------------------
+| bytes length (uint32) | body (bytes)|
+---------------------------------------.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.SetInt32">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=2869:2925#L125">SetInt32</a>
+					<a class="permalink" href="index.html#Buffer.SetInt32">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) SetInt32(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>, x <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>) <a href="http://localhost:8080/pkg/builtin/#error">error</a></pre>
+				<p>
+SetInt32 returns int32 from buffer.
+--------------------
+|  int32 (4 bytes) |
+--------------------.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.SetString">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=4640:4700#L204">SetString</a>
+					<a class="permalink" href="index.html#Buffer.SetString">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) SetString(offset <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>, str <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/builtin/#error">error</a></pre>
+				<p>
+SetString returns string from buffer.
+----------------------------------------
+| string length (uint32)| body (string)|
+----------------------------------------.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.Size">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=1339:1370#L47">Size</a>
+					<a class="permalink" href="index.html#Buffer.Size">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) Size() <a href="http://localhost:8080/pkg/builtin/#int64">int64</a></pre>
+				<p>
+Size returns a buffer size.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Buffer.Write">func (*Buffer) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/buffer.go?s=1658:1711#L65">Write</a>
+					<a class="permalink" href="index.html#Buffer.Write">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (buf *<a href="index.html#Buffer">Buffer</a>) Write(p []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>) (n <a href="http://localhost:8080/pkg/builtin/#int">int</a>, err <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Write writes given bytes to writer.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ByteSliceCreater">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/byte_slice_creater.go?s=73:103#L1">ByteSliceCreater</a>
+				<a class="permalink" href="index.html#ByteSliceCreater">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+ByteSliceCreater is a model of creature of byte slice.
+</p>
+
+			<pre>type ByteSliceCreater struct{}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewByteSliceCreater">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/byte_slice_creater.go?s=166:210#L1">NewByteSliceCreater</a>
+					<a class="permalink" href="index.html#NewByteSliceCreater">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewByteSliceCreater() *<a href="index.html#ByteSliceCreater">ByteSliceCreater</a></pre>
+				<p>
+NewByteSliceCreater is a constructor of ByteSliceCreater.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="ByteSliceCreater.Create">func (*ByteSliceCreater) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/byte_slice_creater.go?s=287:343#L2">Create</a>
+					<a class="permalink" href="index.html#ByteSliceCreater.Create">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="index.html#ByteSliceCreater">ByteSliceCreater</a>) Create(n <a href="http://localhost:8080/pkg/builtin/#int">int</a>) ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Create creats an n bytes `bytes` slice.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="DirectByteSliceCreater">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/direct_byte_slice_creater.go?s=181:217#L1">DirectByteSliceCreater</a>
+				<a class="permalink" href="index.html#DirectByteSliceCreater">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+DirectByteSliceCreater is a slice creature with direct io.
+</p>
+
+			<pre>type DirectByteSliceCreater struct{}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewDirectByteSliceCreater">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/direct_byte_slice_creater.go?s=292:348#L2">NewDirectByteSliceCreater</a>
+					<a class="permalink" href="index.html#NewDirectByteSliceCreater">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewDirectByteSliceCreater() *<a href="index.html#DirectByteSliceCreater">DirectByteSliceCreater</a></pre>
+				<p>
+NewDirectByteSliceCreater is a constructor of DirectByteSliceCreater.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="DirectByteSliceCreater.Create">func (*DirectByteSliceCreater) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/lib/bytes/direct_byte_slice_creater.go?s=420:482#L7">Create</a>
+					<a class="permalink" href="index.html#DirectByteSliceCreater.Create">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="index.html#DirectByteSliceCreater">DirectByteSliceCreater</a>) Create(n <a href="http://localhost:8080/pkg/builtin/#int">int</a>) ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Create creates a byte slice.
+</p>
+
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.18.3.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:8080/LICENSE">BSD license</a>.<br>
+<a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>

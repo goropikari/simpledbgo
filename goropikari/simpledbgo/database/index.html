@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>database - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="http://localhost:8080/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="http://localhost:8080/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.18.3";</script>
+<script src="http://localhost:8080/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:8080/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:8080/pkg/">GoDoc</a></div>
+<a href="index.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:8080/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package database
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/goropikari/simpledbgo/database"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="index.html#pkg-variables">Variables</a></dd>
+			
+			
+			
+				
+				<dd><a href="index.html#Config">type Config</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewConfig">func NewConfig() Config</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#DB">type DB</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#InitializeDB">func InitializeDB() (*DB, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewDB">func NewDB(fmgr domain.FileManager, lmgr domain.LogManager, bmgr domain.BufferPoolManager, lt *tx.LockTable, gen domain.TxNumberGenerator, pe *plan.Executor) *DB</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#DB.Exec">func (db *DB) Exec(txn domain.Transaction, cmd string) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#DB.NewTx">func (db *DB) NewTx() (domain.Transaction, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#DB.Query">func (db *DB) Query(txn domain.Transaction, query string) (domain.Planner, error)</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go">database.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/wire_gen.go">wire_gen.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				
+				<pre>var <span id="Set">Set</span> = <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#NewSet">NewSet</a>(<a href="../file/index.html">file</a>.<a href="../file/index.html#NewManagerConfig">NewManagerConfig</a>, <a href="../file/index.html">file</a>.<a href="../file/index.html#NewManager">NewManager</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FileManager">FileManager</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../file/index.html">file</a>.<a href="../file/index.html#Manager">Manager</a>)), <a href="../log/index.html">log</a>.<a href="../log/index.html#NewManagerConfig">NewManagerConfig</a>, <a href="../log/index.html">log</a>.<a href="../log/index.html#NewManager">NewManager</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#LogManager">LogManager</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../log/index.html">log</a>.<a href="../log/index.html#Manager">Manager</a>)), <a href="../buffer/index.html">buffer</a>.<a href="../buffer/index.html#NewConfig">NewConfig</a>, <a href="../buffer/index.html">buffer</a>.<a href="../buffer/index.html#NewManager">NewManager</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#BufferPoolManager">BufferPoolManager</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../buffer/index.html">buffer</a>.<a href="../buffer/index.html#Manager">Manager</a>)), <a href="../tx/index.html">tx</a>.<a href="../tx/index.html#NewLockTableConfig">NewLockTableConfig</a>, <a href="../tx/index.html">tx</a>.<a href="../tx/index.html#NewLockTable">NewLockTable</a>, <a href="../tx/index.html">tx</a>.<a href="../tx/index.html#NewNumberGenerator">NewNumberGenerator</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#TxNumberGenerator">TxNumberGenerator</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../tx/index.html">tx</a>.<a href="../tx/index.html#NumberGenerator">NumberGenerator</a>)), <a href="../index/hash/index.html">hash</a>.<a href="../index/hash/index.html#NewIndexFactory">NewIndexFactory</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#IndexFactory">IndexFactory</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../index/hash/index.html">hash</a>.<a href="../index/hash/index.html#IndexFactory">IndexFactory</a>)), <a href="../index/hash/index.html">hash</a>.<a href="../index/hash/index.html#NewSearchCostCalculator">NewSearchCostCalculator</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#SearchCostCalculator">SearchCostCalculator</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../index/hash/index.html">hash</a>.<a href="../index/hash/index.html#SearchCostCalculator">SearchCostCalculator</a>)), <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#NewIndexDriver">NewIndexDriver</a>, <a href="../metadata/index.html">metadata</a>.<a href="../metadata/index.html#NewManager">NewManager</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#MetadataManager">MetadataManager</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../metadata/index.html">metadata</a>.<a href="../metadata/index.html#Manager">Manager</a>)), <a href="../plan/index.html">plan</a>.<a href="../plan/index.html#NewBasicQueryPlanner">NewBasicQueryPlanner</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#QueryPlanner">QueryPlanner</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../plan/index.html">plan</a>.<a href="../plan/index.html#BasicQueryPlanner">BasicQueryPlanner</a>)), <a href="../plan/index.html">plan</a>.<a href="../plan/index.html#NewBasicUpdatePlanner">NewBasicUpdatePlanner</a>, <a href="http://localhost:8080/pkg/github.com/google/wire/">wire</a>.<a href="http://localhost:8080/pkg/github.com/google/wire/#Bind">Bind</a>(<a href="http://localhost:8080/pkg/builtin/#new">new</a>(<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#UpdateExecutor">UpdateExecutor</a>), <a href="http://localhost:8080/pkg/builtin/#new">new</a>(*<a href="../plan/index.html">plan</a>.<a href="../plan/index.html#BasicUpdatePlanner">BasicUpdatePlanner</a>)), <a href="../plan/index.html">plan</a>.<a href="../plan/index.html#NewExecutor">NewExecutor</a>, <a href="index.html#NewDB">NewDB</a>)</pre>
+			
+		
+		
+		
+			
+			
+			<h2 id="Config">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=317:428#L7">Config</a>
+				<a class="permalink" href="index.html#Config">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+Config is configuration for server.
+</p>
+
+			<pre>type Config struct {
+<span id="Config.DBPath"></span>    DBPath          <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="Config.BlockSize"></span>    BlockSize       <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>
+<span id="Config.NumBuf"></span>    NumBuf          <a href="http://localhost:8080/pkg/builtin/#int">int</a>
+<span id="Config.TimeoutMilliSec"></span>    TimeoutMilliSec <a href="http://localhost:8080/pkg/builtin/#int">int</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewConfig">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=464:487#L15">NewConfig</a>
+					<a class="permalink" href="index.html#NewConfig">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewConfig() <a href="index.html#Config">Config</a></pre>
+				<p>
+NewConfig constructs a Config.
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="DB">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=633:803#L26">DB</a>
+				<a class="permalink" href="index.html#DB">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+DB is database.
+</p>
+
+			<pre>type DB struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="InitializeDB">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/wire_gen.go?s=563:595#L13">InitializeDB</a>
+					<a class="permalink" href="index.html#InitializeDB">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func InitializeDB() (*<a href="index.html#DB">DB</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				
+				
+				
+			
+				
+				<h3 id="NewDB">func <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=831:1001#L36">NewDB</a>
+					<a class="permalink" href="index.html#NewDB">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewDB(
+    fmgr <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#FileManager">FileManager</a>,
+    lmgr <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#LogManager">LogManager</a>,
+    bmgr <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#BufferPoolManager">BufferPoolManager</a>,
+    lt *<a href="../tx/index.html">tx</a>.<a href="../tx/index.html#LockTable">LockTable</a>,
+    gen <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#TxNumberGenerator">TxNumberGenerator</a>,
+    pe *<a href="../plan/index.html">plan</a>.<a href="../plan/index.html#Executor">Executor</a>,
+) *<a href="index.html#DB">DB</a></pre>
+				<p>
+NewDB constructs a DB.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="DB.Exec">func (*DB) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=1534:1601#L70">Exec</a>
+					<a class="permalink" href="index.html#DB.Exec">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (db *<a href="index.html#DB">DB</a>) Exec(txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>, cmd <a href="http://localhost:8080/pkg/builtin/#string">string</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Exec executes a command.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="DB.NewTx">func (*DB) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=1135:1184#L55">NewTx</a>
+					<a class="permalink" href="index.html#DB.NewTx">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (db *<a href="index.html#DB">DB</a>) NewTx() (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+NewTx make a new transaction.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="DB.Query">func (*DB) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/database/database.go?s=1377:1458#L65">Query</a>
+					<a class="permalink" href="index.html#DB.Query">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (db *<a href="index.html#DB">DB</a>) Query(txn <a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Transaction">Transaction</a>, query <a href="http://localhost:8080/pkg/builtin/#string">string</a>) (<a href="../domain/index.html">domain</a>.<a href="../domain/index.html#Planner">Planner</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Query queries given sql.
+</p>
+
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.18.3.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:8080/LICENSE">BSD license</a>.<br>
+<a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>

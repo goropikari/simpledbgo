@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>protobuf - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="http://localhost:8080/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="http://localhost:8080/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.18.3";</script>
+<script src="http://localhost:8080/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:8080/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:8080/pkg/">GoDoc</a></div>
+<a href="index.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:8080/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package protobuf
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/goropikari/simpledbgo/tx/logrecord/protobuf"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="index.html#pkg-variables">Variables</a></dd>
+			
+			
+			
+				
+				<dd><a href="index.html#CheckpointRecord">type CheckpointRecord</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CheckpointRecord.Descriptor">func (*CheckpointRecord) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CheckpointRecord.GetTxnum">func (x *CheckpointRecord) GetTxnum() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CheckpointRecord.ProtoMessage">func (*CheckpointRecord) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CheckpointRecord.ProtoReflect">func (x *CheckpointRecord) ProtoReflect() protoreflect.Message</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CheckpointRecord.Reset">func (x *CheckpointRecord) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CheckpointRecord.String">func (x *CheckpointRecord) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#CommitRecord">type CommitRecord</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CommitRecord.Descriptor">func (*CommitRecord) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CommitRecord.GetTxnum">func (x *CommitRecord) GetTxnum() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CommitRecord.ProtoMessage">func (*CommitRecord) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CommitRecord.ProtoReflect">func (x *CommitRecord) ProtoReflect() protoreflect.Message</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CommitRecord.Reset">func (x *CommitRecord) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CommitRecord.String">func (x *CommitRecord) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#RollbackRecord">type RollbackRecord</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RollbackRecord.Descriptor">func (*RollbackRecord) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RollbackRecord.GetTxnum">func (x *RollbackRecord) GetTxnum() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RollbackRecord.ProtoMessage">func (*RollbackRecord) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RollbackRecord.ProtoReflect">func (x *RollbackRecord) ProtoReflect() protoreflect.Message</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RollbackRecord.Reset">func (x *RollbackRecord) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RollbackRecord.String">func (x *RollbackRecord) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#SetInt32Record">type SetInt32Record</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.Descriptor">func (*SetInt32Record) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.GetBlockNumber">func (x *SetInt32Record) GetBlockNumber() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.GetFilename">func (x *SetInt32Record) GetFilename() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.GetOffset">func (x *SetInt32Record) GetOffset() int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.GetTxnum">func (x *SetInt32Record) GetTxnum() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.GetVal">func (x *SetInt32Record) GetVal() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.ProtoMessage">func (*SetInt32Record) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.ProtoReflect">func (x *SetInt32Record) ProtoReflect() protoreflect.Message</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.Reset">func (x *SetInt32Record) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetInt32Record.String">func (x *SetInt32Record) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#SetStringRecord">type SetStringRecord</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.Descriptor">func (*SetStringRecord) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.GetBlockNumber">func (x *SetStringRecord) GetBlockNumber() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.GetFilename">func (x *SetStringRecord) GetFilename() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.GetOffset">func (x *SetStringRecord) GetOffset() int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.GetTxnum">func (x *SetStringRecord) GetTxnum() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.GetVal">func (x *SetStringRecord) GetVal() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.ProtoMessage">func (*SetStringRecord) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.ProtoReflect">func (x *SetStringRecord) ProtoReflect() protoreflect.Message</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.Reset">func (x *SetStringRecord) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#SetStringRecord.String">func (x *SetStringRecord) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#StartRecord">type StartRecord</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StartRecord.Descriptor">func (*StartRecord) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StartRecord.GetTxnum">func (x *StartRecord) GetTxnum() int32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StartRecord.ProtoMessage">func (*StartRecord) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StartRecord.ProtoReflect">func (x *StartRecord) ProtoReflect() protoreflect.Message</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StartRecord.Reset">func (x *StartRecord) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StartRecord.String">func (x *StartRecord) String() string</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go">record.pb.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				
+				<pre>var <span id="File_tx_logrecord_protofile_record_proto">File_tx_logrecord_protofile_record_proto</span> <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#FileDescriptor">FileDescriptor</a></pre>
+			
+		
+		
+		
+			
+			
+			<h2 id="CheckpointRecord">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=4185:4410#L154">CheckpointRecord</a>
+				<a class="permalink" href="index.html#CheckpointRecord">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type CheckpointRecord struct {
+<span id="CheckpointRecord.Txnum"></span>    Txnum <a href="http://localhost:8080/pkg/builtin/#int32">int32</a> `protobuf:&#34;varint,1,opt,name=txnum,proto3&#34; json:&#34;txnum,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="CheckpointRecord.Descriptor">func (*CheckpointRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=5188:5241#L190">Descriptor</a>
+					<a class="permalink" href="index.html#CheckpointRecord.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#CheckpointRecord">CheckpointRecord</a>) Descriptor() ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, []<a href="http://localhost:8080/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Deprecated: Use CheckpointRecord.ProtoReflect.Descriptor instead.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CheckpointRecord.GetTxnum">func (*CheckpointRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=5320:5363#L194">GetTxnum</a>
+					<a class="permalink" href="index.html#CheckpointRecord.GetTxnum">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CheckpointRecord">CheckpointRecord</a>) GetTxnum() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CheckpointRecord.ProtoMessage">func (*CheckpointRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=4742:4781#L175">ProtoMessage</a>
+					<a class="permalink" href="index.html#CheckpointRecord.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#CheckpointRecord">CheckpointRecord</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CheckpointRecord.ProtoReflect">func (*CheckpointRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=4786:4848#L177">ProtoReflect</a>
+					<a class="permalink" href="index.html#CheckpointRecord.ProtoReflect">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CheckpointRecord">CheckpointRecord</a>) ProtoReflect() <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#Message">Message</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CheckpointRecord.Reset">func (*CheckpointRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=4412:4446#L162">Reset</a>
+					<a class="permalink" href="index.html#CheckpointRecord.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CheckpointRecord">CheckpointRecord</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CheckpointRecord.String">func (*CheckpointRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=4655:4697#L171">String</a>
+					<a class="permalink" href="index.html#CheckpointRecord.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CheckpointRecord">CheckpointRecord</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="CommitRecord">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=1781:2002#L60">CommitRecord</a>
+				<a class="permalink" href="index.html#CommitRecord">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type CommitRecord struct {
+<span id="CommitRecord.Txnum"></span>    Txnum <a href="http://localhost:8080/pkg/builtin/#int32">int32</a> `protobuf:&#34;varint,1,opt,name=txnum,proto3&#34; json:&#34;txnum,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="CommitRecord.Descriptor">func (*CommitRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2756:2805#L96">Descriptor</a>
+					<a class="permalink" href="index.html#CommitRecord.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#CommitRecord">CommitRecord</a>) Descriptor() ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, []<a href="http://localhost:8080/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Deprecated: Use CommitRecord.ProtoReflect.Descriptor instead.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CommitRecord.GetTxnum">func (*CommitRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2884:2923#L100">GetTxnum</a>
+					<a class="permalink" href="index.html#CommitRecord.GetTxnum">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CommitRecord">CommitRecord</a>) GetTxnum() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CommitRecord.ProtoMessage">func (*CommitRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2322:2357#L81">ProtoMessage</a>
+					<a class="permalink" href="index.html#CommitRecord.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#CommitRecord">CommitRecord</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CommitRecord.ProtoReflect">func (*CommitRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2362:2420#L83">ProtoReflect</a>
+					<a class="permalink" href="index.html#CommitRecord.ProtoReflect">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CommitRecord">CommitRecord</a>) ProtoReflect() <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#Message">Message</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CommitRecord.Reset">func (*CommitRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2004:2034#L68">Reset</a>
+					<a class="permalink" href="index.html#CommitRecord.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CommitRecord">CommitRecord</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="CommitRecord.String">func (*CommitRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2239:2277#L77">String</a>
+					<a class="permalink" href="index.html#CommitRecord.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#CommitRecord">CommitRecord</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="RollbackRecord">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=2974:3197#L107">RollbackRecord</a>
+				<a class="permalink" href="index.html#RollbackRecord">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type RollbackRecord struct {
+<span id="RollbackRecord.Txnum"></span>    Txnum <a href="http://localhost:8080/pkg/builtin/#int32">int32</a> `protobuf:&#34;varint,1,opt,name=txnum,proto3&#34; json:&#34;txnum,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="RollbackRecord.Descriptor">func (*RollbackRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=3963:4014#L143">Descriptor</a>
+					<a class="permalink" href="index.html#RollbackRecord.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#RollbackRecord">RollbackRecord</a>) Descriptor() ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, []<a href="http://localhost:8080/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Deprecated: Use RollbackRecord.ProtoReflect.Descriptor instead.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="RollbackRecord.GetTxnum">func (*RollbackRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=4093:4134#L147">GetTxnum</a>
+					<a class="permalink" href="index.html#RollbackRecord.GetTxnum">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#RollbackRecord">RollbackRecord</a>) GetTxnum() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="RollbackRecord.ProtoMessage">func (*RollbackRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=3523:3560#L128">ProtoMessage</a>
+					<a class="permalink" href="index.html#RollbackRecord.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#RollbackRecord">RollbackRecord</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="RollbackRecord.ProtoReflect">func (*RollbackRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=3565:3625#L130">ProtoReflect</a>
+					<a class="permalink" href="index.html#RollbackRecord.ProtoReflect">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#RollbackRecord">RollbackRecord</a>) ProtoReflect() <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#Message">Message</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="RollbackRecord.Reset">func (*RollbackRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=3199:3231#L115">Reset</a>
+					<a class="permalink" href="index.html#RollbackRecord.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#RollbackRecord">RollbackRecord</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="RollbackRecord.String">func (*RollbackRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=3438:3478#L124">String</a>
+					<a class="permalink" href="index.html#RollbackRecord.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#RollbackRecord">RollbackRecord</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="SetInt32Record">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=5414:6026#L201">SetInt32Record</a>
+				<a class="permalink" href="index.html#SetInt32Record">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type SetInt32Record struct {
+<span id="SetInt32Record.Filename"></span>    Filename    <a href="http://localhost:8080/pkg/builtin/#string">string</a> `protobuf:&#34;bytes,1,opt,name=filename,proto3&#34; json:&#34;filename,omitempty&#34;`
+<span id="SetInt32Record.Txnum"></span>    Txnum       <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>  `protobuf:&#34;varint,2,opt,name=txnum,proto3&#34; json:&#34;txnum,omitempty&#34;`
+<span id="SetInt32Record.BlockNumber"></span>    BlockNumber <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>  `protobuf:&#34;varint,3,opt,name=block_number,json=blockNumber,proto3&#34; json:&#34;block_number,omitempty&#34;`
+<span id="SetInt32Record.Offset"></span>    Offset      <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>  `protobuf:&#34;varint,4,opt,name=offset,proto3&#34; json:&#34;offset,omitempty&#34;`
+<span id="SetInt32Record.Val"></span>    Val         <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>  `protobuf:&#34;varint,5,opt,name=val,proto3&#34; json:&#34;val,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="SetInt32Record.Descriptor">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=6792:6843#L241">Descriptor</a>
+					<a class="permalink" href="index.html#SetInt32Record.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#SetInt32Record">SetInt32Record</a>) Descriptor() ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, []<a href="http://localhost:8080/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Deprecated: Use SetInt32Record.ProtoReflect.Descriptor instead.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.GetBlockNumber">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=7114:7161#L259">GetBlockNumber</a>
+					<a class="permalink" href="index.html#SetInt32Record.GetBlockNumber">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) GetBlockNumber() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.GetFilename">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=6922:6967#L245">GetFilename</a>
+					<a class="permalink" href="index.html#SetInt32Record.GetFilename">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) GetFilename() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.GetOffset">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=7218:7260#L266">GetOffset</a>
+					<a class="permalink" href="index.html#SetInt32Record.GetOffset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) GetOffset() <a href="http://localhost:8080/pkg/builtin/#int64">int64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.GetTxnum">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=7022:7063#L252">GetTxnum</a>
+					<a class="permalink" href="index.html#SetInt32Record.GetTxnum">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) GetTxnum() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.GetVal">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=7312:7351#L273">GetVal</a>
+					<a class="permalink" href="index.html#SetInt32Record.GetVal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) GetVal() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.ProtoMessage">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=6352:6389#L226">ProtoMessage</a>
+					<a class="permalink" href="index.html#SetInt32Record.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#SetInt32Record">SetInt32Record</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.ProtoReflect">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=6394:6454#L228">ProtoReflect</a>
+					<a class="permalink" href="index.html#SetInt32Record.ProtoReflect">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) ProtoReflect() <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#Message">Message</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.Reset">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=6028:6060#L213">Reset</a>
+					<a class="permalink" href="index.html#SetInt32Record.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetInt32Record.String">func (*SetInt32Record) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=6267:6307#L222">String</a>
+					<a class="permalink" href="index.html#SetInt32Record.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetInt32Record">SetInt32Record</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="SetStringRecord">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=7400:8012#L280">SetStringRecord</a>
+				<a class="permalink" href="index.html#SetStringRecord">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type SetStringRecord struct {
+<span id="SetStringRecord.Filename"></span>    Filename    <a href="http://localhost:8080/pkg/builtin/#string">string</a> `protobuf:&#34;bytes,1,opt,name=filename,proto3&#34; json:&#34;filename,omitempty&#34;`
+<span id="SetStringRecord.Txnum"></span>    Txnum       <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>  `protobuf:&#34;varint,2,opt,name=txnum,proto3&#34; json:&#34;txnum,omitempty&#34;`
+<span id="SetStringRecord.BlockNumber"></span>    BlockNumber <a href="http://localhost:8080/pkg/builtin/#int32">int32</a>  `protobuf:&#34;varint,3,opt,name=block_number,json=blockNumber,proto3&#34; json:&#34;block_number,omitempty&#34;`
+<span id="SetStringRecord.Offset"></span>    Offset      <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>  `protobuf:&#34;varint,4,opt,name=offset,proto3&#34; json:&#34;offset,omitempty&#34;`
+<span id="SetStringRecord.Val"></span>    Val         <a href="http://localhost:8080/pkg/builtin/#string">string</a> `protobuf:&#34;bytes,5,opt,name=val,proto3&#34; json:&#34;val,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="SetStringRecord.Descriptor">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=8784:8836#L320">Descriptor</a>
+					<a class="permalink" href="index.html#SetStringRecord.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#SetStringRecord">SetStringRecord</a>) Descriptor() ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, []<a href="http://localhost:8080/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Deprecated: Use SetStringRecord.ProtoReflect.Descriptor instead.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.GetBlockNumber">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=9109:9157#L338">GetBlockNumber</a>
+					<a class="permalink" href="index.html#SetStringRecord.GetBlockNumber">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) GetBlockNumber() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.GetFilename">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=8915:8961#L324">GetFilename</a>
+					<a class="permalink" href="index.html#SetStringRecord.GetFilename">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) GetFilename() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.GetOffset">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=9214:9257#L345">GetOffset</a>
+					<a class="permalink" href="index.html#SetStringRecord.GetOffset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) GetOffset() <a href="http://localhost:8080/pkg/builtin/#int64">int64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.GetTxnum">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=9016:9058#L331">GetTxnum</a>
+					<a class="permalink" href="index.html#SetStringRecord.GetTxnum">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) GetTxnum() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.GetVal">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=9309:9350#L352">GetVal</a>
+					<a class="permalink" href="index.html#SetStringRecord.GetVal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) GetVal() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.ProtoMessage">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=8341:8379#L305">ProtoMessage</a>
+					<a class="permalink" href="index.html#SetStringRecord.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#SetStringRecord">SetStringRecord</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.ProtoReflect">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=8384:8445#L307">ProtoReflect</a>
+					<a class="permalink" href="index.html#SetStringRecord.ProtoReflect">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) ProtoReflect() <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#Message">Message</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.Reset">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=8014:8047#L292">Reset</a>
+					<a class="permalink" href="index.html#SetStringRecord.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="SetStringRecord.String">func (*SetStringRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=8255:8296#L301">String</a>
+					<a class="permalink" href="index.html#SetStringRecord.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#SetStringRecord">SetStringRecord</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="StartRecord">type <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=597:817#L13">StartRecord</a>
+				<a class="permalink" href="index.html#StartRecord">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type StartRecord struct {
+<span id="StartRecord.Txnum"></span>    Txnum <a href="http://localhost:8080/pkg/builtin/#int32">int32</a> `protobuf:&#34;varint,1,opt,name=txnum,proto3&#34; json:&#34;txnum,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="StartRecord.Descriptor">func (*StartRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=1565:1613#L49">Descriptor</a>
+					<a class="permalink" href="index.html#StartRecord.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#StartRecord">StartRecord</a>) Descriptor() ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, []<a href="http://localhost:8080/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Deprecated: Use StartRecord.ProtoReflect.Descriptor instead.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="StartRecord.GetTxnum">func (*StartRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=1692:1730#L53">GetTxnum</a>
+					<a class="permalink" href="index.html#StartRecord.GetTxnum">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#StartRecord">StartRecord</a>) GetTxnum() <a href="http://localhost:8080/pkg/builtin/#int32">int32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="StartRecord.ProtoMessage">func (*StartRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=1134:1168#L34">ProtoMessage</a>
+					<a class="permalink" href="index.html#StartRecord.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="index.html#StartRecord">StartRecord</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="StartRecord.ProtoReflect">func (*StartRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=1173:1230#L36">ProtoReflect</a>
+					<a class="permalink" href="index.html#StartRecord.ProtoReflect">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#StartRecord">StartRecord</a>) ProtoReflect() <a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/">protoreflect</a>.<a href="http://localhost:8080/pkg/google.golang.org/protobuf/reflect/protoreflect/#Message">Message</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="StartRecord.Reset">func (*StartRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=819:848#L21">Reset</a>
+					<a class="permalink" href="index.html#StartRecord.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#StartRecord">StartRecord</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="StartRecord.String">func (*StartRecord) <a href="http://localhost:8080/src/github.com/goropikari/simpledbgo/tx/logrecord/protobuf/record.pb.go?s=1052:1089#L30">String</a>
+					<a class="permalink" href="index.html#StartRecord.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (x *<a href="index.html#StartRecord">StartRecord</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.18.3.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:8080/LICENSE">BSD license</a>.<br>
+<a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
