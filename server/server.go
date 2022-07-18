@@ -39,7 +39,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
-		Host: getEnvWithDefault("SIMPLEDB_HOST", "127.0.0.1"),
+		Host: getEnvWithDefault("SIMPLEDB_HOST", "0.0.0.0"),
 		Port: getEnvWithDefault("SIMPLEDB_PORT", "5432"),
 	}
 }

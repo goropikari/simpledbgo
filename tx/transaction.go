@@ -252,7 +252,6 @@ func (tx *Transaction) GetInt32(blk domain.Block, offset int64) (int32, error) {
 
 // SetInt32 sets int32 on the given block.
 func (tx *Transaction) SetInt32(blk domain.Block, offset int64, val int32, writeLog bool) error {
-	// fmt.Printf("%v %v %v %v %v\n", tx.GetTxNum(), blk, val, writeLog, tx.concurMgr.GetLockTable())
 	if err := tx.concurMgr.XLock(blk); err != nil {
 		return errors.Err(err, "XLock")
 	}
