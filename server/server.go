@@ -171,7 +171,7 @@ func (cn *Connection) handleConnection() {
 func (cn *Connection) sendError(err error) {
 	log.Printf("%v\n", err)
 	// Ideally, error msg should be sent if errors occur
-	cn.conn.Write(makeCommandCompleteMsg(baseError(err).Error()))
+	cn.conn.Write(makeErrorMsg(baseError(err)))
 	cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
 }
 

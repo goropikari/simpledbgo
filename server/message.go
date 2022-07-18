@@ -14,38 +14,59 @@ const (
 	nullEnd = 0x00
 )
 
+func makeMsg(tag byte, body []byte) []byte {
+	length := make([]byte, payloadBytesLength)
+	binary.BigEndian.PutUint32(length, uint32(len(body)+payloadBytesLength))
+
+	msg := make([]byte, 0)
+	msg = append(msg, tag)
+	msg = append(msg, length...)
+	msg = append(msg, body...)
+
+	return msg
+}
+
 func makeReadyForQueryMsg(status TransactionStatus) []byte {
-	return []byte{0x5a, 0x00, 0x00, 0x00, 0x05, status}
+	return makeMsg('Z', []byte{status})
 }
 
 func makeCommandCompleteMsg(s string) []byte {
 	body := make([]byte, 0)
 	body = append(body, []byte(s)...)
 	body = append(body, nullEnd)
-	l := len(body)
-	lb := make([]byte, payloadBytesLength)
-	binary.BigEndian.PutUint32(lb, uint32(l+payloadBytesLength))
-	payload := make([]byte, 0)
-	payload = append(payload, 'C') // 0x43 -> C: CommandComplete
-	payload = append(payload, lb...)
-	payload = append(payload, body...)
 
-	return payload
+	return makeMsg('C', body)
 }
 
 func makeParameterStatusMsg(param, value string) []byte {
-	msg := make([]byte, 0)
-	length := make([]byte, payloadBytesLength)
 	body := make([]byte, 0)
 	body = append(body, []byte(param)...)
 	body = append(body, nullEnd)
 	body = append(body, []byte(value)...)
 	body = append(body, nullEnd)
-	binary.BigEndian.PutUint32(length, uint32(len(body)+payloadBytesLength))
 
-	msg = append(msg, 'S')
-	msg = append(msg, length...)
-	msg = append(msg, body...)
+	return makeMsg('S', body)
+}
 
-	return msg
+func makeErrorMsg(err error) []byte {
+	const errMsgEnd = 0x00
+	errMsg := err.Error()
+
+	body := make([]byte, 0)
+
+	body = append(body, 'S') // Severity
+	body = append(body, []byte("ERROR")...)
+	body = append(body, nullEnd)
+
+	body = append(body, 'V') // Severity
+	body = append(body, []byte("ERROR")...)
+	body = append(body, nullEnd)
+
+	body = append(body, 'M') // message
+	body = append(body, []byte(errMsg)...)
+	body = append(body, nullEnd)
+
+	body = append(body, errMsgEnd)
+
+	return makeMsg('E', body)
 }
