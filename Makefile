@@ -28,11 +28,12 @@ docker-build:
 
 .PHONY: docker-run
 docker-run:
-	docker run -p 5432:5432 simpledb
+	docker run --rm -p 5432:5432 simpledb
 
 .PHONY: test
 test: mockgen protoc wire
 	go test -timeout 20s -shuffle=on ./...
+	bash e2e/test.sh
 
 .PHONY: ci-test
 ci-test:

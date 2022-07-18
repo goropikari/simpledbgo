@@ -17,11 +17,17 @@ jobs:
     - name: tools
       run: make tools
 
+    - name: install psql
+      run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
     - name: lint
       run: make lint
 
     - name: Test
       run: make ci-test
+
+    - name: e2e Test
+      run: make docker-build && bash e2e/test.sh
 
     - name: Test Report
       uses: dorny/test-reporter@v1
