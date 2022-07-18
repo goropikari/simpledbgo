@@ -108,8 +108,8 @@ func (cn *Connection) startup() error {
 	// 0x53 -> S: ParameterStatus
 	// fake client encoding for python PostgreSQL connector
 	cn.conn.Write(makeParameterStatusMsg("client_encoding", "SQL_ASCII"))
-	// fake server version
-	cn.conn.Write(makeParameterStatusMsg("server_version", "0.0.0"))
+	// fake postgres server version
+	cn.conn.Write(makeParameterStatusMsg("server_version", "14.0.0"))
 
 	// ReadyForQuery
 	cn.conn.Write(makeReadyForQueryMsg(TransactionIdle))
