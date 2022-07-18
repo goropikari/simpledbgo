@@ -65,8 +65,7 @@ func (lex *Lexer) scan() (Token, error) {
 
 	switch c {
 	case '*':
-		// return NewToken(TStar, "*"), nil
-		return Token{}, errors.New("* is not supported")
+		return NewToken(TStar, "*"), nil
 	case '=':
 		return NewToken(TEqual, "="), nil
 	case ',':

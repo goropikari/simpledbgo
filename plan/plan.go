@@ -186,7 +186,13 @@ type ProjectPlan struct {
 func NewProjectPlan(plan domain.Planner, fields []domain.FieldName) *ProjectPlan {
 	sch := domain.NewSchema()
 	for _, f := range fields {
-		sch.Add(f, plan.Schema())
+		if f == "*" {
+			for _, f2 := range plan.Schema().Fields() {
+				sch.Add(f2, plan.Schema())
+			}
+		} else {
+			sch.Add(f, plan.Schema())
+		}
 	}
 
 	return &ProjectPlan{
