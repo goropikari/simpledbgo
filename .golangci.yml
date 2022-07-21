@@ -26,6 +26,7 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
+    - gocognit
   enable-all: true
 issues:
   exclude-use-default: false

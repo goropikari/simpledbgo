@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bufio"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -13,6 +12,7 @@ import (
 	"github.com/goropikari/simpledbgo/database"
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/errors"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -20,6 +20,7 @@ const (
 	payloadBytesLength  = 4
 	payloadLengthOffset = tagLength
 	bufferSize          = 1024
+	queryOffset         = tagLength + payloadBytesLength
 )
 
 type ResultType int
@@ -92,16 +93,36 @@ func NewConnection(db *database.DB, conn net.Conn) Connection {
 func (cn *Connection) startup() error {
 	// https://www.pgcon.org/2014/schedule/attachments/330_postgres-for-the-wire.pdf
 	// https://www.postgresql.org/docs/12/protocol-message-formats.html
+	// initial packet is ssl negotiation or start up request.
 	sizeByte, err := read(cn.conn, payloadBytesLength)
 	if err != nil {
 		return errors.Err(err, "read")
 	}
-	cn.conn.Write([]byte{0x4e})
 
 	size := int(binary.BigEndian.Uint32(sizeByte))
-	if _, err := read(cn.conn, size-payloadBytesLength); err != nil {
+	data, err := read(cn.conn, size-payloadBytesLength)
+	if err != nil {
 		return errors.Err(err, "read")
 	}
+
+	// compare sslcode
+	if slices.Compare(data, []byte{0x04, 0xd2, 0x16, 0x2f}) == 0 {
+		// send no ssl support
+		cn.conn.Write([]byte{0x4e})
+
+		// read start up packet
+		sizeByte, err := read(cn.conn, payloadBytesLength)
+		if err != nil {
+			return errors.Err(err, "read")
+		}
+
+		size := int(binary.BigEndian.Uint32(sizeByte))
+		_, err = read(cn.conn, size-payloadBytesLength)
+		if err != nil {
+			return errors.Err(err, "read")
+		}
+	}
+
 	// AuthenticationOk
 	// 0x52 -> Z: ReadyForQuery
 	cn.conn.Write([]byte{0x52, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00})
@@ -199,20 +220,6 @@ func (cn *Connection) sendReadyForQueryMsg() {
 	}
 }
 
-// 	cols := []string{"hoge", "piyo"}
-// 	header := makeColDesc(cols)
-// 	c.Write(header)
-// 	recs := [][]any{
-// 		{"1", "taro"},
-// 		{"2", "hanako"},
-// 	}
-// 	if len(recs) != 0 {
-// 		rowByte := makeDataRows(recs)
-// 		c.Write(rowByte)
-// 	}
-
-// 	c.Write(selectFooter(len(recs)))
-// 	c.Write(makeReadyForQueryMsg(TransactionIdle))
 func (cn *Connection) sendResult(res Result) {
 	cols := res.fields
 	header := makeColDesc(cols)
@@ -224,6 +231,21 @@ func (cn *Connection) sendResult(res Result) {
 	}
 
 	cn.conn.Write(makeCommandCompleteMsg(fmt.Sprintf("SELECT %v", len(recs))))
+
+	// 	cols := []string{"hoge", "piyo"}
+	// 	header := makeColDesc(cols)
+	// 	c.Write(header)
+	// 	recs := [][]any{
+	// 		{"1", "taro"},
+	// 		{"2", "hanako"},
+	// 	}
+	// 	if len(recs) != 0 {
+	// 		rowByte := makeDataRows(recs)
+	// 		c.Write(rowByte)
+	// 	}
+
+	// 	c.Write(selectFooter(len(recs)))
+	// 	c.Write(makeReadyForQueryMsg(TransactionIdle))
 }
 
 func (cn *Connection) handleQuery(query string) (Result, error) {
@@ -360,10 +382,10 @@ func (cn *Connection) readQuery() (byte, string, error) {
 		data = append(data, buf[:]...)
 	}
 	tag := data[0]
-	size := parseSize(data[payloadLengthOffset : payloadLengthOffset+payloadBytesLength])
-	var query string
-	if size >= 5 {
-		query = string(data[5:size][:])
+	size := parseSize(data[payloadLengthOffset:queryOffset])
+	query := ""
+	if size >= queryOffset {
+		query = string(data[queryOffset:size][:])
 	}
 
 	return tag, query, nil
@@ -375,17 +397,13 @@ func parseSize(bs []byte) int {
 
 // read n bytes from c.
 func read(c net.Conn, n int) ([]byte, error) {
-	reader := bufio.NewReader(c)
-	data := make([]byte, 0)
-	for i := 0; i < n; i++ {
-		b, err := reader.ReadByte()
-		if err != nil {
-			return nil, errors.Err(err, "ReadByte")
-		}
-		data = append(data, b)
+	data := make([]byte, n)
+	nread, err := c.Read(data)
+	if err != nil {
+		return nil, errors.Err(err, "Read")
 	}
 
-	return data, nil
+	return data[:nread], nil
 }
 
 func baseError(err error) error {
