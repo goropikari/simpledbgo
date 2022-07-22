@@ -26,6 +26,7 @@ type Indexer interface {
 	Insert(Constant, RecordID) error
 	Delete(Constant, RecordID) error
 	Close()
+	Err() error
 }
 
 // IndexDriver is driver for index.

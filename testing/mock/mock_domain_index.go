@@ -111,6 +111,20 @@ func (mr *MockIndexerMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIndexer)(nil).Delete), arg0, arg1)
 }
 
+// Err mocks base method.
+func (m *MockIndexer) Err() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Err")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Err indicates an expected call of Err.
+func (mr *MockIndexerMockRecorder) Err() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Err", reflect.TypeOf((*MockIndexer)(nil).Err))
+}
+
 // GetDataRecordID mocks base method.
 func (m *MockIndexer) GetDataRecordID() (domain.RecordID, error) {
 	m.ctrl.T.Helper()

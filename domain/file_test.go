@@ -96,7 +96,7 @@ func TestBlock(t *testing.T) {
 	})
 
 	t.Run("test block", func(t *testing.T) {
-		_, err := domain.NewBlockNumber(-1)
+		_, err := domain.NewBlockNumber(-2)
 		require.Error(t, err)
 	})
 }
