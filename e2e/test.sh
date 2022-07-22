@@ -44,6 +44,17 @@ if [ "$ret" != "$expected" ]; then
     exit 1
 fi
 
+# valid test 3
+ret=$($PSQL "select * from hoge, piyo where id = 1;")
+expected="id,name,id2,name2 1,foo,1,foo 1,foo,2,bar"
+ret=$(echo -n $ret)
+expected=$(echo -n $expected)
+
+if [ "$ret" != "$expected" ]; then
+    docker stop $id
+    exit 1
+fi
+
 # error test 1
 ret=$($PSQL "select id, name, id2, name2 from hoge, hogehoge;" 2>&1)
 expected='ERROR: relation "hogehoge" does not exist'
