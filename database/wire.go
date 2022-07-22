@@ -10,11 +10,26 @@ import (
 	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/file"
+	"github.com/goropikari/simpledbgo/index/dummy"
 	"github.com/goropikari/simpledbgo/index/hash"
 	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/metadata"
 	"github.com/goropikari/simpledbgo/plan"
 	"github.com/goropikari/simpledbgo/tx"
+)
+
+var SetHashIndex = wire.NewSet(
+	hash.NewIndexFactory,
+	wire.Bind(new(domain.IndexFactory), new(*hash.IndexFactory)),
+	hash.NewSearchCostCalculator,
+	wire.Bind(new(domain.SearchCostCalculator), new(*hash.SearchCostCalculator)),
+)
+
+var SetDummyIndex = wire.NewSet(
+	dummy.NewIndexFactory,
+	wire.Bind(new(domain.IndexFactory), new(*dummy.IndexFactory)),
+	dummy.NewSearchCostCalculator,
+	wire.Bind(new(domain.SearchCostCalculator), new(*dummy.SearchCostCalculator)),
 )
 
 var Set = wire.NewSet(
@@ -31,10 +46,8 @@ var Set = wire.NewSet(
 	tx.NewLockTable,
 	tx.NewNumberGenerator,
 	wire.Bind(new(domain.TxNumberGenerator), new(*tx.NumberGenerator)),
-	hash.NewIndexFactory,
-	wire.Bind(new(domain.IndexFactory), new(*hash.IndexFactory)),
-	hash.NewSearchCostCalculator,
-	wire.Bind(new(domain.SearchCostCalculator), new(*hash.SearchCostCalculator)),
+	SetDummyIndex,
+	// SetHashIndex,
 	domain.NewIndexDriver,
 	metadata.NewManager,
 	wire.Bind(new(domain.MetadataManager), new(*metadata.Manager)),

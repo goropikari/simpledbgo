@@ -11,6 +11,7 @@ import (
 	"github.com/goropikari/simpledbgo/buffer"
 	"github.com/goropikari/simpledbgo/domain"
 	"github.com/goropikari/simpledbgo/file"
+	"github.com/goropikari/simpledbgo/index/dummy"
 	"github.com/goropikari/simpledbgo/index/hash"
 	"github.com/goropikari/simpledbgo/log"
 	"github.com/goropikari/simpledbgo/metadata"
@@ -39,8 +40,8 @@ func InitializeDB() (*DB, error) {
 	lockTableConfig := tx.NewLockTableConfig()
 	lockTable := tx.NewLockTable(lockTableConfig)
 	numberGenerator := tx.NewNumberGenerator()
-	indexFactory := hash.NewIndexFactory()
-	searchCostCalculator := hash.NewSearchCostCalculator()
+	indexFactory := dummy.NewIndexFactory()
+	searchCostCalculator := dummy.NewSearchCostCalculator()
 	indexDriver := domain.NewIndexDriver(indexFactory, searchCostCalculator)
 	metadataManager, err := metadata.NewManager(indexDriver, manager, logManager, bufferManager, lockTable, numberGenerator)
 	if err != nil {
@@ -55,4 +56,8 @@ func InitializeDB() (*DB, error) {
 
 // wire.go:
 
-var Set = wire.NewSet(file.NewManagerConfig, file.NewManager, wire.Bind(new(domain.FileManager), new(*file.Manager)), log.NewManagerConfig, log.NewManager, wire.Bind(new(domain.LogManager), new(*log.Manager)), buffer.NewConfig, buffer.NewManager, wire.Bind(new(domain.BufferPoolManager), new(*buffer.Manager)), tx.NewLockTableConfig, tx.NewLockTable, tx.NewNumberGenerator, wire.Bind(new(domain.TxNumberGenerator), new(*tx.NumberGenerator)), hash.NewIndexFactory, wire.Bind(new(domain.IndexFactory), new(*hash.IndexFactory)), hash.NewSearchCostCalculator, wire.Bind(new(domain.SearchCostCalculator), new(*hash.SearchCostCalculator)), domain.NewIndexDriver, metadata.NewManager, wire.Bind(new(domain.MetadataManager), new(*metadata.Manager)), plan.NewBasicQueryPlanner, wire.Bind(new(domain.QueryPlanner), new(*plan.BasicQueryPlanner)), plan.NewBasicUpdatePlanner, wire.Bind(new(domain.UpdateExecutor), new(*plan.BasicUpdatePlanner)), plan.NewExecutor, NewDB)
+var SetHashIndex = wire.NewSet(hash.NewIndexFactory, wire.Bind(new(domain.IndexFactory), new(*hash.IndexFactory)), hash.NewSearchCostCalculator, wire.Bind(new(domain.SearchCostCalculator), new(*hash.SearchCostCalculator)))
+
+var SetDummyIndex = wire.NewSet(dummy.NewIndexFactory, wire.Bind(new(domain.IndexFactory), new(*dummy.IndexFactory)), dummy.NewSearchCostCalculator, wire.Bind(new(domain.SearchCostCalculator), new(*dummy.SearchCostCalculator)))
+
+var Set = wire.NewSet(file.NewManagerConfig, file.NewManager, wire.Bind(new(domain.FileManager), new(*file.Manager)), log.NewManagerConfig, log.NewManager, wire.Bind(new(domain.LogManager), new(*log.Manager)), buffer.NewConfig, buffer.NewManager, wire.Bind(new(domain.BufferPoolManager), new(*buffer.Manager)), tx.NewLockTableConfig, tx.NewLockTable, tx.NewNumberGenerator, wire.Bind(new(domain.TxNumberGenerator), new(*tx.NumberGenerator)), SetDummyIndex, domain.NewIndexDriver, metadata.NewManager, wire.Bind(new(domain.MetadataManager), new(*metadata.Manager)), plan.NewBasicQueryPlanner, wire.Bind(new(domain.QueryPlanner), new(*plan.BasicQueryPlanner)), plan.NewBasicUpdatePlanner, wire.Bind(new(domain.UpdateExecutor), new(*plan.BasicUpdatePlanner)), plan.NewExecutor, NewDB)

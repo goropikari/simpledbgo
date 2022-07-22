@@ -56,3 +56,4 @@ run:
   skip-dirs:
     - errors
     - sample
+    - index/dummy
