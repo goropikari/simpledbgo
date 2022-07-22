@@ -781,6 +781,12 @@ transaction 14 committed
 全レコードを消したあとでも `where` をつけて `SELECT` すると2件 record が返ってきた。
 printf debug によると overflow block 由来だったのでやはり `tryOverflow` はバグっている。
 
+## 2022/7/23
+
+どうやらこの章で実装した index を使うようにするには15章まで進めないといけないもよう。
+IndexSelectPlan などを使う Planner は HeuristicQueryPlanner しかないので、この時点で Scan で index を使うようにするには自分で QueryPlanner を実装するしかなさそう。
+UpdatePlanner は実装しているのでそこだけ今のうちから変えるという手もあるが、select で index が使えないと動作確認もしづらいのでいったんは実装しないでいいかな。
+
 
 # おまけ
 ## 2022/7/16

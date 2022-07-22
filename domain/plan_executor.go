@@ -5,8 +5,11 @@ package domain
 // Planner is an interface of planner.
 type Planner interface {
 	Open() (Scanner, error)
+	// EstNumBlocks estimates the number of block access.
 	EstNumBlocks() int
+	// EstNumRecord estimates the number of record access.
 	EstNumRecord() int
+	// EstDistinctVals estimates the number of distinct value at given fldName.
 	EstDistinctVals(FieldName) int
 	Schema() *Schema
 }

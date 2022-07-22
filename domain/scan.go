@@ -374,33 +374,33 @@ func (scan *ProductScan) MoveToFirst() error {
 }
 
 // HasNext checks the existence of next record.
-func (plan *ProductScan) HasNext() bool {
-	if plan.rhsScan.HasNext() {
+func (scan *ProductScan) HasNext() bool {
+	if scan.rhsScan.HasNext() {
 		return true
 	}
-	if plan.rhsScan.Err() != nil {
-		plan.err = plan.rhsScan.Err()
+	if scan.rhsScan.Err() != nil {
+		scan.err = scan.rhsScan.Err()
 
 		return false
 	}
 
-	err := plan.rhsScan.MoveToFirst()
+	err := scan.rhsScan.MoveToFirst()
 	if err != nil {
-		plan.err = err
+		scan.err = err
 
 		return false
 	}
 
-	rhsFound := plan.rhsScan.HasNext()
-	if plan.rhsScan.Err() != nil {
-		plan.err = plan.rhsScan.Err()
+	rhsFound := scan.rhsScan.HasNext()
+	if scan.rhsScan.Err() != nil {
+		scan.err = scan.rhsScan.Err()
 
 		return false
 	}
 
-	lhsFound := plan.lhsScan.HasNext()
-	if plan.lhsScan.Err() != nil {
-		plan.err = plan.lhsScan.Err()
+	lhsFound := scan.lhsScan.HasNext()
+	if scan.lhsScan.Err() != nil {
+		scan.err = scan.lhsScan.Err()
 
 		return false
 	}
@@ -409,58 +409,58 @@ func (plan *ProductScan) HasNext() bool {
 }
 
 // GetInt32 gets int32 from the table.
-func (plan *ProductScan) GetInt32(fld FieldName) (int32, error) {
-	if plan.lhsScan.HasField(fld) {
-		return plan.lhsScan.GetInt32(fld)
+func (scan *ProductScan) GetInt32(fld FieldName) (int32, error) {
+	if scan.lhsScan.HasField(fld) {
+		return scan.lhsScan.GetInt32(fld)
 	}
 
-	if plan.rhsScan.HasField(fld) {
-		return plan.rhsScan.GetInt32(fld)
+	if scan.rhsScan.HasField(fld) {
+		return scan.rhsScan.GetInt32(fld)
 	}
 
 	return 0, fieldNotFoudError(fld)
 }
 
 // GetString gets fld as string.
-func (plan *ProductScan) GetString(fld FieldName) (string, error) {
-	if plan.lhsScan.HasField(fld) {
-		return plan.lhsScan.GetString(fld)
+func (scan *ProductScan) GetString(fld FieldName) (string, error) {
+	if scan.lhsScan.HasField(fld) {
+		return scan.lhsScan.GetString(fld)
 	}
 
-	if plan.rhsScan.HasField(fld) {
-		return plan.rhsScan.GetString(fld)
+	if scan.rhsScan.HasField(fld) {
+		return scan.rhsScan.GetString(fld)
 	}
 
 	return "", fieldNotFoudError(fld)
 }
 
 // GetVal gets fld as Constant.
-func (plan *ProductScan) GetVal(fld FieldName) (Constant, error) {
-	if plan.lhsScan.HasField(fld) {
-		return plan.lhsScan.GetVal(fld)
+func (scan *ProductScan) GetVal(fld FieldName) (Constant, error) {
+	if scan.lhsScan.HasField(fld) {
+		return scan.lhsScan.GetVal(fld)
 	}
 
-	if plan.rhsScan.HasField(fld) {
-		return plan.rhsScan.GetVal(fld)
+	if scan.rhsScan.HasField(fld) {
+		return scan.rhsScan.GetVal(fld)
 	}
 
 	return Constant{}, fieldNotFoudError(fld)
 }
 
 // HasField checks whether plan has fld as field or not.
-func (plan *ProductScan) HasField(fld FieldName) bool {
-	return plan.lhsScan.HasField(fld) || plan.rhsScan.HasField(fld)
+func (scan *ProductScan) HasField(fld FieldName) bool {
+	return scan.lhsScan.HasField(fld) || scan.rhsScan.HasField(fld)
 }
 
 // Close closes scan.
-func (plan *ProductScan) Close() {
-	plan.lhsScan.Close()
-	plan.rhsScan.Close()
+func (scan *ProductScan) Close() {
+	scan.lhsScan.Close()
+	scan.rhsScan.Close()
 }
 
 // Err returns error.
-func (plan *ProductScan) Err() error {
-	return plan.err
+func (scan *ProductScan) Err() error {
+	return scan.err
 }
 
 // SelectScan is scanner of select query.
@@ -593,6 +593,88 @@ func (s *SelectScan) MoveToRecordID(rid RecordID) error {
 // Err returns error.
 func (s *SelectScan) Err() error {
 	return s.err
+}
+
+// IndexSelectScan is scanner using index.
+type IndexSelectScan struct {
+	ts  *TableScan
+	idx Indexer
+	val Constant
+	err error
+}
+
+// NewIndexSelectScan constructs a IndexSelectScan.
+func NewIndexSelectScan(ts *TableScan, idx Indexer, val Constant) (*IndexSelectScan, error) {
+	s := &IndexSelectScan{
+		ts:  ts,
+		idx: idx,
+		val: val,
+		err: nil,
+	}
+	if err := s.MoveToFirst(); err != nil {
+		return nil, errors.Err(err, "MoveToFirst")
+	}
+
+	return s, nil
+}
+
+// MoveToFirst moves to first record.
+func (ss *IndexSelectScan) MoveToFirst() error {
+	return ss.idx.BeforeFirst(ss.val)
+}
+
+// HasNext checks the existence of next record.
+func (ss *IndexSelectScan) HasNext() bool {
+	found := ss.idx.HasNext()
+	if found {
+		rid, err := ss.idx.GetDataRecordID()
+		if err != nil {
+			ss.err = errors.Err(err, "GetDataRecordID")
+
+			return false
+		}
+		if err := ss.ts.MoveToRecordID(rid); err != nil {
+			ss.err = errors.Err(err, "MoveToRecordID")
+
+			return false
+		}
+	}
+	if ss.idx.Err() != nil {
+		ss.err = ss.idx.Err()
+	}
+
+	return found
+}
+
+// GetInt32 gets int32 from the table.
+func (ss *IndexSelectScan) GetInt32(fldName FieldName) (int32, error) {
+	return ss.ts.GetInt32(fldName)
+}
+
+// GetString gets string from the scanner.
+func (ss *IndexSelectScan) GetString(fldName FieldName) (string, error) {
+	return ss.ts.GetString(fldName)
+}
+
+// GetVal gets value from the scanner.
+func (ss *IndexSelectScan) GetVal(fldName FieldName) (Constant, error) {
+	return ss.ts.GetVal(fldName)
+}
+
+// HasField checks the existence of the field.
+func (ss *IndexSelectScan) HasField(fldName FieldName) bool {
+	return ss.ts.HasField(fldName)
+}
+
+// Close closes scanner.
+func (ss *IndexSelectScan) Close() {
+	ss.idx.Close()
+	ss.ts.Close()
+}
+
+// Err returns error.
+func (ss *IndexSelectScan) Err() error {
+	return ss.err
 }
 
 // ProjectScan is scanner of projection scanner.

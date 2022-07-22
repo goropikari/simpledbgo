@@ -176,6 +176,58 @@ func (p *SelectPlan) Schema() *domain.Schema {
 	return p.plan.Schema()
 }
 
+// IndexSelectPlan is select plan using index.
+type IndexSelectPlan struct {
+	p       domain.Planner
+	idxInfo *domain.IndexInfo
+	val     domain.Constant
+}
+
+// NewIndexSelectPlan constructs a IndexSelectPlan.
+func NewIndexSelectPlan(p domain.Planner, idxInfo *domain.IndexInfo, val domain.Constant) *IndexSelectPlan {
+	return &IndexSelectPlan{
+		p:       p,
+		idxInfo: idxInfo,
+		val:     val,
+	}
+}
+
+// Open opens a scanner.
+func (sp *IndexSelectPlan) Open() (domain.Scanner, error) {
+	tempTs, err := sp.p.Open()
+	if err != nil {
+		return nil, errors.Err(err, "Open")
+	}
+	ts, ok := tempTs.(*domain.TableScan)
+	if !ok {
+		return nil, errors.Err(err, "cast TableScan")
+	}
+
+	idx := sp.idxInfo.Open()
+
+	return domain.NewIndexSelectScan(ts, idx, sp.val)
+}
+
+// EstNumBlocks estimates the number of block access.
+func (sp *IndexSelectPlan) EstNumBlocks() int {
+	return sp.idxInfo.EstBlockAccessed() + sp.EstNumRecord()
+}
+
+// EstNumRecord estimates the number of record access.
+func (sp *IndexSelectPlan) EstNumRecord() int {
+	return sp.idxInfo.EstNumRecord()
+}
+
+// EstDistinctVals estimates the number of distinct value at given fldName.
+func (sp *IndexSelectPlan) EstDistinctVals(fldName domain.FieldName) int {
+	return sp.idxInfo.EstNumRecord()
+}
+
+// Schema returns schema of table schema.
+func (sp *IndexSelectPlan) Schema() *domain.Schema {
+	return sp.p.Schema()
+}
+
 // ProjectPlan is planner of projection.
 type ProjectPlan struct {
 	plan   domain.Planner
