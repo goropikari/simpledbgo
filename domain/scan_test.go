@@ -66,7 +66,7 @@ func TestTableScan(t *testing.T) {
 		table2, err := domain.NewTableScan(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
-		err = table2.MoveToFirst()
+		err = table2.BeforeFirst()
 		require.NoError(t, err)
 		actual2 := make([]string, 0)
 		for table2.HasNext() {
@@ -103,7 +103,7 @@ func TestTableScan(t *testing.T) {
 		table3, err := domain.NewTableScan(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
-		err = table3.MoveToFirst()
+		err = table3.BeforeFirst()
 		require.NoError(t, err)
 		actual3 := make([]string, 0)
 		for table3.HasNext() {
@@ -181,7 +181,7 @@ func TestTableScan2(t *testing.T) {
 		table2, err := domain.NewTableScan(txn2, "T.tbl", layout2)
 		require.NoError(t, err)
 
-		err = table2.MoveToFirst()
+		err = table2.BeforeFirst()
 		require.NoError(t, err)
 		for table2.HasNext() {
 			a, err := table2.GetInt32("A")
@@ -208,7 +208,7 @@ func TestTableScan2(t *testing.T) {
 		table3, err := domain.NewTableScan(txn3, "T.tbl", layout3)
 		require.NoError(t, err)
 
-		err = table3.MoveToFirst()
+		err = table3.BeforeFirst()
 		require.NoError(t, err)
 
 		err = table3.AdvanceNextInsertSlotID()
@@ -221,7 +221,7 @@ func TestTableScan2(t *testing.T) {
 		err = table3.SetString("B", fmt.Sprintf("rec%v", n))
 		require.NoError(t, err)
 
-		err = table3.MoveToFirst()
+		err = table3.BeforeFirst()
 		require.NoError(t, err)
 		actual3 := make([]string, 0)
 		for table3.HasNext() {
@@ -482,13 +482,13 @@ func TestSelectScan_update_column(t *testing.T) {
 		})
 		utbl := domain.NewSelectScan(table, pred)
 
-		err = utbl.MoveToFirst()
+		err = utbl.BeforeFirst()
 		require.NoError(t, err)
 		for utbl.HasNext() {
 			utbl.SetVal("A", domain.NewConstant(domain.Int32FieldType, int32(10000)))
 		}
 
-		err = table.MoveToFirst()
+		err = table.BeforeFirst()
 		require.NoError(t, err)
 		actual := make([]string, 0)
 		for table.HasNext() {
@@ -569,14 +569,14 @@ func TestSelectScan_delete_record(t *testing.T) {
 		})
 		utbl := domain.NewSelectScan(table, pred)
 
-		err = utbl.MoveToFirst()
+		err = utbl.BeforeFirst()
 		require.NoError(t, err)
 		for utbl.HasNext() {
 			err = utbl.Delete()
 			require.NoError(t, err)
 		}
 
-		err = table.MoveToFirst()
+		err = table.BeforeFirst()
 		require.NoError(t, err)
 		actual := make([]string, 0)
 		for table.HasNext() {

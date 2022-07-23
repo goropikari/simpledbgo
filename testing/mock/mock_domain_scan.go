@@ -34,6 +34,20 @@ func (m *MockScanner) EXPECT() *MockScannerMockRecorder {
 	return m.recorder
 }
 
+// BeforeFirst mocks base method.
+func (m *MockScanner) BeforeFirst() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BeforeFirst")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BeforeFirst indicates an expected call of BeforeFirst.
+func (mr *MockScannerMockRecorder) BeforeFirst() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeforeFirst", reflect.TypeOf((*MockScanner)(nil).BeforeFirst))
+}
+
 // Close mocks base method.
 func (m *MockScanner) Close() {
 	m.ctrl.T.Helper()
@@ -133,20 +147,6 @@ func (mr *MockScannerMockRecorder) HasNext() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasNext", reflect.TypeOf((*MockScanner)(nil).HasNext))
 }
 
-// MoveToFirst mocks base method.
-func (m *MockScanner) MoveToFirst() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MoveToFirst")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MoveToFirst indicates an expected call of MoveToFirst.
-func (mr *MockScannerMockRecorder) MoveToFirst() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveToFirst", reflect.TypeOf((*MockScanner)(nil).MoveToFirst))
-}
-
 // MockUpdateScanner is a mock of UpdateScanner interface.
 type MockUpdateScanner struct {
 	ctrl     *gomock.Controller
@@ -182,6 +182,20 @@ func (m *MockUpdateScanner) AdvanceNextInsertSlotID() error {
 func (mr *MockUpdateScannerMockRecorder) AdvanceNextInsertSlotID() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdvanceNextInsertSlotID", reflect.TypeOf((*MockUpdateScanner)(nil).AdvanceNextInsertSlotID))
+}
+
+// BeforeFirst mocks base method.
+func (m *MockUpdateScanner) BeforeFirst() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BeforeFirst")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BeforeFirst indicates an expected call of BeforeFirst.
+func (mr *MockUpdateScannerMockRecorder) BeforeFirst() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeforeFirst", reflect.TypeOf((*MockUpdateScanner)(nil).BeforeFirst))
 }
 
 // Close mocks base method.
@@ -295,20 +309,6 @@ func (m *MockUpdateScanner) HasNext() bool {
 func (mr *MockUpdateScannerMockRecorder) HasNext() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasNext", reflect.TypeOf((*MockUpdateScanner)(nil).HasNext))
-}
-
-// MoveToFirst mocks base method.
-func (m *MockUpdateScanner) MoveToFirst() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MoveToFirst")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MoveToFirst indicates an expected call of MoveToFirst.
-func (mr *MockUpdateScannerMockRecorder) MoveToFirst() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveToFirst", reflect.TypeOf((*MockUpdateScanner)(nil).MoveToFirst))
 }
 
 // MoveToRecordID mocks base method.

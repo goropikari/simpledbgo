@@ -13,7 +13,8 @@ var ErrNotUpdatable = errors.New("can't update query")
 
 // Scanner is an interface of scanner.
 type Scanner interface {
-	MoveToFirst() error
+	// BeforeFirst move to the position before the first record.
+	BeforeFirst() error
 	HasNext() bool
 	GetInt32(FieldName) (int32, error)
 	GetString(FieldName) (string, error)
@@ -26,9 +27,9 @@ type Scanner interface {
 // UpdateScanner is an interface of updatable scanner.
 type UpdateScanner interface {
 	Scanner
-	SetVal(FieldName, Constant) error
 	SetInt32(FieldName, int32) error
 	SetString(FieldName, string) error
+	SetVal(FieldName, Constant) error
 	AdvanceNextInsertSlotID() error
 	Delete() error
 	RecordID() RecordID
@@ -67,173 +68,23 @@ func NewTableScan(txn Transaction, tblName TableName, layout *Layout) (*TableSca
 			return nil, errors.Wrap(err, "moveToNewBlock")
 		}
 	} else {
-		err := tbl.MoveToFirst()
+		err := tbl.BeforeFirst()
 		if err != nil {
-			return nil, errors.Wrap(err, "MoveToFirst")
+			return nil, errors.Wrap(err, "BeforeFirst")
 		}
 	}
 
 	return tbl, nil
 }
 
-// Err returns iteration err.
-func (tbl *TableScan) Err() error {
-	return tbl.err
-}
-
-// Close closes the table.
-func (tbl *TableScan) Close() {
-	if tbl.recordPage != nil {
-		tbl.txn.Unpin(tbl.recordPage.Block())
-	}
-}
-
-// GetInt32 gets int32 from the table.
-func (tbl *TableScan) GetInt32(fldName FieldName) (int32, error) {
-	return tbl.recordPage.GetInt32(tbl.currentSlotID, fldName)
-}
-
-// GetString gets string from the table.
-func (tbl *TableScan) GetString(fldName FieldName) (string, error) {
-	return tbl.recordPage.GetString(tbl.currentSlotID, fldName)
-}
-
-// GetVal gets value from the table.
-func (tbl *TableScan) GetVal(fldName FieldName) (Constant, error) {
-	typ := tbl.layout.schema.Type(fldName)
-	switch typ {
-	case Int32FieldType:
-		val, err := tbl.GetInt32(fldName)
-		if err != nil {
-			return Constant{}, errors.Err(err, "GetInt32")
-		}
-
-		return NewConstant(Int32FieldType, val), nil
-	case StringFieldType:
-		val, err := tbl.GetString(fldName)
-		if err != nil {
-			return Constant{}, errors.Err(err, "GetString")
-		}
-
-		return NewConstant(StringFieldType, val), nil
-	case UnknownFieldType:
-		return Constant{}, errors.New("unexpected field type")
-	}
-
-	return Constant{}, errors.New("GetVal error")
-}
-
-// SetInt32 sets int32 to the table.
-func (tbl *TableScan) SetInt32(fldName FieldName, val int32) error {
-	return tbl.recordPage.SetInt32(tbl.currentSlotID, fldName, val)
-}
-
-// SetString sets string to the table.
-func (tbl *TableScan) SetString(fldName FieldName, val string) error {
-	l := tbl.layout.Length(fldName)
-	if len(val) > l {
-		return fmt.Errorf("exceed varchar size %v: value '%v'", l, val)
-	}
-
-	return tbl.recordPage.SetString(tbl.currentSlotID, fldName, val)
-}
-
-// SetVal sets value to the table.
-func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
-	typ := tbl.layout.schema.Type(fldName)
-	switch typ {
-	case Int32FieldType:
-		v, err := val.AsInt32()
-		if err != nil {
-			return errors.Err(err, "AsInt32")
-		}
-		if err := tbl.SetInt32(fldName, v); err != nil {
-			return errors.Err(err, "SetInt32")
-		}
-	case StringFieldType:
-		v, err := val.AsString()
-		if err != nil {
-			return errors.Err(err, "AsString")
-		}
-		if err := tbl.SetString(fldName, v); err != nil {
-			return errors.Err(err, "SetString")
-		}
-	case UnknownFieldType:
-		return ErrUnsupportedFieldType
-	}
-
-	return nil
-}
-
-// AdvanceNextInsertSlotID  advances current slot id to next to unused slot id.
-// If there is no unused record, append file block.
-func (tbl *TableScan) AdvanceNextInsertSlotID() error {
-	slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)
-	if err != nil {
-		return errors.Err(err, "InsertAfter")
-	}
-	tbl.currentSlotID = slotID
-
-	for tbl.currentSlotID < 0 {
-		last, err := tbl.isAtLastBlock()
-		if err != nil {
-			return errors.Err(err, "isAtLastBlock")
-		}
-		if last {
-			err = tbl.moveToNewBlock()
-			if err != nil {
-				return errors.Err(err, "moveToNewBlock")
-			}
-		} else {
-			blk := tbl.recordPage.Block()
-			blkNum := blk.Number()
-			err := tbl.moveToBlock(blkNum + 1)
-			if err != nil {
-				return errors.Err(err, "moveToBlock")
-			}
-		}
-		slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)
-		if err != nil {
-			return errors.Err(err, "InsertAfter")
-		}
-		tbl.currentSlotID = slotID
-	}
-
-	return nil
-}
-
-// Delete deletes the current slot logically.
-func (tbl *TableScan) Delete() error {
-	return tbl.recordPage.Delete(tbl.currentSlotID)
-}
-
-// MoveToRecordID moves to the record id.
-func (tbl *TableScan) MoveToRecordID(rid RecordID) error {
-	tbl.Close()
-	blk := NewBlock(FileName(tbl.tblName), rid.BlockNumber())
-	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
-	if err != nil {
-		return errors.Err(err, "NewRecordPage")
-	}
-	tbl.recordPage = recordPage
-	tbl.currentSlotID = rid.SlotID()
-
-	return nil
-}
-
-// RecordID is a identifier of record.
-func (tbl *TableScan) RecordID() RecordID {
-	blk := tbl.recordPage.Block()
-
-	return NewRecordID(blk.Number(), tbl.currentSlotID)
-}
-
-// HasField checks the existence of the field.
-func (tbl *TableScan) HasField(fldName FieldName) bool {
-	return tbl.layout.schema.HasField(fldName)
+// BeforeFirst move to the position before the first record.
+// BeforeFirst implements Scanner.
+func (tbl *TableScan) BeforeFirst() error {
+	return tbl.moveToBlock(0)
 }
 
 // HasNext checks the existence of next record.
+// HasNext implements Scanner.
 func (tbl *TableScan) HasNext() bool {
 	currentSlotID, err := tbl.recordPage.NextUsedSlot(tbl.currentSlotID)
 	if err != nil {
@@ -271,6 +122,190 @@ func (tbl *TableScan) HasNext() bool {
 	}
 
 	return true
+}
+
+// GetInt32 gets int32 from the table.
+// GetInt32  implements Scanner.
+func (tbl *TableScan) GetInt32(fldName FieldName) (int32, error) {
+	return tbl.recordPage.GetInt32(tbl.currentSlotID, fldName)
+}
+
+// GetString gets string from the table.
+// GetString  implements Scanner.
+func (tbl *TableScan) GetString(fldName FieldName) (string, error) {
+	return tbl.recordPage.GetString(tbl.currentSlotID, fldName)
+}
+
+// GetVal gets value from the table.
+// GetVal implements Scanner.
+func (tbl *TableScan) GetVal(fldName FieldName) (Constant, error) {
+	typ := tbl.layout.schema.Type(fldName)
+	switch typ {
+	case Int32FieldType:
+		val, err := tbl.GetInt32(fldName)
+		if err != nil {
+			return Constant{}, errors.Err(err, "GetInt32")
+		}
+
+		return NewConstant(Int32FieldType, val), nil
+	case StringFieldType:
+		val, err := tbl.GetString(fldName)
+		if err != nil {
+			return Constant{}, errors.Err(err, "GetString")
+		}
+
+		return NewConstant(StringFieldType, val), nil
+	case UnknownFieldType:
+		return Constant{}, errors.New("unexpected field type")
+	}
+
+	return Constant{}, errors.New("GetVal error")
+}
+
+// HasField checks the existence of the field.
+// HasField implements Scanner.
+func (tbl *TableScan) HasField(fldName FieldName) bool {
+	return tbl.layout.schema.HasField(fldName)
+}
+
+// Close closes the table.
+// Close implements Scanner.
+func (tbl *TableScan) Close() {
+	if tbl.recordPage != nil {
+		tbl.txn.Unpin(tbl.recordPage.Block())
+	}
+}
+
+// Err returns iteration err.
+// Err implements Scanner.
+func (tbl *TableScan) Err() error {
+	return tbl.err
+}
+
+// SetInt32 sets int32 to the table.
+// SetInt32 implements UpdateScanner.
+func (tbl *TableScan) SetInt32(fldName FieldName, val int32) error {
+	return tbl.recordPage.SetInt32(tbl.currentSlotID, fldName, val)
+}
+
+// SetString sets string to the table.
+// SetString implements UpdateScanner.
+func (tbl *TableScan) SetString(fldName FieldName, val string) error {
+	l := tbl.layout.Length(fldName)
+	if len(val) > l {
+		return fmt.Errorf("exceed varchar size %v: value '%v'", l, val)
+	}
+
+	return tbl.recordPage.SetString(tbl.currentSlotID, fldName, val)
+}
+
+// SetVal sets value to the table.
+// SetVal implements UpdateScanner.
+func (tbl *TableScan) SetVal(fldName FieldName, val Constant) error {
+	typ := tbl.layout.schema.Type(fldName)
+	switch typ {
+	case Int32FieldType:
+		v, err := val.AsInt32()
+		if err != nil {
+			return errors.Err(err, "AsInt32")
+		}
+		if err := tbl.SetInt32(fldName, v); err != nil {
+			return errors.Err(err, "SetInt32")
+		}
+	case StringFieldType:
+		v, err := val.AsString()
+		if err != nil {
+			return errors.Err(err, "AsString")
+		}
+		if err := tbl.SetString(fldName, v); err != nil {
+			return errors.Err(err, "SetString")
+		}
+	case UnknownFieldType:
+		return ErrUnsupportedFieldType
+	}
+
+	return nil
+}
+
+// AdvanceNextInsertSlotID  advances current slot id to next to unused slot id.
+// If there is no unused record, append file block.
+// AdvanceNextInsertSlotID implements UpdateScanner.
+func (tbl *TableScan) AdvanceNextInsertSlotID() error {
+	slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)
+	if err != nil {
+		return errors.Err(err, "InsertAfter")
+	}
+	tbl.currentSlotID = slotID
+
+	for tbl.currentSlotID < 0 {
+		last, err := tbl.isAtLastBlock()
+		if err != nil {
+			return errors.Err(err, "isAtLastBlock")
+		}
+		if last {
+			err = tbl.moveToNewBlock()
+			if err != nil {
+				return errors.Err(err, "moveToNewBlock")
+			}
+		} else {
+			blk := tbl.recordPage.Block()
+			blkNum := blk.Number()
+			err := tbl.moveToBlock(blkNum + 1)
+			if err != nil {
+				return errors.Err(err, "moveToBlock")
+			}
+		}
+		slotID, err := tbl.recordPage.InsertAfter(tbl.currentSlotID)
+		if err != nil {
+			return errors.Err(err, "InsertAfter")
+		}
+		tbl.currentSlotID = slotID
+	}
+
+	return nil
+}
+
+// Delete deletes the current slot logically.
+// Delete implements UpdateScanner.
+func (tbl *TableScan) Delete() error {
+	return tbl.recordPage.Delete(tbl.currentSlotID)
+}
+
+// RecordID is a identifier of record.
+// RecordID implements UpdateScanner.
+func (tbl *TableScan) RecordID() RecordID {
+	blk := tbl.recordPage.Block()
+
+	return NewRecordID(blk.Number(), tbl.currentSlotID)
+}
+
+// MoveToRecordID moves to the record id.
+// MoveToRecordID implements UpdateScanner.
+func (tbl *TableScan) MoveToRecordID(rid RecordID) error {
+	tbl.Close()
+	blk := NewBlock(FileName(tbl.tblName), rid.BlockNumber())
+	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
+	if err != nil {
+		return errors.Err(err, "NewRecordPage")
+	}
+	tbl.recordPage = recordPage
+	tbl.currentSlotID = rid.SlotID()
+
+	return nil
+}
+
+func (tbl *TableScan) moveToBlock(blkNum BlockNumber) error {
+	tbl.Close()
+	blk := NewBlock(FileName(tbl.tblName), blkNum)
+	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
+	if err != nil {
+		return errors.Err(err, "NewRecordPage")
+	}
+
+	tbl.recordPage = recordPage
+	tbl.currentSlotID = -1
+
+	return nil
 }
 
 // isAtLastBlock checks whether the current block is last block or not.
@@ -313,25 +348,6 @@ func (tbl *TableScan) moveToNewBlock() error {
 	return nil
 }
 
-// MoveToFirst move to the first block of the table.
-func (tbl *TableScan) MoveToFirst() error {
-	return tbl.moveToBlock(0)
-}
-
-func (tbl *TableScan) moveToBlock(blkNum BlockNumber) error {
-	tbl.Close()
-	blk := NewBlock(FileName(tbl.tblName), blkNum)
-	recordPage, err := NewRecordPage(tbl.txn, blk, tbl.layout)
-	if err != nil {
-		return errors.Err(err, "NewRecordPage")
-	}
-
-	tbl.recordPage = recordPage
-	tbl.currentSlotID = -1
-
-	return nil
-}
-
 // ProductScan is scanner of table product.
 type ProductScan struct {
 	lhsScan Scanner
@@ -346,18 +362,19 @@ func NewProductScan(lhs, rhs Scanner) (*ProductScan, error) {
 		rhsScan: rhs,
 	}
 
-	if err := scan.MoveToFirst(); err != nil {
-		return nil, errors.Err(err, "MoveToFirst")
+	if err := scan.BeforeFirst(); err != nil {
+		return nil, errors.Err(err, "BeforeFirst")
 	}
 
 	return scan, nil
 }
 
-// MoveToFirst moves to first record.
-func (scan *ProductScan) MoveToFirst() error {
-	err := scan.lhsScan.MoveToFirst()
+// BeforeFirst move to the position before the first record.
+// BeforeFirst implements Scanner.
+func (scan *ProductScan) BeforeFirst() error {
+	err := scan.lhsScan.BeforeFirst()
 	if err != nil {
-		return errors.Err(err, "MoveToFirst")
+		return errors.Err(err, "BeforeFirst")
 	}
 
 	scan.lhsScan.HasNext()
@@ -365,15 +382,16 @@ func (scan *ProductScan) MoveToFirst() error {
 		return errors.Wrap(scan.lhsScan.Err(), "failed to Scan")
 	}
 
-	err = scan.rhsScan.MoveToFirst()
+	err = scan.rhsScan.BeforeFirst()
 	if err != nil {
-		return errors.Err(err, "MoveToFirst")
+		return errors.Err(err, "BeforeFirst")
 	}
 
 	return nil
 }
 
 // HasNext checks the existence of next record.
+// HasNext implements Scanner.
 func (scan *ProductScan) HasNext() bool {
 	if scan.rhsScan.HasNext() {
 		return true
@@ -384,7 +402,7 @@ func (scan *ProductScan) HasNext() bool {
 		return false
 	}
 
-	err := scan.rhsScan.MoveToFirst()
+	err := scan.rhsScan.BeforeFirst()
 	if err != nil {
 		scan.err = err
 
@@ -409,6 +427,7 @@ func (scan *ProductScan) HasNext() bool {
 }
 
 // GetInt32 gets int32 from the table.
+// GetInt32 implements Scanner.
 func (scan *ProductScan) GetInt32(fld FieldName) (int32, error) {
 	if scan.lhsScan.HasField(fld) {
 		return scan.lhsScan.GetInt32(fld)
@@ -421,7 +440,8 @@ func (scan *ProductScan) GetInt32(fld FieldName) (int32, error) {
 	return 0, fieldNotFoudError(fld)
 }
 
-// GetString gets fld as string.
+// GetString gets string from the table.
+// GetString  implements Scanner.
 func (scan *ProductScan) GetString(fld FieldName) (string, error) {
 	if scan.lhsScan.HasField(fld) {
 		return scan.lhsScan.GetString(fld)
@@ -434,7 +454,8 @@ func (scan *ProductScan) GetString(fld FieldName) (string, error) {
 	return "", fieldNotFoudError(fld)
 }
 
-// GetVal gets fld as Constant.
+// GetVal gets value from the table.
+// GetVal implements Scanner.
 func (scan *ProductScan) GetVal(fld FieldName) (Constant, error) {
 	if scan.lhsScan.HasField(fld) {
 		return scan.lhsScan.GetVal(fld)
@@ -447,18 +468,21 @@ func (scan *ProductScan) GetVal(fld FieldName) (Constant, error) {
 	return Constant{}, fieldNotFoudError(fld)
 }
 
-// HasField checks whether plan has fld as field or not.
+// HasField checks the existence of the field.
+// HasField implements Scanner.
 func (scan *ProductScan) HasField(fld FieldName) bool {
 	return scan.lhsScan.HasField(fld) || scan.rhsScan.HasField(fld)
 }
 
-// Close closes scan.
+// Close closes the table.
+// Close implements Scanner.
 func (scan *ProductScan) Close() {
 	scan.lhsScan.Close()
 	scan.rhsScan.Close()
 }
 
-// Err returns error.
+// Err returns iteration err.
+// Err implements Scanner.
 func (scan *ProductScan) Err() error {
 	return scan.err
 }
@@ -478,9 +502,10 @@ func NewSelectScan(s Scanner, pred *Predicate) *SelectScan {
 	}
 }
 
-// MoveToFirst moves to first record.
-func (s *SelectScan) MoveToFirst() error {
-	return s.scan.MoveToFirst()
+// BeforeFirst move to the position before the first record.
+// BeforeFirst implements Scanner.
+func (s *SelectScan) BeforeFirst() error {
+	return s.scan.BeforeFirst()
 }
 
 // HasNext checks the existence of next record.
@@ -495,32 +520,38 @@ func (s *SelectScan) HasNext() bool {
 	return false
 }
 
-// GetInt32 gets int32 from the scanner.
+// GetInt32 gets int32 from the table.
+// GetInt32 implements Scanner.
 func (s *SelectScan) GetInt32(fld FieldName) (int32, error) {
 	return s.scan.GetInt32(fld)
 }
 
-// GetString gets string from the scanner.
+// GetString gets string from the table.
+// GetString  implements Scanner.
 func (s *SelectScan) GetString(fld FieldName) (string, error) {
 	return s.scan.GetString(fld)
 }
 
-// GetVal gets value from the scanner.
+// GetVal gets value from the table.
+// GetVal implements Scanner.
 func (s *SelectScan) GetVal(fld FieldName) (Constant, error) {
 	return s.scan.GetVal(fld)
 }
 
 // HasField checks the existence of the field.
+// HasField implements Scanner.
 func (s *SelectScan) HasField(fld FieldName) bool {
 	return s.scan.HasField(fld)
 }
 
-// Close closes scanner.
+// Close closes the table.
+// Close implements Scanner.
 func (s *SelectScan) Close() {
 	s.scan.Close()
 }
 
-// SetVal sets value at given fld.
+// SetVal sets value to the table.
+// SetVal implements UpdateScanner.
 func (s *SelectScan) SetVal(fld FieldName, c Constant) error {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -530,7 +561,8 @@ func (s *SelectScan) SetVal(fld FieldName, c Constant) error {
 	return us.SetVal(fld, c)
 }
 
-// SetInt32 sets int32 at given fld.
+// SetInt32 sets int32 to the table.
+// SetInt32 implements UpdateScanner.
 func (s *SelectScan) SetInt32(fld FieldName, x int32) error {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -540,7 +572,8 @@ func (s *SelectScan) SetInt32(fld FieldName, x int32) error {
 	return us.SetInt32(fld, x)
 }
 
-// SetString sets string at given fld.
+// SetString sets string to the table.
+// SetString implements UpdateScanner.
 func (s *SelectScan) SetString(fld FieldName, str string) error {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -550,7 +583,9 @@ func (s *SelectScan) SetString(fld FieldName, str string) error {
 	return us.SetString(fld, str)
 }
 
-// AdvanceNextInsertSlotID returns insertion slot id.
+// AdvanceNextInsertSlotID  advances current slot id to next to unused slot id.
+// If there is no unused record, append file block.
+// AdvanceNextInsertSlotID implements UpdateScanner.
 func (s *SelectScan) AdvanceNextInsertSlotID() error {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -560,7 +595,8 @@ func (s *SelectScan) AdvanceNextInsertSlotID() error {
 	return us.AdvanceNextInsertSlotID()
 }
 
-// Delete deletes record.
+// Delete deletes the current slot logically.
+// Delete implements UpdateScanner.
 func (s *SelectScan) Delete() error {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -570,7 +606,8 @@ func (s *SelectScan) Delete() error {
 	return us.Delete()
 }
 
-// RecordID returns current record id.
+// RecordID is a identifier of record.
+// RecordID implements UpdateScanner.
 func (s *SelectScan) RecordID() RecordID {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -580,7 +617,8 @@ func (s *SelectScan) RecordID() RecordID {
 	return us.RecordID()
 }
 
-// MoveToRecordID moves given RecordID.
+// MoveToRecordID moves to the record id.
+// MoveToRecordID implements UpdateScanner.
 func (s *SelectScan) MoveToRecordID(rid RecordID) error {
 	us, ok := s.scan.(UpdateScanner)
 	if !ok {
@@ -590,7 +628,8 @@ func (s *SelectScan) MoveToRecordID(rid RecordID) error {
 	return us.MoveToRecordID(rid)
 }
 
-// Err returns error.
+// Err returns iteration err.
+// Err implements Scanner.
 func (s *SelectScan) Err() error {
 	return s.err
 }
@@ -611,15 +650,16 @@ func NewIndexSelectScan(ts *TableScan, idx Indexer, val Constant) (*IndexSelectS
 		val: val,
 		err: nil,
 	}
-	if err := s.MoveToFirst(); err != nil {
-		return nil, errors.Err(err, "MoveToFirst")
+	if err := s.BeforeFirst(); err != nil {
+		return nil, errors.Err(err, "BeforeFirst")
 	}
 
 	return s, nil
 }
 
-// MoveToFirst moves to first record.
-func (ss *IndexSelectScan) MoveToFirst() error {
+// BeforeFirst move to the position before the first record.
+// BeforeFirst implements Scanner.
+func (ss *IndexSelectScan) BeforeFirst() error {
 	return ss.idx.BeforeFirst(ss.val)
 }
 
@@ -651,28 +691,33 @@ func (ss *IndexSelectScan) GetInt32(fldName FieldName) (int32, error) {
 	return ss.ts.GetInt32(fldName)
 }
 
-// GetString gets string from the scanner.
+// GetString gets string from the table.
+// GetString  implements Scanner.
 func (ss *IndexSelectScan) GetString(fldName FieldName) (string, error) {
 	return ss.ts.GetString(fldName)
 }
 
-// GetVal gets value from the scanner.
+// GetVal gets value from the table.
+// GetVal implements Scanner.
 func (ss *IndexSelectScan) GetVal(fldName FieldName) (Constant, error) {
 	return ss.ts.GetVal(fldName)
 }
 
 // HasField checks the existence of the field.
+// HasField implements Scanner.
 func (ss *IndexSelectScan) HasField(fldName FieldName) bool {
 	return ss.ts.HasField(fldName)
 }
 
-// Close closes scanner.
+// Close closes the table.
+// Close implements Scanner.
 func (ss *IndexSelectScan) Close() {
 	ss.idx.Close()
 	ss.ts.Close()
 }
 
-// Err returns error.
+// Err returns iteration err.
+// Err implements Scanner.
 func (ss *IndexSelectScan) Err() error {
 	return ss.err
 }
@@ -692,9 +737,10 @@ func NewProjectScan(s Scanner, fields []FieldName) *ProjectScan {
 	}
 }
 
-// MoveToFirst moves to first record.
-func (s *ProjectScan) MoveToFirst() error {
-	return s.scan.MoveToFirst()
+// BeforeFirst move to the position before the first record.
+// BeforeFirst implements Scanner.
+func (s *ProjectScan) BeforeFirst() error {
+	return s.scan.BeforeFirst()
 }
 
 // HasNext checks the existence of next record.
@@ -714,7 +760,8 @@ func (s *ProjectScan) GetInt32(fld FieldName) (int32, error) {
 	return 0, fieldNotFoudError(fld)
 }
 
-// GetString gets string from the scanner.
+// GetString gets string from the table.
+// GetString  implements Scanner.
 func (s *ProjectScan) GetString(fld FieldName) (string, error) {
 	if s.HasField(fld) {
 		return s.scan.GetString(fld)
@@ -723,7 +770,8 @@ func (s *ProjectScan) GetString(fld FieldName) (string, error) {
 	return "", fieldNotFoudError(fld)
 }
 
-// GetVal gets value from the scanner.
+// GetVal gets value from the table.
+// GetVal implements Scanner.
 func (s *ProjectScan) GetVal(fld FieldName) (Constant, error) {
 	if s.HasField(fld) {
 		return s.scan.GetVal(fld)
@@ -733,11 +781,13 @@ func (s *ProjectScan) GetVal(fld FieldName) (Constant, error) {
 }
 
 // HasField checks the existence of the field.
+// HasField implements Scanner.
 func (s *ProjectScan) HasField(fld FieldName) bool {
 	return s.scan.HasField(fld)
 }
 
-// Close closes scanner.
+// Close closes the table.
+// Close implements Scanner.
 func (s *ProjectScan) Close() {
 	s.scan.Close()
 }
